@@ -14,12 +14,20 @@
 
 현재 [단순 레이어 제작 script](../../scripts/dev/sd_explorer_simple_layers.py)는 **온전한 기준 몸 → 눈 → 헤어 → 의상** 네 레이어로 시작한다. 선택한 SD 디자인에서 머리·눈만 비운 온전한 base-body 그림과 별도 눈·헤어·상의 그림을 생성했다. 그 기준 몸으로 실제 Grok idle/walk/run 영상 세 개를 만들었으며, 영상의 몸 전체 프레임을 그대로 보존한다. 모든 프레임에 공통 720→128 projection과 binary alpha를 적용하고, 몸은 항상 (0,0), 파츠는 기준 머리/상의 위치와의 차이만 사용한다. 몸을 잘라내거나 덮인 몸의 interface를 제거하지 않고, 파츠를 구부리거나 재질로 투영하지 않는다.
 
-현재 데모는 `assets/sd-explorer-simple-layers-20261005/library/assembly.json`이다. 각 상태는 실제 영상의 96프레임 / 24fps / 4초 pinned 재생이며, 완성 외형별 모션을 제작하지 않는다. 눈·헤어·의상을 독립적으로 켜고 끄는 8가지 레이어 상태에서 기본 몸의 전체 image hash와 (0,0) 위치가 유지되는 2,304 sample 검사를 통과했다. `/api/layers`는 개별 texture와 상대좌표를 반환하며, 뷰어는 네 레이어를 유지하는 선택적인 검수 클라이언트다. 기준 몸 보존과 레이어 연결을 확인하는 최소 데모이며, 5slot 각 2종의 32외형 데모 완료나 아트 승인을 뜻하지 않는다. 포즈별 의상 피팅과 추가 베리에이션은 이 기준에서 이어간다.
+초기 레이어 데모는 `assets/sd-explorer-simple-layers-20261005/library/assembly.json`이다. 각 상태는 실제 영상의 96프레임 / 24fps / 4초 pinned 재생이며, 완성 외형별 모션을 제작하지 않는다. 눈·헤어·의상을 독립적으로 켜고 끄는 8가지 레이어 상태에서 기본 몸의 전체 image hash와 (0,0) 위치가 유지되는 2,304 sample 검사를 통과했다. `/api/layers`는 개별 texture와 상대좌표를 반환하며, 뷰어는 네 레이어를 유지하는 선택적인 검수 클라이언트다. 기준 몸 보존과 레이어 연결을 확인하는 최소 데모이며, 5slot 각 2종의 32외형 데모 완료나 아트 승인을 뜻하지 않는다. 포즈별 의상 피팅과 추가 베리에이션은 이 기준에서 이어간다.
 
 헤어 위치 검수에서 귀 주변과 앞머리의 정렬을 보정했다. 128px 기준으로 헤어 레이어에 공통 local offset `[2,-1]`을 적용하며, 기존 머리 위치 보간을 그대로 따른다. 기본 몸·공통 모션·파츠 이미지 바이트는 유지하고 binding 위치만 갱신했다. [위치 보정 화면](assets/sd-explorer-simple-layer-hair-aligned-20261005.jpg)을 별도로 남겼으며, 아래 실행 패키지에도 반영했다.
 
 - [실행 가능한 workspace·원본 영상·개별 파츠 패키지](assets/sd-explorer-simple-layers-20261005.tar.gz)
 - [출처·해시·검증 범위](assets/sd-explorer-simple-layers-20261005.provenance.json), [생성 prompt](assets/sd-explorer-simple-layers-20261005.prompts.json), [검수 화면](assets/sd-explorer-simple-layer-viewer-20261005.jpg)
+
+현재 실행 데모는 `assets/sd-explorer-wardrobe-20261005-v1/library/assembly.json`이다. 눈(기본/웃는 눈), 헤어(숏/단발), 상의(탱크탑/포켓 베스트) 각 2종을 연결했다. 새 디자인 세 개는 built-in imagegen 원본과 fitting 좌표를 보관하고, 기존 기본 몸·frozen motion reference를 그대로 재사용한다. 8외형 × 3상태의 실제 재생과, empty를 포함한 27선택 × 3상태 × 96sample의 7,776 검사를 통과했다. 교체 중 body image와 clock 유지, held texture 재사용, clip 미생성도 확인했다. 회귀는 runtime/part import 36 passed이며 JavaScript 문법과 브라우저의 세 동작을 확인했다.
+
+하의·신발은 실제 영상에서 다리 silhouette가 다른 16포즈를 골라 별도 그림을 제작했다. 전체 몸을 자르지 않고, 참고용 다리 crop의 offset을 기록해 파츠 좌표를 복원한다. 생성된 바지·부츠 후보는 아직 피팅·전체 sample coverage·두 디자인이 미완료이므로 runtime catalog에 연결하지 않았다. 실제 5slot·32외형·96 상태 사례와 추가 장비의 아트 검수는 계속 남아 있으며, 이 checkpoint를 그 완료로 취급하지 않는다.
+
+- [현재 실행 workspace·원본 그림·포즈 후보 패키지](assets/sd-explorer-layer-variations-20261005.tar.gz)
+- [베리에이션 제작 recipe](../../scripts/dev/sd_explorer_layer_variations.py), [출처·검증·남은 범위](assets/sd-explorer-layer-variations-20261005.provenance.json), [생성 prompt](assets/sd-explorer-layer-variations-20261005.prompts.json)
+- [실제 뷰어 화면](assets/sd-explorer-wardrobe-viewer-20261005-v1.jpg), [8외형과 세 동작의 그림 비교](assets/sd-explorer-layer-variations-review-20261005.png)
 
 원래 영상 후보와 출처 기록은 [2026-10-04 패키지](assets/sd-explorer-video-motion-candidate-20261004.tar.gz)와 [provenance](assets/sd-explorer-video-motion-candidate-20261004.provenance.json)에 남겼다. 초기 수동 모션이나 반려된 장신 이미지는 현재 데모에 사용하지 않는다. 전체 엔진 회귀는 3,388 passed / 2 skipped / 기존 Pillow 경고 74개이며, 온전한 base-body 레이어 보존 회귀도 추가했다.
 
@@ -38,7 +46,7 @@
 | PR04 | 공통 timeline, 독립 layer/상대좌표 보간, subslot 우선순위, draw order, mask/palette/mirror, appearance/preview CLI 구현. 다섯 체형과 synthetic 32외형·96검증 사례 |
 | PR05 | 입력·render·QA evidence snapshot, contact/world travel 측정, 명시적 검수 결정, scope와 오래된 승인 차단 구현 |
 | PR06 | 결정론적 다중 state atlas·manifest·Aseprite mapping, 순서/ticks 유지 dedup, build lock와 승인 release gate 구현 |
-| 실제 SD 데모 | 몸 분해·재질 투영 데모 철회. 온전한 몸 위에 눈·헤어·상의 세 그림을 덮는 최소 데모와 실제 영상 3상태 연결. 5slot 각 2종과 추가 아트 검수는 진행 중 |
+| 실제 SD 데모 | 몸 분해·재질 투영 데모 철회. 온전한 몸 위에 눈·헤어·상의 각 2종, 8외형과 실제 영상 3상태 연결. 하의·신발의 16포즈 아트 후보 제작. 전체 5slot·32외형과 추가 장비 아트 검수는 진행 중 |
 
 ## 확인한 기준선
 

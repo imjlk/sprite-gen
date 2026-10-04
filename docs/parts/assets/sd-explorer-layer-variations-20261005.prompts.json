@@ -1,0 +1,32 @@
+{
+  "images": [
+    {
+      "generated_file_name": "exec-020a717c-4289-4443-952d-9bca4a1026a0.png",
+      "generator": "built-in image_gen",
+      "id": "hair-b",
+      "prompt": "Use case: identity-preserve. Asset: one interchangeable hairstyle sprite layer for the same SD explorer. Image 1 is the intact bald body reference on a 128x128 grid; Image 2 is the existing short textured hairstyle layer. Generate ONLY an alternative compact warm-brown BOB haircut, ear-length, rounded smooth silhouette, small side-part and clean grouped pixel highlights. Keep the right-facing three-quarter view and the same head scale and layer canvas alignment as the references. The opening for the forehead, eyes, ear and face must remain transparent: no skin, no face, no eyes, no eyebrows, no mouth, no neck, no body. Fit around the bald head, with the side-lock ending behind the ear rather than across the cheek. Preserve the black-brown 1px contour and crisp large pixel clusters of the current sprite. Use the same spacious transparent square canvas; only the hair in the head region. No grid, labels, text, background or shadow. This must be an independent hair overlay, not a finished character or a recolor of the old hairstyle.",
+      "source": "raw-art/hair-b.png",
+      "source_sha256": "fea50cfd070755cf48a83ea72c85af7c2946b18eb4b2fb37f78a31d9e1f1622d",
+      "transparent_background": true
+    },
+    {
+      "generated_file_name": "exec-51f8ee90-ac39-4ba0-baa1-27c52359aeed.png",
+      "generator": "built-in image_gen",
+      "id": "eyes-b",
+      "prompt": "Use case: identity-preserve. Asset: interchangeable paired eye-and-eyebrow sprite overlay. Image 1 is the bald SD explorer body with blank eye area. Image 2 is its existing open-eye layer. Generate ONLY a second cheerful closed-eye expression: two curved smiling eyes, relaxed raised eyebrows, same three-quarter right-facing view, matching spacing and perspective and black-brown crisp pixel clusters. No face, no skin patch, no mouth, no hair, no nose, no ears, no body. Keep all space outside the small paired-eye/brow shape truly transparent. Preserve the same relative left/far and right/near eye positions and visual scale as the open-eye layer. This is one paired facial-feature layer, not a character. No words, labels, grid or background.",
+      "source": "raw-art/eyes-b.png",
+      "source_sha256": "fe4b56984d6fb75f8023e8642e29da901b3dd30ffff65e94a81e613818690d00",
+      "transparent_background": true
+    },
+    {
+      "generated_file_name": "exec-3e612e1b-3772-4148-a188-8553ec126b3e.png",
+      "generator": "built-in image_gen",
+      "id": "shirt-b",
+      "prompt": "Use case: identity-preserve. Asset: one interchangeable upper-clothing sprite layer for the SD explorer. Image 1 is the intact bald body reference; Image 2 is its teal tank-top layer. Generate ONLY an alternative ochre-orange sleeveless SAFARI VEST with a small turned collar, two patch pockets, dark front opening/zipper and a squared hem. It fits the same compact torso and three-quarter right-facing view as the reference. Shoulder-to-waist clothing only, with transparent neckline and arm openings. No arms, hands, head, legs, shorts, skin or full character. Match the existing sprite's crisp black-brown outline and simple grouped pixel shading. Keep the garment close fitting and the same torso attachment scale; the collar and pockets create a different design, not a recolor. Transparent background. No shadows outside the cloth, text, labels, grid or props.",
+      "source": "raw-art/shirt-b.png",
+      "source_sha256": "27b6c2bb395f6a6bf96d5d253da1518c118dbbe54220377589770cbe2bfa1401",
+      "transparent_background": true
+    }
+  ],
+  "schema_version": 1
+}

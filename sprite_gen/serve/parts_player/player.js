@@ -1,6 +1,7 @@
 const $ = id => document.getElementById(id);
 const names = {hair:'헤어',expression:'표정',upper:'상의',lower:'하의',footwear:'신발',headwear:'모자',gloves:'장갑',back_accessory:'등 장비',neckwear:'목 장식',eyewear:'안경',bangs:'앞머리',eyes:'눈',brows:'눈썹',mouth:'입',sleeve_l:'왼쪽 소매',sleeve_r:'오른쪽 소매',footwear_l:'왼쪽 신발',footwear_r:'오른쪽 신발'};
 const labels = {hair:['숏 헤어','보브 헤어'],expression:['기본','미소'],upper:['틸 재킷','사파리 재킷'],lower:['반바지','긴바지'],footwear:['운동화','앵클 부츠'],bangs:['숏 앞머리','보브 앞머리'],eyes:['기본 눈','미소 눈'],brows:['기본 눈썹','편안한 눈썹'],mouth:['중립','미소'],sleeve_l:['틸 소매','사파리 소매'],sleeve_r:['틸 소매','사파리 소매'],footwear_l:['운동화','앵클 부츠'],footwear_r:['운동화','앵클 부츠']};
+const optionLabels = {'sd.simple.shirt':'탱크탑','sd.simple.shirt.b':'포켓 베스트','sd.simple.hair.b':'단발','sd.simple.eyes.b':'웃는 눈'};
 const stateNames = {idle:'아이들',walk:'걷기',run:'뛰기'};
 let metadata, state, selected={}, playing=true, origin=performance.now(), held=0, dirty=true, revision=0, busy=false, lastSent=0;
 const layerNodes=new Map(), textureCache=new Map();
@@ -126,7 +127,7 @@ async function boot(){
       slot.options.forEach(option=>{
         const button=document.createElement('button');button.type='button';button.dataset.slot=slot.id;button.dataset.option=option.id;
         const index=slot.options.filter(o=>o.id!=='').findIndex(o=>o.id===option.id);
-        button.textContent=slot.options.length===2&&slot.options.some(o=>o.id==='')?(option.id?'켜기':'끄기'):option.id===''?option.label:labels[slot.id]?.[index]||({headwear:'탐험 모자',gloves:'핑거리스',back_accessory:'백팩',neckwear:'스카프',eyewear:'라운드 안경'}[slot.id]||option.label);
+        button.textContent=slot.options.length===2&&slot.options.some(o=>o.id==='')?(option.id?'켜기':'끄기'):option.id===''?option.label:optionLabels[option.id]||labels[slot.id]?.[index]||({headwear:'탐험 모자',gloves:'핑거리스',back_accessory:'백팩',neckwear:'스카프',eyewear:'라운드 안경'}[slot.id]||option.label);
         button.addEventListener('click',()=>{selected[slot.id]=option.id;showSelection();$('selection-status').textContent='파츠 교체 · 재생 시점 유지';invalidate();});choices.append(button);
       });section.append(choices);(['hair','expression','eyes','upper','lower','footwear'].includes(slot.id)?$('wardrobe'):$('extras')).append(section);
     }

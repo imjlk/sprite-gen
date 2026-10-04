@@ -1,0 +1,121 @@
+{
+  "appearance_clips_baked": 0,
+  "archive": {
+    "bytes": 12670791,
+    "file": "sd-explorer-layer-variations-20261005.tar.gz",
+    "files": 1876,
+    "sha256": "2542fccfaac125492d2e41ed6c764d55d720afdb6e9dc260c6ec284feb5f5fad"
+  },
+  "archive_roundtrip": {
+    "body_texture_preserved": true,
+    "clock_preserved": true,
+    "distinct_appearances_per_state": 8,
+    "safe_data_extraction": true,
+    "states": 3
+  },
+  "art_approved": false,
+  "art_generator": "built-in image_gen",
+  "base_body_split": false,
+  "body": [
+    {
+      "digest": "636a72a0e86c94230cdc284a485a1c5efb883ace579c19810e1dc55a8e5277cb",
+      "id": "sd.simple.body"
+    }
+  ],
+  "body_replacements": 0,
+  "browser_check": {
+    "body_texture_unchanged": true,
+    "console_errors": 0,
+    "sample_unchanged": true,
+    "screenshot": "sd-explorer-wardrobe-viewer-20261005-v1.jpg",
+    "states_visually_checked": [
+      "idle",
+      "walk",
+      "run"
+    ],
+    "three_variants_swapped": true
+  },
+  "designs_per_slot": {
+    "eyes": 2,
+    "hair": 2,
+    "upper": 2
+  },
+  "generated_part_files": {
+    "sd-explorer-layer-eyes-b-20261005.png": "00a34d86cda97ec42884b600e6689231a073e9f191e8aafd921f3b4d004503c7",
+    "sd-explorer-layer-hair-b-20261005.png": "999599b308d48acb8cebfd9c1cafcb80a27d9db09777414f9df78f7e5e7d7566",
+    "sd-explorer-layer-shirt-b-20261005.png": "8d6299e4c3df9d3de770a3cc0efd94be7a7d5129dc99b46d965beb211d2baa33"
+  },
+  "kind": "sd-layer-variation-checkpoint",
+  "motion": {
+    "digest": "b6c45275a24269de55bb613216ea507c8cc80c57765aa687eabda9ef8c27de14",
+    "id": "sd.simple.video.motion"
+  },
+  "motion_origin": "three real Grok videos; full frozen body images reused unchanged",
+  "pose_art_candidates": {
+    "designs": [
+      "charcoal trousers",
+      "brown ankle boots"
+    ],
+    "fitting_verified": false,
+    "full_sample_coverage": false,
+    "runtime_enabled": false,
+    "source_poses": 16
+  },
+  "recipes": {
+    "scripts/dev/sd_explorer_layer_variations.py": "4c1fcbfb426a5e032fc78ae2fd3f9a8b568e6519423e875829d7a8a705c343d4",
+    "sprite_gen/serve/parts_player/player.js": "d0f7c3ee0f16251ebf5d26d5cd7cf8bd4fc12e4370ac8fffbe4a0a77bdd66b0b"
+  },
+  "regression_tests": {
+    "javascript_syntax": "passed",
+    "runtime_and_part_import": {
+      "passed": 36,
+      "seconds": 7.32
+    }
+  },
+  "release_ready": false,
+  "remaining_goal_work": [
+    "lower and footwear: two designs with complete pose bindings",
+    "full five-slot 32 appearances and 96 state cases",
+    "additional equipment and real-art review coverage"
+  ],
+  "runtime_slots": [
+    "eyes",
+    "hair",
+    "upper"
+  ],
+  "runtime_texture_warps": 0,
+  "schema_version": 1,
+  "source_simple_layer_archive": {
+    "file": "sd-explorer-simple-layers-20261005.tar.gz",
+    "sha256": "07410ce449aac072daca562e7691cf83ab413d324e59ecc9df282b8b16982c62"
+  },
+  "validation": {
+    "appearance_clips_baked": 0,
+    "art_approved": false,
+    "designs_per_slot": {
+      "eyes": 2,
+      "hair": 2,
+      "upper": 2
+    },
+    "layer_sets_including_empty": 27,
+    "part_textures_held": true,
+    "release_ready": false,
+    "remaining_slots": [
+      "lower",
+      "footwear"
+    ],
+    "sample_evaluations": 7776,
+    "slots": [
+      "eyes",
+      "hair",
+      "upper"
+    ],
+    "states": [
+      "idle",
+      "walk",
+      "run"
+    ],
+    "swap_clock_preserved": true,
+    "whole_body_preserved": true
+  }
+}
