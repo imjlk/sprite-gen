@@ -724,7 +724,7 @@ def run_item(
                 else:
                     still = item_dir / "facing.png"
                     facing_report = facing_mod.prepare_still(base, still, facing=facing, fix=facing_fix)
-            canvas_report = canvas_mod.run_canvas(still, canvas_png, state=state, shape=shape, facing=facing if direction not in ("front", "back") else "right", headroom=None, lead=None, report_path=canvas_report_path, fit=fit)
+            canvas_report = canvas_mod.run_canvas(still, canvas_png, state=state, shape=shape, facing=facing if direction not in ("front", "back") else "right", headroom=None, lead=None, report_path=canvas_report_path, fit=fit, key=key)
             if facing_report is not None:
                 canvas_report["facing_check"] = facing_report
                 atomic_write_text(canvas_report_path, json.dumps(canvas_report, ensure_ascii=False, indent=2) + "\n")

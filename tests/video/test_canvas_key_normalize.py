@@ -103,6 +103,37 @@ def test_run_canvas_accepts_key_and_records_it(tmp_path: Path) -> None:
     assert _corners(Image.open(tmp_path / "o" / "c.png")) == [GREEN] * 4
 
 
+@pytest.mark.parametrize("kind,key", [("green",GREEN),("magenta",MAGENTA)])
+def test_transparent_source_is_composited_without_recoloring_opaque_subject(kind,key):
+    image=Image.new("RGBA",(32,40),(170,20,90,0))
+    image.paste((18,130,27,255),(12,10,20,30))  # real green fabric must survive
+    image.putpixel((11,12),(200,40,40,128))
+    original=image.tobytes()
+    out,report=canvas_mod.pad_canvas(image,canvas_mod.profile_for("walk"),key=kind)
+    x,y=report["offset"]
+    assert _corners(out)==[key]*4
+    assert out.getpixel((x+12,y+10))==(18,130,27)
+    expected=tuple((s*128+b*127+127)//255 for s,b in zip((200,40,40),key))
+    assert out.getpixel((x+11,y+12))==expected
+    assert report["transparent_source"] is True
+    assert report["normalized_px"]==32*40-8*20-1
+    assert image.tobytes()==original
+
+
+def test_transparent_source_requires_a_declared_background_and_palette_alpha_is_supported():
+    image=Image.new("P",(32,40),0)
+    image.putpalette([0,0,0,200,40,40]+[0]*762)
+    image.info["transparency"]=0
+    image.paste(1,(12,10,20,30))
+    for key in ("auto","white"):
+        with pytest.raises(SystemExit,match="transparent input requires"):
+            canvas_mod.pad_canvas(image,canvas_mod.profile_for("walk"),key=key)
+    out,report=canvas_mod.pad_canvas(image,canvas_mod.profile_for("walk"),key="green")
+    x,y=report["offset"]
+    assert out.getpixel((x+12,y+10))==SUBJECT and _corners(out)==[GREEN]*4
+    assert report["transparent_source"] is True
+
+
 def test_normalized_dark_still_keys_like_the_pure_key_still(tmp_path: Path) -> None:
     """The canvas output of a dark-green still and of the same still on pure green must key to the
     same alpha in `video-frames` (the double safety: normalization + relative key both close it)."""

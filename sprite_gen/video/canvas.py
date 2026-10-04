@@ -253,14 +253,35 @@ def pad_canvas(
 
     On a green/magenta base the background is normalized to the exact key and
     the padding is that key; otherwise the padding is the corner colour.
+    Transparent corners require an explicit green/magenta key: alpha is
+    composited over that background without recoloring opaque subject pixels.
     """
-    corner = corner_key(image)
-    kind = resolve_key(corner, key)
-    if kind is None:
-        src, fill, key_report = image.convert("RGB"), corner, {"key": None, "key_painted": list(corner), "normalized_px": 0, "normalized_pct": 0.0}
+    rgba = image.convert("RGBA") if "A" in image.getbands() or "transparency" in image.info else None
+    alpha = rgba.getchannel("A") if rgba is not None else None
+    w, h = image.size
+    transparent_corners = alpha is not None and all(alpha.getpixel(p) == 0 for p in
+        ((0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)))
+    if transparent_corners:
+        if key not in KEY_TARGETS:
+            raise SystemExit("video-canvas: transparent input requires an explicit --key green or --key magenta")
+        kind = key
+        fill = corner = KEY_TARGETS[kind]
+        # Do not run the chroma matte on a transparent source: genuine green
+        # clothing is still subject here. Only the existing alpha sets coverage.
+        src = Image.alpha_composite(Image.new("RGBA", image.size, (*fill, 255)), rgba).convert("RGB")
+        values = np.asarray(alpha)
+        erased = int((values == 0).sum())
+        key_report = {"key": kind, "key_painted": list(fill), "normalized_px": erased,
+            "normalized_pct": round(100 * erased / (w * h), 2),
+            "transparent_source": True, "alpha_composited_px": int((values < 255).sum())}
     else:
-        src, key_report = normalize_key(image, kind)
-        fill = KEY_TARGETS[kind]
+        corner = corner_key(image)
+        kind = resolve_key(corner, key)
+        if kind is None:
+            src, fill, key_report = image.convert("RGB"), corner, {"key": None, "key_painted": list(corner), "normalized_px": 0, "normalized_pct": 0.0}
+        else:
+            src, key_report = normalize_key(image, kind)
+            fill = KEY_TARGETS[kind]
     if fit not in FITS:
         raise SystemExit(f"video-canvas: unknown --fit {fit!r}; expected one of {', '.join(FITS)}")
     if fit == "tight":
@@ -357,7 +378,7 @@ def run_canvas(
 
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--still", required=True, type=Path, help="base still on a flat chroma background")
+    parser.add_argument("--still", required=True, type=Path, help="base still on flat chroma, or a transparent PNG with an explicit --key")
     parser.add_argument("--out", required=True, type=Path, help="padded PNG to feed `sprite-gen video`")
     parser.add_argument("--state", help="motion state name (jump/attack/projectile/... — selects the canvas row)")
     parser.add_argument("--shape", choices=SHAPES, help="override the state's canvas shape")

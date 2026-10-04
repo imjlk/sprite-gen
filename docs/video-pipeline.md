@@ -98,6 +98,14 @@ erase, and the subject stays byte-identical. A corner that survives the matte fa
 chroma key, the padding is the corner colour. The report records `key`, `key_painted`
 (the colour the model actually used) and `normalized_px`.
 
+Transparent PNG sources require `--key green` or `--key magenta`. The canvas
+composites their existing alpha over that exact fill before the video call;
+opaque subject pixels stay byte-identical, including genuine green clothing.
+It records `transparent_source` and `alpha_composited_px`, and never infers a
+background from RGB hidden beneath alpha zero. `video-set` forwards its declared
+`--key` to this same operation. Sending a transparent PNG straight to the video
+provider can encode the opening frame on black and fail later chroma extraction.
+
 ## 2. Clip — `sprite-gen video`
 
 Unchanged from [video.md](video.md): the user's own credential, fail-loud, `ftyp`-verified

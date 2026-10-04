@@ -40,6 +40,10 @@ def test_set_facing_reaches_both_real_canvas_and_prompt(tmp_path, offline, facin
     assert result["ok"] == 1 and result["facing"] == facing
     assert FIXTURE.read_bytes() == source_bytes
     canvas = json.loads((tmp_path / f"{direction}-attack" / "canvas.report.json").read_text())
+    assert canvas["key"]=="green" and canvas["transparent_source"] is True
+    from PIL import Image
+    with Image.open(tmp_path/f"{direction}-attack"/"canvas.png") as prepared:
+        assert prepared.getpixel((0,0))==(0,255,0)
     if direction == "side":
         assert f"facing {facing}" in prompts[0]
         assert result["items"][0]["facing"]["action"] == ("mirror" if facing == "right" and options else "none")
