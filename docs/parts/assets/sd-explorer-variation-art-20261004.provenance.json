@@ -1,0 +1,48 @@
+{
+  "kind": "sd-explorer-generated-source-provenance",
+  "schema_version": 1,
+  "generator": "built-in image_gen",
+  "grok_used": false,
+  "source": "sd-explorer-modular-body-atlas-20261004.png",
+  "images": [
+    {
+      "file": "sd-explorer-upper.b-atlas-20261004.png",
+      "use_only": [
+        "torso",
+        "arm_l",
+        "arm_r"
+      ],
+      "prompt": "Use case: identity-preserve. Asset: modular SD explorer sprite parts.\nImage 1 is the modular atlas derived from the user's selected SD design. Change ONLY the torso and two arms in top row columns 2, 3 and 4. Make an ORANGE SAFARI JACKET: long sleeves, turned collar, two patch chest pockets, dark front seam and small brass buttons. Torso is neck-to-waist only: NO pelvis, shorts, legs or attached arm stubs. Two arm pieces are shoulder-to-wrist only, no hands; the orange sleeves follow the original arm shape. Preserve original neckline, shoulder, elbow, wrist endpoints and artwork scale.\nPreserve the compact SD character's identity and clean pixel cluster style. Keep the transparent canvas, sixteen tile positions and all unaffected parts. Never add another limb, full character, text, labels, grid lines or backdrop. Only the specified parts will be used; consistent anatomical fitting is essential. Transparent RGBA background.",
+      "sha256": "73b8f5eb28a3abf87046b729503fe47d13cd75d51a2fe8dc551b2772ba75b36e"
+    },
+    {
+      "file": "sd-explorer-lower.b-atlas-20261004.png",
+      "use_only": [
+        "leg_l",
+        "leg_r"
+      ],
+      "prompt": "Use case: identity-preserve. Asset: modular SD explorer sprite parts.\nImage 1 is the modular atlas derived from the user's selected SD design. Change ONLY the two leg pieces in row 2 columns 3 and 4. Replace the charcoal shorts and bare lower legs with full-length CHARCOAL TROUSERS. Simple work trousers with knees visible through shading, cuff at ankle, subtle seam, same dark gray palette. Each piece includes only ONE leg from its half of the hip to ankle: no torso or feet. Keep the original hip, knee and ankle endpoints, limb silhouette, scale and tile positions.\nPreserve the compact SD character's identity and clean pixel cluster style. Keep the transparent canvas, sixteen tile positions and all unaffected parts. Never add another limb, full character, text, labels, grid lines or backdrop. Only the specified parts will be used; consistent anatomical fitting is essential. Transparent RGBA background.",
+      "sha256": "54964b39268afe22e33ed9734600264ee709ac62b2f0c524b594490df8978f95"
+    },
+    {
+      "file": "sd-explorer-footwear.a-atlas-20261004.png",
+      "use_only": [
+        "foot_l",
+        "foot_r"
+      ],
+      "prompt": "Use case: identity-preserve. Asset: modular SD explorer sprite parts.\nImage 1 is the modular atlas derived from the user's selected SD design. Change ONLY the two bare feet in row 3 columns 1 and 2. Replace each foot with a CHARCOAL LOW SNEAKER with a light beige sole and small simple laces. Each shoe contains only its matching foot/ankle interface, without a leg. Same right-facing three-quarter orientation, left/far and right/near identity, original ankle pivot and artwork scale. The sneaker's outer silhouette can extend slightly beyond the bare foot.\nPreserve the compact SD character's identity and clean pixel cluster style. Keep the transparent canvas, sixteen tile positions and all unaffected parts. Never add another limb, full character, text, labels, grid lines or backdrop. Only the specified parts will be used; consistent anatomical fitting is essential. Transparent RGBA background.",
+      "sha256": "3ebd6240675b9d207bc00924cb7c7110cd72c306219753227932e49125d2d8a2"
+    },
+    {
+      "file": "sd-explorer-footwear.b-atlas-20261004.png",
+      "use_only": [
+        "foot_l",
+        "foot_r"
+      ],
+      "prompt": "Use case: identity-preserve. Asset: modular SD explorer sprite parts.\nImage 1 is the modular atlas derived from the user's selected SD design. Change ONLY the two bare feet in row 3 columns 1 and 2. Replace each with a BROWN LEATHER ANKLE BOOT, darker brown heel, simple ankle cuff and warm tan sole. Each contains only one matching foot/ankle interface, no leg. Same right-facing three-quarter orientation, left/far and right/near identity, original ankle pivot and artwork scale. The boot can extend slightly above and beyond the original foot.\nPreserve the compact SD character's identity and clean pixel cluster style. Keep the transparent canvas, sixteen tile positions and all unaffected parts. Never add another limb, full character, text, labels, grid lines or backdrop. Only the specified parts will be used; consistent anatomical fitting is essential. Transparent RGBA background.",
+      "sha256": "0778f9445d8f77e86f8d0c5b89ed1f7bc22cf81da4589e2fe122d07d87956776"
+    }
+  ],
+  "production_character": false,
+  "release_ready": false
+}

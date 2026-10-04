@@ -1,0 +1,76 @@
+{
+  "kind": "sd-explorer-generated-source-provenance",
+  "schema_version": 1,
+  "generator": "built-in image_gen",
+  "grok_used": false,
+  "status": "production-candidate, pending part fitting and motion review",
+  "source": {
+    "file": "sd-explorer-body-candidate-v2-20261004.png",
+    "sha256": "462c5f330daba54007d2b5d5327d4a04bf54571962bec5de2632f569344012c1",
+    "user_feedback": "accepted SD design reference"
+  },
+  "excluded_source": "first-art-sheet.png (unrelated code-authored alignment experiment)",
+  "images": [
+    {
+      "file": "sd-explorer-modular-body-atlas-20261004.png",
+      "sha256": "68d58b21c679e4a7afa0115e318cbd1acf762999486347425d43459c94da54e7",
+      "parts": "bald head, torso, two arms, two hands, two legs, two feet, hair back/front, eyes, eyebrows, mouth",
+      "steps": [
+        "sd-segmented-atlas-prompt",
+        "sd-atlas-torso-correction-prompt"
+      ]
+    },
+    {
+      "file": "sd-explorer-hair.b-atlas-20261004.png",
+      "use_only": [
+        "hair_back",
+        "hair_front"
+      ],
+      "steps": [
+        "sd-variant-hair.b-prompt"
+      ],
+      "sha256": "3397d4ceaa920211edff9ce7bec010268c9880ac5a56b5cbf1d832ef47d5e119"
+    },
+    {
+      "file": "sd-explorer-expression.b-atlas-20261004.png",
+      "use_only": [
+        "eye_l",
+        "eye_r",
+        "brow_l",
+        "brow_r",
+        "mouth"
+      ],
+      "steps": [
+        "sd-variant-expression.b-prompt"
+      ],
+      "sha256": "8fb8b905720ab1ba457b2e84f6af23fd4092c3497f510470be54aa43d0c299ef"
+    },
+    {
+      "file": "sd-explorer-upper.a-atlas-20261004.png",
+      "use_only": [
+        "torso",
+        "arm_l",
+        "arm_r"
+      ],
+      "steps": [
+        "sd-variant-upper.a-prompt"
+      ],
+      "sha256": "d30b96aac1b018cadc131396ba342ba49af648e4c162058cd0acce284c4fa08f"
+    }
+  ],
+  "prompts": {
+    "sd-segmented-atlas-prompt": "Use case: identity-preserve / game sprite production.\nImage 1 is the user's accepted SD explorer design reference and edit target.\nCreate one modular sprite-parts atlas preserving this EXACT character: the same\nlarge head, short brown hair, warm skin, big expressive brown eyes, right-facing\nthree-quarter orientation, gray sleeveless shirt and charcoal shorts, same\ncompact SD body proportions. Do not redesign him or change to a tall character.\nThe output is a 1024x1024 transparent PNG arranged as exactly FOUR columns and\nFOUR rows of 256x256 cells. No lines, borders, labels, text, checkerboard or UI.\nEvery part fits with a clear transparent margin within its own cell and never\noverlaps another cell. Only draw the named part; omit surrounding body/context.\nParts are separated for a layered character animation, with hidden joint areas\nfilled in completely so no holes appear when they move. Use the SAME common\nartwork scale for all cells; do not enlarge the small hands, feet or face marks.\nRows in reading order, left to right:\nRow 1: (1) complete bald head including ears and neutral bare face surface, NO\nhair, NO eyes, eyebrows or mouth, maintaining the reference head silhouette;\n(2) neck and torso in the gray sleeveless shirt, from neck down to hips, no head\nor arms; (3) far LEFT arm, from shoulder to wrist, no hand;\n(4) near RIGHT arm from shoulder to wrist, no hand.\nRow 2: (5) far LEFT hand; (6) near RIGHT hand;\n(7) far LEFT leg including its half of shorts, from hip to ankle, no foot;\n(8) near RIGHT leg including its half of shorts, from hip to ankle, no foot.\nRow 3: (9) far LEFT bare foot; (10) near RIGHT bare foot;\n(11) BACK hair as a separate complete brown silhouette behind the head;\n(12) FRONT hair and fringe only, without any face pixels.\nRow 4: (13) far LEFT eye; (14) near RIGHT eye;\n(15) both eyebrows as a pair; (16) neutral mouth only.\nOrient all parts as in the reference's neutral standing pose. Exactly one of each\nnamed part, no extra limbs or duplicate hands. Keep left/far and right/near\nanatomical identity, consistent outlines and pixel cluster style. Sharp clean\npixel artwork, flat limited shading, no painterly glow, blur or soft lighting.\nActually transparent RGBA background. This is a SINGLE parts atlas asset, not\na portrait or finished character sheet. Preserve the source character's identity\nand all sixteen cell positions exactly.",
+    "sd-atlas-torso-correction-prompt": "Precise edit of Image 1, a modular parts atlas for the user's SD explorer.\nKeep the canvas, transparent background, all sixteen part locations, character\nidentity, pixel-art outlines and every other part unchanged.\nChange ONLY the TORSO in the top row, second column:\n- It must contain only the NECK and GRAY SLEEVELESS SHIRT torso ending at the\nwaistline. No shorts, pelvis, legs, arms, shoulder cap or limb stubs.\n- Fill the hidden side surfaces under the armholes, so the complete torso can\nbe layered between two independently movable arms without gaps.\n- Preserve gray shirt neckline and the source torso scale and location.\nAll head, separate arms/hands/legs/feet/hair/eyes/brows/mouth remain unchanged.\nNo extra limb, no text, no borders, no background. Preserve actual RGBA alpha.\nThis is one targeted correction of the production-candidate atlas, not a new\ndesign or a complete character.",
+    "sd-variant-hair.b-prompt": "Precise modular sprite-part edit. Image 1 is the accepted SD explorer's body-parts atlas, an edit target. Preserve the character identity, all unaffected parts, transparent canvas and all sixteen asset positions. Change ONLY the BACK hair and FRONT hair in row 3 columns 3 and 4. Make a neat short BOB hairstyle with rounded crown, smooth side-swept fringe and a chin-length back section. Keep dark brown color and the same head fitting scale, skull shape, orientation and exact tile locations. Do not include a face or head surface in either hair piece. Back hair can extend down to the neck, front hair must leave the eyes and face uncovered. Keep clean pixel-art clusters and the source's outline/shading. Do not add labels, frames, duplicate parts, limbs or any backdrop. Genuinely transparent RGBA background. This is one variant atlas; keep every other tile unchanged.",
+    "sd-variant-expression.b-prompt": "Precise modular sprite-part edit. Image 1 is the accepted SD explorer's body-parts atlas, an edit target. Preserve the character identity, all unaffected parts, transparent canvas and all sixteen asset positions. Change ONLY the two eyes, eyebrow pair and mouth in row 4. Make a warm SMILING expression: bright friendly brown eyes, slightly raised relaxed brows, small curved smile. Keep exact artwork scale, orientation and the eye/eyebrow/mouth asset positions. No head/face background in any feature. This is the same adult SD explorer identity, not a different face. Keep clean pixel-art clusters and the source's outline/shading. Do not add labels, frames, duplicate parts, limbs or any backdrop. Genuinely transparent RGBA background. This is one variant atlas; keep every other tile unchanged.",
+    "sd-variant-upper.a-prompt": "Precise modular sprite-part edit. Image 1 is the accepted SD explorer's body-parts atlas, an edit target. Preserve the character identity, all unaffected parts, transparent canvas and all sixteen asset positions. Change ONLY the torso and two arms in top row columns 2, 3 and 4. Dress those pieces in a SHORT TEAL ZIP JACKET with short sleeves, visible gray undershirt at a V neckline, stand-out zipper seam, small simple side pockets, light teal edge detail. Torso is neck-to-waist only, no shorts. Arms include short jacket sleeves over the upper arm and the original bare skin forearms, no hands. Exact source shoulder, elbow and wrist endpoints, scale, body proportions and part locations must remain the same. Only jacket shape may extend a few pixels beyond the original body silhouette. Keep clean pixel-art clusters and the source's outline/shading. Do not add labels, frames, duplicate parts, limbs or any backdrop. Genuinely transparent RGBA background. This is one variant atlas; keep every other tile unchanged."
+  },
+  "observed_limitations": [
+    "Output is 1254x1254, not the requested exact 1024 grid.",
+    "Parts need explicitly authored crop bounds, scale and attachment pivots.",
+    "Unaffected tiles in variant atlases are not byte-identical; only declared variant parts are used.",
+    "Artwork generation is not a fit, occlusion, motion, contact or release approval."
+  ],
+  "production_character": false,
+  "release_ready": false
+}

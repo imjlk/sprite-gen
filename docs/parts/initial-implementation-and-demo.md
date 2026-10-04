@@ -6,9 +6,23 @@
 
 사용자 정정(2026-10-04): 데모의 기본 경로는 **공통 idle/walk/run + 현재 sample에 대한 파츠 레이어 합성**이다. 아래의 96 clip 수량은 32외형 × 3상태의 검증 공간으로 읽는다. 조합별 완성 clip을 만들거나 저장하지 않는다. Baked export는 명시적으로 요청할 때만 사용한다. 팔이 중복된 장신 artwork 후보는 사용자가 반려했으므로 demo/reference로 재사용하지 않는다. Tall rig의 기술 검증은 별도이며 이 후보를 승인한 증거가 아니다.
 
-2026-10-04 요구를 반영해 SD explorer의 기본 사용자 데모를 헤어·표정·상의·하의·신발의 5slot으로 확장했다. 추가 장비, 독립 subslot, palette와 다른 체형의 variation도 PR01부터 데이터 계약에 포함한다. 상세 범위와 조합 규칙은 [커스터마이징과 베리에이션 계획](customization-and-variation.md)을 따른다. 두 slot의 12 clip은 내부 smoke이며 사용자 데모의 완료 기준은 기본 32외형·96 clip이다.
+제작 경로 정정(2026-10-04): `assets/sd-explorer-live-demo-20261004-v1`–`v3`의 동작 시트는 **영상에서 추출한 모션이 아니다.** 선택한 SD 디자인에서 생성한 파츠 atlas를 수동 관절 좌표와 두 segment의 affine 변형으로 배치한 실험이다. 파츠 교체·공통 시계·파일 쓰기 없음의 검증은 유효하지만, 이 결과를 실제 아트 모션의 승인이나 비디오 기반 데모 완료로 보고하지 않는다. 해당 모션은 production 후보에서 제외했고 재현 script도 `--experimental-raster-motion`을 명시해야 실행된다. `first-art-sheet.png`는 이보다 앞선 Python/Pillow 그림 실험이며 선택한 SD 디자인을 사용하지 않았다.
 
-작성일은 2026-10-04이다. PR00–06의 M1 엔진을 구현했다. 현재 사용할 수 있는 범위는 [선언 계약](01-contract.md), [모션 snapshot](02-motion-snapshots.md), [파츠 import](03-part-import.md), [공통 합성](04-composition.md), [검수·QA](05-review-and-qa.md), [baked export](06-baked-export.md)와 [기준선](00-baseline.md)을 따른다. 실제 아트의 96 clip 제작·검수는 진행 전이며, 엔진의 synthetic 증거와 구분한다.
+실제 모션은 선택한 `sd-explorer-body-candidate-v2-20261004.png`로 Grok Imagine의 공통 body 영상 idle/walk/run을 만들고, 기존 `video-frames` → `video-loop` 경로로 추출·루프·크기·접지·동일 view를 검증한 뒤 freeze한다. 이후 파츠를 그 최종 포즈에 맞춘다. 2026-10-04의 첫 실제 영상 호출은 `assets/sd-explorer-video-source-20261004/`에 MP4 3개, prompt 및 provider report를 보관했다. 인증은 `grok-login`이며 각 MP4는 실제 960×960 / 24fps / 97frame이다. 첫 프레임이 검은 배경으로 인코딩되어 green-key 추출이 실패했고, 이 v1 영상은 **추출 검사 미통과 후보**로 남겼다. 외형마다 별도 영상을 생성하지 않는다.
+
+2026-10-05 실제 영상 경로: 투명 원본의 RGBA를 명시된 green canvas에 합성하고, batch가 선언한 key를 canvas 단계까지 전달하도록 수정했다. 이를 입력으로 만든 v2 공통 영상 세 개는 각각 720×720 / 24fps / 97frame이며, 전 프레임의 chroma 추출과 경계 검사를 통과했다. idle은 첫·끝 frame 고정 방식의 4초 루프를 64 sample / 16fps로, walk는 24 sample / 24fps로, run은 20 sample / 24fps로 가져왔다. walk의 jolt 경고는 해소되지 않았고 품질 승인을 받은 결과가 아니다.
+
+[영상 모션 import script](../../scripts/dev/sd_explorer_video_motion.py)는 세 상태의 실제 cycle PNG에 동일한 scale·offset·64색 palette를 적용해 128×128 최종 raster 108개를 확정한 후 import한다. 수동 pose 생성기는 사용하지 않았다. 각 상태의 ticks 변환 오차는 0이며, 1,188개 socket annotation은 아직 미검수다. 미검수 annotation으로 freeze를 시도하면 거절되고 active assembly가 바뀌지 않는 것도 확인했다. 따라서 이 후보는 **실제 영상 import 완료, socket 검수·body 분리·파츠 fitting 미완료** 상태다. 기존 수동 모션에서 수행한 32외형/96검증 사례를 이 후보의 완료 증거로 재사용하지 않는다.
+
+- [실제 영상 프레임 검토 이미지](assets/sd-explorer-actual-video-motion-review-20261004.png)
+- [idle](assets/sd-explorer-video-idle-v2-20261004.gif), [walk](assets/sd-explorer-video-walk-v2-20261004.gif), [run](assets/sd-explorer-video-run-v2-20261004.gif)의 추출 루프
+- [원본 MP4·최종 PNG·candidate·annotation 패키지](assets/sd-explorer-video-motion-candidate-20261004.tar.gz)와 [출처·해시·검증 기록](assets/sd-explorer-video-motion-candidate-20261004.provenance.json)
+
+남은 실제 아트 데모 작업은 이 영상의 최종 raster에서 socket과 body piece를 검수하고, 선택한 SD에서 만든 파츠 atlas를 각 sample에 fitting한 뒤 32외형 × 3상태의 실시간 교체를 검증하는 것이다. 외형별 완성 clip을 만들지 않는다. RGBA/key 변경과 live player를 포함한 전체 회귀 결과는 3,377 passed, 2 skipped, 기존 Pillow 경고 74개다.
+
+2026-10-04 요구를 반영해 SD explorer의 기본 사용자 데모를 헤어·표정·상의·하의·신발의 5slot으로 확장했다. 추가 장비, 독립 subslot, palette와 다른 체형의 variation도 PR01부터 데이터 계약에 포함한다. 상세 범위와 조합 규칙은 [커스터마이징과 베리에이션 계획](customization-and-variation.md)을 따른다. 두 slot × 3상태의 조합은 내부 smoke이며 사용자 데모의 완료 기준은 기본 32외형·96검증 사례다.
+
+작성일은 2026-10-04이다. PR00–06의 M1 엔진을 구현했다. 현재 사용할 수 있는 범위는 [선언 계약](01-contract.md), [모션 snapshot](02-motion-snapshots.md), [파츠 import](03-part-import.md), [공통 합성](04-composition.md), [검수·QA](05-review-and-qa.md), [baked export](06-baked-export.md)와 [기준선](00-baseline.md)을 따른다. 실제 아트의 영상 모션 import는 진행했으나 파츠 fitting과 96검증 사례 검수는 미완료이며, 엔진의 synthetic 증거와 구분한다.
 
 ## 구현 현황
 
@@ -21,7 +35,7 @@
 | PR04 | 공통 timeline, body 교체, subslot 우선순위, draw order, mask/palette/mirror, appearance/preview CLI 구현. 다섯 체형과 synthetic 32외형·96 clip 검증 |
 | PR05 | 입력·render·QA evidence snapshot, contact/world travel 측정, 명시적 검수 결정, scope와 오래된 승인 차단 구현 |
 | PR06 | 결정론적 다중 state atlas·manifest·Aseprite mapping, 순서/ticks 유지 dedup, build lock와 승인 release gate 구현 |
-| 실제 SD 데모 | 디자인 참고 시트와 새 투명 RGBA body 후보가 있음. pixel grid·alpha·view 보정, 분리와 5slot 각 2종·96 clip 검수는 미완료 |
+| 실제 SD 데모 | 선택한 SD에서 파츠 atlas를 생성하고 실제 Grok 영상 3개에서 공통 108 sample 후보를 import함. socket 검수·body 분리·fitting과 5slot 각 2종·96검증 사례 검수는 미완료 |
 
 ## 확인한 기준선
 

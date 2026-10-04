@@ -1,0 +1,20 @@
+{
+  "kind": "sd-explorer-generated-source-provenance",
+  "schema_version": 1,
+  "generator": "built-in image_gen",
+  "grok_used": false,
+  "source": "sd-explorer-modular-body-atlas-20261004.png",
+  "file": "sd-explorer-equipment-atlas-20261004.png",
+  "use_only": [
+    "hat",
+    "backpack",
+    "glove_l",
+    "glove_r",
+    "scarf",
+    "glasses"
+  ],
+  "prompt": "Use case: stylized-concept. Asset: modular pixel-art equipment atlas for the SD explorer in Image 1.\nImage 1 is the existing SD explorer modular body atlas: preserve its dark outlines, crisp pixel clusters, warm brown/teal/olive adventure palette, right-facing three-quarter view and compact SD proportions.\nCreate a new transparent atlas with SIX separately floating equipment pieces, two columns and three rows. Each item has ample transparent gaps from every other item. No character or skin/body drawn.\nRow 1 left: an OLIVE EXPLORER HAT, short crown and small brim, designed to fit this large SD head, right-facing three-quarter orientation.\nRow 1 right: an OLIVE CANVAS BACKPACK, seen on the far/back left side of a character facing right, simple tan straps and small outer pocket, no torso/arms.\nRow 2 left: one FAR LEFT BROWN FINGERLESS GLOVE, only glove exterior, transparent finger openings, fits the left hand in Image 1.\nRow 2 right: one NEAR RIGHT BROWN FINGERLESS GLOVE, only glove exterior, transparent finger openings, fits the right hand in Image 1.\nRow 3 left: a small WARM OCHRE NECK SCARF tied to the side, only scarf, no head/torso.\nRow 3 right: one pair of ROUND EXPLORER GLASSES, right-facing three-quarter perspective with far lens narrower, hollow transparent lenses, dark brown thin pixel outlines, no face/eyes.\nExactly these six items, one per position. No text, labels, grid lines, duplicates, limbs or background. Crisp limited flat shading, matching source pixel art. Transparent RGBA background.",
+  "production_character": false,
+  "release_ready": false,
+  "sha256": "fc94af2e820e0748f923a9fc0a939a94325a785a7548356bbcbed043b5f46af6"
+}

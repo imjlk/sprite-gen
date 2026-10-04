@@ -1,0 +1,76 @@
+{
+  "kind": "sd-video-source-production",
+  "schema_version": 1,
+  "source": {
+    "file": "selected-sd-reference.png",
+    "sha256": "462c5f330daba54007d2b5d5327d4a04bf54571962bec5de2632f569344012c1"
+  },
+  "provider": "grok-imagine-video-1.5",
+  "auth_source": "grok-login",
+  "states": [
+    "idle",
+    "walk",
+    "run"
+  ],
+  "common_body_only": true,
+  "appearance_clips_requested": 0,
+  "freeze_status": "not frozen: inspect videos, extract frames and approve shared motion first",
+  "replaces": "manual joint-coordinate raster motion experiment",
+  "release_ready": false,
+  "clips": [
+    {
+      "state": "idle",
+      "file": "idle.mp4",
+      "sha256": "b1c80fd2d7dd9bed4d3d2666b112bc44160d957dffa029351102cc18529cca6d",
+      "report": "idle.video-report.json",
+      "prompt": "idle.prompt.txt",
+      "measured": {
+        "width": 960,
+        "height": 960,
+        "fps": "24/1",
+        "frames": 97,
+        "duration_seconds": "4.041667"
+      },
+      "extraction_status": "failed: first frame has black background instead of green chroma",
+      "frozen": false
+    },
+    {
+      "state": "walk",
+      "file": "walk.mp4",
+      "sha256": "9d8ecdb2320b5a2b6af27134335fe81bff5e05c929f083beb13fd523e8841d1d",
+      "report": "walk.video-report.json",
+      "prompt": "walk.prompt.txt",
+      "measured": {
+        "width": 960,
+        "height": 960,
+        "fps": "24/1",
+        "frames": 97,
+        "duration_seconds": "4.041667"
+      },
+      "extraction_status": "failed: first frame has black background instead of green chroma",
+      "frozen": false
+    },
+    {
+      "state": "run",
+      "file": "run.mp4",
+      "sha256": "c3f4c5c07868f3468c184c452c2063cfd2cb9b9c8b7f261d4829b3c33790a142",
+      "report": "run.video-report.json",
+      "prompt": "run.prompt.txt",
+      "measured": {
+        "width": 960,
+        "height": 960,
+        "fps": "24/1",
+        "frames": 97,
+        "duration_seconds": "4.041667"
+      },
+      "extraction_status": "failed: first frame has black background instead of green chroma",
+      "frozen": false
+    }
+  ],
+  "workspace_output": "assets/sd-explorer-video-source-20261004",
+  "prompts": {
+    "idle": "Use the exact SD explorer from the input image. Keep the same large head, short brown hair, warm skin, brown eyes, gray sleeveless shirt, charcoal shorts and bare feet. Exactly TWO arms, TWO hands, TWO legs and TWO feet throughout. This is a 2D pixel-art sprite motion source. Keep the original right-facing three-quarter view, character identity, proportions and artwork style. Do not turn toward the camera. Static locked camera: no zoom, pan, cuts, rotation, scale change, added objects or shadows. Keep the complete character safely inside the original square framing. Render the transparent area as one perfectly flat pure chroma green #00FF00 background throughout the clip; no gradient, floor, scenery or texture. The character animates IN PLACE; its overall position stays fixed. Silent.\nA calm natural idle loop: both feet remain planted at the same ground line, subtle breathing in torso, very small head motion, one soft blink, relaxed arms. No walking, waving or bouncing. Return smoothly to the starting idle pose.\n",
+    "walk": "Use the exact SD explorer from the input image. Keep the same large head, short brown hair, warm skin, brown eyes, gray sleeveless shirt, charcoal shorts and bare feet. Exactly TWO arms, TWO hands, TWO legs and TWO feet throughout. This is a 2D pixel-art sprite motion source. Keep the original right-facing three-quarter view, character identity, proportions and artwork style. Do not turn toward the camera. Static locked camera: no zoom, pan, cuts, rotation, scale change, added objects or shadows. Keep the complete character safely inside the original square framing. Render the transparent area as one perfectly flat pure chroma green #00FF00 background throughout the clip; no gradient, floor, scenery or texture. The character animates IN PLACE; its overall position stays fixed. Silent.\nA natural repeating WALK cycle in place at a moderate walking pace. Alternate left and right foot contacts; clear heel-to-toe weight transfer, knees bend naturally, arms swing opposite the legs. Upright torso with small rhythmic weight shift. No running or sliding the whole character sideways. Repeat several complete walk cycles; return smoothly to the starting stance.\n",
+    "run": "Use the exact SD explorer from the input image. Keep the same large head, short brown hair, warm skin, brown eyes, gray sleeveless shirt, charcoal shorts and bare feet. Exactly TWO arms, TWO hands, TWO legs and TWO feet throughout. This is a 2D pixel-art sprite motion source. Keep the original right-facing three-quarter view, character identity, proportions and artwork style. Do not turn toward the camera. Static locked camera: no zoom, pan, cuts, rotation, scale change, added objects or shadows. Keep the complete character safely inside the original square framing. Render the transparent area as one perfectly flat pure chroma green #00FF00 background throughout the clip; no gradient, floor, scenery or texture. The character animates IN PLACE; its overall position stays fixed. Silent.\nA natural repeating RUN cycle in place, clearly faster and more energetic than walking. Bent elbows swing opposite the legs, knees rise and fold, alternating foot contacts and brief flight phases, slight forward torso lean while maintaining the fixed right-facing three-quarter view. Anatomically coherent two-arm/two-leg motion. Repeat several complete running cycles; return smoothly to the starting stance.\n"
+  }
+}
