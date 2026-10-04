@@ -8,6 +8,10 @@ SD explorer의 기본 커스터마이징은 헤어·표정·상의·하의·신�
 
 이 문서는 2026-10-04 사용자 요구를 반영한 구현 계획이다. [초기 실행 계획](initial-implementation-and-demo.md)의 두 slot 데모를 내부 smoke로 두고, 사용자 데모와 후속 베리에이션 목표를 확장한다. PR01에서 group/slot/preset/palette와 체형별 binding의 첫 선언 검증을 구현했고, humanoid 초기 catalog는 기본 5종을 포함한 20개 slot을 제공한다. 실제 지원 범위는 [구현된 계약](01-contract.md)을 따른다. 아래의 추가 slot·아트 수량·합성·UI·승인은 후속 구현·제작 목표다.
 
+2026-10-05 사용자 검수로 기본 구현을 단순화했다. **온전한 기본 몸 + 눈 + 헤어 + 의상**을 순서대로 그린다. 위치 기준점은 머리·몸통의 상대좌표를 알려줄 뿐이며, 몸을 분해하거나 파츠를 변형하는 지시가 아니다. 기본 몸 프레임은 파츠를 모두 꺼도 그대로 남는다. 현재 최소 데모는 세 파츠 각 한 장을 독립적으로 켜고 끌 수 있다. 앞서 분리·재질 투영으로 제작한 18slot 데모는 철회했으며, 그 기술 검사 수량을 아트 완료로 세지 않는다.
+
+다리 자체는 기본 몸의 영상 스프라이트에 이미 들어 있는 동작을 따른다. 바지·신발의 포즈가 달라져야 한다면 필요한 **파츠의 포즈 그림**을 추가한다. 허벅지/종아리 회전·길이 보정·무릎 solver를 늘려 대응하지 않는다. 파츠 디자인 수와 포즈 수는 별도 축이며, 포즈 그림은 공통 motion sample에서 모든 외형이 공유한다. 다른 체형도 그 체형의 기준 몸과 상대좌표·포즈 그림을 명시적으로 준비하는 방식으로 확장한다.
+
 ## 선택과 렌더링을 나누는 데이터 구조
 
 | 단위 | 의미 | 예 |
@@ -140,7 +144,7 @@ M2의 다른 체형 acceptance는 슬롯 하나의 교체로 끝내지 않는다
 | 03 | 기본 hair/face/clothing 제거가 가능한 body piece 등록, multi-piece variants, join interface, 여러 rig의 binding 수용·불일치 거절 |
 | 04 | 공통 timeline의 런타임 파츠 합성·교체, 선택·preset·mask·replacement, 5slot/독립 subslot/palette와 96 상태 조합 검증 |
 | 05 | catalog/preset/palette/mask 포함 승인 subject, 조합·slot footprint 변화의 invalidation, 검수 coverage report |
-| 06 | 요청된 appearance만 export, 기본 96 clip과 추가 장비 case의 승인 범위 확인, 조합 전수 bake 금지 |
+| 06 | 요청된 appearance만 export, 기본 96상태 사례과 추가 장비 case의 승인 범위 확인, 조합 전수 bake 금지 |
 | 07 | design × rig × view × motion/sample × piece의 missing coverage 계획; palette-only 변경은 이미지 생성 작업 없음 |
 | 08 | 기존 provider로 지정한 variant와 누락 piece/sample만 후보 제작; 미확정 제출 상태와 locked 결과 보존 |
 | 09 | catalog로 group/기본·세부 선택 UI 생성; preset 변경 범위, pair 연결·해제, unavailable binding, 충돌 이유 표시 |

@@ -34,7 +34,7 @@ def write(path, data):
     return path
 
 
-def prepare(source, output):
+def prepare(source, output, *, walk_loop="walk-v2-loop", palette_file=None):
     source,output=source.absolute(),output.absolute()
     if output.exists() and any(output.iterdir()):
         raise ValueError("output requires a new or empty directory")
@@ -60,10 +60,12 @@ def prepare(source, output):
             120-round(reference_box[3]*actual_y))
     origin=output/"video-origin"
     origin.mkdir()
+    if Path(walk_loop).name != walk_loop or walk_loop in {".",".."}:
+        raise ValueError("walk loop must be one directory under --source")
     for filename in ("selected-sd-reference.png","selected-sd-green-canvas.png","green-canvas.report.json"):
         copyfile(source/filename,origin/filename)
     for state in STATES:
-        loop=source/(f"{state}-v2-pinned-loop" if state=="idle" else f"{state}-v2-loop")
+        loop=source/("idle-v2-pinned-loop" if state=="idle" else walk_loop if state=="walk" else "run-v2-loop")
         loop_report=json.loads((loop/f"{state}.loop.report.json").read_bytes())
         strip_meta=json.loads((loop/f"{state}.strip.json").read_bytes())
         frames_report=json.loads((source/f"{state}-v2-frames/frames.report.json").read_bytes())
@@ -78,6 +80,7 @@ def prepare(source, output):
             raise ValueError("this recipe requires an integer finalized sample rate")
         chosen=list(range(length)) if count==length else [round(k*length/count) for k in range(count)]
         rows=[]
+        replacements=set((loop_report.get("jump_repair") or {}).get("replaced",[]))
         for number,ordinal in enumerate(chosen):
             source_frame=loop/"cycle"/f"frame-{ordinal:03d}.png"
             rgba=Image.open(source_frame).convert("RGBA")
@@ -91,6 +94,7 @@ def prepare(source, output):
             images.append(image)
             rows.append({"number":number,"cycle_ordinal":ordinal,
                 "source_video_ordinal":loop_report["cycle"]["start"]+ordinal,
+                "pixel_origin":"RIFE midpoint of video neighbours" if ordinal in replacements else "extracted video frame",
                 "source_frame_sha256":assets.sha256(source_frame.read_bytes())})
         clips.append({"state":state,"rate":int(rate),"rows":rows})
         for suffix in ("v2.mp4","v2.video-report.json","v2.prompt.txt"):
@@ -104,8 +108,20 @@ def prepare(source, output):
             "mp4_sha256":assets.sha256(video_bytes),"native_fps":str(fps),"source_cycle_start":loop_report["cycle"]["start"],
             "source_cycle_length":length,"finalized_samples":count,"finalized_rate":str(rate),
             "cycle_kind":loop_report["cycle"]["kind"],"seam_ratio":loop_report.get("resampled_seam_ratio"),
+            "jump_repair":loop_report.get("jump_repair"),
             "jolt_warning":(loop_report.get("jolt") or {}).get("warnings",[]),"frames":rows})
-    palette=build_shared_palette(images,64)
+    if palette_file is None:
+        palette=build_shared_palette(images,64)
+        palette_source=None
+    else:
+        palette_data=Path(palette_file).read_bytes()
+        palette=json.loads(palette_data)["colors"]
+        if not isinstance(palette,list) or not 1 <= len(palette) <= 256 or any(
+            not isinstance(color,list) or len(color)!=3 or any(
+                type(value) is not int or not 0 <= value <= 255 for value in color) for color in palette):
+            raise ValueError("palette requires 1..256 explicit RGB colors")
+        (origin/"customization-palette.json").write_bytes(palette_data)
+        palette_source={"file":"customization-palette.json","sha256":assets.sha256(palette_data)}
     inputs=output/"motion-source"
     requests=[]
     cursor=0
@@ -143,7 +159,8 @@ def prepare(source, output):
         "common_projection":{"reference_bbox":list(reference_box),"standing_height":standing_height,
             "target_body_height":112,"native_canvas":list(first.size),"scaled_canvas":list(scaled_size),
             "offset":list(offset),"resample":"common premultiplied RGBA resize_cell"},
-        "palette":palette,"palette_size":len(palette),"alpha":"binary, same pinned palette across the three states",
+        "palette":palette,"palette_size":len(palette),"palette_source":palette_source,
+        "alpha":"binary, same pinned palette across the three states",
         "clips":records,"samples":len(images),"candidate":imported["candidate"],"annotation_template":imported["annotation_template"],
         "manual_pose_generator_used":False,"appearance_clips_baked":0,"frozen":False,"release_ready":False,
         "remaining":"verify per-sample sockets and body segmentation, then fit actual part variants on this exact motion",
@@ -157,8 +174,10 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source",type=Path,required=True)
     parser.add_argument("--out",type=Path,required=True)
+    parser.add_argument("--walk-loop",default="walk-v2-loop",help="inspected walk loop directory, relative to --source")
+    parser.add_argument("--palette",type=Path,help="explicit shared customization RGB palette JSON")
     args=parser.parse_args()
-    print(json.dumps(prepare(args.source,args.out),ensure_ascii=False,indent=2))
+    print(json.dumps(prepare(args.source,args.out,walk_loop=args.walk_loop,palette_file=args.palette),ensure_ascii=False,indent=2))
 
 
 if __name__=="__main__":

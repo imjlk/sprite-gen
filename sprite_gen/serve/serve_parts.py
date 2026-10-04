@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import base64
 from collections import OrderedDict
+from contextlib import contextmanager
 from fractions import Fraction
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -33,6 +34,8 @@ class PartsSession:
         self.documents = tuple(registry.values())
         self.load = compose_parts.AssetLoader(root, index)
         self.players, self.lock = OrderedDict(), threading.Lock()
+        self.textures = {}
+        self.texture_refs = {}
         catalog = registry[index["catalog"]["id"]]
         rig = registry[index["rig"]["id"]]
         topology = registry[rig["topology"]["id"]]
@@ -44,7 +47,7 @@ class PartsSession:
         resolved = contract.resolve_selections(self.appearance, catalog)
         self.metadata = {"id": self.appearance["id"], "canvas": registry[index["rig"]["id"]]["canvas"],
             "motion": index["motion"], "states": [], "slots": [], "release_ready": False,
-            "mode": "live-current-sample", "appearance_clips_baked": 0}
+            "mode": "independent-layers", "appearance_clips_baked": 0}
         motion = registry[index["motion"]["id"]]
         for state in index["states"]:
             clip = next(c for c in motion["clips"] if c["state"] == state)
@@ -60,7 +63,8 @@ class PartsSession:
                 self.metadata["slots"].append({"id": slot["id"], "label": slot["label"], "selected": selected,
                     "options": options})
 
-    def frame(self, query):
+    @contextmanager
+    def _at(self, query):
         if set(query) - {"state", "time_ms", *self.options} or any(len(v)!=1 for v in query.values()):
             raise contract.PartsContractError("unknown or duplicate player parameter")
         state = query.get("state", [self.appearance["states"][0]])[0]
@@ -90,9 +94,44 @@ class PartsSession:
             self.players.move_to_end(key)
             player.set_state(state,restart=False)
             player.seek(Fraction(milliseconds,1000))
+            yield player
+
+    def frame(self, query):
+        """Explicit CPU reference rendering for inspection and pixel comparison."""
+        with self._at(query) as player:
             image, evidence = player.frame()
             return {"image":"data:image/png;base64,"+base64.b64encode(assets.png_bytes(image)).decode("ascii"),
                 **evidence}
+
+    def _texture(self, pack, reference):
+        key = (pack["id"],reference["file"],reference["sha256"])
+        if key in self.texture_refs:
+            return {**self.texture_refs[key],"size":self.texture_refs[key]["size"][:]}
+        image = self.load(pack,reference)
+        encoded = assets.png_bytes(image)
+        digest = assets.sha256(encoded)
+        self.textures.setdefault(digest,encoded)
+        value = {"id":digest,"url":f"/api/textures/{digest}.png","size":list(image.size)}
+        self.texture_refs[key] = value
+        return {**value,"size":value["size"][:]}
+
+    def layer_frame(self, query):
+        """Return separate cached textures and relative tracks, never a merged PNG."""
+        with self._at(query) as player:
+            scene = player.layers()
+            for layer in scene["layers"]:
+                layer["texture"] = self._texture(layer["pack"],layer["image"])
+                layer["regions"] = {name:self._texture(layer["pack"],reference)
+                    for name,reference in layer["palette_regions"].items()}
+            for mask in scene["masks"]:
+                mask["texture"] = self._texture(mask["pack"],mask["image"])
+            return scene
+
+    def texture(self, digest):
+        with self.lock:
+            if digest not in self.textures:
+                raise contract.PartsContractError("texture was not referenced by the selected layers")
+            return self.textures[digest]
 
 
 def handler_for(session):
@@ -100,11 +139,11 @@ def handler_for(session):
         def log_message(self, *_):
             pass
 
-        def reply(self, status, data, content_type):
+        def reply(self, status, data, content_type, *, immutable=False):
             self.send_response(status)
             self.send_header("Content-Type",content_type)
             self.send_header("Content-Length",str(len(data)))
-            self.send_header("Cache-Control","no-store")
+            self.send_header("Cache-Control","public, max-age=31536000, immutable" if immutable else "no-store")
             self.send_header("X-Content-Type-Options","nosniff")
             self.end_headers()
             self.wfile.write(data)
@@ -119,6 +158,12 @@ def handler_for(session):
                     result = session.metadata
                 elif request.path == "/api/frame":
                     result = session.frame(parse_qs(request.query,keep_blank_values=True,max_num_fields=24))
+                elif request.path == "/api/layers":
+                    result = session.layer_frame(parse_qs(request.query,keep_blank_values=True,max_num_fields=24))
+                elif request.path.startswith("/api/textures/") and request.path.endswith(".png"):
+                    digest = request.path.removeprefix("/api/textures/").removesuffix(".png")
+                    self.reply(200,session.texture(digest),"image/png",immutable=True)
+                    return
                 elif request.path in {"/","/index.html","/player.js","/player.css"}:
                     name = "index.html" if request.path=="/" else request.path[1:]
                     content_type = {"index.html":"text/html","player.js":"text/javascript","player.css":"text/css"}[name]

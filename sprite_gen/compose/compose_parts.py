@@ -90,7 +90,7 @@ def render_sample(plan, sample, load):
         layer = Image.new("RGBA", size)
         layer.alpha_composite(image, tuple(entry["offset"]))
         for node, mask in masks:
-            if entry["node"] == node or node in entry["provides"]:
+            if node in entry["provides"]:
                 layer = apply_alpha_mask(layer, mask)
         output = Image.alpha_composite(output, layer)
         x, y = entry["offset"]

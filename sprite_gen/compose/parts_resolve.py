@@ -113,6 +113,7 @@ def resolve(appearance, documents):
         for piece in bindings[name]["pieces"]:
             entries.append({"id": f"{name}.{piece['id']}", "pack": contract.reference(pack),
                             "binding_id": bindings[name]["id"], "piece_id": piece["id"],
+                            "mode": piece["mode"],
                             "role": pack["role"], "slot": piece["slot"], "node": piece["node"],
                             "provides": piece["provides"], "replaces": piece["replaces"],
                             "palette_regions": piece["palette_regions"], "piece": piece})
@@ -173,7 +174,7 @@ def resolve(appearance, documents):
             ordered = _order(active, known, {n["id"] for n in topology["nodes"]})
             for entry in ordered:
                 mask = entry["placement"]["mask"]
-                if mask is not None and not any(mask["target_node"] in e["provides"] or mask["target_node"] == e["node"] for e in remaining):
+                if mask is not None and not any(mask["target_node"] in e["provides"] for e in remaining):
                     raise contract.PartsContractError(f"{entry['id']}: mask target has no raster provider")
             samples.append({"id": sample["id"], "duration_ticks": sample["duration_ticks"],
                             "sockets": deepcopy(sample["sockets"]), "draw": ordered,

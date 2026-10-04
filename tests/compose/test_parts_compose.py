@@ -191,6 +191,30 @@ def test_palette_changes_only_declared_rgb_regions_and_preserves_alpha():
         renderer.recolor(image, {"a": region, "b": region}, {"a": [0, 0, 0], "b": [255, 255, 255]})
 
 
+@pytest.mark.parametrize("missing_provider", [False, True])
+def test_mask_uses_raster_providers_not_an_accessory_attachment(missing_provider):
+    docs, images = composition_fixture()
+    add_part(docs, images, "hat", "headwear", "head", provides=[], replaces=[], color=(200, 20, 40, 255))
+    mask = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
+    ref = {"file": "mask.png", "sha256": assets.sha256(assets.png_bytes(mask))}
+    images[("hat", "mask.png")] = mask
+    target = "mouth" if missing_provider else "head"
+    if missing_provider:
+        mutate(docs, "fixture.body", lambda d: d["bindings"][0].update(pieces=[p
+            for p in d["bindings"][0]["pieces"] if p["node"] != "mouth"]))
+        add_part(docs, images, "lip.ornament", "mouth", "mouth", provides=[], replaces=[])
+    mutate(docs, "hat", lambda d: [p.update(mask={"image": ref, "target_node": target,
+        "space": "rig-canvas", "channel": "alpha"})
+        for m in d["bindings"][0]["pieces"][0]["sample_map"].values() for p in m.values()])
+    if missing_provider:
+        with pytest.raises(contract.PartsContractError, match="mask target has no raster provider"):
+            plan(docs)
+    else:
+        output, evidence = render(docs, images)
+        accessory = next(e for e in evidence["draw"] if e["id"] == "hat.part")
+        assert output.getpixel(tuple(accessory["offset"])) == (200, 20, 40, 255)
+
+
 def test_mirror_reflects_pixels_pivots_sockets_but_keeps_anatomical_ids():
     docs, images = composition_fixture()
     original, evidence = render(docs, images)

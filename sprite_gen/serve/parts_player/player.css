@@ -8,3 +8,4 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr);min-height:calc(100s
 @media(prefers-reduced-motion:reduce){canvas{animation:none}button{transition:none!important}}
 
 aside{max-height:calc(100svh - 120px);overflow:auto}#advanced{margin:0 0 18px}#advanced summary{font-size:12px;color:#5e705c;cursor:pointer;padding:10px 0}#advanced[open] summary{margin-bottom:18px}#error:empty{display:none}#error{margin:8px 0}.choices{flex-wrap:wrap}.choices button{flex:1 1 60px}.slot{padding-bottom:12px;margin-bottom:13px}@media(max-width:590px){aside{max-height:none;overflow:visible}#extras{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}}
+#character{position:relative;flex:none;overflow:hidden}#character canvas{position:absolute;top:0;left:0;max-width:none;animation:none;object-fit:initial;image-rendering:pixelated}#landmarks{z-index:10000;pointer-events:none}.sprite-layer[hidden]{display:none}

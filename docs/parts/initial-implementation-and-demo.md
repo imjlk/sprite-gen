@@ -4,25 +4,26 @@
 
 이 문서는 첨부된 `sprite-gen-parts-system-pr-roadmap-20261004.md`의 초기 작업을 구현 단위와 데모 제작 규격으로 구체화한 제안이다. 기존 Python 엔진을 유지하고, 파츠 기능은 별도 assembly를 사용하는 opt-in 경로로 추가한다. 첫 착수 범위는 PR00–03이며, 첫 합성 데모는 PR04까지 완료한 뒤 검증한다.
 
-사용자 정정(2026-10-04): 데모의 기본 경로는 **공통 idle/walk/run + 현재 sample에 대한 파츠 레이어 합성**이다. 아래의 96 clip 수량은 32외형 × 3상태의 검증 공간으로 읽는다. 조합별 완성 clip을 만들거나 저장하지 않는다. Baked export는 명시적으로 요청할 때만 사용한다. 팔이 중복된 장신 artwork 후보는 사용자가 반려했으므로 demo/reference로 재사용하지 않는다. Tall rig의 기술 검증은 별도이며 이 후보를 승인한 증거가 아니다.
+사용자 정정(2026-10-04–05): 데모의 기본 경로는 **공통 idle/walk/run + 독립 파츠 레이어와 상대좌표 보간**이다. 기본 몸은 머리부터 발까지 온전한 모션 스프라이트 한 장으로 유지하고, 눈·헤어·의상을 그 위에 순서대로 덮는다. 위치 기준점은 상대좌표를 위한 참조이며, 몸 분해·재질 투영·runtime 관절 변형을 기본 경로로 사용하지 않는다. 바지·신발 등에는 필요한 포즈별 그림을 추가할 수 있다. 32외형 × 3상태는 검증 공간이며, 조합별 완성 clip을 만들거나 저장하지 않는다. Baked export는 명시적으로 요청할 때만 사용한다. 팔이 중복된 장신 artwork 후보는 사용자가 반려했으므로 demo/reference로 재사용하지 않는다. Tall rig의 기술 검증은 별도이며 이 후보를 승인한 증거가 아니다.
 
 제작 경로 정정(2026-10-04): `assets/sd-explorer-live-demo-20261004-v1`–`v3`의 동작 시트는 **영상에서 추출한 모션이 아니다.** 선택한 SD 디자인에서 생성한 파츠 atlas를 수동 관절 좌표와 두 segment의 affine 변형으로 배치한 실험이다. 파츠 교체·공통 시계·파일 쓰기 없음의 검증은 유효하지만, 이 결과를 실제 아트 모션의 승인이나 비디오 기반 데모 완료로 보고하지 않는다. 해당 모션은 production 후보에서 제외했고 재현 script도 `--experimental-raster-motion`을 명시해야 실행된다. `first-art-sheet.png`는 이보다 앞선 Python/Pillow 그림 실험이며 선택한 SD 디자인을 사용하지 않았다.
 
 실제 모션은 선택한 `sd-explorer-body-candidate-v2-20261004.png`로 Grok Imagine의 공통 body 영상 idle/walk/run을 만들고, 기존 `video-frames` → `video-loop` 경로로 추출·루프·크기·접지·동일 view를 검증한 뒤 freeze한다. 이후 파츠를 그 최종 포즈에 맞춘다. 2026-10-04의 첫 실제 영상 호출은 `assets/sd-explorer-video-source-20261004/`에 MP4 3개, prompt 및 provider report를 보관했다. 인증은 `grok-login`이며 각 MP4는 실제 960×960 / 24fps / 97frame이다. 첫 프레임이 검은 배경으로 인코딩되어 green-key 추출이 실패했고, 이 v1 영상은 **추출 검사 미통과 후보**로 남겼다. 외형마다 별도 영상을 생성하지 않는다.
 
-2026-10-05 실제 영상 경로: 투명 원본의 RGBA를 명시된 green canvas에 합성하고, batch가 선언한 key를 canvas 단계까지 전달하도록 수정했다. 이를 입력으로 만든 v2 공통 영상 세 개는 각각 720×720 / 24fps / 97frame이며, 전 프레임의 chroma 추출과 경계 검사를 통과했다. idle은 첫·끝 frame 고정 방식의 4초 루프를 64 sample / 16fps로, walk는 24 sample / 24fps로, run은 20 sample / 24fps로 가져왔다. walk의 jolt 경고는 해소되지 않았고 품질 승인을 받은 결과가 아니다.
+2026-10-05 사용자 검수 후 제작 경로를 다시 바로잡았다. `sd-explorer-layers-20261005-v1`–`v6`의 body 분리·숨은 면 복원·의상 재질 투영 데모는 시각적으로 깨져 사용자 요구를 충족하지 못했다. 32외형·96사례의 기술 검사 통과를 실제 데모 성공으로 보고하지 않는다. 관련 로컬 실험은 `assets/sd-explorer-rejected-study-20261005/`에 보존하고 기본 제작 경로에서 제외했다.
 
-[영상 모션 import script](../../scripts/dev/sd_explorer_video_motion.py)는 세 상태의 실제 cycle PNG에 동일한 scale·offset·64색 palette를 적용해 128×128 최종 raster 108개를 확정한 후 import한다. 수동 pose 생성기는 사용하지 않았다. 각 상태의 ticks 변환 오차는 0이며, 1,188개 socket annotation은 아직 미검수다. 미검수 annotation으로 freeze를 시도하면 거절되고 active assembly가 바뀌지 않는 것도 확인했다. 따라서 이 후보는 **실제 영상 import 완료, socket 검수·body 분리·파츠 fitting 미완료** 상태다. 기존 수동 모션에서 수행한 32외형/96검증 사례를 이 후보의 완료 증거로 재사용하지 않는다.
+현재 [단순 레이어 제작 script](../../scripts/dev/sd_explorer_simple_layers.py)는 **온전한 기준 몸 → 눈 → 헤어 → 의상** 네 레이어로 시작한다. 선택한 SD 디자인에서 머리·눈만 비운 온전한 base-body 그림과 별도 눈·헤어·상의 그림을 생성했다. 그 기준 몸으로 실제 Grok idle/walk/run 영상 세 개를 만들었으며, 영상의 몸 전체 프레임을 그대로 보존한다. 모든 프레임에 공통 720→128 projection과 binary alpha를 적용하고, 몸은 항상 (0,0), 파츠는 기준 머리/상의 위치와의 차이만 사용한다. 몸을 잘라내거나 덮인 몸의 interface를 제거하지 않고, 파츠를 구부리거나 재질로 투영하지 않는다.
 
-- [실제 영상 프레임 검토 이미지](assets/sd-explorer-actual-video-motion-review-20261004.png)
-- [idle](assets/sd-explorer-video-idle-v2-20261004.gif), [walk](assets/sd-explorer-video-walk-v2-20261004.gif), [run](assets/sd-explorer-video-run-v2-20261004.gif)의 추출 루프
-- [원본 MP4·최종 PNG·candidate·annotation 패키지](assets/sd-explorer-video-motion-candidate-20261004.tar.gz)와 [출처·해시·검증 기록](assets/sd-explorer-video-motion-candidate-20261004.provenance.json)
+현재 데모는 `assets/sd-explorer-simple-layers-20261005/library/assembly.json`이다. 각 상태는 실제 영상의 96프레임 / 24fps / 4초 pinned 재생이며, 완성 외형별 모션을 제작하지 않는다. 눈·헤어·의상을 독립적으로 켜고 끄는 8가지 레이어 상태에서 기본 몸의 전체 image hash와 (0,0) 위치가 유지되는 2,304 sample 검사를 통과했다. `/api/layers`는 개별 texture와 상대좌표를 반환하며, 뷰어는 네 레이어를 유지하는 선택적인 검수 클라이언트다. 기준 몸 보존과 레이어 연결을 확인하는 최소 데모이며, 5slot 각 2종의 32외형 데모 완료나 아트 승인을 뜻하지 않는다. 포즈별 의상 피팅과 추가 베리에이션은 이 기준에서 이어간다.
 
-남은 실제 아트 데모 작업은 이 영상의 최종 raster에서 socket과 body piece를 검수하고, 선택한 SD에서 만든 파츠 atlas를 각 sample에 fitting한 뒤 32외형 × 3상태의 실시간 교체를 검증하는 것이다. 외형별 완성 clip을 만들지 않는다. RGBA/key 변경과 live player를 포함한 전체 회귀 결과는 3,377 passed, 2 skipped, 기존 Pillow 경고 74개다.
+- [실행 가능한 workspace·원본 영상·개별 파츠 패키지](assets/sd-explorer-simple-layers-20261005.tar.gz)
+- [출처·해시·검증 범위](assets/sd-explorer-simple-layers-20261005.provenance.json), [생성 prompt](assets/sd-explorer-simple-layers-20261005.prompts.json), [검수 화면](assets/sd-explorer-simple-layer-viewer-20261005.jpg)
+
+원래 영상 후보와 출처 기록은 [2026-10-04 패키지](assets/sd-explorer-video-motion-candidate-20261004.tar.gz)와 [provenance](assets/sd-explorer-video-motion-candidate-20261004.provenance.json)에 남겼다. 초기 수동 모션이나 반려된 장신 이미지는 현재 데모에 사용하지 않는다. 전체 엔진 회귀는 3,388 passed / 2 skipped / 기존 Pillow 경고 74개이며, 온전한 base-body 레이어 보존 회귀도 추가했다.
 
 2026-10-04 요구를 반영해 SD explorer의 기본 사용자 데모를 헤어·표정·상의·하의·신발의 5slot으로 확장했다. 추가 장비, 독립 subslot, palette와 다른 체형의 variation도 PR01부터 데이터 계약에 포함한다. 상세 범위와 조합 규칙은 [커스터마이징과 베리에이션 계획](customization-and-variation.md)을 따른다. 두 slot × 3상태의 조합은 내부 smoke이며 사용자 데모의 완료 기준은 기본 32외형·96검증 사례다.
 
-작성일은 2026-10-04이다. PR00–06의 M1 엔진을 구현했다. 현재 사용할 수 있는 범위는 [선언 계약](01-contract.md), [모션 snapshot](02-motion-snapshots.md), [파츠 import](03-part-import.md), [공통 합성](04-composition.md), [검수·QA](05-review-and-qa.md), [baked export](06-baked-export.md)와 [기준선](00-baseline.md)을 따른다. 실제 아트의 영상 모션 import는 진행했으나 파츠 fitting과 96검증 사례 검수는 미완료이며, 엔진의 synthetic 증거와 구분한다.
+작성일은 2026-10-04이며,레이어 구현 현황은 2026-10-05에 갱신했다. PR00–06의 M1 엔진을 구현했다. 현재 사용할 수 있는 범위는 [선언 계약](01-contract.md), [모션 snapshot](02-motion-snapshots.md), [파츠 import](03-part-import.md), [공통 합성](04-composition.md), [검수·QA](05-review-and-qa.md), [baked export](06-baked-export.md)와 [기준선](00-baseline.md)을 따른다. 실제 영상 기반 레이어 데모의 기술 검증과 아트 승인,synthetic 엔진 증거를 구분한다.
 
 ## 구현 현황
 
@@ -32,10 +33,10 @@
 | PR01 | content digest·정확한 reference·sample binding·20개 humanoid slot·palette·preset·cardinality 검증, 다섯 체형의 선언 fixture 및 CLI 구현 |
 | PR02 | 공통 source adapter, exact timing, immutable candidate/freeze, 최종 raster annotation, stale binding 분리와 CLI 구현 |
 | PR03 | Body/part 분리, 실제 RGBA import, crop/pivot 보존, mask/region, coverage, immutable 등록 구현 |
-| PR04 | 공통 timeline, body 교체, subslot 우선순위, draw order, mask/palette/mirror, appearance/preview CLI 구현. 다섯 체형과 synthetic 32외형·96 clip 검증 |
+| PR04 | 공통 timeline, 독립 layer/상대좌표 보간, subslot 우선순위, draw order, mask/palette/mirror, appearance/preview CLI 구현. 다섯 체형과 synthetic 32외형·96검증 사례 |
 | PR05 | 입력·render·QA evidence snapshot, contact/world travel 측정, 명시적 검수 결정, scope와 오래된 승인 차단 구현 |
 | PR06 | 결정론적 다중 state atlas·manifest·Aseprite mapping, 순서/ticks 유지 dedup, build lock와 승인 release gate 구현 |
-| 실제 SD 데모 | 선택한 SD에서 파츠 atlas를 생성하고 실제 Grok 영상 3개에서 공통 108 sample 후보를 import함. socket 검수·body 분리·fitting과 5slot 각 2종·96검증 사례 검수는 미완료 |
+| 실제 SD 데모 | 몸 분해·재질 투영 데모 철회. 온전한 몸 위에 눈·헤어·상의 세 그림을 덮는 최소 데모와 실제 영상 3상태 연결. 5slot 각 2종과 추가 아트 검수는 진행 중 |
 
 ## 확인한 기준선
 
@@ -191,7 +192,7 @@ slot/subslot의 허용 목록과 선택 cardinality는 profile/catalog 데이터
 
 우선 20개 sample을 목표로 한다. 첫 idle에는 추가 breathe 후처리를 넣지 않는다. breathe 검증은 별도 synthetic 케이스에서 먼저 수행하고, 실제 사용 시 최종 변형을 freeze 전에 끝낸다.
 
-기본 다섯 slot 각 2종의 후보는 `2^5 = 32`외형이며 idle/walk/run까지 총 96 clip을 검수한다. 이 기본 pack은 서로 양립하도록 제작해 전수 검수한다. 목표 20 sample 기준으로는 dedup 전 640개의 composed frame이다. 추가 장비와 확대된 wardrobe는 유효 pair·위험 triple·named appearance의 검수 coverage를 기록하며 전체 조합을 기본으로 미리 굽지 않는다.
+기본 다섯 slot 각 2종의 후보는 `2^5 = 32`외형이며 idle/walk/run까지 총 96상태 사례를 검수한다. 이 기본 pack은 서로 양립하도록 제작해 전수 검수한다. 현재 영상은 상태별 총 108 sample이며, 32외형에서 3,456번 평가한다. 이를 외형별 composed frame 자산으로 저장하지 않는다. 추가 장비와 확대된 wardrobe는 유효 pair·위험 triple·named appearance의 검수 coverage를 기록하며 전체 조합을 기본으로 미리 굽지 않는다.
 
 각 variant의 모든 piece는 같은 20개 target sample을 지원해야 한다. 예를 들어 upper는 `2 designs × 3 pieces × 20 samples = 120`개 mapping, 신발은 `2 designs × 2 pieces × 20 samples = 80`개 mapping이 필요하며 hair/face/lower mapping을 추가한다. piece 수는 데이터이고 mapping 수가 곧 고유 PNG 수는 아니다. 재사용은 held/per-sample map에 명시하고 각 sample의 피팅을 검사한다.
 
@@ -204,7 +205,7 @@ hair/face/clothing/foot replacement를 보여주려면 이전 그림을 제거�
 3. 모션을 curate/finalize하고 최종 raster에 head/face/waist/cuff/limb socket과 ID를 profile에 맞춰 annotation한다. 기본 body pieces를 분리하고 가려진 영역을 보정한 뒤 기준 motion을 freeze한다.
 4. hair/expression/upper/lower/footwear 각 두 디자인을 확정한다. 기준 sample을 가이드로 나머지 sample의 piece 그림을 제작하고 palette region과 preset·join 규칙을 등록한다.
 5. cropped 입력은 offset/pivot을 기록해 rig-canvas로 복원한다. 피팅을 위해 파츠 자체를 자동 확대하거나 bbox 중심에 다시 정렬하지 않는다.
-6. 기본 96 clip의 피팅·가림·교체를 검수하고 headwear/gloves/back의 위험 조합을 추가한다. 반려한 sample/piece를 수정하되 기준 motion과 변경 footprint 밖의 파츠는 보존한다.
+6. 기본 96상태 사례의 피팅·가림·교체를 검수하고 headwear/gloves/back의 위험 조합을 추가한다. 반려한 sample/piece를 수정하되 기준 motion과 변경 footprint 밖의 파츠는 보존한다.
 
 생성 모델이 기준 pose와 좌표를 정확하게 지킬 것이라고 가정하지 않는다. AI 결과는 후보이며 피팅·분리·픽셀 정리가 필요할 수 있다. 파츠별로 독립 walk/run 영상을 만든 뒤 동기화된 것으로 취급하지 않는다.
 
@@ -248,7 +249,7 @@ appearance 선택 재생은 공통 timeline의 현재 sample에 선택한 파츠
 
 | 형태 | PR01–04 synthetic 검증 | 후속 실제 아트 |
 |---|---|---|
-| SD humanoid | 공유 humanoid topology, 128×128 rig, 기본/추가/subslot catalog | 첫 실제 기본 96 clip과 추가 장비 검수 |
+| SD humanoid | 공유 humanoid topology, 128×128 rig, 기본/추가/subslot catalog | 첫 실제 기본 96상태 사례과 추가 장비 검수 |
 | tall humanoid | 같은 topology, 별도 128×192 rig, 긴 limb 좌표 | 기본 5slot 각 2종의 별도 fitting과 glove/cuff 검수 |
 | quadruped | 별도 topology, 192×128 rig, 네 발 ID와 앞뒤 순서 | coat/pattern·expression·ears·tail·neckwear·torso gear 각 2종 |
 | root-only blob | 96×96 rig, 필수 다리 없음, custom state | synthetic regression 유지 |
@@ -262,4 +263,4 @@ canvas 크기는 fixture 데이터다. core가 SD/tall/animal에 따라 분기�
 
 PR04에서 같은 resolver의 다중 체형 동작과 SD 파츠 교체를 확인한다. 이후 PR05의 QA·해시 기반 승인과 PR06의 결정론적 export를 끝내 M1을 완성한다. PR07/08에서 기준 모션에 연결된 실제 생성·부분 재생성 workflow를 구현하고, PR09 UI와 PR10 실제 acceptance pack을 연결한다.
 
-현재 산출물은 PR00–06의 선언/CLI/모션 snapshot/파츠 import/공통 renderer/QA·검수/결정론적 export와 회귀 테스트, 본 계획과 customization 계획이다. 초기 catalog의 options는 비어 있으며 실제 imported part를 등록하면 갱신된다. 디자인 참고 시트 외에 [새 body 후보](assets/sd-explorer-body-candidate-v2-20261004.png)와 [prompt·측정·미검증 사항](assets/sd-explorer-body-candidate-v2-20261004.provenance.json)을 보관했다. 첫 생성은 팔 중복과 등신 문제로 제외했고, 두 번째 후보도 palette·alpha·grid·view·분리·모션 검증이 필요하다. 실제 승인된 기본 96 clip과 확장 wardrobe는 아직 제작하지 않았다.
+현재 산출물은 PR00–06의 선언/CLI/모션 snapshot/파츠 import/공통 renderer/QA·검수/결정론적 export와 회귀 테스트, 본 계획과 customization 계획이다. 초기 catalog의 options는 비어 있으며 실제 imported part를 등록하면 갱신된다. 디자인 참고 시트 외에 [새 body 후보](assets/sd-explorer-body-candidate-v2-20261004.png)와 [prompt·측정·미검증 사항](assets/sd-explorer-body-candidate-v2-20261004.provenance.json)을 보관했다. 첫 생성은 팔 중복과 등신 문제로 제외했고, 두 번째 후보도 palette·alpha·grid·view·분리·모션 검증이 필요하다. 실제 승인된 기본 96상태 사례과 확장 wardrobe는 아직 제작하지 않았다.

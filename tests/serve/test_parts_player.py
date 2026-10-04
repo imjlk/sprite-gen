@@ -65,6 +65,37 @@ def test_optional_overlay_can_be_removed_without_resetting_or_masking_head(sessi
     assert len(hat["evidence"]["draw"])==len(bare["evidence"]["draw"])+1
 
 
+def test_layer_api_keeps_separate_textures_and_tweens_without_cpu_composition(session,monkeypatch):
+    player,assembly=session
+    before=tree_hashes(assembly.parent)
+    def forbidden(*args,**kwargs):
+        pytest.fail("independent layers attempted CPU composition, file writes or baking")
+    monkeypatch.setattr(compose_parts,"render_sample",forbidden)
+    monkeypatch.setattr(compose_parts,"render_plan",forbidden)
+    monkeypatch.setattr(parts_build,"build",forbidden)
+    monkeypatch.setattr(Path,"write_bytes",forbidden)
+    monkeypatch.setattr(Path,"write_text",forbidden)
+    common={"state":["run"],"time_ms":["300"]}
+    first=player.layer_frame({**common,"hair":["hair.a"]})
+    changed=player.layer_frame({**common,"hair":["hair.b"]})
+    assert player.metadata["mode"]=="independent-layers"
+    assert first["sample_tick"]==changed["sample_tick"]=="6000"
+    assert first["sample_fraction"]==changed["sample_fraction"]=="2/5"
+    assert first["motion"]==changed["motion"]
+    assert "image" not in first and "evidence" not in first
+    a=next(layer for layer in first["layers"] if layer["slot"]=="hair")
+    b=next(layer for layer in changed["layers"] if layer["slot"]=="hair")
+    assert a["id"]==b["id"] and a["texture"]["id"]!=b["texture"]["id"]
+    assert a["position"]==b["position"] and a["mode"]==b["mode"]=="held"
+    body_a={layer["id"]:layer["texture"] for layer in first["layers"] if layer["slot"] is None}
+    body_b={layer["id"]:layer["texture"] for layer in changed["layers"] if layer["slot"] is None}
+    assert body_a==body_b
+    cached=player.texture(a["texture"]["id"])
+    assert player.texture(a["texture"]["id"]) is cached
+    assert Image.open(BytesIO(cached)).size==tuple(a["texture"]["size"])
+    assert tree_hashes(assembly.parent)==before
+
+
 def test_parallel_viewers_keep_state_and_time_isolated(session):
     player,_=session
     requests=[{"state":[state],"time_ms":[str(time)]} for _ in range(3)
@@ -102,6 +133,17 @@ def test_http_routes_return_frames_errors_and_packaged_view_without_writes(sessi
             assert json.load(response)["sample_id"]=="sample.1"
         with urlopen(url+"/") as response:
             assert b"SD Explorer" in response.read()
+        with urlopen(url+"/api/layers?state=walk&time_ms=300&hair=hair.b") as response:
+            scene=json.load(response)
+            assert scene["sample_id"]=="sample.1" and "image" not in scene
+        reference=scene["layers"][0]["texture"]
+        with urlopen(url+reference["url"]) as response:
+            assert response.headers["Content-Type"]=="image/png"
+            assert "immutable" in response.headers["Cache-Control"]
+            assert Image.open(BytesIO(response.read())).size==tuple(reference["size"])
+        with pytest.raises(HTTPError) as missing:
+            urlopen(url+"/api/textures/../../assembly.json.png")
+        assert missing.value.code==400
         with pytest.raises(HTTPError) as invalid:
             urlopen(url+"/api/frame?time_ms=0&time_ms=1")
         assert invalid.value.code==400

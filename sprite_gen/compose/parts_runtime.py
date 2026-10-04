@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Live sample composition and attachment swapping on a shared motion clock.
+"""Independent sprite layers and attachment tracks on a shared motion clock.
 
 No atlas, completed clip, appearance file or workspace write is required. This
-is the native CPU runtime; target-engine GPU/mesh adapters can consume the same
-resolved sample draw lists without inventing independent part timelines.
+Layer sampling is independent of any viewer and does not decode or composite
+images. A display adapter keeps the part textures and applies the sampled anchor
+and local offset. The CPU frame renderer remains an explicit inspection adapter.
 """
 from __future__ import annotations
 
@@ -12,6 +13,8 @@ from fractions import Fraction
 
 from sprite_gen.compose import compose_parts, parts_resolve
 from sprite_gen.spec import parts_contract as contract
+
+LAYER_POLICY = "parts.relative-layer-tween.v1"
 
 
 class PartsPlayer:
@@ -95,9 +98,63 @@ class PartsPlayer:
         raise contract.PartsContractError("runtime timeline has no sample")
 
     def frame(self):
-        """Compose only the current sample; caller displays it or sends draw lists."""
+        """Explicit CPU inspection rendering; independent layers use layers()."""
         _, sample, clock = self.current()
         image, evidence = compose_parts.render_sample(self.plan, sample, self.load)
         return image, {**clock, "appearance": contract.reference(self.appearance),
             "motion": self.appearance["motion"], "render_policy": self.plan["render_policy"],
             "evidence": evidence, "release_ready": False}
+
+    def layers(self, *, interpolate=True):
+        """Sample persistent layers; retain textures and tween attachment points.
+
+        Held pieces keep their one source image. Raster pieces select the
+        current shared body/pose sample; the image itself is never blended.
+        Placement is socket position + local origin (-pivot + offset).
+        Fractions remain exact until a target engine displays the scene.
+        """
+        if not isinstance(interpolate, bool):
+            raise contract.PartsContractError("layer interpolation must be boolean")
+        clip, sample, clock = self.current()
+        index = clock["sample_index"]
+        next_index = (index+1) % len(clip["samples"]) if clip["loop"] else min(index+1,len(clip["samples"])-1)
+        following = clip["samples"][next_index]
+        weight = Fraction(clock["sample_tick"]) / sample["duration_ticks"] if interpolate else Fraction(0)
+        later = {entry["id"]:entry for entry in following["draw"]}
+        names = {}
+        for entry in sample["draw"]:
+            key = ("body" if entry["role"]=="body" else entry["slot"])+"."+entry["piece_id"]
+            names[key] = names.get(key,0)+1
+        layers, masks = [], []
+        for order,entry in enumerate(sample["draw"]):
+            placement = entry["placement"]
+            next_entry = later.get(entry["id"])
+            anchor = [Fraction(v) for v in entry["socket_position"]]
+            local = [Fraction(d-p) for d,p in zip(placement["offset"],placement["pivot"])]
+            tweened = False
+            if next_entry is not None and next_entry["placement"]["target_socket"]==placement["target_socket"]:
+                anchor = [a+(Fraction(b)-a)*weight for a,b in zip(anchor,next_entry["socket_position"])]
+                # Local pivots belonging to a different raster are not tweened:
+                # the current texture retains its own geometry until the swap.
+                if placement["image"]==next_entry["placement"]["image"]:
+                    next_local = [d-p for d,p in zip(next_entry["placement"]["offset"],next_entry["placement"]["pivot"])]
+                    local = [a+(Fraction(b)-a)*weight for a,b in zip(local,next_local)]
+                tweened = bool(weight)
+            position = [a+b for a,b in zip(anchor,local)]
+            key = ("body" if entry["role"]=="body" else entry["slot"])+"."+entry["piece_id"]
+            layer = {"id":key if names[key]==1 else entry["id"],"render_id":entry["id"],
+                "order":order,"slot":entry["slot"],"node":entry["node"],"provides":entry["provides"],
+                "mode":entry["mode"],"pack":entry["pack"],"image":placement["image"],
+                "attach_to":placement["target_socket"],"anchor":[str(v) for v in anchor],
+                "local_origin":[str(v) for v in local],"position":[str(v) for v in position],
+                "tweened":tweened,"allow_clip":placement["allow_clip"],
+                "palette_regions":{**entry["palette_regions"],**placement["palette_regions"]}}
+            layers.append(layer)
+            mask = placement["mask"]
+            if mask is not None:
+                masks.append({**deepcopy(mask),"pack":entry["pack"],"issuer":layer["id"],
+                    "origin":[str(v) for v in position] if mask["space"]=="part-local" else ["0","0"]})
+        return deepcopy({**clock,"appearance":contract.reference(self.appearance),"motion":self.appearance["motion"],
+            "canvas":deepcopy(self.plan["canvas"]),"mirror":self.plan["mirror"],"palette":deepcopy(self.plan["palette"]),
+            "layer_policy":LAYER_POLICY,"sample_fraction":str(weight),"next_sample_id":following["id"],
+            "layers":layers,"masks":masks,"hidden":sample["hidden"],"release_ready":False})

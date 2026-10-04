@@ -1,0 +1,114 @@
+{
+  "appearance_clips_baked": 0,
+  "archive": {
+    "bytes": 15221561,
+    "file": "sd-explorer-simple-layers-20261005.tar.gz",
+    "files": 2088,
+    "sha256": "177d4df8c9234b5f6798186cd51103984742245b064c609e8ce1abf8d54498fa"
+  },
+  "archive_roundtrip": "extracted with safe data filter; frozen workspace loaded and four layers rendered",
+  "art_approved": false,
+  "art_generator": "built-in image_gen",
+  "asset_alignment": {
+    "eyes": {
+      "operation": "one-time asset size/position alignment; no per-frame warp",
+      "reference_box": [
+        649,
+        415,
+        825,
+        557
+      ],
+      "source_bbox": [
+        531,
+        558,
+        865,
+        800
+      ]
+    },
+    "hair": {
+      "operation": "one-time asset size/position alignment; no per-frame warp",
+      "reference_box": [
+        333,
+        155,
+        878,
+        640
+      ],
+      "source_bbox": [
+        304,
+        321,
+        938,
+        889
+      ]
+    },
+    "shirt": {
+      "operation": "one-time asset size/position alignment; no per-frame warp",
+      "reference_box": [
+        559,
+        675,
+        719,
+        868
+      ],
+      "source_bbox": [
+        519,
+        515,
+        789,
+        830
+      ]
+    }
+  },
+  "base_body_split": false,
+  "body_pngs": "one whole 128x128 image per shared motion frame; exact same image reference regardless of part selection",
+  "body_replacements": 0,
+  "browser_check": {
+    "all_parts_off": 1,
+    "all_parts_on": 4,
+    "base_texture_unchanged": true,
+    "console_errors": 0,
+    "sample_unchanged": true
+  },
+  "kind": "sd-whole-body-layer-proof",
+  "layout": [
+    "whole body",
+    "eyes",
+    "hair",
+    "shirt"
+  ],
+  "part_pngs": "three held images; position offsets only",
+  "public_assets": {
+    "sd-explorer-simple-body-reference-20261005.png": "ebccb5e822af6dbbaafe7a08750382683d73e2337b7b9739a4f3e0fd834f5f60",
+    "sd-explorer-simple-eyes-20261005.png": "14e921e0985a6d07a9852cfa1574e05682b942768afd1719bbc9fe44da3e4973",
+    "sd-explorer-simple-hair-20261005.png": "0f9a8276d876444d9c003e58e2438ec5666ed93448c254f0f5403015e7b0d6b3",
+    "sd-explorer-simple-shirt-20261005.png": "e6df72812f68a6f4661d8689751f6698059012a81a04986689307602b1c6cafc"
+  },
+  "recipes": {
+    "scripts/dev/sd_explorer_simple_layers.py": "2106a58f13e12dd1fdbf22230d47915ceab010d3d41797a2ab9e29765a96996d",
+    "sprite_gen/compose/parts_runtime.py": "961192ee4d35b46bc5b66ee9c79ef504cfd4ec7b0408a6bdbb0ed6ad82cd877d",
+    "sprite_gen/serve/parts_player/player.js": "200dc0155112ad774191e4a556c19804b228af41dcfcbeeae9c18ea7874c958a"
+  },
+  "release_ready": false,
+  "schema_version": 1,
+  "scope": "minimum body/eyes/hair/shirt layer proof; five-slot two-variation wardrobe still in progress",
+  "source_motion": "three real Grok Imagine videos from an intact bald base reference",
+  "test_results": {
+    "current_targeted_regressions": {
+      "passed": 47
+    },
+    "full_engine": {
+      "existing_warnings": 74,
+      "passed": 3388,
+      "skipped": 2
+    }
+  },
+  "texture_warps": 0,
+  "validation": {
+    "appearance_clips_baked": 0,
+    "art_approved": false,
+    "layer_sets": 8,
+    "release_ready": false,
+    "sample_evaluations": 2304,
+    "states": 3,
+    "whole_body_preserved": true
+  },
+  "video_generator": "grok-imagine-video-1.5, grok-login",
+  "withdrawn_study": "fragmented body reconstruction and clothing material projection rejected by user, preserved locally only"
+}

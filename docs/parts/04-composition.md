@@ -32,21 +32,40 @@ All selected pieces need mappings for every requested sample, including held
 pieces and invisible samples. Timing and repeated sample IDs come only from the
 frozen motion; parts never run separate timelines.
 
-The default customization workflow uses `compose.parts_runtime.PartsPlayer`:
-load reusable body/part assets, seek the shared motion clock, then compose only
-the current sample. `set_selection` and `set_appearance` preserve state and exact
-elapsed time. They require the same rig/motion, validate before mutation, and
-never write an atlas, appearance snapshot or completed clip. `parts-preview`
-snapshots and `parts-build` are explicitly requested inspection/export tools.
-The 32 × 3 count is a validation space, not a default collection of 96 clips.
+The default customization workflow uses `compose.parts_runtime.PartsPlayer.layers()`:
+keep the base body and each selected part as independent sprite layers, seek the
+one shared motion clock, and apply each layer's attachment point plus local
+origin. The sampler does not decode or composite an image. Exact linear
+interpolation uses the current sample's duration and wraps to the first sample
+only for looping clips. Held parts retain one texture; pose sprites change on
+the shared sample boundary. Textures themselves are not blended. A held part's
+local offset can also interpolate; a different raster keeps its own pivot until
+the texture changes. Visibility and draw order follow the sampled pose.
+
+`layers()` returns stable layer IDs, separate image references, exact Fraction
+strings for `anchor`, `local_origin` and `position`, palette regions and masks.
+The target engine caches those textures and retains layer objects. Mirroring is
+an explicit scene transform; anatomical IDs retain their meaning. The method
+works without a browser, viewer, renderer, image loader or file writer.
+
+`set_selection` and `set_appearance` preserve state and exact elapsed time. They
+require the same rig/motion and validate before mutation. `frame()` is the
+explicit CPU inspection adapter. `parts-preview` snapshots and `parts-build`
+are explicitly requested inspection/export tools. The 32 × 3 count is a
+validation space, not a default collection of 96 clips.
 
 `sprite-gen parts-play --assembly path/to/library/assembly.json --port 8766`
 opens the same runtime in a read-only local HTTP player at `127.0.0.1`. It needs
 a frozen motion and an active appearance; an imported candidate alone cannot
 be played as a fitted parts demo. Pause/seek, slot selections, optional equipment
-and independent subslots use the shared clock. The server renders only the
-requested sample, bounds its selection cache and refuses unknown or duplicate
-parameters. HTTP playback never writes an assembly or bakes an appearance.
+and independent subslots use the shared clock. `/api/layers` serves separate,
+hash-addressed texture URLs and interpolated placements. The browser retains a
+canvas for each layer; it never requests a completed character PNG. Texture
+pixels change only at a pose or selection boundary. `/api/frame` is an explicit
+CPU comparison adapter. The server bounds its selection cache and refuses
+unknown or duplicate parameters. HTTP playback never writes an assembly or
+bakes an appearance. The viewer is an optional inspection client, not a runtime
+dependency.
 
 The body is an explicit pack. Segmented bodies must provide every required
 topology node. `provides` identifies indivisible raster interfaces, and `replaces`
@@ -80,6 +99,8 @@ masks start at (0,0); `part-local` masks start at the issuing piece's placement.
 They apply to the named target node's providers regardless of drawing order.
 Alpha masks read alpha; luma masks multiply grayscale intensity by alpha.
 Zero outside the mask means hidden. Multiple target masks multiply.
+Only the target node's `provides` interfaces receive its mask; attaching an
+eye or accessory to `head` does not make that overlay a head provider.
 
 Palette regions are disjoint coverage masks. Sample regions override a piece's
 channel region. v1 blends flat target RGB using integer rounding and preserves
