@@ -96,7 +96,9 @@ a quadruped, a blob and an asymmetric six-limb fixture. Hash-bound
 The [part importer](docs/parts/03-part-import.md) preserves small rasters, crop offsets
 and separate body pieces. [Shared-timeline composition](docs/parts/04-composition.md)
 adds replacement, ordering, masks, palette and previews. [Review and QA](docs/parts/05-review-and-qa.md)
-bind explicit decisions to current bytes, timeline and policies. Baked export is still planned. See the
+bind explicit decisions to current bytes, timeline and policies.
+[Baked export](docs/parts/06-baked-export.md) emits deterministic multi-state snapshots
+and requires a current appearance approval for release. See the
 [parts contract and CLI](docs/parts/01-contract.md).
 
 ## What you actually get

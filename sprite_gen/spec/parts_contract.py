@@ -316,17 +316,21 @@ def _local(document):
             _members(slot["overrides"], {s["id"] for s in document["slots"]}, f"{path}.slots.overrides")
         # Slot precedence is data, including for non-humanoid catalogs.
         relations = {s["id"]: s["overrides"] for s in document["slots"]}
-        def visit(name, pending, done):
-            if name in pending:
-                _fail(path, "slot override cycle")
-            if name in done:
-                return
-            for target in relations[name]:
-                visit(target, pending | {name}, done)
-            done.add(name)
-        done = set()
-        for name in relations:
-            visit(name, set(), done)
+        dependents = {name: [] for name in relations}
+        counts = {name: len(targets) for name, targets in relations.items()}
+        for name, targets in relations.items():
+            for target in targets:
+                dependents[target].append(name)
+        ready = [name for name, count in counts.items() if count == 0]
+        visited = 0
+        while ready:
+            visited += 1
+            for name in dependents[ready.pop()]:
+                counts[name] -= 1
+                if counts[name] == 0:
+                    ready.append(name)
+        if visited != len(relations):
+            _fail(path, "slot override cycle")
     elif kind == "parts-motion":
         pairs = [(c["state"], c["view"]) for c in document["clips"]]
         if len(set(pairs)) != len(pairs):

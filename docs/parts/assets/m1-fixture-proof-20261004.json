@@ -1,0 +1,427 @@
+{
+  "artwork_acceptance": false,
+  "evidence": "synthetic fixture only",
+  "kind": "parts-pipeline-proof",
+  "release_ready": false,
+  "rigs": [
+    {
+      "appearances": 32,
+      "builds": [
+        {
+          "appearance": "fixture.00000",
+          "build": {
+            "digest": "3fe1b5af4169bf7a70895fe5833e2a4b2b8e5af66a4379180eca2a7e62d6c141",
+            "id": "build.de220ff2b50353ff3ec82206ca5b79e7"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.00000/snapshots/build.de220ff2b50353ff3ec82206ca5b79e7/3fe1b5af4169bf7a70895fe5833e2a4b2b8e5af66a4379180eca2a7e62d6c141/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.00001",
+          "build": {
+            "digest": "8f8f38940aa55837c9d036dbf87435621cc1d5516144ddc46a141f0835f6f582",
+            "id": "build.fb92042d4cbc79402ac3cc48c13653e8"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.00001/snapshots/build.fb92042d4cbc79402ac3cc48c13653e8/8f8f38940aa55837c9d036dbf87435621cc1d5516144ddc46a141f0835f6f582/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.00010",
+          "build": {
+            "digest": "afef58375425b0a633e938ff9d2b1e77cb97deea6046e5eb99e7dd235bb49b46",
+            "id": "build.abed0d84745031e068587bc4d831ce83"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.00010/snapshots/build.abed0d84745031e068587bc4d831ce83/afef58375425b0a633e938ff9d2b1e77cb97deea6046e5eb99e7dd235bb49b46/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.00011",
+          "build": {
+            "digest": "8e9db130934ea68d2d09935fc55b3bcdae43b448203fa95d2595bbe9d87b6b48",
+            "id": "build.8bd67a3456d42d84bbdbc46a76b30d77"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.00011/snapshots/build.8bd67a3456d42d84bbdbc46a76b30d77/8e9db130934ea68d2d09935fc55b3bcdae43b448203fa95d2595bbe9d87b6b48/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.00100",
+          "build": {
+            "digest": "119c7722525d4321961a4531e9bdc17b6edd93421e9fe88a08a98285315d97f7",
+            "id": "build.24780ab358a7295b5ccd083afd3cecbc"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.00100/snapshots/build.24780ab358a7295b5ccd083afd3cecbc/119c7722525d4321961a4531e9bdc17b6edd93421e9fe88a08a98285315d97f7/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.00101",
+          "build": {
+            "digest": "13b266375c8a6d1056d0bba45792f96c8f56cceac820a3b4a109485afdfdced8",
+            "id": "build.176dcf9bf8f7b0dbbb2c4f03598993da"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.00101/snapshots/build.176dcf9bf8f7b0dbbb2c4f03598993da/13b266375c8a6d1056d0bba45792f96c8f56cceac820a3b4a109485afdfdced8/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.00110",
+          "build": {
+            "digest": "7ca801b1d1c29b61e2b956ef9a2e2cabd1c6c1a7f8a887ed11a12cead259d80a",
+            "id": "build.411d63abe9fda0d03f132e0e75dd0667"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.00110/snapshots/build.411d63abe9fda0d03f132e0e75dd0667/7ca801b1d1c29b61e2b956ef9a2e2cabd1c6c1a7f8a887ed11a12cead259d80a/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.00111",
+          "build": {
+            "digest": "e2d4c74ed5dbddf571742451a2b646aba260c7a0463ea027d33e847a569c0449",
+            "id": "build.636deea47c5e0ce214eabd2124761e68"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.00111/snapshots/build.636deea47c5e0ce214eabd2124761e68/e2d4c74ed5dbddf571742451a2b646aba260c7a0463ea027d33e847a569c0449/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.01000",
+          "build": {
+            "digest": "4567eb8e19c9161820826b558a1979061a0a63bba63fe43bc7a1dc893ad33972",
+            "id": "build.251a6520cdc21255df29eaea9d7853d7"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.01000/snapshots/build.251a6520cdc21255df29eaea9d7853d7/4567eb8e19c9161820826b558a1979061a0a63bba63fe43bc7a1dc893ad33972/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.01001",
+          "build": {
+            "digest": "11ef72718267e7c38da121ac8799d070b24066b8f2f0fc325c16a1c010945038",
+            "id": "build.7e02912647801624339280b6189d5081"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.01001/snapshots/build.7e02912647801624339280b6189d5081/11ef72718267e7c38da121ac8799d070b24066b8f2f0fc325c16a1c010945038/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.01010",
+          "build": {
+            "digest": "87f4d5847577caca5cfd684a0152fd4c2efc927cc485e54d783611a1c1ed7576",
+            "id": "build.6b973e1d772fd00391f43d2c13f8b2cf"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.01010/snapshots/build.6b973e1d772fd00391f43d2c13f8b2cf/87f4d5847577caca5cfd684a0152fd4c2efc927cc485e54d783611a1c1ed7576/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.01011",
+          "build": {
+            "digest": "174745c150f31c2ce6b7ee7959b01eb96644c02aa89636023da9da30ade71d2c",
+            "id": "build.07276a6b16912ba63ae191636d54cb8e"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.01011/snapshots/build.07276a6b16912ba63ae191636d54cb8e/174745c150f31c2ce6b7ee7959b01eb96644c02aa89636023da9da30ade71d2c/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.01100",
+          "build": {
+            "digest": "e72bf66417347821d431fe7c315c3ee043d5940caab22972824dcbfdd394cba2",
+            "id": "build.3de6e7b36a9e0b6555dfffd541579ad2"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.01100/snapshots/build.3de6e7b36a9e0b6555dfffd541579ad2/e72bf66417347821d431fe7c315c3ee043d5940caab22972824dcbfdd394cba2/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.01101",
+          "build": {
+            "digest": "82205c81b71e8d93d5d4d7abc4c8c15317f68596f7a0b6830407e973644144d3",
+            "id": "build.82a4eca88c3c50b75d88a1e5b78253d7"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.01101/snapshots/build.82a4eca88c3c50b75d88a1e5b78253d7/82205c81b71e8d93d5d4d7abc4c8c15317f68596f7a0b6830407e973644144d3/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.01110",
+          "build": {
+            "digest": "81843d1899346e4b7191b2e071a8eb6de09ad8dd5f91e1af845e4d0ec577841c",
+            "id": "build.fa93ad4211cc79e21196a5b1772aae8c"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.01110/snapshots/build.fa93ad4211cc79e21196a5b1772aae8c/81843d1899346e4b7191b2e071a8eb6de09ad8dd5f91e1af845e4d0ec577841c/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.01111",
+          "build": {
+            "digest": "906696955c79bd060b04c9ad87d8e1915a674f552f925a29d98e35acdc3e77d6",
+            "id": "build.46bfc98203de1c19da72e1001f93d5c1"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.01111/snapshots/build.46bfc98203de1c19da72e1001f93d5c1/906696955c79bd060b04c9ad87d8e1915a674f552f925a29d98e35acdc3e77d6/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.10000",
+          "build": {
+            "digest": "335c0a4f1ccdfe0847aba5867f82d39021e03de060508ccabdce4b26042d9f4f",
+            "id": "build.1393bbc121446dba120bcce44525fe69"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.10000/snapshots/build.1393bbc121446dba120bcce44525fe69/335c0a4f1ccdfe0847aba5867f82d39021e03de060508ccabdce4b26042d9f4f/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.10001",
+          "build": {
+            "digest": "3161b2e68ae4e6302044c6e7a8f2ac1840cc5333184b83724ad54a57c8c4dfb5",
+            "id": "build.74c608ac4964b6d5a1957b5131c52b0c"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.10001/snapshots/build.74c608ac4964b6d5a1957b5131c52b0c/3161b2e68ae4e6302044c6e7a8f2ac1840cc5333184b83724ad54a57c8c4dfb5/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.10010",
+          "build": {
+            "digest": "bca3a4ccf96d2507c5214f35f6ee3b736421b45eb3db8b23f103a47d8e86f2c2",
+            "id": "build.787e2b0c98c48f424c8a529fd1d06d4f"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.10010/snapshots/build.787e2b0c98c48f424c8a529fd1d06d4f/bca3a4ccf96d2507c5214f35f6ee3b736421b45eb3db8b23f103a47d8e86f2c2/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.10011",
+          "build": {
+            "digest": "0e95c59497aa98d1d6b504ae636b6734580a9f5d104e5cf8ea92893aaabbe8ff",
+            "id": "build.a39e89067ee13c0da55bc7191edf5ece"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.10011/snapshots/build.a39e89067ee13c0da55bc7191edf5ece/0e95c59497aa98d1d6b504ae636b6734580a9f5d104e5cf8ea92893aaabbe8ff/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.10100",
+          "build": {
+            "digest": "0e4b8de261e528992d4964cb32cd48f94a4a22f44e8fadc6e7da567e6f3e497a",
+            "id": "build.b083ccfccf054b868f54cc4c9de7de43"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.10100/snapshots/build.b083ccfccf054b868f54cc4c9de7de43/0e4b8de261e528992d4964cb32cd48f94a4a22f44e8fadc6e7da567e6f3e497a/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.10101",
+          "build": {
+            "digest": "836e10f384f5d7e5cd2429a4eba3bdc9ee7f1e0341014f521af792c10c45b962",
+            "id": "build.647ea0258a8e6b025b880505417ad7f0"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.10101/snapshots/build.647ea0258a8e6b025b880505417ad7f0/836e10f384f5d7e5cd2429a4eba3bdc9ee7f1e0341014f521af792c10c45b962/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.10110",
+          "build": {
+            "digest": "1b3db7cca0d2a6fa604e877d41a7d812cf1fe96263df0d8714fc4e3221a08f05",
+            "id": "build.958793553ca9e1010cedec964e9a2c15"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.10110/snapshots/build.958793553ca9e1010cedec964e9a2c15/1b3db7cca0d2a6fa604e877d41a7d812cf1fe96263df0d8714fc4e3221a08f05/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.10111",
+          "build": {
+            "digest": "3cc366c9050219934b2a287d23cf9fc38a7ab424384081da2a64c040af1b88f9",
+            "id": "build.9e6fb31088b87e5b3b8980714e6c1bb5"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.10111/snapshots/build.9e6fb31088b87e5b3b8980714e6c1bb5/3cc366c9050219934b2a287d23cf9fc38a7ab424384081da2a64c040af1b88f9/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.11000",
+          "build": {
+            "digest": "87d3c74f8b9417cc50d4df78d52e63ed16fc99a7acf1f1552007167e3db0ca5a",
+            "id": "build.7ff5d6d56e622791dd2aaca2d45575a6"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.11000/snapshots/build.7ff5d6d56e622791dd2aaca2d45575a6/87d3c74f8b9417cc50d4df78d52e63ed16fc99a7acf1f1552007167e3db0ca5a/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.11001",
+          "build": {
+            "digest": "268ceb7d540ae91689e50f5f3b9ebc84b84ff62fc263fcf0ff97e8ae22221739",
+            "id": "build.c34412f14fe369791ae1bd77af9f747f"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.11001/snapshots/build.c34412f14fe369791ae1bd77af9f747f/268ceb7d540ae91689e50f5f3b9ebc84b84ff62fc263fcf0ff97e8ae22221739/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.11010",
+          "build": {
+            "digest": "e68a000e0b36c068493628a658573661fbf7e77c4942bb9480372c26f80b4a9c",
+            "id": "build.a0f2b0e89dcb381b11e7215d00f0e03f"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.11010/snapshots/build.a0f2b0e89dcb381b11e7215d00f0e03f/e68a000e0b36c068493628a658573661fbf7e77c4942bb9480372c26f80b4a9c/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.11011",
+          "build": {
+            "digest": "1d2f529151e4898d465a1025cbc1d2bab0a5d5d85932798916542dabfe319bca",
+            "id": "build.101559a9e4f6ef454695712f55e14203"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.11011/snapshots/build.101559a9e4f6ef454695712f55e14203/1d2f529151e4898d465a1025cbc1d2bab0a5d5d85932798916542dabfe319bca/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.11100",
+          "build": {
+            "digest": "63ac34e9e252c3a72c4525cd353a8f47754317b9949336c2fd79ad2bc7adb789",
+            "id": "build.fb768ee18c9d5941d751341c48c59cf3"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.11100/snapshots/build.fb768ee18c9d5941d751341c48c59cf3/63ac34e9e252c3a72c4525cd353a8f47754317b9949336c2fd79ad2bc7adb789/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.11101",
+          "build": {
+            "digest": "f08e5dba95cca9f11755523c7ad661761a0d2c0b833a82f8d970d987e43cb4d6",
+            "id": "build.352d32994ee6e54bf6eead5341eb81f9"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.11101/snapshots/build.352d32994ee6e54bf6eead5341eb81f9/f08e5dba95cca9f11755523c7ad661761a0d2c0b833a82f8d970d987e43cb4d6/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.11110",
+          "build": {
+            "digest": "05f7fcfd9dd2cf16b2dafd9a155230c14e01b3ae1d325b0977fbf6117120348e",
+            "id": "build.74f23d4707563e12f6de962b245fc55b"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.11110/snapshots/build.74f23d4707563e12f6de962b245fc55b/05f7fcfd9dd2cf16b2dafd9a155230c14e01b3ae1d325b0977fbf6117120348e/manifest.json",
+          "samples": 20
+        },
+        {
+          "appearance": "fixture.11111",
+          "build": {
+            "digest": "74ab9021920aa8f02d4db47e38428790b1676507b4df1a9ccc191491ec3fbebb",
+            "id": "build.c2d9e312424a239e0969246cb13b2442"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.11111/snapshots/build.c2d9e312424a239e0969246cb13b2442/74ab9021920aa8f02d4db47e38428790b1676507b4df1a9ccc191491ec3fbebb/manifest.json",
+          "samples": 20
+        }
+      ],
+      "clips": 96,
+      "evidence": "synthetic fixture",
+      "preset": "human.sd.v1",
+      "release_ready": false,
+      "samples": 640
+    },
+    {
+      "appearances": 1,
+      "builds": [
+        {
+          "appearance": "fixture.default",
+          "build": {
+            "digest": "394519ac856cce9c77fa52195085dd8344b48097e84206ed982e99f97371d189",
+            "id": "build.40f3db328e38658990776be16781eca0"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.default/snapshots/build.40f3db328e38658990776be16781eca0/394519ac856cce9c77fa52195085dd8344b48097e84206ed982e99f97371d189/manifest.json",
+          "samples": 20
+        }
+      ],
+      "clips": 3,
+      "evidence": "synthetic fixture",
+      "preset": "human.tall.v1",
+      "release_ready": false,
+      "samples": 20
+    },
+    {
+      "appearances": 1,
+      "builds": [
+        {
+          "appearance": "fixture.default",
+          "build": {
+            "digest": "b1919d6e1ce8748174999df5de7598f11cf9f9a24c7fb2e39f301363e9e930df",
+            "id": "build.2a5360cf59dd112a94f225852c17478d"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.default/snapshots/build.2a5360cf59dd112a94f225852c17478d/b1919d6e1ce8748174999df5de7598f11cf9f9a24c7fb2e39f301363e9e930df/manifest.json",
+          "samples": 20
+        }
+      ],
+      "clips": 3,
+      "evidence": "synthetic fixture",
+      "preset": "canine.medium.v1",
+      "release_ready": false,
+      "samples": 20
+    },
+    {
+      "appearances": 1,
+      "builds": [
+        {
+          "appearance": "fixture.default",
+          "build": {
+            "digest": "9db7efae06cbbba76e00c9eb32f34fd59c5b23f6f187533211371f51a2055269",
+            "id": "build.bc0dfefe86390c78dec85ad6cd2dbd24"
+          },
+          "clips": 4,
+          "manifest": "builds/fixture.default/snapshots/build.bc0dfefe86390c78dec85ad6cd2dbd24/9db7efae06cbbba76e00c9eb32f34fd59c5b23f6f187533211371f51a2055269/manifest.json",
+          "samples": 22
+        }
+      ],
+      "clips": 4,
+      "evidence": "synthetic fixture",
+      "preset": "blob.fixture.v1",
+      "release_ready": false,
+      "samples": 22
+    },
+    {
+      "appearances": 1,
+      "builds": [
+        {
+          "appearance": "fixture.default",
+          "build": {
+            "digest": "09a8540cc2c921a26b66c95f24afa6f8a372b01cf41025871a74e8c3a981ee96",
+            "id": "build.9cd5b9edde0dca0e7fa51e19b5824248"
+          },
+          "clips": 3,
+          "manifest": "builds/fixture.default/snapshots/build.9cd5b9edde0dca0e7fa51e19b5824248/09a8540cc2c921a26b66c95f24afa6f8a372b01cf41025871a74e8c3a981ee96/manifest.json",
+          "samples": 20
+        }
+      ],
+      "clips": 3,
+      "evidence": "synthetic fixture",
+      "preset": "asymmetric.six-limb.v1",
+      "release_ready": false,
+      "samples": 20
+    }
+  ],
+  "schema_version": 1,
+  "toolchain": {
+    "export_policy": "parts.atlas-dedup.v1",
+    "numpy": "2.5.3",
+    "parts_code_sha256": "349935dd00d0d468ed4977acebfb1eb4a016892ee87b76d2c01e41cd32cb3756",
+    "pillow": "12.3.0",
+    "python": "3.13.2",
+    "sprite-gen": "2.20.0"
+  }
+}

@@ -79,7 +79,7 @@ def tree_hashes(root):
     return {p.relative_to(root).as_posix(): assets.sha256(p.read_bytes()) for p in root.rglob("*") if p.is_file()}
 
 
-def frozen_workspace(base, *, preset="human.sd.v1"):
+def frozen_workspace(base, *, preset="human.sd.v1", states=("walk",)):
     from sprite_gen.curate import parts_motion
     base.mkdir(parents=True, exist_ok=True)
     root, source = base / "library", base / "motion-source"
@@ -87,10 +87,11 @@ def frozen_workspace(base, *, preset="human.sd.v1"):
     index, registry = workspace.read_workspace(assembly)
     rig = registry[index["rig"]["id"]]
     size = (rig["canvas"]["width"], rig["canvas"]["height"])
-    index["states"] = ["walk"]
+    index["states"] = list(states)
     assembly.write_bytes(workspace.json_bytes(index))
     external_source(source, size=size)
-    spec = import_spec(base / "motion-import.json", assembly, [source_request(source)])
+    spec = import_spec(base / "motion-import.json", assembly,
+                       [source_request(source, id=state + ".right", state=state) for state in states])
     imported = parts_motion.import_motion(assembly, spec, source)
     annotations = verified_annotations(root, imported, point=(size[0] // 2, size[1] // 2))
     parts_motion.freeze_motion(assembly, imported["candidate"], annotations)

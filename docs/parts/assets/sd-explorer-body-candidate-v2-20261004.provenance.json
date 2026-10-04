@@ -1,0 +1,50 @@
+{
+  "kind": "sprite-gen-demo-image-provenance",
+  "schema_version": 1,
+  "asset": "sd-explorer-body-candidate-v2-20261004.png",
+  "sha256": "462c5f330daba54007d2b5d5327d4a04bf54571962bec5de2632f569344012c1",
+  "generator": "built-in image_gen",
+  "mode": "generate",
+  "transparent_background_requested": true,
+  "prompt": "Use case: stylized-concept. Asset: a single low-resolution pixel-art SD game character base sprite. Original cheerful young adult male explorer, right-facing side view, standing. Mandatory anatomy: EXACTLY TWO ARMS, TWO HANDS, TWO LEGS, TWO FEET, no extra or duplicated limbs. Compact SD proportions, total body height EXACTLY THREE HEAD HEIGHTS: a very large rounded head comprises one third of total height; short compact torso and short legs. Clearly adult face, not baby. Short dark-brown textured hair, warm skin, light-gray plain sleeveless shirt, charcoal shorts, barefoot. Near arm gently held forward away from torso; far arm held slightly back; one visible hand per arm. Two clear feet separated at baseline. Clean small game sprite suitable for a 128x128 canvas, confident square pixel clusters with at most 24 flat colors, one flat shadow per material, crisp outline, absolutely no soft shading, glow, gradients, blur, lighting halos or antialiasing. Show the full body with empty margin on all sides. Actually transparent RGBA background, with fully opaque sprite pixels and zero-alpha background. No solid backdrop, no floor or cast shadow. No text, sheet, frames, equipment, jacket, bag, gloves, shoes, hat, weapon, scenery or other character. The design is for later modular hair/expression/jacket/pants/shoe replacement. Prioritize the three-head-tall silhouette and correct anatomy above fine detail.",
+  "date": "2026-10-04",
+  "status": "draft",
+  "measurements": {
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "zero_alpha_pixels": 1266730,
+    "opaque_pixels": 1622,
+    "unique_rgba_colors": 43429
+  },
+  "inspection": {
+    "two_arms_and_two_legs_visible": true,
+    "compact_sd_design": true,
+    "view": "right-facing three-quarter rather than requested strict side",
+    "limitations": [
+      "Not a 128x128 rig canvas or aligned pixel grid",
+      "Generated palette exceeds 24-32 color target",
+      "Most visible pixels are not fully opaque; alpha/edge cleanup required",
+      "Body is not segmented and has no sample bindings",
+      "Proportions are shorter than the requested three-head brief",
+      "No motion, part-pack fitting, visual approval or release acceptance"
+    ]
+  },
+  "discarded_previous_candidate": {
+    "reason": "Duplicated arm/hand appearance and elongated non-SD proportions",
+    "stored_in_repository": false
+  },
+  "approval": {
+    "design": false,
+    "rig": false,
+    "motion": false,
+    "parts": false,
+    "release": false
+  }
+}

@@ -10,8 +10,8 @@ from sprite_gen.qa import inspect_parts
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 
 
-def ready(tmp_path):
-    assembly, selection, source = populated_workspace(tmp_path)
+def ready(tmp_path, *, states=("walk",)):
+    assembly, selection, source = populated_workspace(tmp_path, states=states)
     parts_appearance.create(assembly, selection)
     checks = tmp_path / "checks.json"
     checks.write_bytes(workspace.json_bytes({name: "approved" for name in inspect_parts.REVIEW_CHECKS}))

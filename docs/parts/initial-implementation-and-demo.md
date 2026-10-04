@@ -1,12 +1,12 @@
 # 파츠 시스템 초기 구현과 데모 계획
 
-> Owns: Fork planning for PR00–04 and the first parts demo · Index: [docs/README.md](../README.md)
+> Owns: Fork planning and status for PR00–06 and the first parts demo · Index: [docs/README.md](../README.md)
 
 이 문서는 첨부된 `sprite-gen-parts-system-pr-roadmap-20261004.md`의 초기 작업을 구현 단위와 데모 제작 규격으로 구체화한 제안이다. 기존 Python 엔진을 유지하고, 파츠 기능은 별도 assembly를 사용하는 opt-in 경로로 추가한다. 첫 착수 범위는 PR00–03이며, 첫 합성 데모는 PR04까지 완료한 뒤 검증한다.
 
 2026-10-04 요구를 반영해 SD explorer의 기본 사용자 데모를 헤어·표정·상의·하의·신발의 5slot으로 확장했다. 추가 장비, 독립 subslot, palette와 다른 체형의 variation도 PR01부터 데이터 계약에 포함한다. 상세 범위와 조합 규칙은 [커스터마이징과 베리에이션 계획](customization-and-variation.md)을 따른다. 두 slot의 12 clip은 내부 smoke이며 사용자 데모의 완료 기준은 기본 32외형·96 clip이다.
 
-작성일은 2026-10-04이다. PR00–04를 구현해 init/validate/motion import/freeze/part import/appearance/preview 명령과 다섯 preset을 추가했다. 현재 사용할 수 있는 범위는 [선언 계약](01-contract.md), [모션 snapshot](02-motion-snapshots.md), [파츠 import](03-part-import.md), [공통 합성](04-composition.md)과 [기준선](00-baseline.md)을 따른다. 실제 데모 아트 제작과 release 승인은 아직 계획이다.
+작성일은 2026-10-04이다. PR00–06의 M1 엔진을 구현했다. 현재 사용할 수 있는 범위는 [선언 계약](01-contract.md), [모션 snapshot](02-motion-snapshots.md), [파츠 import](03-part-import.md), [공통 합성](04-composition.md), [검수·QA](05-review-and-qa.md), [baked export](06-baked-export.md)와 [기준선](00-baseline.md)을 따른다. 실제 아트의 96 clip 제작·검수는 진행 전이며, 엔진의 synthetic 증거와 구분한다.
 
 ## 구현 현황
 
@@ -18,7 +18,8 @@
 | PR03 | Body/part 분리, 실제 RGBA import, crop/pivot 보존, mask/region, coverage, immutable 등록 구현 |
 | PR04 | 공통 timeline, body 교체, subslot 우선순위, draw order, mask/palette/mirror, appearance/preview CLI 구현. 다섯 체형과 synthetic 32외형·96 clip 검증 |
 | PR05 | 입력·render·QA evidence snapshot, contact/world travel 측정, 명시적 검수 결정, scope와 오래된 승인 차단 구현 |
-| 실제 SD 데모 | 디자인 참고 PNG만 있음. 5slot 각 2종의 그림과 96 clip 검수는 제작 전 |
+| PR06 | 결정론적 다중 state atlas·manifest·Aseprite mapping, 순서/ticks 유지 dedup, build lock와 승인 release gate 구현 |
+| 실제 SD 데모 | 디자인 참고 시트와 새 투명 RGBA body 후보가 있음. pixel grid·alpha·view 보정, 분리와 5slot 각 2종·96 clip 검수는 미완료 |
 
 ## 확인한 기준선
 
@@ -132,7 +133,7 @@ parts-appearance       [구현] 현재 rig/motion/body/catalog에 선택과 pale
 parts-preview          [구현] 동일 resolver의 draw-list로 sample PNG와 검수용 preview 생성
 ```
 
-각 명령은 처음 등장하는 PR부터 `_modules.py`, CLI/help, wrapper 정책, 문서와 packaging test를 함께 갱신한다. `parts-preview`는 release 승인 기능을 갖지 않는다.
+`parts-inspect`, `parts-review`, `parts-approve`, `parts-build`도 PR05/06에서 구현했다. 각 명령은 처음 등장하는 PR부터 `_modules.py`, CLI/help, wrapper 정책, 문서와 packaging test를 함께 갱신한다. `parts-preview`는 release 승인 기능을 갖지 않는다.
 
 ## 첫 데모의 이미지 선택
 
@@ -245,4 +246,4 @@ canvas 크기는 fixture 데이터다. core가 SD/tall/animal에 따라 분기�
 
 PR04에서 같은 resolver의 다중 체형 동작과 SD 파츠 교체를 확인한다. 이후 PR05의 QA·해시 기반 승인과 PR06의 결정론적 export를 끝내 M1을 완성한다. PR07/08에서 기준 모션에 연결된 실제 생성·부분 재생성 workflow를 구현하고, PR09 UI와 PR10 실제 acceptance pack을 연결한다.
 
-현재 산출물은 PR00–03의 선언/CLI/모션 snapshot/파츠 import/회귀 보호 코드와 테스트, 본 계획, customization/variation 계획, 디자인 참고 PNG와 provenance다. 초기 catalog의 options는 비어 있으며 실제 imported part를 등록하면 갱신된다. 실제 SD용 artwork, renderer, 승인된 기본 96 clip과 확장 wardrobe는 아직 제작하지 않았다.
+현재 산출물은 PR00–06의 선언/CLI/모션 snapshot/파츠 import/공통 renderer/QA·검수/결정론적 export와 회귀 테스트, 본 계획과 customization 계획이다. 초기 catalog의 options는 비어 있으며 실제 imported part를 등록하면 갱신된다. 디자인 참고 시트 외에 [새 body 후보](assets/sd-explorer-body-candidate-v2-20261004.png)와 [prompt·측정·미검증 사항](assets/sd-explorer-body-candidate-v2-20261004.provenance.json)을 보관했다. 첫 생성은 팔 중복과 등신 문제로 제외했고, 두 번째 후보도 palette·alpha·grid·view·분리·모션 검증이 필요하다. 실제 승인된 기본 96 clip과 확장 wardrobe는 아직 제작하지 않았다.

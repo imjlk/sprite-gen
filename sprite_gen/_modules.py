@@ -20,6 +20,7 @@ MODULE_DOMAIN = {
     'parts_appearance': 'curate',
     'parts_review': 'curate',
     'inspect_parts': 'qa',
+    'parts_build': 'compose',
     'tile': 'background',
     'shadow': 'effects',
     'motion': 'qa',

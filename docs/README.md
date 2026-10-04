@@ -146,5 +146,7 @@ remain planned; no part art is approved.
 | [parts/03-part-import.md](parts/03-part-import.md) | Cropped/full-canvas geometry, separate body packs, masks/regions, coverage and immutable part registration |
 | [parts/04-composition.md](parts/04-composition.md) | Shared timeline, body replacement, subslot precedence, ordering, target masks, palette and immutable previews |
 | [parts/05-review-and-qa.md](parts/05-review-and-qa.md) | Measured evidence, explicit world-travel/contact annotations, review scopes and stale approval rejection |
-| [parts/initial-implementation-and-demo.md](parts/initial-implementation-and-demo.md) | PR00–04 execution plan, snapshot/digest/timing rules, and the five-slot SD parts demo art brief |
+| [parts/06-baked-export.md](parts/06-baked-export.md) | Deterministic multi-state atlas/manifest, ordered dedup, Aseprite mapping, build locks and atomic release pointers |
+| [parts/07-m1-verification.md](parts/07-m1-verification.md) | M1 test evidence, reproducible five-rig synthetic builds, exact art limitations and remaining acceptance work |
+| [parts/initial-implementation-and-demo.md](parts/initial-implementation-and-demo.md) | PR00–06 status, snapshot/digest/timing rules, and the five-slot SD parts demo art brief |
 | [parts/customization-and-variation.md](parts/customization-and-variation.md) | Basic and detailed slots, variation/palette/preset rules, rig-specific fitting, and expanded multi-body acceptance scope |

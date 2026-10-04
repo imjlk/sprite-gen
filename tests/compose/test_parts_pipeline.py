@@ -14,8 +14,8 @@ from sprite_gen.frames import parts_import
 from sprite_gen.spec import parts_contract as contract, parts_workspace as workspace
 
 
-def populated_workspace(tmp_path):
-    assembly = frozen_workspace(tmp_path)
+def populated_workspace(tmp_path, *, states=("walk",)):
+    assembly = frozen_workspace(tmp_path, states=states)
     index, registry = workspace.read_workspace(assembly)
     topology = registry[registry[index["rig"]["id"]]["topology"]["id"]]
     source = tmp_path / "body-source"

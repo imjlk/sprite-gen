@@ -9,10 +9,10 @@ import math
 from pathlib import Path
 import platform
 
-import numpy as np
+from sprite_gen._deps import np
 from PIL import __version__ as pillow_version
 
-from sprite_gen.compose import compose_parts, parts_resolve
+from sprite_gen.compose import compose_parts, parts_resolve, export_aseprite
 from sprite_gen.curate import parts_motion
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 
@@ -28,6 +28,7 @@ _CONTACTS = contract._record({"kind": contract._enum("parts-contact-annotations"
 
 
 def toolchain():
+    from sprite_gen.compose.parts_build import EXPORT_POLICY
     # Package version alone cannot identify code edited in a source checkout.
     paths = ("spec/parts_contract.py", "spec/parts_assets.py", "compose/parts_resolve.py",
              "compose/compose_parts.py", "compose/compose_layers.py", "qa/inspect_parts.py",
@@ -38,7 +39,8 @@ def toolchain():
         if path.is_file():
             digest.update(name.encode() + b"\0" + path.read_bytes())
     return {"python": platform.python_version(), "pillow": pillow_version,
-            "numpy": np.__version__, "parts_code_sha256": digest.hexdigest()}
+            "numpy": np.__version__, "sprite-gen": export_aseprite._package_version(),
+            "export_policy": EXPORT_POLICY, "parts_code_sha256": digest.hexdigest()}
 
 
 def input_references(appearance, registry):

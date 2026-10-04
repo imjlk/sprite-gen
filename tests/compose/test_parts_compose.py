@@ -165,6 +165,11 @@ def test_missing_state_or_held_sample_fails_and_visibility_is_explicit():
 
 def test_mask_targets_another_piece_in_declared_space_with_integer_rounding():
     docs, images = composition_fixture("blob.fixture.v1")
+    images[("fixture.body", "eye_l.png")].putalpha(127)
+    digest = assets.sha256(assets.png_bytes(images[("fixture.body", "eye_l.png")]))
+    mutate(docs, "fixture.body", lambda d: [p["image"].update(sha256=digest)
+        for piece in d["bindings"][0]["pieces"] if piece["node"] == "eye_l"
+        for m in piece["sample_map"].values() for p in m.values()])
     add_part(docs, images, "ornament", "ornament", "root", provides=[], replaces=[], color=(0, 0, 0, 0))
     mask = Image.new("RGBA", (96, 96), (128, 128, 128, 255))
     ref = {"file": "mask.png", "sha256": assets.sha256(assets.png_bytes(mask))}
@@ -173,7 +178,7 @@ def test_mask_targets_another_piece_in_declared_space_with_integer_rounding():
          for m in d["bindings"][0]["pieces"][0]["sample_map"].values() for p in m.values()])
     output, evidence = render(docs, images)
     target = next(e for e in evidence["draw"] if e["node"] == "eye_l")
-    assert output.getpixel(tuple(target["offset"]))[3] == 128
+    assert output.getpixel(tuple(target["offset"]))[3] == 64  # round(127 * 128 / 255), not truncation.
 
 
 def test_palette_changes_only_declared_rgb_regions_and_preserves_alpha():
@@ -227,3 +232,14 @@ def test_sd_five_slots_two_variants_make_32_distinct_appearances_and_96_clips():
         hashes.add(clips[0]["samples"][0]["rgba_sha256"])
         total += len(clips)
     assert len(hashes) == 32 and total == 96
+
+
+def test_long_custom_slot_precedence_dag_is_iterative_and_cycle_fails():
+    raw = {"kind": "parts-topology", "schema_version": 1, "id": "long.dag", "nodes": [{"id": "root"}],
+           "sockets": [], "slots": [{"id": f"slot.{i}", "overrides": [f"slot.{i + 1}"] if i < 1049 else []} for i in range(1050)]}
+    topology = contract.seal(raw)
+    relations = parts_resolve._precedence({s["id"]: s for s in topology["slots"]})
+    assert len(relations["slot.0"]) == 1049
+    raw["slots"][-1]["overrides"] = ["slot.0"]
+    with pytest.raises(contract.PartsContractError, match="override cycle"):
+        contract.seal(raw)

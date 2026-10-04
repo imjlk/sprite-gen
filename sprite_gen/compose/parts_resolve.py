@@ -16,9 +16,21 @@ def _binding(pack, appearance, rig):
 
 
 def _precedence(slots):
-    def descendants(name):
-        return set(slots[name]["overrides"]).union(*(descendants(n) for n in slots[name]["overrides"]))
-    return {name: descendants(name) for name in slots}
+    result = {name: set(slot["overrides"]) for name, slot in slots.items()}
+    parents = {name: [] for name in slots}
+    counts = {name: len(targets) for name, targets in result.items()}
+    for name, targets in result.items():
+        for target in targets:
+            parents[target].append(name)
+    ready = [name for name, count in counts.items() if count == 0]
+    while ready:
+        target = ready.pop()
+        for name in parents[target]:
+            result[name].update(result[target])
+            counts[name] -= 1
+            if counts[name] == 0:
+                ready.append(name)
+    return result
 
 
 def _remove(suppressed, entry, targets, reason):

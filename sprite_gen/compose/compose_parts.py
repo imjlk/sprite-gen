@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-import numpy as np
+from sprite_gen._deps import np
 from PIL import Image
 
 from sprite_gen.compose.compose_layers import apply_alpha_mask, _clipped_pixels

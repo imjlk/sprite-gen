@@ -34,7 +34,7 @@ from sprite_gen.serve import serve_compose, serve_curation
 from sprite_gen.spec import migrate_breathe, migrate_request, parts_workspace
 from sprite_gen.curate import parts_motion, parts_appearance, parts_review
 from sprite_gen.qa import inspect_parts
-from sprite_gen.compose import compose_parts
+from sprite_gen.compose import compose_parts, parts_build
 from sprite_gen.frames import parts_import
 from sprite_gen.gen.prepare import BODY_PLAN_HELP, STYLE_DEFAULT, _outline_config
 from sprite_gen.spec.subject import SUBJECTS
@@ -464,6 +464,11 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         "Record explicit approval/rejection checks against the active review hash; reject stale evidence.",
         parts_review.add_decision_arguments,
         parts_review.run_decision,
+    ),
+    "parts-build": (
+        "Bake requested states into a deterministic atlas snapshot; release requires current appearance approval.",
+        parts_build.add_arguments,
+        parts_build.run,
     ),
     # The argument surface is `serve_curation.add_arguments` itself, not a copy of it: the
     # webview's own `--help` and this subcommand are the same declaration, so `sprite-gen
