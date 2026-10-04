@@ -16,6 +16,7 @@ MODULE_DOMAIN = {
     'parts_motion': 'curate',
     'parts_import': 'frames',
     'parts_resolve': 'compose',
+    'parts_runtime': 'compose',
     'compose_parts': 'compose',
     'parts_appearance': 'curate',
     'parts_review': 'curate',

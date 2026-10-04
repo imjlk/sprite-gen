@@ -4,6 +4,8 @@
 
 SD explorer의 기본 커스터마이징은 헤어·표정·상의·하의·신발이다. 이 다섯 가지를 각각 바꿀 수 있어야 첫 사용자 데모가 완료된다. 모자, 얼굴 장식, 겉옷, 장갑, 등 장비 등도 초기 계약에서 정의할 수 있어야 하며, 지원 범위는 profile과 catalog 데이터가 결정한다.
 
+2026-10-04 사용자 정정: **기본 재생 방식은 공통 모션 위의 런타임 파츠 레이어 합성이다.** idle/walk/run은 공통 모션 3개이며, 외형을 바꿀 때 현재 state/sample/elapsed time을 유지하고 선택한 attachment만 교체한다. 32외형 × 3상태 = 96은 조합·가림을 확인하는 검증 케이스 수다. 96개의 완성 클립을 제작·저장하는 요구가 아니다. 조합별 사전 bake는 기본 데모나 기본 자산 형식으로 사용하지 않고, `parts-build`는 명시적으로 요청한 export 용도로 유지한다.
+
 이 문서는 2026-10-04 사용자 요구를 반영한 구현 계획이다. [초기 실행 계획](initial-implementation-and-demo.md)의 두 slot 데모를 내부 smoke로 두고, 사용자 데모와 후속 베리에이션 목표를 확장한다. PR01에서 group/slot/preset/palette와 체형별 binding의 첫 선언 검증을 구현했고, humanoid 초기 catalog는 기본 5종을 포함한 20개 slot을 제공한다. 실제 지원 범위는 [구현된 계약](01-contract.md)을 따른다. 아래의 추가 slot·아트 수량·합성·UI·승인은 후속 구현·제작 목표다.
 
 ## 선택과 렌더링을 나누는 데이터 구조
@@ -57,7 +59,7 @@ tail/wings 같은 node가 없는 인간 rig에 이 slot을 자동으로 노출�
 
 모든 face piece도 현재 MotionClip의 sample에 binding된다. 얼굴 방향·head pose가 같을 때는 검증된 rigid/held 그림을 명시적으로 재사용할 수 있다. head pose나 가림이 다르면 해당 sample/view의 별도 raster와 mask가 필요하다. 포니테일, 치마, 꼬리의 secondary motion도 sample별 그림과 draw-order를 가진다.
 
-M1은 선택한 표정을 같은 clip에 유지하는 동작을 지원 목표로 삼는다. sample별 blink/표정 전환은 동일 motion clock의 sample/event map으로 추가할 수 있게 계약을 설계한다. 독립 표정 시계나 임의 procedural face 변형을 M1에 넣지 않는다. 게임 실행 중 표정·장비를 교체하는 adapter는 PR12의 범위다.
+M1 데모는 같은 motion clock에서 표정·장비를 바꾸고 현재 sample과 경과 시간을 유지한다. sample별 blink/표정 전환도 이 clock의 sample map을 따른다. 독립 표정 시계를 만들지 않는다. 특정 게임 엔진의 GPU/mesh adapter는 후속 범위이며, 기본 데모의 파츠 교체 재생을 후속 단계로 미루지 않는다.
 
 ## 조합 정책과 세트
 
@@ -86,7 +88,7 @@ M1 preset은 slot별 assignment 목록으로 정의하고 재귀 preset 호출�
 | 단계 | 실제 SD pack의 의무 | 완료 의미 |
 |---|---|---|
 | 내부 smoke | upper 2 × footwear 2, 세 상태, 12 clip | 초기 피팅·교체 경로 확인; 사용자 커스터마이징 데모 완료 판정에는 사용하지 않음 |
-| 기본 사용자 데모 | hair 2 × expression 2 × upper 2 × lower 2 × footwear 2, 세 상태 | 기본 5slot 모두 독립 선택, 32외형·96 clip 검수 |
+| 기본 사용자 데모 | 공통 모션 3개 + hair/expression/upper/lower/footwear 각 2종 | 재생 중 5slot 독립 교체, clock 유지, 32외형·96 상태 조합 검증; 조합별 완성 clip 저장 없음 |
 | M1 추가 장비 | headwear/gloves/back_accessory 각각 `None`과 1종 | 기존 5slot과 함께 교체 가능, 위험 pair/triple 검수 기록 |
 | M2 SD wardrobe | hair 4, expression 5, upper 3, lower 3, footwear 3; 추가 장비·세부 subslot 확장 | 제작·부분 재생성·검수 workflow로 catalog를 확장하고 승인 coverage를 기록 |
 
@@ -102,7 +104,7 @@ M1 preset은 slot별 assignment 목록으로 정의하고 재귀 preset 호출�
 
 표정과 헤어를 바꾸기 위해 실제 기본 head에는 hair/eyes/brows/mouth가 분리돼 있어야 한다. 하의·신발 교체도 기본 의상·발 그림을 제거할 수 있는 자료가 필요하다. 합쳐진 body에서 일부 영역을 crop했다고 가려졌던 살색이나 신체 그림이 복원되는 것으로 처리하지 않는다.
 
-M1 추가 장비가 모두 기본 다섯 slot과 양립한다고 가정하면 8개 binary 선택의 후보 공간은 256외형·768 clip이다. 이것은 전수 검수 완료 수량이 아니다. 기본 pack의 96 clip은 전수 검수하고, 추가 장비는 유효 조합의 pair coverage와 다음 위험 triple을 별도로 검사한다.
+M1 추가 장비가 모두 기본 다섯 slot과 양립한다고 가정하면 후보 공간은 256외형·768 상태 조합이다. 이는 제작할 clip 수가 아니다. 기본 pack의 96 상태 조합을 런타임으로 검사하고, 추가 장비는 유효 조합의 pair coverage와 다음 위험 triple을 별도로 검사한다.
 
 - hair × headwear × expression: 얼굴·앞머리 visibility와 착용 위치.
 - upper × gloves × hand pose: 손목 경계와 hand/sleeve 순서.
@@ -136,7 +138,7 @@ M2의 다른 체형 acceptance는 슬롯 하나의 교체로 끝내지 않는다
 | 01 | SlotDefinition/CustomizationCatalog, group/subslot/cardinality, palette channel, preset, footprint/compatibility 참조, asymmetric/6limb fixture의 순수 파싱 |
 | 02 | 얼굴·머리·waist·손목·발·appendage의 최종 geometry annotations를 profile 데이터로 처리; 필요한 socket만 검증 |
 | 03 | 기본 hair/face/clothing 제거가 가능한 body piece 등록, multi-piece variants, join interface, 여러 rig의 binding 수용·불일치 거절 |
-| 04 | resolved appearance의 선택·preset·mask·replacement 해석, 기본 5slot/독립 subslot/palette 사례, 96 clip 기본 사용자 preview |
+| 04 | 공통 timeline의 런타임 파츠 합성·교체, 선택·preset·mask·replacement, 5slot/독립 subslot/palette와 96 상태 조합 검증 |
 | 05 | catalog/preset/palette/mask 포함 승인 subject, 조합·slot footprint 변화의 invalidation, 검수 coverage report |
 | 06 | 요청된 appearance만 export, 기본 96 clip과 추가 장비 case의 승인 범위 확인, 조합 전수 bake 금지 |
 | 07 | design × rig × view × motion/sample × piece의 missing coverage 계획; palette-only 변경은 이미지 생성 작업 없음 |

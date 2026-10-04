@@ -46,5 +46,10 @@
     "motion": false,
     "parts": false,
     "release": false
+  },
+  "user_feedback": {
+    "design_reference": "accepted",
+    "production_ready": false,
+    "instruction": "Keep this SD reference; drop the duplicated-arm tall candidate."
   }
 }

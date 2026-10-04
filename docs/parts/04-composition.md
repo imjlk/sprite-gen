@@ -32,6 +32,14 @@ All selected pieces need mappings for every requested sample, including held
 pieces and invisible samples. Timing and repeated sample IDs come only from the
 frozen motion; parts never run separate timelines.
 
+The default customization workflow uses `compose.parts_runtime.PartsPlayer`:
+load reusable body/part assets, seek the shared motion clock, then compose only
+the current sample. `set_selection` and `set_appearance` preserve state and exact
+elapsed time. They require the same rig/motion, validate before mutation, and
+never write an atlas, appearance snapshot or completed clip. `parts-preview`
+snapshots and `parts-build` are explicitly requested inspection/export tools.
+The 32 × 3 count is a validation space, not a default collection of 96 clips.
+
 The body is an explicit pack. Segmented bodies must provide every required
 topology node. `provides` identifies indivisible raster interfaces, and `replaces`
 removes all body pieces providing those nodes. A raster supplying several nodes
@@ -49,6 +57,12 @@ Relations to known hidden/replaced pieces become inactive. Unknown or ambiguous
 targets and cycles fail. Unconstrained ties use lexical qualified IDs, so authors
 must declare meaningful overlaps. Socket visibility and placement visibility
 both apply; anatomical IDs retain their meaning through visibility and mirror.
+
+Node order targets match `provides` interfaces. An accessory's primary `node`
+describes its attachment constraint; it does not automatically make the accessory
+a provider of that node. Two overlays attached to `head` can both order after
+the head raster without ordering after each other. Target a specific overlay by
+its qualified piece ID when its relative order matters.
 
 Placement is integer `socket - pivot + offset`, with original crop geometry
 already preserved by import. Art clipping fails unless `allow_clip` is explicit;

@@ -6,6 +6,21 @@
 The existing generation, extraction, curation and non-parts export paths retain
 their legacy behavior. The actual explorer acceptance pack is still incomplete.
 
+User correction, 2026-10-04: the primary demo composes reusable parts at the
+current shared motion sample and preserves playback time during selection
+changes. The 96 count means appearance/state validation cases, not separately
+produced or stored finished clips. Existing synthetic baked proof is export
+test evidence, not the default customization workflow. Baked release remains
+an explicit optional export. The duplicated-arm tall artwork candidate was
+rejected by the user and must not be reused.
+
+The follow-up runtime implementation retains one shared motion clock and
+composes only its current sample while swapping attachments. The temporary
+`assets/sd-explorer-art-work/first-art-sheet.png` is a separately code-authored
+alignment study (`scripts/dev/sd_explorer_art_study.py`), not an extraction,
+Grok generation or replacement for the user's accepted SD design candidate.
+Actual art production remains based on that accepted SD candidate.
+
 | Stage | Available behavior |
 |---|---|
 | PR02 | Immutable motion import/freeze, exact timing, final-raster annotation and revision invalidation |

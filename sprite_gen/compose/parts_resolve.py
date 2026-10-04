@@ -46,7 +46,10 @@ def _order(active, known, nodes):
     edges = {name: set() for name in by_id}
     def targets(token):
         if token in nodes:
-            return [e["id"] for e in active if e["node"] == token or token in e["provides"]]
+            # A primary node is an attachment/slot constraint, not a promise
+            # that this raster depicts that node. Face accessories attached at
+            # head must order after the head provider, not after each other.
+            return [e["id"] for e in active if token in e["provides"]]
         matches = [e["id"] for e in known if token in (e["id"], e["piece_id"])]
         if len(matches) != 1:
             label = "unknown" if not matches else "ambiguous"

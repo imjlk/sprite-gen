@@ -1,0 +1,13 @@
+{
+  "kind": "parts-rejected-art",
+  "schema_version": 1,
+  "candidate": "exec-e6c26811-87a9-4384-a541-067f632a37dd.png",
+  "sha256": "4fe4a1ab6bd03d275a79ec5560369dd2a58169742fa5b4f97f855d5c28a25937",
+  "generator": "built-in imagegen",
+  "status": "rejected-by-user",
+  "reason": "Tall/elongated character has duplicated arm/hand appearance. User explicitly requested dropping it.",
+  "demo_eligible": false,
+  "part_import_eligible": false,
+  "replacement_required_before_tall_art_demo": true,
+  "technical_tall_rig_support_affected": false
+}

@@ -4,6 +4,8 @@
 
 이 문서는 첨부된 `sprite-gen-parts-system-pr-roadmap-20261004.md`의 초기 작업을 구현 단위와 데모 제작 규격으로 구체화한 제안이다. 기존 Python 엔진을 유지하고, 파츠 기능은 별도 assembly를 사용하는 opt-in 경로로 추가한다. 첫 착수 범위는 PR00–03이며, 첫 합성 데모는 PR04까지 완료한 뒤 검증한다.
 
+사용자 정정(2026-10-04): 데모의 기본 경로는 **공통 idle/walk/run + 현재 sample에 대한 파츠 레이어 합성**이다. 아래의 96 clip 수량은 32외형 × 3상태의 검증 공간으로 읽는다. 조합별 완성 clip을 만들거나 저장하지 않는다. Baked export는 명시적으로 요청할 때만 사용한다. 팔이 중복된 장신 artwork 후보는 사용자가 반려했으므로 demo/reference로 재사용하지 않는다. Tall rig의 기술 검증은 별도이며 이 후보를 승인한 증거가 아니다.
+
 2026-10-04 요구를 반영해 SD explorer의 기본 사용자 데모를 헤어·표정·상의·하의·신발의 5slot으로 확장했다. 추가 장비, 독립 subslot, palette와 다른 체형의 variation도 PR01부터 데이터 계약에 포함한다. 상세 범위와 조합 규칙은 [커스터마이징과 베리에이션 계획](customization-and-variation.md)을 따른다. 두 slot의 12 clip은 내부 smoke이며 사용자 데모의 완료 기준은 기본 32외형·96 clip이다.
 
 작성일은 2026-10-04이다. PR00–06의 M1 엔진을 구현했다. 현재 사용할 수 있는 범위는 [선언 계약](01-contract.md), [모션 snapshot](02-motion-snapshots.md), [파츠 import](03-part-import.md), [공통 합성](04-composition.md), [검수·QA](05-review-and-qa.md), [baked export](06-baked-export.md)와 [기준선](00-baseline.md)을 따른다. 실제 아트의 96 clip 제작·검수는 진행 전이며, 엔진의 synthetic 증거와 구분한다.
@@ -226,7 +228,7 @@ PR04의 첫 preview는 읽기 전용 비교 화면 또는 PNG/GIF 묶음이다. 
 | 잘못된 rig/view/motion binding | 별도 binding 필요 오류 |
 | 동일 입력으로 preview 두 번 생성 | 고정 toolchain에서 픽셀·draw-list·portable metadata 일치 |
 
-appearance 선택 재생은 공통 timeline에서 미리 합성된 raster를 바꾸는 기능이다. 런타임에서 개별 파츠를 GPU로 합성하는 게임 adapter 검증은 PR12가 담당한다. PR04 preview 결과에는 미검증 품질을 표시하며, 정식 게임용 release export는 PR05/06의 승인 gate를 거친다.
+appearance 선택 재생은 공통 timeline의 현재 sample에 선택한 파츠를 배치하고 합성하는 기능이다. 파츠를 바꿔도 state/sample/elapsed tick을 유지한다. 조합별 완성 raster를 사전 제작하는 방식을 기본 경로로 사용하지 않는다. 특정 게임 엔진의 GPU/mesh adapter는 별도 범위지만 기본 데모의 런타임 교체는 지금 구현한다. 정식 baked release export는 명시적 요청 시 PR05/06의 승인 gate를 따른다.
 
 ## 다른 체형을 검증하는 순서
 

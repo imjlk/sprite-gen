@@ -31,7 +31,7 @@ def toolchain():
     from sprite_gen.compose.parts_build import EXPORT_POLICY
     # Package version alone cannot identify code edited in a source checkout.
     paths = ("spec/parts_contract.py", "spec/parts_assets.py", "compose/parts_resolve.py",
-             "compose/compose_parts.py", "compose/compose_layers.py", "qa/inspect_parts.py",
+             "compose/parts_runtime.py", "compose/compose_parts.py", "compose/compose_layers.py", "qa/inspect_parts.py",
              "curate/parts_review.py", "compose/parts_build.py", "compose/export_aseprite.py")
     digest = hashlib.sha256()
     for name in paths:
