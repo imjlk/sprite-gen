@@ -18,6 +18,8 @@ MODULE_DOMAIN = {
     'parts_resolve': 'compose',
     'compose_parts': 'compose',
     'parts_appearance': 'curate',
+    'parts_review': 'curate',
+    'inspect_parts': 'qa',
     'tile': 'background',
     'shadow': 'effects',
     'motion': 'qa',

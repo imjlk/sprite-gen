@@ -17,6 +17,7 @@
 | PR02 | 공통 source adapter, exact timing, immutable candidate/freeze, 최종 raster annotation, stale binding 분리와 CLI 구현 |
 | PR03 | Body/part 분리, 실제 RGBA import, crop/pivot 보존, mask/region, coverage, immutable 등록 구현 |
 | PR04 | 공통 timeline, body 교체, subslot 우선순위, draw order, mask/palette/mirror, appearance/preview CLI 구현. 다섯 체형과 synthetic 32외형·96 clip 검증 |
+| PR05 | 입력·render·QA evidence snapshot, contact/world travel 측정, 명시적 검수 결정, scope와 오래된 승인 차단 구현 |
 | 실제 SD 데모 | 디자인 참고 PNG만 있음. 5slot 각 2종의 그림과 96 clip 검수는 제작 전 |
 
 ## 확인한 기준선

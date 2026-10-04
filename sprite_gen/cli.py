@@ -32,7 +32,8 @@ from sprite_gen.effects import recolor, shadow
 from sprite_gen.scene import render, inspect_scene
 from sprite_gen.serve import serve_compose, serve_curation
 from sprite_gen.spec import migrate_breathe, migrate_request, parts_workspace
-from sprite_gen.curate import parts_motion, parts_appearance
+from sprite_gen.curate import parts_motion, parts_appearance, parts_review
+from sprite_gen.qa import inspect_parts
 from sprite_gen.compose import compose_parts
 from sprite_gen.frames import parts_import
 from sprite_gen.gen.prepare import BODY_PLAN_HELP, STYLE_DEFAULT, _outline_config
@@ -448,6 +449,21 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         "Compose body and parts on the shared sample timeline with replacement, ordering, masks and palette.",
         compose_parts.add_arguments,
         compose_parts.run,
+    ),
+    "parts-inspect": (
+        "Measure parts evidence and optional declared contacts; keep visual/motion quality unverified.",
+        inspect_parts.add_arguments,
+        inspect_parts.run,
+    ),
+    "parts-review": (
+        "Snapshot exact render and QA evidence for appearance, part or binding review.",
+        parts_review.add_review_arguments,
+        parts_review.run_review,
+    ),
+    "parts-approve": (
+        "Record explicit approval/rejection checks against the active review hash; reject stale evidence.",
+        parts_review.add_decision_arguments,
+        parts_review.run_decision,
     ),
     # The argument surface is `serve_curation.add_arguments` itself, not a copy of it: the
     # webview's own `--help` and this subcommand are the same declaration, so `sprite-gen

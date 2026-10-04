@@ -74,7 +74,10 @@ def resolve(appearance, documents):
     slot override, and a raster supplying several nodes cannot be partly erased.
     """
     appearance = contract.parse(appearance)
-    docs = [d for d in documents if d["id"] != appearance["id"]] + [appearance]
+    # Reviews/build locks consume appearances, and cannot validate a proposed
+    # replacement before activation has detached those old consumers.
+    docs = [d for d in documents if d["id"] != appearance["id"]
+            and d["kind"] not in {"parts-review", "parts-build-lock"}] + [appearance]
     registry = contract.validate_bundle(docs)
     contract._check_appearance(appearance, registry, True)
     rig = registry[appearance["rig"]["id"]]

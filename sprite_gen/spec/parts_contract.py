@@ -217,6 +217,10 @@ _preset = _record({"id": _id, "label": _string, "assignments": _mapping(_selecti
 _pack_import = _record({"request_sha256": _hash, "source_assets": _list(_asset, nonempty=True, unique=True),
                        "style": _id, "encoding_policy": _id, "coverage": _enum("complete", "partial"),
                        "states": _list(_id, nonempty=True, unique=True)})
+_review_evidence = _record({"appearance": _ref, "inputs": _list(_ref, nonempty=True, unique=True),
+    "plan_digest": _hash, "preview_digest": _hash, "qa_digest": _hash,
+    "artifacts": _list(_asset, nonempty=True, unique=True), "contacts": _nullable(_asset),
+    "subject": _ref, "binding_id": _nullable(_id)}, {"contacts": None, "binding_id": None})
 
 _COMMON = {"kind": _string, "schema_version": _positive, "id": _id}
 _SCHEMAS = {
@@ -245,7 +249,11 @@ _SCHEMAS = {
     "parts-review": _record({**_COMMON, "subject_digest": _hash,
                              "scope": _enum("part", "binding", "appearance"),
                              "status": _enum("approved", "rejected", "unverified"),
-                             "render_policy": _id, "qa_policy": _id}),
+                             "render_policy": _id, "qa_policy": _id,
+                             "evidence": _nullable(_review_evidence),
+                             "checks": _mapping(_enum("approved", "rejected", "unverified")),
+                             "reviewer": _nullable(_string), "note": _nullable(_string)},
+                            {"evidence": None, "checks": {}, "reviewer": None, "note": None}),
     "parts-build-lock": _record({**_COMMON, "appearance": _ref, "inputs": _list(_ref, nonempty=True, unique=True),
                                  "toolchain": _mapping(_string, keys=_string),
                                  "render_policy": _id, "qa_policy": _id,
@@ -629,6 +637,22 @@ def validate_bundle(documents: Iterable[dict], *, complete=False) -> dict[str, d
                         _fail(path, f"preset option is unavailable at {slot}")
         elif kind == "parts-appearance":
             _check_appearance(doc, registry, complete)
+        elif kind == "parts-review" and doc["evidence"] is not None:
+            evidence = doc["evidence"]
+            _get(registry, evidence["appearance"], "parts-appearance", path)
+            subject = _get(registry, evidence["subject"], "parts-appearance" if doc["scope"] == "appearance" else "parts-pack", path)
+            for ref in evidence["inputs"]:
+                _get(registry, ref, None, path)
+            digest = subject["digest"]
+            if doc["scope"] == "binding":
+                matches = [b for b in subject["bindings"] if b["id"] == evidence["binding_id"]]
+                if len(matches) != 1:
+                    _fail(path, "review binding is missing")
+                digest = content_digest(matches[0])
+            elif evidence["binding_id"] is not None:
+                _fail(path, "binding ID only applies to binding reviews")
+            if digest != doc["subject_digest"]:
+                _fail(path, "review subject digest differs from evidence")
         elif kind == "parts-build-lock":
             _get(registry, doc["appearance"], "parts-appearance", path)
             for ref in doc["inputs"]:
