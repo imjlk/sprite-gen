@@ -6,7 +6,7 @@
 
 2026-10-04 요구를 반영해 SD explorer의 기본 사용자 데모를 헤어·표정·상의·하의·신발의 5slot으로 확장했다. 추가 장비, 독립 subslot, palette와 다른 체형의 variation도 PR01부터 데이터 계약에 포함한다. 상세 범위와 조합 규칙은 [커스터마이징과 베리에이션 계획](customization-and-variation.md)을 따른다. 두 slot의 12 clip은 내부 smoke이며 사용자 데모의 완료 기준은 기본 32외형·96 clip이다.
 
-작성일은 2026-10-04이다. PR00–03을 구현해 `parts-init`, `parts-validate`, `parts-motion-import`, `parts-motion-freeze`, `parts-import`, 순수 parser와 다섯 preset을 추가했다. 현재 사용할 수 있는 범위는 [선언 계약](01-contract.md), [모션 snapshot](02-motion-snapshots.md), [파츠 import](03-part-import.md)와 [기준선](00-baseline.md)을 따른다. 합성·실제 데모 제작은 아직 계획이다.
+작성일은 2026-10-04이다. PR00–04를 구현해 init/validate/motion import/freeze/part import/appearance/preview 명령과 다섯 preset을 추가했다. 현재 사용할 수 있는 범위는 [선언 계약](01-contract.md), [모션 snapshot](02-motion-snapshots.md), [파츠 import](03-part-import.md), [공통 합성](04-composition.md)과 [기준선](00-baseline.md)을 따른다. 실제 데모 아트 제작과 release 승인은 아직 계획이다.
 
 ## 구현 현황
 
@@ -16,7 +16,7 @@
 | PR01 | content digest·정확한 reference·sample binding·20개 humanoid slot·palette·preset·cardinality 검증, 다섯 체형의 선언 fixture 및 CLI 구현 |
 | PR02 | 공통 source adapter, exact timing, immutable candidate/freeze, 최종 raster annotation, stale binding 분리와 CLI 구현 |
 | PR03 | Body/part 분리, 실제 RGBA import, crop/pivot 보존, mask/region, coverage, immutable 등록 구현 |
-| PR04 | Body piece 교체와 공통 renderer 미구현 |
+| PR04 | 공통 timeline, body 교체, subslot 우선순위, draw order, mask/palette/mirror, appearance/preview CLI 구현. 다섯 체형과 synthetic 32외형·96 clip 검증 |
 | 실제 SD 데모 | 디자인 참고 PNG만 있음. 5slot 각 2종의 그림과 96 clip 검수는 제작 전 |
 
 ## 확인한 기준선
@@ -127,7 +127,8 @@ parts-validate         [구현] 선언·digest·선택/coverage 검증, release 
 parts-motion-import    [구현] finalized/external source를 draft candidate로 가져오기
 parts-motion-freeze    [구현] raster와 annotation을 검사하고 motion snapshot 게시
 parts-import           [구현] body/overlay/replacement piece와 sample binding 가져오기
-parts-preview          [예정] 동일 resolver의 draw-list로 sample PNG와 검수용 preview 생성
+parts-appearance       [구현] 현재 rig/motion/body/catalog에 선택과 palette 고정
+parts-preview          [구현] 동일 resolver의 draw-list로 sample PNG와 검수용 preview 생성
 ```
 
 각 명령은 처음 등장하는 PR부터 `_modules.py`, CLI/help, wrapper 정책, 문서와 packaging test를 함께 갱신한다. `parts-preview`는 release 승인 기능을 갖지 않는다.

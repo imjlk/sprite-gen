@@ -1,0 +1,82 @@
+# Shared-timeline parts composition
+
+> Owns: PR04 resolver, appearance selection and raster preview · Index: [docs/README.md](../README.md)
+
+`parts-appearance` pins the current body, rig, frozen motion, catalog, requested
+states and explicit selections. `parts-preview` uses the same pure resolver and
+RGBA renderer that later QA and baked export consume. Preview is always
+`unverified`; successful composition grants no visual or motion approval.
+
+```sh
+sprite-gen parts-appearance --assembly ./library/assembly.json --spec ./selection.json
+sprite-gen parts-preview --assembly ./library/assembly.json
+```
+
+Selection authoring example:
+
+```json
+{
+  "kind": "parts-appearance-selection",
+  "schema_version": 1,
+  "id": "explorer",
+  "selections": {"hair": {"id": "hair.a", "digest": "<exact imported digest>"}},
+  "palette": {"fabric_primary": [40, 100, 110]},
+  "mirror": false
+}
+```
+
+The example digest is a placeholder. Defaults, named presets, then explicit
+selections determine the chosen packs. An empty required slot can use its
+`body-default` only when the body explicitly provides every declared slot node.
+All selected pieces need mappings for every requested sample, including held
+pieces and invisible samples. Timing and repeated sample IDs come only from the
+frozen motion; parts never run separate timelines.
+
+The body is an explicit pack. Segmented bodies must provide every required
+topology node. `provides` identifies indivisible raster interfaces, and `replaces`
+removes all body pieces providing those nodes. A raster supplying several nodes
+cannot be partly removed. Cross-pack duplicate providers are errors unless the
+topology declares a slot `overrides` relationship. Humanoid presets declare
+mouth/eyes/brows over expression, bangs over hair, and side sleeves/footwear over
+their parent slots. Only shared provided nodes are suppressed: a mouth override
+leaves the expression's eye pieces in place. Cyclic slot precedence is rejected.
+Several pieces of one pack can jointly provide one node. Flat body packs support
+overlays only; they cannot claim separated limb replacement.
+
+Body and part pieces share one draw list. Per-sample `before`/`after` targets may
+be topology nodes, unique piece IDs, or qualified `pack-id.piece-id` names.
+Relations to known hidden/replaced pieces become inactive. Unknown or ambiguous
+targets and cycles fail. Unconstrained ties use lexical qualified IDs, so authors
+must declare meaningful overlaps. Socket visibility and placement visibility
+both apply; anatomical IDs retain their meaning through visibility and mirror.
+
+Placement is integer `socket - pivot + offset`, with original crop geometry
+already preserved by import. Art clipping fails unless `allow_clip` is explicit;
+preview records clipped pixel counts. Masks keep their target raster's alpha,
+using the legacy integer `(alpha * mask + 127) // 255` operation. `rig-canvas`
+masks start at (0,0); `part-local` masks start at the issuing piece's placement.
+They apply to the named target node's providers regardless of drawing order.
+Alpha masks read alpha; luma masks multiply grayscale intensity by alpha.
+Zero outside the mask means hidden. Multiple target masks multiply.
+
+Palette regions are disjoint coverage masks. Sample regions override a piece's
+channel region. v1 blends flat target RGB using integer rounding and preserves
+source alpha; it does not preserve shaded material ramps. Region overlap or size
+mismatch fails. Transparent output RGB is canonicalized to zero.
+
+Mirror requires both `rig.mirror_allowed` and `binding.mirror_safe` on every
+selected pack. Output pixels, sockets, local pivots and placement offsets reflect
+together; relative draw order and anatomical IDs are retained. The original plan
+and source offset remain available alongside transformed preview metadata.
+All presets default to refusing mirror, including the asymmetric fixture.
+
+Objects are published below `appearances/` and `previews/` by content digest.
+Appearance activation uses an assembly revision check. Replacing a named
+appearance detaches its old consumers/reviews without deleting history.
+Asset reads verify hashes under the workspace root and enforce byte/pixel limits.
+No source file is rewritten, resized, rotated, recentered or silently retargeted.
+
+Synthetic pixel tests cover five rigs, idle/walk/run, a five-slot 32 appearance /
+96 clip matrix, replacements, subslot precedence, body ordering, masks, palette,
+visibility, clipping and mirror. These tests validate engine behavior and are
+separate from acceptance of the actual explorer artwork and animations.

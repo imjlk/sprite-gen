@@ -94,7 +94,8 @@ data-defined customization workspaces. Five body presets include SD and tall hum
 a quadruped, a blob and an asymmetric six-limb fixture. Hash-bound
 [motion import/freeze](docs/parts/02-motion-snapshots.md) preserves final sources and exact time.
 The [part importer](docs/parts/03-part-import.md) preserves small rasters, crop offsets
-and separate body pieces. Composition and release approval are still planned. See the
+and separate body pieces. [Shared-timeline composition](docs/parts/04-composition.md)
+adds replacement, ordering, masks, palette and previews. Release approval is still planned. See the
 [parts contract and CLI](docs/parts/01-contract.md).
 
 ## What you actually get

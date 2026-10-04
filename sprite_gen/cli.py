@@ -32,7 +32,8 @@ from sprite_gen.effects import recolor, shadow
 from sprite_gen.scene import render, inspect_scene
 from sprite_gen.serve import serve_compose, serve_curation
 from sprite_gen.spec import migrate_breathe, migrate_request, parts_workspace
-from sprite_gen.curate import parts_motion
+from sprite_gen.curate import parts_motion, parts_appearance
+from sprite_gen.compose import compose_parts
 from sprite_gen.frames import parts_import
 from sprite_gen.gen.prepare import BODY_PLAN_HELP, STYLE_DEFAULT, _outline_config
 from sprite_gen.spec.subject import SUBJECTS
@@ -437,6 +438,16 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         "Import body or customization parts with exact crop/pivot geometry and frozen-motion coverage.",
         parts_import.add_arguments,
         parts_import.run,
+    ),
+    "parts-appearance": (
+        "Pin customization selections to the active frozen motion and body; no release approval.",
+        parts_appearance.add_arguments,
+        parts_appearance.run,
+    ),
+    "parts-preview": (
+        "Compose body and parts on the shared sample timeline with replacement, ordering, masks and palette.",
+        compose_parts.add_arguments,
+        compose_parts.run,
     ),
     # The argument surface is `serve_curation.add_arguments` itself, not a copy of it: the
     # webview's own `--help` and this subcommand are the same declaration, so `sprite-gen

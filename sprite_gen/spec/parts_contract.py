@@ -165,9 +165,9 @@ _node = _record({"id": _id, "parent": _nullable(_id), "required": _boolean,
 _socket = _record({"id": _id, "node": _id, "required": _boolean}, {"required": False})
 _slot = _record({"id": _id, "nodes": _ids, "sockets": _ids, "optional": _boolean,
                  "max_count": _positive, "empty_policy": _enum("body-default", "no-piece"),
-                 "semantic_role": _nullable(_id)},
+                 "semantic_role": _nullable(_id), "overrides": _ids},
                 {"nodes": [], "sockets": [], "optional": False, "max_count": 1,
-                 "empty_policy": "body-default", "semantic_role": None})
+                 "empty_policy": "body-default", "semantic_role": None, "overrides": []})
 _location = _record({"position": _point, "visible": _boolean,
                      "confidence": _enum("verified", "unverified")})
 _sample = _record({"id": _id, "image": _asset, "duration_ticks": _positive,
@@ -206,7 +206,8 @@ _piece = _record({"id": _id, "slot": _nullable(_id), "node": _id,
                  {"provides": [], "replaces": [], "join_interface": None, "palette_regions": {}})
 _binding = _record({"id": _id, "rig": _ref, "motion": _ref, "view": _id,
                     "occupies": _ids, "requires": _ids, "excludes": _ids,
-                    "pieces": _records(_piece, nonempty=True)}, {"requires": [], "excludes": []})
+                    "pieces": _records(_piece, nonempty=True), "mirror_safe": _boolean},
+                   {"requires": [], "excludes": [], "mirror_safe": False})
 _group = _record({"id": _id, "label": _string, "parent": _nullable(_id)}, {"parent": None})
 _choice = _record({"id": _id, "group": _id, "label": _string,
                    "options": _list(_ref, unique=True), "default": _selection,
@@ -238,8 +239,9 @@ _SCHEMAS = {
     "parts-appearance": _record({**_COMMON, "rig": _ref, "motion": _ref, "catalog": _ref,
                                  "states": _list(_id, nonempty=True, unique=True),
                                  "selections": _mapping(_selection), "presets": _ids,
-                                 "palette": _mapping(_rgb), "body": _list(_ref, unique=True)},
-                                {"selections": {}, "presets": [], "palette": {}, "body": []}),
+                                 "palette": _mapping(_rgb), "body": _list(_ref, unique=True),
+                                 "mirror": _boolean},
+                                {"selections": {}, "presets": [], "palette": {}, "body": [], "mirror": False}),
     "parts-review": _record({**_COMMON, "subject_digest": _hash,
                              "scope": _enum("part", "binding", "appearance"),
                              "status": _enum("approved", "rejected", "unverified"),
@@ -303,6 +305,20 @@ def _local(document):
         for slot in document["slots"]:
             _members(slot["nodes"], nodes, f"{path}.slots.{slot['id']}.node")
             _members(slot["sockets"], sockets, f"{path}.slots.{slot['id']}.socket")
+            _members(slot["overrides"], {s["id"] for s in document["slots"]}, f"{path}.slots.overrides")
+        # Slot precedence is data, including for non-humanoid catalogs.
+        relations = {s["id"]: s["overrides"] for s in document["slots"]}
+        def visit(name, pending, done):
+            if name in pending:
+                _fail(path, "slot override cycle")
+            if name in done:
+                return
+            for target in relations[name]:
+                visit(target, pending | {name}, done)
+            done.add(name)
+        done = set()
+        for name in relations:
+            visit(name, set(), done)
     elif kind == "parts-motion":
         pairs = [(c["state"], c["view"]) for c in document["clips"]]
         if len(set(pairs)) != len(pairs):
@@ -531,9 +547,13 @@ def _check_appearance(document, registry, complete):
             if interface is not None and piece["join_interface"] != interface:
                 _fail(path, f"join interface mismatch at {piece['slot']}")
     if complete:
+        body_nodes = {node for ref in document["body"]
+                      for piece in selected_bindings[ref["id"]]["pieces"] for node in piece["provides"]}
         for slot in topology_slots.values():
             if not slot["optional"] and slot["id"] not in covered_slots:
-                _fail(path, f"required slot {slot['id']} has no selection")
+                fallback = slot["empty_policy"] == "body-default" and slot["nodes"] and set(slot["nodes"]) <= body_nodes
+                if not fallback:
+                    _fail(path, f"required slot {slot['id']} has no selection or body default")
         clips = [c for c in motion["clips"] if c["state"] in document["states"]]
         _members(document["states"], {c["state"] for c in clips}, f"{path}.states")
         for binding in selected_bindings.values():

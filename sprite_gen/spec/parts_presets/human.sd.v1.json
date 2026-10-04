@@ -227,7 +227,10 @@
         "sockets": [
           "head"
         ],
-        "optional": true
+        "optional": true,
+        "overrides": [
+          "hair"
+        ]
       },
       {
         "id": "eyes",
@@ -238,7 +241,10 @@
         "sockets": [
           "face"
         ],
-        "optional": true
+        "optional": true,
+        "overrides": [
+          "expression"
+        ]
       },
       {
         "id": "brows",
@@ -249,7 +255,10 @@
         "sockets": [
           "face"
         ],
-        "optional": true
+        "optional": true,
+        "overrides": [
+          "expression"
+        ]
       },
       {
         "id": "mouth",
@@ -259,7 +268,10 @@
         "sockets": [
           "face"
         ],
-        "optional": true
+        "optional": true,
+        "overrides": [
+          "expression"
+        ]
       },
       {
         "id": "eyewear",
@@ -312,7 +324,10 @@
         "sockets": [
           "shoulder_l"
         ],
-        "optional": true
+        "optional": true,
+        "overrides": [
+          "upper"
+        ]
       },
       {
         "id": "footwear_l",
@@ -322,7 +337,10 @@
         "sockets": [
           "foot_l"
         ],
-        "optional": true
+        "optional": true,
+        "overrides": [
+          "footwear"
+        ]
       },
       {
         "id": "hand_item_l",
@@ -342,7 +360,10 @@
         "sockets": [
           "shoulder_r"
         ],
-        "optional": true
+        "optional": true,
+        "overrides": [
+          "upper"
+        ]
       },
       {
         "id": "footwear_r",
@@ -352,7 +373,10 @@
         "sockets": [
           "foot_r"
         ],
-        "optional": true
+        "optional": true,
+        "overrides": [
+          "footwear"
+        ]
       },
       {
         "id": "hand_item_r",

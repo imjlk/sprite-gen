@@ -34,7 +34,8 @@ _IMPORT = contract._record({
     "rig": contract._ref, "motion": contract._ref, "view": contract._id, "binding_id": contract._id,
     "occupies": contract._ids, "requires": contract._ids, "excludes": contract._ids,
     "pieces": contract._records(_INPUT_PIECE, nonempty=True), "states": contract._ids,
-}, {"role": "part", "body_mode": "segmented", "occupies": [], "requires": [], "excludes": [], "states": []})
+    "mirror_safe": contract._boolean,
+}, {"role": "part", "body_mode": "segmented", "occupies": [], "requires": [], "excludes": [], "states": [], "mirror_safe": False})
 
 
 def _normalize_asset(reader, reference, payloads, *, size=None):
@@ -201,7 +202,8 @@ def import_pack(assembly: Path, spec: Path, source_root: Path, *, allow_incomple
                 piece["sample_map"][clip_id][sample_id] = normalized
         pieces.append(piece)
     binding = {"id": request["binding_id"], "rig": request["rig"], "motion": request["motion"], "view": request["view"],
-               "occupies": request["occupies"], "requires": request["requires"], "excludes": request["excludes"], "pieces": pieces}
+               "occupies": request["occupies"], "requires": request["requires"], "excludes": request["excludes"],
+               "pieces": pieces, "mirror_safe": request["mirror_safe"]}
     missing = _coverage(binding, motion, request["states"] or index["states"])
     if missing and not allow_incomplete:
         raise contract.PartsContractError(f"missing part coverage: {missing}")

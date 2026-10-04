@@ -113,3 +113,39 @@ def part_spec(path, assembly, source_root, *, slot="hair", node="hair_front", so
                          } for sample in clip["samples"]} for clip in motion["clips"]}}]}
     path.write_bytes(workspace.json_bytes(value))
     return path
+
+
+def composition_fixture(preset="human.sd.v1", *, states=("idle", "walk", "run")):
+    """Sealed synthetic declarations + actual tiny rasters; not reviewed artwork."""
+    docs, _ = workspace.initial_documents(preset)
+    topology, rig, catalog = docs
+    center = [rig["canvas"]["width"] // 2, rig["canvas"]["height"] // 2]
+    motion = contract.seal({"kind": "parts-motion", "schema_version": 1, "id": "fixture.motion",
+        "rig": contract.reference(rig), "freeze": {"candidate_digest": "a" * 64,
+        "annotations": {"file": "synthetic-annotations.json", "sha256": "b" * 64},
+        "source_assets": [], "encoding_policy": "rgba-png.v1"}, "clips": [
+        {"id": state + ".right", "state": state, "view": rig["view"], "timebase": 1000,
+         "loop": state != "pulse", "samples": [{"id": f"sample.{i}",
+           "image": {"file": "synthetic-source.png", "sha256": "c" * 64}, "duration_ticks": t,
+           "sockets": {s["id"]: {"position": [center[0] + (i % 2), center[1]],
+             "visible": True, "confidence": "verified"} for s in topology["sockets"]}}
+          for i, t in enumerate([250, 125, 250])]} for state in states]})
+    images = {}
+    pieces = []
+    for i, node in enumerate(topology["nodes"]):
+        name = node["id"]
+        image = Image.new("RGBA", (3, 3), ((i * 17) % 256, (i * 31) % 256, (i * 43) % 256, 255))
+        if name == "root": image = Image.new("RGBA", (1, 1))
+        data = assets.png_bytes(image)
+        ref = {"file": name + ".png", "sha256": assets.sha256(data)}
+        images[("fixture.body", ref["file"])] = image
+        pieces.append({"id": name, "slot": None, "node": name, "mode": "held", "provides": [name],
+           "sample_map": {c["id"]: {s["id"]: {"image": ref, "pivot": [1, 1], "target_socket": "root",
+             "offset": [(i % 6) * 6 - 18, (i // 6) * 6 - 12]} for s in c["samples"]} for c in motion["clips"]}})
+    body = contract.seal({"kind": "parts-pack", "schema_version": 1, "id": "fixture.body", "design_id": "synthetic",
+        "role": "body", "bindings": [{"id": "fixture.body.binding", "rig": contract.reference(rig),
+        "motion": contract.reference(motion), "view": rig["view"], "occupies": [], "pieces": pieces}]})
+    appearance = contract.seal({"kind": "parts-appearance", "schema_version": 1, "id": "fixture.appearance",
+       "rig": contract.reference(rig), "motion": contract.reference(motion), "catalog": contract.reference(catalog),
+       "states": list(states), "body": [contract.reference(body)]})
+    return [topology, rig, motion, body, catalog, appearance], images
