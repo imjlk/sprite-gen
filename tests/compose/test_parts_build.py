@@ -88,7 +88,7 @@ def test_old_approval_or_missing_states_never_replace_current_release(tmp_path, 
         data["states"].append("run")
         assembly.write_bytes(workspace.json_bytes(data))
     elif change == "qa-policy":
-        monkeypatch.setattr(inspect_parts, "QA_POLICY", "parts.evidence.v2")
+        monkeypatch.setattr(inspect_parts, "QA_POLICY", "parts.evidence.changed-for-test")
     else:
         index, registry = workspace.read_workspace(assembly)
         body = registry[index["body"][0]["id"]]

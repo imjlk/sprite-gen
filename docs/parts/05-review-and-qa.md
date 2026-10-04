@@ -65,6 +65,20 @@ clips remain unverified. There is no lowest-silhouette-pixel foot inference or
 automatic in-place walking failure. Profiles without contact nodes impose no
 humanoid foot requirement.
 
+With `--contacts`, QA and review also snapshot `preview.json.world_travel` and
+`world-travel/<clip>/frames/<sample>.png`. Each frame translates the **complete
+rendered character** by the supplied world offset. Native pixels, sample IDs,
+ticks, loop flags and anatomical IDs remain unchanged. A contact sheet selects
+up to twelve ordered samples and marks supplied stance points; these markers
+are separate from the exact world-frame PNGs. Missing travel samples report
+partial coverage. Travel is never inferred from feet, and repeated-cycle travel
+accumulation must be supplied by the game rather than guessed from one cycle.
+
+World-preview allocation obeys the existing per-image and total pixel budgets.
+The preview metadata, generated image hashes and contact annotations participate
+in the review evidence. Modifying a world image blocks approval. This evidence
+format uses `parts.evidence.v2`, so an older policy decision cannot approve it.
+
 Structural/measurement errors block review. Warnings and unverified facts remain
 visible in the evidence even after an explicit decision. Release requires a
 current approved appearance review with all five decisions, and reruns the

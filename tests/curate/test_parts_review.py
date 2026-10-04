@@ -44,6 +44,26 @@ def test_approval_requires_explicit_checks_and_exact_candidate_hash(tmp_path):
     parts_review.verify(assembly.parent, index, registry, registry[approved["review"]["id"]])
 
 
+def test_world_travel_images_are_hashed_review_evidence_and_tampering_blocks_approval(tmp_path):
+    assembly, _, checks = ready(tmp_path)
+    index, registry = workspace.read_workspace(assembly)
+    motion = registry[index['motion']['id']]
+    contacts = tmp_path/'contacts.json'
+    contacts.write_bytes(workspace.json_bytes({'kind': 'parts-contact-annotations', 'schema_version': 1,
+        'motion': index['motion'], 'clips': {clip['id']: {'stances': [],
+            'world_offsets': {sample['id']: [number, 0] for number, sample in enumerate(clip['samples'])}}
+            for clip in motion['clips']}}))
+    result = parts_review.prepare(assembly, contacts=contacts)
+    folder = (assembly.parent/result['file']).parent
+    preview = workspace.read_json(folder, 'preview.json')
+    frame = preview['world_travel'][0]['samples'][0]['image']
+    candidate = workspace.read_json(folder, 'review.json')
+    assert frame in candidate['evidence']['artifacts']
+    (folder/frame['file']).write_bytes(b'tampered world preview')
+    with pytest.raises(contract.PartsContractError):
+        parts_review.decide(assembly, result['review_hash'], checks, 'fixture-test')
+
+
 def test_rejected_review_does_not_grant_release_approval(tmp_path):
     assembly, _, checks = ready(tmp_path)
     result = parts_review.prepare(assembly)
@@ -66,7 +86,7 @@ def test_stale_palette_states_policy_toolchain_or_bytes_cannot_be_approved(tmp_p
         data["states"].append("run")
         assembly.write_bytes(workspace.json_bytes(data))
     elif change == "policy":
-        monkeypatch.setattr(inspect_parts, "QA_POLICY", "parts.evidence.v2")
+        monkeypatch.setattr(inspect_parts, "QA_POLICY", "parts.evidence.changed-for-test")
     elif change == "toolchain":
         monkeypatch.setattr(inspect_parts, "toolchain", lambda: {"fake": "changed"})
     elif change == "evidence":

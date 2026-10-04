@@ -1,0 +1,148 @@
+{
+  "artwork_acceptance": false,
+  "evidence": "synthetic fixture only",
+  "kind": "parts-pipeline-proof",
+  "release_ready": false,
+  "rigs": [
+    {
+      "appearances": 32,
+      "distinct_appearances_per_state": {
+        "idle": 32,
+        "run": 32,
+        "walk": 32
+      },
+      "evidence": "synthetic fixture",
+      "explicit_preview_export": {
+        "build": {
+          "digest": "9b4255349f836ed4c28d8765a214b1f75bc208fe254c59fe86525f32c5cdc3a0",
+          "id": "build.929cab2a454e58d27ff355fd0e984ece"
+        },
+        "byte_identical_repeat": true,
+        "clips": 3,
+        "manifest": "builds/export-check/snapshots/build.929cab2a454e58d27ff355fd0e984ece/9b4255349f836ed4c28d8765a214b1f75bc208fe254c59fe86525f32c5cdc3a0/manifest.json",
+        "samples": 20
+      },
+      "inputs_preserved": true,
+      "preset": "human.sd.v1",
+      "release_ready": false,
+      "sample_evaluations": 640,
+      "shared_motion_clips": 3,
+      "state_cases": 96,
+      "swap_clock_preserved": true
+    },
+    {
+      "appearances": 2,
+      "distinct_appearances_per_state": {
+        "idle": 2,
+        "run": 2,
+        "walk": 2
+      },
+      "evidence": "synthetic fixture",
+      "explicit_preview_export": {
+        "build": {
+          "digest": "d2bb07fc1df3bc8585a790eb46e28f181935838507934453c5d4dd081d7f011f",
+          "id": "build.252a32e1069a8b708059db54ffc28445"
+        },
+        "byte_identical_repeat": true,
+        "clips": 3,
+        "manifest": "builds/export-check/snapshots/build.252a32e1069a8b708059db54ffc28445/d2bb07fc1df3bc8585a790eb46e28f181935838507934453c5d4dd081d7f011f/manifest.json",
+        "samples": 20
+      },
+      "inputs_preserved": true,
+      "preset": "human.tall.v1",
+      "release_ready": false,
+      "sample_evaluations": 40,
+      "shared_motion_clips": 3,
+      "state_cases": 6,
+      "swap_clock_preserved": true
+    },
+    {
+      "appearances": 4,
+      "distinct_appearances_per_state": {
+        "idle": 4,
+        "run": 4,
+        "walk": 4
+      },
+      "evidence": "synthetic fixture",
+      "explicit_preview_export": {
+        "build": {
+          "digest": "a82442b3c4ca5137d6afa5d075a6b8c02256afbbe3ad5c94cf20e2f74b6805c8",
+          "id": "build.133aea4b800c45ee4632b3f544f8752a"
+        },
+        "byte_identical_repeat": true,
+        "clips": 3,
+        "manifest": "builds/export-check/snapshots/build.133aea4b800c45ee4632b3f544f8752a/a82442b3c4ca5137d6afa5d075a6b8c02256afbbe3ad5c94cf20e2f74b6805c8/manifest.json",
+        "samples": 20
+      },
+      "inputs_preserved": true,
+      "preset": "canine.medium.v1",
+      "release_ready": false,
+      "sample_evaluations": 80,
+      "shared_motion_clips": 3,
+      "state_cases": 12,
+      "swap_clock_preserved": true
+    },
+    {
+      "appearances": 2,
+      "distinct_appearances_per_state": {
+        "idle": 2,
+        "pulse": 2,
+        "run": 2,
+        "walk": 2
+      },
+      "evidence": "synthetic fixture",
+      "explicit_preview_export": {
+        "build": {
+          "digest": "bfd17528b4595d851431dd95c8d30f1be8a0765bf6d06b4746fcd121121c531e",
+          "id": "build.aa2259f76f1efbd6324e2bfc91502444"
+        },
+        "byte_identical_repeat": true,
+        "clips": 4,
+        "manifest": "builds/export-check/snapshots/build.aa2259f76f1efbd6324e2bfc91502444/bfd17528b4595d851431dd95c8d30f1be8a0765bf6d06b4746fcd121121c531e/manifest.json",
+        "samples": 22
+      },
+      "inputs_preserved": true,
+      "preset": "blob.fixture.v1",
+      "release_ready": false,
+      "sample_evaluations": 44,
+      "shared_motion_clips": 4,
+      "state_cases": 8,
+      "swap_clock_preserved": true
+    },
+    {
+      "appearances": 4,
+      "distinct_appearances_per_state": {
+        "idle": 4,
+        "run": 4,
+        "walk": 4
+      },
+      "evidence": "synthetic fixture",
+      "explicit_preview_export": {
+        "build": {
+          "digest": "459ec7bbd5772e4124e3d8e2894c32090d88cf507eb52829e414cde0e5d12654",
+          "id": "build.84f7977a08771b89160cfe57d693906c"
+        },
+        "byte_identical_repeat": true,
+        "clips": 3,
+        "manifest": "builds/export-check/snapshots/build.84f7977a08771b89160cfe57d693906c/459ec7bbd5772e4124e3d8e2894c32090d88cf507eb52829e414cde0e5d12654/manifest.json",
+        "samples": 20
+      },
+      "inputs_preserved": true,
+      "preset": "asymmetric.six-limb.v1",
+      "release_ready": false,
+      "sample_evaluations": 80,
+      "shared_motion_clips": 3,
+      "state_cases": 12,
+      "swap_clock_preserved": true
+    }
+  ],
+  "schema_version": 1,
+  "toolchain": {
+    "export_policy": "parts.atlas-dedup.v1",
+    "numpy": "2.5.3",
+    "parts_code_sha256": "40d70142ecac98520f527f58310144fd79ef6a0c00a7af6b1ddcf59e5048a025",
+    "pillow": "12.3.0",
+    "python": "3.13.2",
+    "sprite-gen": "2.20.0"
+  }
+}

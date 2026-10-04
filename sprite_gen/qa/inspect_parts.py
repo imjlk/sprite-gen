@@ -10,13 +10,14 @@ from pathlib import Path
 import platform
 
 from sprite_gen._deps import np
+from PIL import Image, ImageDraw
 from PIL import __version__ as pillow_version
 
 from sprite_gen.compose import compose_parts, parts_resolve, export_aseprite
 from sprite_gen.curate import parts_motion
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 
-QA_POLICY = "parts.evidence.v1"
+QA_POLICY = "parts.evidence.v2"
 REVIEW_CHECKS = ("fitting", "occlusion", "motion", "contact", "style")
 
 _STANCE = contract._record({"node": contract._id, "socket": contract._id,
@@ -102,6 +103,72 @@ def _contact_checks(contacts, motion, topology, mirror, canvas_width):
     return checks
 
 
+def _world_travel_previews(plan, clips, payloads, contacts, checks):
+    """Translate the complete rendered sprite by explicit game-world travel.
+
+    These are inspection artifacts of one appearance. They neither infer travel
+    from feet nor change native sprite samples, socket IDs, pixels or timing.
+    """
+    if contacts is None:
+        return []
+    output, total_pixels = [], 0
+    for clip in clips:
+        declaration = contacts['clips'].get(clip['id'])
+        if declaration is None:
+            continue
+        samples = [sample for sample in clip['samples'] if sample['id'] in declaration['world_offsets']]
+        if not samples:
+            continue
+        positions = [declaration['world_offsets'][sample['id']] for sample in samples]
+        minimum = [min(p[axis] for p in positions) for axis in (0, 1)]
+        maximum = [max(p[axis] for p in positions) for axis in (0, 1)]
+        width = maximum[0]-minimum[0]+plan['canvas']['width']
+        height = maximum[1]-minimum[1]+plan['canvas']['height']
+        total_pixels += width*height*len(samples)
+        if width*height > assets.MAX_FRAME_PIXELS or total_pixels > assets.MAX_TOTAL_PIXELS:
+            raise contract.PartsContractError('world-travel preview exceeds the image pixel budget')
+        rows = []
+        for sample, position in zip(samples, positions):
+            image = Image.new('RGBA', (width, height))
+            offset = [position[axis]-minimum[axis] for axis in (0, 1)]
+            image.alpha_composite(assets.image_bytes(payloads[sample['image']['file']]), tuple(offset))
+            filename = f'world-travel/{clip["id"]}/frames/{sample["id"]}.png'
+            payloads[filename] = assets.png_bytes(image)
+            rows.append({'id': sample['id'], 'duration_ticks': sample['duration_ticks'],
+                'world_offset': position, 'sprite_position': offset,
+                'image': {'file': filename, 'sha256': assets.sha256(payloads[filename])}})
+        report = {'id': clip['id'], 'state': clip['state'], 'timebase': clip['timebase'], 'loop': clip['loop'],
+            'canvas': {'width': width, 'height': height}, 'world_origin': minimum, 'samples': rows,
+            'coverage': 'complete' if len(samples) == len(clip['samples']) else 'partial',
+            'world_offset_policy': 'one declared source cycle; repeated-cycle accumulation is not supplied',
+            'contact_truth': 'unverified; game travel and stance points are supplied annotations'}
+        capacity = assets.MAX_FRAME_PIXELS//(width*(height+18))
+        count = min(12, len(rows), capacity)
+        if count:
+            columns = next(n for n in range(min(4, count), 0, -1) if count % n == 0)
+            sheet = Image.new('RGBA', (columns*width, (count//columns)*(height+18)), (239, 240, 234, 255))
+            drawing = ImageDraw.Draw(sheet)
+            selected = list(range(len(rows))) if count == len(rows) else [i*(len(rows)-1)//max(1, count-1) for i in range(count)]
+            for number, source_index in enumerate(selected):
+                row = rows[source_index]
+                x, y = number % columns*width, number//columns*(height+18)
+                sheet.alpha_composite(assets.image_bytes(payloads[row['image']['file']]), (x, y+18))
+                caption = Image.new('RGBA', (width, 18))
+                ImageDraw.Draw(caption).text((2, 2), f'{row["id"]} travel {tuple(row["world_offset"])}', fill=(25, 25, 25, 255))
+                sheet.alpha_composite(caption, (x, y))
+                for check in checks:
+                    if check.get('id', '').startswith('contact.'+clip['id']+'.') and row['id'] in check['samples']:
+                        point = check['world_points'][check['samples'].index(row['id'])]
+                        px, py = x+point[0]-minimum[0], y+18+point[1]-minimum[1]
+                        color = (180, 55, 45, 255) if check['status'] == 'error' else (45, 120, 85, 255)
+                        drawing.ellipse((px-1, py-1, px+1, py+1), fill=color)
+            filename = f'world-travel/{clip["id"]}/contact-sheet.png'
+            payloads[filename] = assets.png_bytes(sheet)
+            report['contact_sheet'] = {'file': filename, 'sha256': assets.sha256(payloads[filename])}
+        output.append(report)
+    return output
+
+
 def collect(root, index, registry, contacts=None):
     if index["appearance"] is None:
         raise contract.PartsContractError("QA requires an active appearance")
@@ -140,7 +207,6 @@ def collect(root, index, registry, contacts=None):
     preview = {"kind": "parts-preview", "schema_version": 1, "appearance": index["appearance"],
         "plan_digest": plan["digest"], "render_policy": parts_resolve.RENDER_POLICY,
         "canvas": plan["canvas"], "mirror": plan["mirror"], "clips": clips, "status": "unverified", "release_ready": False}
-    preview["digest"] = contract.content_digest(preview)
     checks = [{"id": "declarations-coverage-assets", "status": "passed", "message": "exact revisions, requested samples and read asset hashes verified"}]
     measurements = []
     for clip in clips:
@@ -156,7 +222,11 @@ def collect(root, index, registry, contacts=None):
                 checks.append({"id": f"clip.{clip['id']}.{sample['id']}", "status": "warning", "message": f"{clipped} pixels clipped with explicit permission"})
     motion = registry[appearance["motion"]["id"]]
     topology = registry[plan["topology"]["id"]]
-    checks += _contact_checks(contacts, motion, topology, plan["mirror"], plan["canvas"]["width"])
+    contact_checks = _contact_checks(contacts, motion, topology, plan["mirror"], plan["canvas"]["width"])
+    checks += contact_checks
+    if contacts is not None:
+        preview['world_travel'] = _world_travel_previews(plan, clips, payloads, contacts, contact_checks)
+    preview["digest"] = contract.content_digest(preview)
     checks += [{"id": name, "status": "unverified", "message": "requires review of this exact rendered appearance"} for name in REVIEW_CHECKS]
     qa = {"kind": "parts-qa", "schema_version": 1, "appearance": index["appearance"], "inputs": inputs,
           "plan_digest": plan["digest"], "preview_digest": preview["digest"], "render_policy": parts_resolve.RENDER_POLICY,

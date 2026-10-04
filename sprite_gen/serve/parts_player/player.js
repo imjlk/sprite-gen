@@ -3,6 +3,7 @@ const names = {hair:'헤어',expression:'표정',upper:'상의',lower:'하의',f
 const labels = {hair:['숏 헤어','보브 헤어'],expression:['기본','미소'],upper:['틸 재킷','사파리 재킷'],lower:['반바지','긴바지'],footwear:['운동화','앵클 부츠'],bangs:['숏 앞머리','보브 앞머리'],eyes:['기본 눈','미소 눈'],brows:['기본 눈썹','편안한 눈썹'],mouth:['중립','미소'],sleeve_l:['틸 소매','사파리 소매'],sleeve_r:['틸 소매','사파리 소매'],footwear_l:['운동화','앵클 부츠'],footwear_r:['운동화','앵클 부츠']};
 const optionLabels = {'sd.simple.shirt':'탱크탑','sd.simple.shirt.b':'포켓 베스트','sd.simple.hair.b':'단발','sd.simple.eyes.b':'웃는 눈'};
 Object.assign(optionLabels, {'sd.wardrobe.hair.a':'숏 헤어','sd.wardrobe.hair.b':'단발','sd.wardrobe.expression.a':'기본','sd.wardrobe.expression.b':'눈 미소','sd.wardrobe.upper.a':'탱크탑','sd.wardrobe.upper.b':'포켓 베스트','sd.wardrobe.lower.a':'카고 반바지','sd.wardrobe.lower.b':'긴바지','sd.wardrobe.footwear.a':'운동화','sd.wardrobe.footwear.b':'앵클 부츠'});
+Object.assign(optionLabels, {'sd.equipment.headwear':'사파리 모자','sd.equipment.gloves':'가죽 장갑','sd.equipment.back_accessory':'탐험 백팩'});
 const stateNames = {idle:'아이들',walk:'걷기',run:'뛰기'};
 let metadata, state, selected={}, playing=true, origin=performance.now(), held=0, dirty=true, revision=0, busy=false, lastSent=0;
 const layerNodes=new Map(), textureCache=new Map();

@@ -7,6 +7,7 @@ generation provider or review approval is used. Every output is a preview build.
 from __future__ import annotations
 
 import argparse
+from fractions import Fraction
 from itertools import product
 import json
 from pathlib import Path
@@ -14,6 +15,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from sprite_gen.compose import parts_build
+from sprite_gen.compose.parts_runtime import PartsPlayer
 from sprite_gen.curate import parts_motion, parts_appearance
 from sprite_gen.frames import parts_import
 from sprite_gen.qa import inspect_parts
@@ -112,20 +114,54 @@ def fixture(base, preset):
         for slot, nodes in interfaces.items():
             options[slot] = [pack(f"{slot}.{variant}", "part", [(provided, slot, node, provided,
                 [210, 90, 40, 255] if variant == 0 else [40, 120, 210, 255], variant) for node, provided in nodes], [slot]) for variant in range(2)]
-    builds = []
-    variants = list(product([0, 1], repeat=5)) if options else [()]
+    else:
+        # Actual raster part imports and swaps on the other profiles, including
+        # tall sleeves, canine gear/tail and two non-adjacent asymmetric limbs.
+        slots = {'human.tall.v1': ('upper',), 'canine.medium.v1': ('torso_gear', 'tail'),
+                 'blob.fixture.v1': ('ornament',), 'asymmetric.six-limb.v1': ('appendage_0', 'appendage_5')}[preset]
+        for slot in slots:
+            declaration = next(s for s in topology['slots'] if s['id'] == slot)
+            options[slot] = [None, pack(slot+'.overlay', 'part', [(node, slot, node, node,
+                [200, 100, 45, 255], 1) for node in declaration['nodes']], [slot])]
+    variants = list(product([0, 1], repeat=len(options)))
+    selection = write(base / "selection.json", {"kind": "parts-appearance-selection", "schema_version": 1,
+        "id": "fixture.runtime", "selections": {slot: refs[0] for slot, refs in options.items()}})
+    parts_appearance.create(assembly, selection)
+    player = PartsPlayer.from_workspace(assembly)
+    source_hashes = {p.relative_to(library).as_posix(): assets.sha256(p.read_bytes())
+                     for p in library.rglob("*") if p.is_file()}
+    evaluations = 0
+    state_hashes = {clip["state"]: set() for clip in motion["clips"]}
     for bits in variants:
-        identity = "fixture." + ("".join(map(str, bits)) if bits else "default")
-        selection = write(base / "selection.json", {"kind": "parts-appearance-selection", "schema_version": 1,
-            "id": identity, "selections": {slot: options[slot][v] for slot, v in zip(options, bits)}})
-        parts_appearance.create(assembly, selection)
-        first = parts_build.build(assembly, base / "builds" / identity)
-        assert first == parts_build.build(assembly, base / "builds" / identity)
-        builds.append({"appearance": identity, "build": first["build"], "clips": first["clips"],
-            "samples": first["samples"], "manifest": str(Path(first["manifest"]).relative_to(base))})
-    return {"preset": preset, "evidence": "synthetic fixture", "appearances": len(builds),
-            "clips": sum(b["clips"] for b in builds), "samples": sum(b["samples"] for b in builds),
-            "release_ready": False, "builds": builds}
+        player.seek(Fraction(1, 7))
+        clock = player.current()[2]
+        player.set_selection({slot: options[slot][v] for slot, v in zip(options, bits)})
+        assert player.current()[2] == clock
+        for clip in motion["clips"]:
+            player.set_state(clip["state"])
+            tick = 0
+            for number, sample in enumerate(clip["samples"]):
+                player.seek(Fraction(tick, clip["timebase"]))
+                image, evidence = player.frame()
+                assert all(row["clipped_pixels"] == 0 for row in evidence["evidence"]["draw"])
+                if number == 0:
+                    state_hashes[clip["state"]].add(assets.sha256(image.tobytes()))
+                evaluations += 1
+                tick += sample["duration_ticks"]
+    assert source_hashes == {p.relative_to(library).as_posix(): assets.sha256(p.read_bytes())
+                            for p in library.rglob("*") if p.is_file()}
+    assert all(len(hashes) == len(variants) for hashes in state_hashes.values())
+    # Export is a separate explicit engineering check of one concrete selection.
+    # The runtime wardrobe matrix is not baked into an appearance clip library.
+    first = parts_build.build(assembly, base / "builds" / "export-check")
+    assert first == parts_build.build(assembly, base / "builds" / "export-check")
+    return {"preset": preset, "evidence": "synthetic fixture", "appearances": len(variants),
+            "shared_motion_clips": len(motion["clips"]), "state_cases": len(variants)*len(motion["clips"]),
+            "sample_evaluations": evaluations, "swap_clock_preserved": True, "inputs_preserved": True,
+            "distinct_appearances_per_state": {state: len(hashes) for state, hashes in state_hashes.items()},
+            "release_ready": False, "explicit_preview_export": {"build": first["build"],
+                "clips": first["clips"], "samples": first["samples"],
+                "manifest": str(Path(first["manifest"]).relative_to(base)), "byte_identical_repeat": True}}
 
 
 def main():
@@ -141,7 +177,9 @@ def main():
         "rigs": [fixture(output / preset, preset) for preset in PRESETS]}
     write(output / "proof.json", report)
     print(json.dumps({"proof": str(output / "proof.json"), "rigs": len(report["rigs"]),
-                      "sd_appearances": report["rigs"][0]["appearances"], "sd_clips": report["rigs"][0]["clips"], "release_ready": False}, indent=2))
+                      "sd_appearances": report["rigs"][0]["appearances"],
+                      "sd_shared_motion_clips": report["rigs"][0]["shared_motion_clips"],
+                      "sd_state_cases": report["rigs"][0]["state_cases"], "release_ready": False}, indent=2))
 
 
 if __name__ == "__main__":

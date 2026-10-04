@@ -1,0 +1,123 @@
+{
+  "archive": {
+    "bytes": 21736429,
+    "file": "sd-explorer-m1-layers-20261005.tar.gz",
+    "files": 4366,
+    "sha256": "8518242c1d5caf105d96320300c1a2f3d96ea934c4fd95e209ea0bd73e97609d"
+  },
+  "archive_roundtrip": {
+    "all_empty_body_only": true,
+    "all_file_hashes_equal": true,
+    "body_and_clock_preserved": true,
+    "distinct_rasters_per_state_at_midcycle": {
+      "idle": 256,
+      "run": 256,
+      "walk": 256
+    }
+  },
+  "art_approved": false,
+  "body_motion": {
+    "appearance_clips_baked": 0,
+    "art_approved": false,
+    "body_frames_and_timing_unchanged": true,
+    "body_replacements": 0,
+    "body_split": false,
+    "kind": "sd-equipment-body-provenance",
+    "motion": {
+      "digest": "7d915eea4b2eb110a70f2696e1a891b56ab19fcad8dcaf40efa1bfbc839dc62c",
+      "id": "sd.equipment.video.motion"
+    },
+    "occlusion_target": "clothing only; intact root body remains unmasked",
+    "previous_motion": {
+      "digest": "cd1924dcb54b5be9c47dfd151ae30158210302a98410e3246175fa7b9e88786a",
+      "id": "sd.wardrobe.video.motion"
+    },
+    "release_ready": false,
+    "runtime_texture_warps": 0,
+    "schema_version": 1
+  },
+  "browser_check": {
+    "all_eight_groups_swapped": true,
+    "backpack_behind_whole_body": true,
+    "body_and_sample_preserved_after_all_empty": true,
+    "console_errors": 0,
+    "empty_layers": 1,
+    "forearm_remains_in_front_of_upper": true,
+    "kind": "sd-m1-browser-check",
+    "schema_version": 1,
+    "scope": "representative browser scenes, not full art acceptance",
+    "states_visually_checked": [
+      "idle",
+      "walk",
+      "run"
+    ]
+  },
+  "generation": "built-in image_gen equipment and pose drawings; three shared real Grok body videos",
+  "kind": "sd-m1-runtime-layer-checkpoint",
+  "known_limits": [
+    "pose matching and bounded palm estimates need further art acceptance",
+    "anatomical hand identity, style and foot contact remain unverified",
+    "world movement is authored one-cycle illustrative travel; no declared stance or inferred contact"
+  ],
+  "recipes": {
+    "scripts/dev/parts_pipeline_proof.py": "dd64c1c8ee093991d241832543cfb2580a6149c913d7fe859b8ac02ad8655cc4",
+    "scripts/dev/sd_explorer_equipment_layers.py": "d47a4a965c30d485ab52e4284cec14cf5264f2e2dce566755dd3bbe506264067",
+    "sprite_gen/qa/inspect_parts.py": "ce0931da56f214e5890dff3698fdf47303d671ffb98b09a3f2cbe1fa9f449dfa",
+    "sprite_gen/serve/parts_player/player.js": "08eea891f8ad17e6db1756282b598d11ebda1d38478de35caebb7bfdf9e0944d"
+  },
+  "regression_tests": {
+    "javascript_syntax": "passed",
+    "passed": 209,
+    "scope": "all parts contracts/import/runtime/QA/review/export/server and legacy goldens",
+    "seconds": 28.46
+  },
+  "release_ready": false,
+  "schema_version": 1,
+  "toolchain": {
+    "export_policy": "parts.atlas-dedup.v1",
+    "numpy": "2.5.3",
+    "parts_code_sha256": "40d70142ecac98520f527f58310144fd79ef6a0c00a7af6b1ddcf59e5048a025",
+    "pillow": "12.3.0",
+    "python": "3.13.2",
+    "sprite-gen": "2.20.0"
+  },
+  "validation": {
+    "all_selection_pairs": 112,
+    "appearance_clips_baked": 0,
+    "appearances": 256,
+    "art_approved": false,
+    "base_appearances": 32,
+    "coverage_scope": "all scene samples; CPU raster bounds at sample zero only; visual review separate",
+    "distinct_rasters_at_sample_zero": {
+      "idle": 256,
+      "run": 256,
+      "walk": 256
+    },
+    "optional_empty_verified": true,
+    "release_ready": false,
+    "risk_triples": 24,
+    "runtime_texture_warps": 0,
+    "sample_evaluations": 73728,
+    "shared_motion_clips": 3,
+    "state_cases": 768,
+    "swap_clock_preserved": true,
+    "whole_body_preserved": true
+  },
+  "visual_scope": {
+    "corrected_difficult_run_poses": 8,
+    "full_frame_art_acceptance": false,
+    "preliminary_arm_equipment_renders_before_glove_update": 120,
+    "preliminary_head_combinations_before_glove_update": 24
+  },
+  "world_preview": {
+    "ordered_frames": 288,
+    "qa_policy": "parts.evidence.v2",
+    "states": 3,
+    "status": "unverified",
+    "travel_speed_px_per_second": {
+      "idle": 0,
+      "run": 48,
+      "walk": 24
+    }
+  }
+}

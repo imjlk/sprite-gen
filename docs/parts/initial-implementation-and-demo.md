@@ -21,13 +21,15 @@
 - [실행 가능한 workspace·원본 영상·개별 파츠 패키지](assets/sd-explorer-simple-layers-20261005.tar.gz)
 - [출처·해시·검증 범위](assets/sd-explorer-simple-layers-20261005.provenance.json), [생성 prompt](assets/sd-explorer-simple-layers-20261005.prompts.json), [검수 화면](assets/sd-explorer-simple-layer-viewer-20261005.jpg)
 
-현재 실행 데모는 `assets/sd-explorer-five-slot-layers-20261005-v6/library/assembly.json`이다. [로컬 뷰어](http://127.0.0.1:8766/)에서 헤어(숏/단발), 표정(기본 눈/웃는 눈), 상의(탱크탑/포켓 베스트), 하의(카고 반바지/긴바지), 신발(운동화/앵클 부츠)을 각각 선택한다. 표정 두 종은 눈·눈썹 레이어이며 작은 입은 기본 몸에 남는다. 입 subslot의 실제 아트는 아직 포함하지 않는다.
+현재 실행 데모는 `assets/sd-explorer-equipment-20261005-v4/library/assembly.json`이다. 기본 5종 각 2디자인에 모자·장갑·백팩의 None/on을 추가했다. 기본 32외형, 장비 포함 256선택 모두 같은 실제 몸 모션 세 개를 사용한다. 온전한 몸 뒤의 백팩, 헤어 위의 모자, 포즈 그림을 사용하는 장갑이 연결됐으며, 상의의 앞팔 가림은 옷에만 적용한다. [M1 검증 기록](m1-verification-20261005.md), [현재 실행 패키지](assets/sd-explorer-m1-layers-20261005.tar.gz), [출처·검증 범위](assets/sd-explorer-m1-layers-20261005.provenance.json), [현재 뷰어 화면](assets/sd-explorer-m1-viewer-20261005.jpg)을 따른다.
+
+이전 기본 5slot checkpoint는 `assets/sd-explorer-five-slot-layers-20261005-v6/library/assembly.json`이다. [로컬 뷰어](http://127.0.0.1:8766/)에서 헤어(숏/단발), 표정(기본 눈/웃는 눈), 상의(탱크탑/포켓 베스트), 하의(카고 반바지/긴바지), 신발(운동화/앵클 부츠)을 각각 선택한다. 표정 두 종은 눈·눈썹 레이어이며 작은 입은 기본 몸에 남는다. 입 subslot의 실제 아트는 아직 포함하지 않는다.
 
 몸 전체의 원본 프레임·머리/몸통 위치·sample 순서·시간은 그대로 유지한다. 다섯 slot 선언 때문에 rig/motion의 메타데이터 digest는 새로 고정했으며, 이전 MotionSet과 세 clip의 sample 전체가 같은지 검사했다. 헤어의 `[2,-1]` 위치 보정을 유지하고, 상의는 제작 단계에서 한 번 폭을 맞춘 두 장의 held 그림을 가슴 중심으로 이동한다.
 
 하의·신발은 실제 영상의 다리 silhouette가 다른 16포즈를 기준으로 제작한 그림이다. 네 디자인이 각각 16개 파츠 그림을 가지며, 같은 몸 sample에 맞는 그림을 선택하고 상대 위치만 이동한다. 런타임에 몸을 자르거나 관절을 회전하거나 그림을 변형하지 않는다. 포즈 그림은 32외형이 공유하며 조합별 clip은 생성하지 않았다. 생성 원본, 참고 crop의 좌표, 한 번 적용한 fitting 값과 전체 sample binding을 실행 패키지에 보존한다.
 
-32외형 × 3상태 × 96sample = 9,216개의 재생 검사를 통과했다. 각 상태에서 32개의 서로 다른 외형, 기본 몸과 정확한 clock 보존, 선택/empty 교체, canvas 밖 픽셀 0을 확인했다. 브라우저에서는 실제 재생과 같은 run sample에서 다섯 파츠 해제 전후의 동일한 body texture·위치를 확인했다. 관련 회귀는 67 passed이고 JavaScript 문법 검사도 통과했다. 이는 기술 coverage이며 모든 프레임의 시각적 승인이 아니다. nearest-pose 매칭의 뛰기 경계, 팔과 상의의 가림, 추가 장비 pair/triple 검수는 남아 있다. `art_approved=false`, `release_ready=false`를 유지한다.
+32외형 × 3상태 × 96sample = 9,216개의 재생 검사를 통과했다. 각 상태에서 32개의 서로 다른 외형, 기본 몸과 정확한 clock 보존, 선택/empty 교체, canvas 밖 픽셀 0을 확인했다. 브라우저에서는 실제 재생과 같은 run sample에서 다섯 파츠 해제 전후의 동일한 body texture·위치를 확인했다. 관련 회귀는 67 passed이고 JavaScript 문법 검사도 통과했다. 이는 기술 coverage이며 모든 프레임의 시각적 승인이 아니다. 최신 checkpoint에서는 앞팔 가림과 추가 장비 연결을 구현했다. 이전 검사 수량은 당시 범위이며, 최신 검증과 미승인 아트 범위는 M1 검증 기록을 따른다. `art_approved=false`, `release_ready=false`를 유지한다.
 
 - [현재 실행 workspace·영상·원본 아트 패키지](assets/sd-explorer-five-slot-layers-20261005.tar.gz)
 - [5slot 제작 recipe](../../scripts/dev/sd_explorer_five_slot_layers.py), [출처·검증·남은 범위](assets/sd-explorer-five-slot-layers-20261005.provenance.json), [생성 prompt](assets/sd-explorer-five-slot-layers-20261005.prompts.json)
@@ -52,7 +54,7 @@
 | PR04 | 공통 timeline, 독립 layer/상대좌표 보간, subslot 우선순위, draw order, mask/palette/mirror, appearance/preview CLI 구현. 다섯 체형과 synthetic 32외형·96검증 사례 |
 | PR05 | 입력·render·QA evidence snapshot, contact/world travel 측정, 명시적 검수 결정, scope와 오래된 승인 차단 구현 |
 | PR06 | 결정론적 다중 state atlas·manifest·Aseprite mapping, 순서/ticks 유지 dedup, build lock와 승인 release gate 구현 |
-| 실제 SD 데모 | 몸 분해·재질 투영 데모 철회. 온전한 몸 위에 기본 5종 각 2디자인, 32외형과 실제 영상 3상태 연결. 9,216sample 기술 검사 통과. 전체 동작의 아트 피팅과 추가 장비 검수는 진행 중 |
+| 실제 SD 데모 | 몸 분해·재질 투영 데모 철회. 온전한 몸 위에 기본 5종 각 2디자인, 32외형과 실제 영상 3상태 연결. 9,216sample 기술 검사 통과. 장비 포함 256선택 연결과 73,728sample 구조 검사 통과. 전체 동작의 아트 승인은 별도 |
 
 ## 확인한 기준선
 
