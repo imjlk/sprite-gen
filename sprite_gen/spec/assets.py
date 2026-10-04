@@ -174,13 +174,15 @@ def _decode_image(data: bytes) -> Image.Image:
 class _Snapshot:
     """Bytes of every file touched by one load, each read once, with their digests."""
 
-    def __init__(self):
+    def __init__(self, read_bytes=None, decode_json=None):
         self.digests: dict[Path, str] = {}
         self._bytes: dict[Path, bytes] = {}
+        self._reader = read_bytes or _read_bytes
+        self._json_decoder = decode_json
 
     def read(self, path: Path) -> bytes:
         if path not in self._bytes:
-            data = _read_bytes(path)
+            data = self._reader(path)
             self._bytes[path] = data
             self.digests[path] = hashlib.sha256(data).hexdigest()
         return self._bytes[path]
@@ -189,7 +191,8 @@ class _Snapshot:
         return _decode_image(self.read(path))
 
     def json(self, path: Path):
-        return json.loads(self.read(path).decode("utf-8"))
+        data = self.read(path)
+        return self._json_decoder(data) if self._json_decoder else json.loads(data.decode("utf-8"))
 
 
 def _choose(rows, state):
@@ -211,9 +214,15 @@ def _integer(value, name):
     return int(number)
 
 
-def load_asset(source: Path, *, state=None, fps=None, anchor=None) -> FrameSequence:
+def load_asset(source: Path, *, state=None, fps=None, anchor=None,
+               read_bytes=None, decode_json=None) -> FrameSequence:
+    """Load through the common decoder, optionally with a caller's bounded reader.
+
+    The callbacks keep sandbox/path/hash policy outside legacy adapters. Defaults
+    preserve the original read and JSON semantics for existing callers.
+    """
     source = Path(source).expanduser().resolve()
-    snapshot = _Snapshot()
+    snapshot = _Snapshot(read_bytes, decode_json)
     meta = {"source": str(source)}
     declared_anchor = None
     if source.suffix.lower() != ".json":

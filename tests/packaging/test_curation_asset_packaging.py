@@ -185,6 +185,12 @@ def test_the_built_wheel_carries_every_package_module(wheel_names: set[str]) -> 
         f"an install imports what shipped, not what the checkout has")
 
 
+def test_the_built_wheel_carries_all_parts_presets(wheel_names: set[str]) -> None:
+    presets = {p.relative_to(ROOT).as_posix() for p in (PACKAGE_DIR / "spec/parts_presets").glob("*.json")}
+    assert len(presets) == 5
+    assert presets <= wheel_names, f"parts-init would lose presets in a wheel: {presets - wheel_names}"
+
+
 def test_the_spa_asks_only_for_assets_that_exist() -> None:
     """Every `src=`/`href=` in index.html is a real file under the SPA root.
 

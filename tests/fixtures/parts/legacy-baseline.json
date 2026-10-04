@@ -1,0 +1,125 @@
+{
+  "baseline_commit": "d993e5300b4255111e8ee0e29779caea1b3b97bd",
+  "manifest": {
+    "animation": {
+      "cellHeight": 96,
+      "cellWidth": 96,
+      "columns": 4,
+      "rows": {
+        "idle": {
+          "durations_ms": [
+            250,
+            250,
+            250,
+            250
+          ],
+          "fps": 4,
+          "frame_variant": "pixel",
+          "frames": 4,
+          "loop": true,
+          "row": 0
+        },
+        "walk": {
+          "durations_ms": [
+            125,
+            125,
+            125
+          ],
+          "fps": 8,
+          "frame_variant": "pixel",
+          "frames": 3,
+          "loop": true,
+          "row": 1
+        }
+      }
+    },
+    "base_image": null,
+    "cell": {
+      "height": 96,
+      "safe_margin": 8,
+      "safe_margin_x": 8,
+      "safe_margin_y": 8,
+      "shape": "square",
+      "size": 96,
+      "width": 96
+    },
+    "characterId": "goldenbot",
+    "chroma_key": {
+      "hex": "#FF00FF",
+      "name": "magenta",
+      "rgb": [
+        255,
+        0,
+        255
+      ],
+      "selection": "fallback"
+    },
+    "curation_applied": false,
+    "degraded_static_fallback": false,
+    "engine": "component-row",
+    "frame_layout": {
+      "cellHeight": 96,
+      "cellWidth": 96,
+      "rows": {
+        "idle": [
+          {
+            "h": 96,
+            "w": 96,
+            "x": 0,
+            "y": 0
+          },
+          {
+            "h": 96,
+            "w": 96,
+            "x": 96,
+            "y": 0
+          },
+          {
+            "h": 96,
+            "w": 96,
+            "x": 192,
+            "y": 0
+          },
+          {
+            "h": 96,
+            "w": 96,
+            "x": 288,
+            "y": 0
+          }
+        ],
+        "walk": [
+          {
+            "h": 96,
+            "w": 96,
+            "x": 0,
+            "y": 96
+          },
+          {
+            "h": 96,
+            "w": 96,
+            "x": 96,
+            "y": 96
+          },
+          {
+            "h": 96,
+            "w": 96,
+            "x": 192,
+            "y": 96
+          }
+        ]
+      },
+      "sheetHeight": 192,
+      "sheetWidth": 384
+    },
+    "frame_variant": "pixel",
+    "game_input": "sprite-sheet-alpha.png",
+    "sprite_sheet_alpha": "sprite-sheet-alpha.png",
+    "sprite_sheet_alpha_report": "sprite-sheet-alpha.report.json"
+  },
+  "request_sha256": "e44d62569b9b43a6ed835f4d707e18833abe1ae91217e8c929e4306127545707",
+  "rgba_sha256": "f36f6fccfdc911e685344baffd721d469cd36a6b840db9a63e54e5f7a96fc36c",
+  "size": [
+    384,
+    192
+  ]
+}

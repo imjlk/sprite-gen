@@ -1,0 +1,316 @@
+{
+  "topology": {
+    "kind": "parts-topology",
+    "schema_version": 1,
+    "id": "quadruped.v1",
+    "nodes": [
+      {
+        "id": "root",
+        "parent": null
+      },
+      {
+        "id": "torso",
+        "parent": "root"
+      },
+      {
+        "id": "head",
+        "parent": "torso"
+      },
+      {
+        "id": "muzzle",
+        "parent": "head"
+      },
+      {
+        "id": "tail",
+        "parent": "torso"
+      },
+      {
+        "id": "ear_l",
+        "parent": "head",
+        "symmetric_with": "ear_r"
+      },
+      {
+        "id": "ear_r",
+        "parent": "head",
+        "symmetric_with": "ear_l"
+      },
+      {
+        "id": "leg_fl",
+        "parent": "torso",
+        "symmetric_with": "leg_fr"
+      },
+      {
+        "id": "foot_fl",
+        "parent": "leg_fl",
+        "symmetric_with": "foot_fr",
+        "contact": true
+      },
+      {
+        "id": "leg_fr",
+        "parent": "torso",
+        "symmetric_with": "leg_fl"
+      },
+      {
+        "id": "foot_fr",
+        "parent": "leg_fr",
+        "symmetric_with": "foot_fl",
+        "contact": true
+      },
+      {
+        "id": "leg_bl",
+        "parent": "torso",
+        "symmetric_with": "leg_br"
+      },
+      {
+        "id": "foot_bl",
+        "parent": "leg_bl",
+        "symmetric_with": "foot_br",
+        "contact": true
+      },
+      {
+        "id": "leg_br",
+        "parent": "torso",
+        "symmetric_with": "leg_bl"
+      },
+      {
+        "id": "foot_br",
+        "parent": "leg_br",
+        "symmetric_with": "foot_bl",
+        "contact": true
+      }
+    ],
+    "sockets": [
+      {
+        "id": "root",
+        "node": "root",
+        "required": true
+      },
+      {
+        "id": "face",
+        "node": "head",
+        "required": false
+      },
+      {
+        "id": "head",
+        "node": "head",
+        "required": false
+      },
+      {
+        "id": "tail",
+        "node": "tail",
+        "required": false
+      },
+      {
+        "id": "neck",
+        "node": "head",
+        "required": false
+      },
+      {
+        "id": "back",
+        "node": "torso",
+        "required": false
+      },
+      {
+        "id": "foot_fl",
+        "node": "foot_fl",
+        "required": false
+      },
+      {
+        "id": "foot_fr",
+        "node": "foot_fr",
+        "required": false
+      },
+      {
+        "id": "foot_bl",
+        "node": "foot_bl",
+        "required": false
+      },
+      {
+        "id": "foot_br",
+        "node": "foot_br",
+        "required": false
+      }
+    ],
+    "slots": [
+      {
+        "id": "coat",
+        "nodes": [
+          "torso"
+        ],
+        "sockets": [
+          "root"
+        ],
+        "optional": false
+      },
+      {
+        "id": "expression",
+        "nodes": [
+          "head",
+          "muzzle"
+        ],
+        "sockets": [
+          "face"
+        ],
+        "optional": false
+      },
+      {
+        "id": "ears",
+        "nodes": [
+          "ear_l",
+          "ear_r"
+        ],
+        "sockets": [
+          "head"
+        ],
+        "optional": false
+      },
+      {
+        "id": "tail",
+        "nodes": [
+          "tail"
+        ],
+        "sockets": [
+          "tail"
+        ],
+        "optional": false
+      },
+      {
+        "id": "neckwear",
+        "nodes": [
+          "head"
+        ],
+        "sockets": [
+          "neck"
+        ],
+        "optional": true
+      },
+      {
+        "id": "torso_gear",
+        "nodes": [
+          "torso"
+        ],
+        "sockets": [
+          "back"
+        ],
+        "optional": true
+      },
+      {
+        "id": "pawwear",
+        "nodes": [
+          "foot_fl",
+          "foot_fr",
+          "foot_bl",
+          "foot_br"
+        ],
+        "sockets": [
+          "foot_fl",
+          "foot_fr",
+          "foot_bl",
+          "foot_br"
+        ],
+        "optional": true
+      }
+    ]
+  },
+  "rig": {
+    "kind": "parts-rig",
+    "schema_version": 1,
+    "id": "canine.medium.v1",
+    "view": "right",
+    "style": "pixel.v1",
+    "canvas": {
+      "width": 192,
+      "height": 128
+    }
+  },
+  "catalog": {
+    "kind": "parts-catalog",
+    "schema_version": 1,
+    "id": "canine.medium.v1.catalog",
+    "groups": [
+      {
+        "id": "appearance",
+        "label": "Coat and expression"
+      },
+      {
+        "id": "appendages",
+        "label": "Ears and tail"
+      },
+      {
+        "id": "equipment",
+        "label": "Equipment"
+      }
+    ],
+    "slots": [
+      {
+        "id": "coat",
+        "group": "appearance",
+        "label": "Coat"
+      },
+      {
+        "id": "expression",
+        "group": "appearance",
+        "label": "Expression"
+      },
+      {
+        "id": "ears",
+        "group": "appendages",
+        "label": "Ears"
+      },
+      {
+        "id": "tail",
+        "group": "appendages",
+        "label": "Tail"
+      },
+      {
+        "id": "neckwear",
+        "group": "equipment",
+        "label": "Neckwear"
+      },
+      {
+        "id": "torso_gear",
+        "group": "equipment",
+        "label": "Torso Gear"
+      },
+      {
+        "id": "pawwear",
+        "group": "equipment",
+        "label": "Pawwear"
+      }
+    ],
+    "palette_channels": [
+      {
+        "id": "fur_primary",
+        "label": "Fur Primary",
+        "default": [
+          185,
+          135,
+          85
+        ]
+      },
+      {
+        "id": "fur_secondary",
+        "label": "Fur Secondary",
+        "default": [
+          240,
+          225,
+          200
+        ]
+      },
+      {
+        "id": "fabric_primary",
+        "label": "Fabric Primary",
+        "default": [
+          50,
+          100,
+          105
+        ]
+      }
+    ]
+  },
+  "states": [
+    "idle",
+    "walk",
+    "run"
+  ]
+}

@@ -89,6 +89,13 @@ flowchart LR
 
 Full index: [`docs/README.md`](docs/README.md). Architecture with domain and pipeline diagrams: [`docs/architecture.md`](docs/architecture.md).
 
+The fork also has experimental `parts-init` / `parts-validate` commands for separate,
+data-defined customization workspaces. Five body presets include SD and tall humanoids,
+a quadruped, a blob and an asymmetric six-limb fixture. Hash-bound
+[motion import/freeze](docs/parts/02-motion-snapshots.md) preserves final sources and exact time.
+Part import, composition and release approval are still planned. See the
+[parts contract and CLI](docs/parts/01-contract.md).
+
 ## What you actually get
 
 - **A transparent sprite atlas** (`sprite-sheet-alpha.png`) — real alpha, no leftover chroma fringe, verified against white backgrounds ([why the extractor unmixes instead of peeling](docs/chroma-alpha.md)).

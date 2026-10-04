@@ -1,0 +1,194 @@
+{
+  "baseline_commit": "d993e5300b4255111e8ee0e29779caea1b3b97bd",
+  "manifest": {
+    "animation": {
+      "cellHeight": 96,
+      "cellWidth": 96,
+      "columns": 2,
+      "rows": {
+        "walk_with_can": {
+          "durations_ms": [
+            125,
+            125
+          ],
+          "fps": 8,
+          "frame_variant": "pixel",
+          "frames": 2,
+          "loop": true,
+          "row": 0,
+          "track": "composite"
+        }
+      }
+    },
+    "base_image": null,
+    "cell": {
+      "height": 96,
+      "safe_margin": 8,
+      "safe_margin_x": 8,
+      "safe_margin_y": 8,
+      "shape": "square",
+      "size": 96,
+      "width": 96
+    },
+    "characterId": "rigbot",
+    "chroma_key": {
+      "hex": "#FF00FF",
+      "name": "magenta",
+      "rgb": [
+        255,
+        0,
+        255
+      ],
+      "selection": "fallback"
+    },
+    "curation_applied": false,
+    "degraded_static_fallback": false,
+    "engine": "component-row",
+    "frame_layout": {
+      "cellHeight": 96,
+      "cellWidth": 96,
+      "rows": {
+        "walk_with_can": [
+          {
+            "h": 96,
+            "w": 96,
+            "x": 0,
+            "y": 0
+          },
+          {
+            "h": 96,
+            "w": 96,
+            "x": 96,
+            "y": 0
+          }
+        ]
+      },
+      "sheetHeight": 96,
+      "sheetWidth": 192
+    },
+    "frame_variant": "pixel",
+    "game_input": "walk_with_can.png",
+    "layers": {
+      "name": "walk_with_can",
+      "report": "layers.report.json",
+      "stack": [
+        {
+          "allow_clip": false,
+          "from": "root",
+          "mask": null,
+          "state": "walk",
+          "state_revision": [
+            "8a31498f5012"
+          ],
+          "to": "root",
+          "track": "base"
+        },
+        {
+          "allow_clip": false,
+          "from": "grip",
+          "mask": null,
+          "state": "can",
+          "state_revision": [
+            "0595c0a2cb9d"
+          ],
+          "to": "hand_r",
+          "track": "prop_effect"
+        }
+      ]
+    },
+    "sprite_sheet_alpha": "walk_with_can.png",
+    "sprite_sheet_alpha_report": null
+  },
+  "report": {
+    "cell": {
+      "height": 96,
+      "safe_margin": 8,
+      "safe_margin_x": 8,
+      "safe_margin_y": 8,
+      "shape": "square",
+      "size": 96,
+      "width": 96
+    },
+    "composite_count": 1,
+    "composites": [
+      {
+        "body": "walk",
+        "cells": 2,
+        "elements": [
+          {
+            "allow_clip": false,
+            "clipped_pixels": 0,
+            "frame_variant": "pixel",
+            "from": "root",
+            "mask": null,
+            "offsets": [
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                0
+              ]
+            ],
+            "played_frames": 2,
+            "pool_frames": 2,
+            "state": "walk",
+            "state_revision": [
+              "8a31498f5012"
+            ],
+            "to": "root",
+            "track": "base"
+          },
+          {
+            "allow_clip": false,
+            "clipped_pixels": 0,
+            "frame_variant": "pixel",
+            "from": "grip",
+            "mask": null,
+            "offsets": [
+              [
+                12,
+                -22
+              ],
+              [
+                14,
+                -20
+              ]
+            ],
+            "played_frames": 1,
+            "pool_frames": 1,
+            "state": "can",
+            "state_revision": [
+              "0595c0a2cb9d"
+            ],
+            "to": "hand_r",
+            "track": "prop_effect"
+          }
+        ],
+        "fps": 8,
+        "frame_cells": [
+          0,
+          1
+        ],
+        "frame_variant": "pixel",
+        "frames": 2,
+        "loop": true,
+        "manifest": "walk_with_can.manifest.json",
+        "name": "walk_with_can",
+        "sheet": "walk_with_can.png"
+      }
+    ],
+    "curation_applied": false,
+    "engine": "component-row",
+    "kind": "sprite-gen-layers-report",
+    "ok": true,
+    "rig_profile": "humanoid_biped"
+  },
+  "request_sha256": "980e82043c71cae765dfbd6e1320cdfc2d0c4545e1607db0434d3240a1a23fa0",
+  "rgba_sha256": "35b48c54533c1848bd3b1b87a6d16d860ed94d886ac79776f8263a75242a5cbd",
+  "size": [
+    192,
+    96
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "kind": "parts-demo-design-reference",
+  "schema_version": 1,
+  "status": "concept-only",
+  "generated_on": "2026-10-04",
+  "generator": "built-in-imagegen",
+  "model": "not-exposed",
+  "prompt": "Use case: stylized-concept\nAsset type: design reference sheet for an original modular 2D sprite character system; this is concept art, not a production sprite atlas.\nCreate one clean landscape reference sheet with three clearly separated columns on a plain warm light-gray background. Draw crisp, readable pixel-art-inspired sprites with restrained colors, dark one-pixel-looking outlines, simple flat shading, and no scenery or cast shadows. Keep hands, feet and leg silhouettes clearly readable. The first column is the main focus and slightly wider than the other two.\n\nCOLUMN 1, heading exactly \"SD EXPLORER\":\nAn original friendly androgynous young-adult explorer, short dark-brown hair, three-head-tall SD proportions, full body, facing screen-right in a strict side view. Show three standing versions in the SAME neutral pose with the SAME head, face, anatomy, dark shorts and canvas alignment: (a) light-gray sleeveless base shirt, (b) a simple muted teal short jacket with separate readable near and far sleeves, (c) a simple rust-orange short jacket, visibly different pocket and collar design, with the same limb proportions. Both hands must be visible and beyond the cuffs. No hat, weapon, bag, cape, skirt, scarf, armor, or glowing effects.\nBelow, show small detached reference drawings of the teal jacket torso and near/far sleeves, the rust jacket torso and sleeves, and two footwear options: low dark sneakers and simple brown ankle boots. Shoe variants have the same sole thickness and foot length. Detached items are only visual references and should not be drawn as if automatically extracted assets.\n\nCOLUMN 2, heading exactly \"TALL EXPLORER\":\nOne original eight-head-tall adult human explorer in right-facing side view, short dark hair, muted teal waist-length jacket, charcoal trousers, simple brown shoes. Clearly readable long arms and legs. One small detached sleeve and glove beneath. Match the SD character's palette, outline character and material simplicity while preserving tall anatomy.\n\nCOLUMN 3, heading exactly \"CANINE\":\nTwo depictions of the SAME original compact tan-and-cream medium dog in the SAME right-facing neutral standing pose. Show all four feet clearly enough to distinguish near and far legs. Top dog has pointed ears, a curled tail and a small rust-orange collar. Lower dog has folded ears, a straighter fluffy tail and a simple muted-teal saddle blanket with a distinct belly strap. Keep the same torso and leg proportions across both dogs. Below, show small detached ear shapes, tail shapes, collar and saddle-blanket reference pieces. No humanoid clothes on the dog.\n\nPlace the small footer text exactly \"DESIGN REFERENCE\".\nNo animation strips, frame numbers, socket markers, UI mockup, annotations, logos, watermark, licensed game characters, or suggestion that the sheet is a verified production asset. Give the sprites enough spacing to see the parts and silhouettes.",
+  "asset": "demo-design-reference-20261004.png",
+  "production_asset": false,
+  "verified_motion_binding": false,
+  "note": "Design reference only. Figures and detached pieces are not aligned, separated or approved PartPack assets.",
+  "image_sha256": "01e8954c8240faff6117c20f8e1fb6b227517d99ccaf25f2781cc286595f0d43",
+  "image_size": [
+    1536,
+    1024
+  ],
+  "image_mode": "RGB",
+  "file_format": "PNG"
+}

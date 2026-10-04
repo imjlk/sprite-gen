@@ -31,7 +31,8 @@ from sprite_gen.video import rife_install
 from sprite_gen.effects import recolor, shadow
 from sprite_gen.scene import render, inspect_scene
 from sprite_gen.serve import serve_compose, serve_curation
-from sprite_gen.spec import migrate_breathe, migrate_request
+from sprite_gen.spec import migrate_breathe, migrate_request, parts_workspace
+from sprite_gen.curate import parts_motion
 from sprite_gen.gen.prepare import BODY_PLAN_HELP, STYLE_DEFAULT, _outline_config
 from sprite_gen.spec.subject import SUBJECTS
 from sprite_gen.workflow import guide, preferences
@@ -410,6 +411,26 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         "install: download the pinned RIFE (rife-ncnn-vulkan, sha256-checked) into the user data directory, where the loop repair finds it.",
         rife_install.add_arguments,
         rife_install.run,
+    ),
+    "parts-init": (
+        "Create an opt-in parts workspace with a data-defined topology, rig and customization catalog.",
+        parts_workspace.add_init_arguments,
+        parts_workspace.run_init,
+    ),
+    "parts-validate": (
+        "Check parts declarations, exact content references and optional requested sample coverage; no image generation.",
+        parts_workspace.add_validate_arguments,
+        parts_workspace.run_validate,
+    ),
+    "parts-motion-import": (
+        "Snapshot finalized/external motion into an immutable draft; preserve exact timing and canvas.",
+        parts_motion.add_import_arguments,
+        parts_motion.run_import,
+    ),
+    "parts-motion-freeze": (
+        "Freeze final raster/socket annotations and invalidate consumers of changed motion revisions.",
+        parts_motion.add_freeze_arguments,
+        parts_motion.run_freeze,
     ),
     # The argument surface is `serve_curation.add_arguments` itself, not a copy of it: the
     # webview's own `--help` and this subcommand are the same declaration, so `sprite-gen

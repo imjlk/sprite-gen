@@ -1,0 +1,231 @@
+{
+  "topology": {
+    "kind": "parts-topology",
+    "schema_version": 1,
+    "id": "six-limb.v1",
+    "nodes": [
+      {
+        "id": "root",
+        "parent": null
+      },
+      {
+        "id": "limb_0",
+        "parent": "root",
+        "contact": true
+      },
+      {
+        "id": "limb_1",
+        "parent": "root",
+        "contact": true
+      },
+      {
+        "id": "limb_2",
+        "parent": "root",
+        "contact": true
+      },
+      {
+        "id": "limb_3",
+        "parent": "root",
+        "contact": false
+      },
+      {
+        "id": "limb_4",
+        "parent": "root",
+        "contact": false
+      },
+      {
+        "id": "limb_5",
+        "parent": "root",
+        "contact": false
+      }
+    ],
+    "sockets": [
+      {
+        "id": "root",
+        "node": "root",
+        "required": true
+      },
+      {
+        "id": "tip_0",
+        "node": "limb_0",
+        "required": false
+      },
+      {
+        "id": "tip_1",
+        "node": "limb_1",
+        "required": false
+      },
+      {
+        "id": "tip_2",
+        "node": "limb_2",
+        "required": false
+      },
+      {
+        "id": "tip_3",
+        "node": "limb_3",
+        "required": false
+      },
+      {
+        "id": "tip_4",
+        "node": "limb_4",
+        "required": false
+      },
+      {
+        "id": "tip_5",
+        "node": "limb_5",
+        "required": false
+      }
+    ],
+    "slots": [
+      {
+        "id": "surface",
+        "nodes": [
+          "root"
+        ],
+        "sockets": [
+          "root"
+        ],
+        "optional": false
+      },
+      {
+        "id": "appendage_0",
+        "nodes": [
+          "limb_0"
+        ],
+        "sockets": [
+          "tip_0"
+        ],
+        "optional": true
+      },
+      {
+        "id": "appendage_1",
+        "nodes": [
+          "limb_1"
+        ],
+        "sockets": [
+          "tip_1"
+        ],
+        "optional": true
+      },
+      {
+        "id": "appendage_2",
+        "nodes": [
+          "limb_2"
+        ],
+        "sockets": [
+          "tip_2"
+        ],
+        "optional": true
+      },
+      {
+        "id": "appendage_3",
+        "nodes": [
+          "limb_3"
+        ],
+        "sockets": [
+          "tip_3"
+        ],
+        "optional": true
+      },
+      {
+        "id": "appendage_4",
+        "nodes": [
+          "limb_4"
+        ],
+        "sockets": [
+          "tip_4"
+        ],
+        "optional": true
+      },
+      {
+        "id": "appendage_5",
+        "nodes": [
+          "limb_5"
+        ],
+        "sockets": [
+          "tip_5"
+        ],
+        "optional": true
+      }
+    ]
+  },
+  "rig": {
+    "kind": "parts-rig",
+    "schema_version": 1,
+    "id": "asymmetric.six-limb.v1",
+    "view": "right",
+    "style": "pixel.v1",
+    "canvas": {
+      "width": 160,
+      "height": 128
+    }
+  },
+  "catalog": {
+    "kind": "parts-catalog",
+    "schema_version": 1,
+    "id": "asymmetric.six-limb.v1.catalog",
+    "groups": [
+      {
+        "id": "appearance",
+        "label": "Surface"
+      },
+      {
+        "id": "appendages",
+        "label": "Independent appendages"
+      }
+    ],
+    "slots": [
+      {
+        "id": "surface",
+        "group": "appearance",
+        "label": "Surface"
+      },
+      {
+        "id": "appendage_0",
+        "group": "appendages",
+        "label": "Appendage 0"
+      },
+      {
+        "id": "appendage_1",
+        "group": "appendages",
+        "label": "Appendage 1"
+      },
+      {
+        "id": "appendage_2",
+        "group": "appendages",
+        "label": "Appendage 2"
+      },
+      {
+        "id": "appendage_3",
+        "group": "appendages",
+        "label": "Appendage 3"
+      },
+      {
+        "id": "appendage_4",
+        "group": "appendages",
+        "label": "Appendage 4"
+      },
+      {
+        "id": "appendage_5",
+        "group": "appendages",
+        "label": "Appendage 5"
+      }
+    ],
+    "palette_channels": [
+      {
+        "id": "surface",
+        "label": "Surface",
+        "default": [
+          100,
+          90,
+          155
+        ]
+      }
+    ]
+  },
+  "states": [
+    "idle",
+    "crawl",
+    "reach"
+  ]
+}

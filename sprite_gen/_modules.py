@@ -10,6 +10,10 @@ MODULE_DOMAIN = {
     'preferences': 'workflow',
     'runio': 'spec',
     'assets': 'spec',
+    'parts_contract': 'spec',
+    'parts_workspace': 'spec',
+    'parts_assets': 'spec',
+    'parts_motion': 'curate',
     'tile': 'background',
     'shadow': 'effects',
     'motion': 'qa',
@@ -83,7 +87,7 @@ DOMAINS: list[tuple[str, str]] = [
     ("scene", "Scene — asset placement, camera, lighting, rendering and inspection"),
     ("qa", "QA — motion/contact measurements, inspect, score, preview, bounded correction loop"),
     ("serve", "Webviews — curation and composition canvases"),
-    ("spec", "Spec — read-only assets, request migrations and run I/O"),
+    ("spec", "Spec — parts declarations, read-only assets, request migrations and run I/O"),
     ("util", "Utilities"),
 ]
 DOMAIN_ORDER = [d for d, _ in DOMAINS]

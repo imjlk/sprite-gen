@@ -1,0 +1,151 @@
+{
+  "topology": {
+    "kind": "parts-topology",
+    "schema_version": 1,
+    "id": "blob.v1",
+    "nodes": [
+      {
+        "id": "root",
+        "parent": null
+      },
+      {
+        "id": "eye_l",
+        "parent": "root",
+        "required": false
+      },
+      {
+        "id": "eye_r",
+        "parent": "root",
+        "required": false
+      },
+      {
+        "id": "mouth",
+        "parent": "root",
+        "required": false
+      }
+    ],
+    "sockets": [
+      {
+        "id": "root",
+        "node": "root",
+        "required": true
+      },
+      {
+        "id": "face",
+        "node": "root",
+        "required": false
+      },
+      {
+        "id": "top",
+        "node": "root",
+        "required": false
+      }
+    ],
+    "slots": [
+      {
+        "id": "surface",
+        "nodes": [
+          "root"
+        ],
+        "sockets": [
+          "root"
+        ],
+        "optional": false
+      },
+      {
+        "id": "expression",
+        "nodes": [
+          "root"
+        ],
+        "sockets": [
+          "face"
+        ],
+        "optional": false
+      },
+      {
+        "id": "ornament",
+        "nodes": [
+          "root"
+        ],
+        "sockets": [
+          "top"
+        ],
+        "optional": true
+      },
+      {
+        "id": "body_accessory",
+        "nodes": [
+          "root"
+        ],
+        "sockets": [
+          "root"
+        ],
+        "optional": true
+      }
+    ]
+  },
+  "rig": {
+    "kind": "parts-rig",
+    "schema_version": 1,
+    "id": "blob.fixture.v1",
+    "view": "right",
+    "style": "pixel.v1",
+    "canvas": {
+      "width": 96,
+      "height": 96
+    }
+  },
+  "catalog": {
+    "kind": "parts-catalog",
+    "schema_version": 1,
+    "id": "blob.fixture.v1.catalog",
+    "groups": [
+      {
+        "id": "appearance",
+        "label": "Surface and expression"
+      },
+      {
+        "id": "equipment",
+        "label": "Ornaments"
+      }
+    ],
+    "slots": [
+      {
+        "id": "surface",
+        "group": "appearance",
+        "label": "Surface"
+      },
+      {
+        "id": "expression",
+        "group": "appearance",
+        "label": "Expression"
+      },
+      {
+        "id": "ornament",
+        "group": "equipment",
+        "label": "Ornament"
+      },
+      {
+        "id": "body_accessory",
+        "group": "equipment",
+        "label": "Body Accessory"
+      }
+    ],
+    "palette_channels": [
+      {
+        "id": "surface",
+        "label": "Surface",
+        "default": [
+          75,
+          145,
+          100
+        ]
+      }
+    ]
+  },
+  "states": [
+    "idle",
+    "crawl",
+    "pulse"
+  ]
+}

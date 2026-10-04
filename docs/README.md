@@ -130,3 +130,17 @@ grouping is derived from `sprite_gen/_modules.py`, the one taxonomy table.
 | [rename-gate.md](rename-gate.md) | What must move together when a vocabulary word or key is renamed |
 | [release.md](release.md) | How a vX.Y.Z tag becomes a release page, what the lane builds and the publisher attaches, and what stays manual |
 | [troubleshooting.md](troubleshooting.md) | Symptoms of a pipeline that is "quietly wrong", with causes and fixes |
+
+## Fork parts system
+
+The experimental parts commands implement separate workspace scaffolding,
+strict declarations and hash-bound motion import/freeze. Part image import,
+composition, review and export remain planned; no part art is approved.
+
+| Doc | Owns |
+|---|---|
+| [parts/00-baseline.md](parts/00-baseline.md) | Pinned legacy request/JSON/pixels, local test environment and fork release policy |
+| [parts/01-contract.md](parts/01-contract.md) | Implemented v1 contracts, five body presets, workspace CLI and validation limits |
+| [parts/02-motion-snapshots.md](parts/02-motion-snapshots.md) | Read-only final-source adapters, exact time, hash-bound annotation/freeze and motion revision invalidation |
+| [parts/initial-implementation-and-demo.md](parts/initial-implementation-and-demo.md) | PR00–04 execution plan, snapshot/digest/timing rules, and the five-slot SD parts demo art brief |
+| [parts/customization-and-variation.md](parts/customization-and-variation.md) | Basic and detailed slots, variation/palette/preset rules, rig-specific fitting, and expanded multi-body acceptance scope |

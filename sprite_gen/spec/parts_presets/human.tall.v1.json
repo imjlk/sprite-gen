@@ -1,0 +1,566 @@
+{
+  "topology": {
+    "kind": "parts-topology",
+    "schema_version": 1,
+    "id": "humanoid.v1",
+    "nodes": [
+      {
+        "id": "root",
+        "parent": null
+      },
+      {
+        "id": "torso",
+        "parent": "root"
+      },
+      {
+        "id": "head",
+        "parent": "torso"
+      },
+      {
+        "id": "hair_front",
+        "parent": "head",
+        "required": false
+      },
+      {
+        "id": "hair_back",
+        "parent": "head",
+        "required": false
+      },
+      {
+        "id": "eye_l",
+        "parent": "head",
+        "required": false
+      },
+      {
+        "id": "eye_r",
+        "parent": "head",
+        "required": false
+      },
+      {
+        "id": "brow_l",
+        "parent": "head",
+        "required": false
+      },
+      {
+        "id": "brow_r",
+        "parent": "head",
+        "required": false
+      },
+      {
+        "id": "mouth",
+        "parent": "head",
+        "required": false
+      },
+      {
+        "id": "arm_l",
+        "parent": "torso",
+        "symmetric_with": "arm_r"
+      },
+      {
+        "id": "hand_l",
+        "parent": "arm_l",
+        "symmetric_with": "hand_r"
+      },
+      {
+        "id": "leg_l",
+        "parent": "root",
+        "symmetric_with": "leg_r"
+      },
+      {
+        "id": "foot_l",
+        "parent": "leg_l",
+        "symmetric_with": "foot_r",
+        "contact": true
+      },
+      {
+        "id": "arm_r",
+        "parent": "torso",
+        "symmetric_with": "arm_l"
+      },
+      {
+        "id": "hand_r",
+        "parent": "arm_r",
+        "symmetric_with": "hand_l"
+      },
+      {
+        "id": "leg_r",
+        "parent": "root",
+        "symmetric_with": "leg_l"
+      },
+      {
+        "id": "foot_r",
+        "parent": "leg_r",
+        "symmetric_with": "foot_l",
+        "contact": true
+      }
+    ],
+    "sockets": [
+      {
+        "id": "root",
+        "node": "root",
+        "required": true
+      },
+      {
+        "id": "head",
+        "node": "head",
+        "required": false
+      },
+      {
+        "id": "face",
+        "node": "head",
+        "required": true
+      },
+      {
+        "id": "waist",
+        "node": "root",
+        "required": false
+      },
+      {
+        "id": "back",
+        "node": "torso",
+        "required": false
+      },
+      {
+        "id": "shoulder_l",
+        "node": "arm_l",
+        "required": false
+      },
+      {
+        "id": "wrist_l",
+        "node": "hand_l",
+        "required": false
+      },
+      {
+        "id": "foot_l",
+        "node": "foot_l",
+        "required": false
+      },
+      {
+        "id": "shoulder_r",
+        "node": "arm_r",
+        "required": false
+      },
+      {
+        "id": "wrist_r",
+        "node": "hand_r",
+        "required": false
+      },
+      {
+        "id": "foot_r",
+        "node": "foot_r",
+        "required": false
+      }
+    ],
+    "slots": [
+      {
+        "id": "hair",
+        "nodes": [
+          "hair_front",
+          "hair_back"
+        ],
+        "sockets": [
+          "head"
+        ],
+        "optional": false
+      },
+      {
+        "id": "expression",
+        "nodes": [
+          "head"
+        ],
+        "sockets": [
+          "face"
+        ],
+        "optional": false
+      },
+      {
+        "id": "upper",
+        "nodes": [
+          "torso",
+          "arm_l",
+          "arm_r"
+        ],
+        "sockets": [
+          "shoulder_l",
+          "shoulder_r"
+        ],
+        "optional": false
+      },
+      {
+        "id": "lower",
+        "nodes": [
+          "leg_l",
+          "leg_r"
+        ],
+        "sockets": [
+          "waist"
+        ],
+        "optional": false
+      },
+      {
+        "id": "footwear",
+        "nodes": [
+          "foot_l",
+          "foot_r"
+        ],
+        "sockets": [
+          "foot_l",
+          "foot_r"
+        ],
+        "optional": false
+      },
+      {
+        "id": "headwear",
+        "nodes": [
+          "head"
+        ],
+        "sockets": [
+          "head"
+        ],
+        "optional": true
+      },
+      {
+        "id": "bangs",
+        "nodes": [
+          "hair_front"
+        ],
+        "sockets": [
+          "head"
+        ],
+        "optional": true
+      },
+      {
+        "id": "eyes",
+        "nodes": [
+          "eye_l",
+          "eye_r"
+        ],
+        "sockets": [
+          "face"
+        ],
+        "optional": true
+      },
+      {
+        "id": "brows",
+        "nodes": [
+          "brow_l",
+          "brow_r"
+        ],
+        "sockets": [
+          "face"
+        ],
+        "optional": true
+      },
+      {
+        "id": "mouth",
+        "nodes": [
+          "mouth"
+        ],
+        "sockets": [
+          "face"
+        ],
+        "optional": true
+      },
+      {
+        "id": "eyewear",
+        "nodes": [
+          "head"
+        ],
+        "sockets": [
+          "face"
+        ],
+        "optional": true
+      },
+      {
+        "id": "gloves",
+        "nodes": [
+          "hand_l",
+          "hand_r"
+        ],
+        "sockets": [
+          "wrist_l",
+          "wrist_r"
+        ],
+        "optional": true
+      },
+      {
+        "id": "back_accessory",
+        "nodes": [
+          "torso"
+        ],
+        "sockets": [
+          "back"
+        ],
+        "optional": true
+      },
+      {
+        "id": "neckwear",
+        "nodes": [
+          "head",
+          "torso"
+        ],
+        "sockets": [
+          "head"
+        ],
+        "optional": true
+      },
+      {
+        "id": "sleeve_l",
+        "nodes": [
+          "arm_l"
+        ],
+        "sockets": [
+          "shoulder_l"
+        ],
+        "optional": true
+      },
+      {
+        "id": "footwear_l",
+        "nodes": [
+          "foot_l"
+        ],
+        "sockets": [
+          "foot_l"
+        ],
+        "optional": true
+      },
+      {
+        "id": "hand_item_l",
+        "nodes": [
+          "hand_l"
+        ],
+        "sockets": [
+          "wrist_l"
+        ],
+        "optional": true
+      },
+      {
+        "id": "sleeve_r",
+        "nodes": [
+          "arm_r"
+        ],
+        "sockets": [
+          "shoulder_r"
+        ],
+        "optional": true
+      },
+      {
+        "id": "footwear_r",
+        "nodes": [
+          "foot_r"
+        ],
+        "sockets": [
+          "foot_r"
+        ],
+        "optional": true
+      },
+      {
+        "id": "hand_item_r",
+        "nodes": [
+          "hand_r"
+        ],
+        "sockets": [
+          "wrist_r"
+        ],
+        "optional": true
+      }
+    ]
+  },
+  "rig": {
+    "kind": "parts-rig",
+    "schema_version": 1,
+    "id": "human.tall.v1",
+    "view": "right",
+    "style": "pixel.v1",
+    "canvas": {
+      "width": 128,
+      "height": 192
+    }
+  },
+  "catalog": {
+    "kind": "parts-catalog",
+    "schema_version": 1,
+    "id": "human.tall.v1.catalog",
+    "groups": [
+      {
+        "id": "head",
+        "label": "Hair and headwear"
+      },
+      {
+        "id": "face",
+        "label": "Face and expression"
+      },
+      {
+        "id": "clothing",
+        "label": "Clothing"
+      },
+      {
+        "id": "equipment",
+        "label": "Equipment"
+      }
+    ],
+    "slots": [
+      {
+        "id": "hair",
+        "group": "head",
+        "label": "Hair"
+      },
+      {
+        "id": "expression",
+        "group": "face",
+        "label": "Expression"
+      },
+      {
+        "id": "upper",
+        "group": "clothing",
+        "label": "Upper"
+      },
+      {
+        "id": "lower",
+        "group": "clothing",
+        "label": "Lower"
+      },
+      {
+        "id": "footwear",
+        "group": "clothing",
+        "label": "Footwear"
+      },
+      {
+        "id": "headwear",
+        "group": "head",
+        "label": "Headwear"
+      },
+      {
+        "id": "bangs",
+        "group": "head",
+        "label": "Bangs"
+      },
+      {
+        "id": "eyes",
+        "group": "face",
+        "label": "Eyes"
+      },
+      {
+        "id": "brows",
+        "group": "face",
+        "label": "Brows"
+      },
+      {
+        "id": "mouth",
+        "group": "face",
+        "label": "Mouth"
+      },
+      {
+        "id": "eyewear",
+        "group": "face",
+        "label": "Eyewear"
+      },
+      {
+        "id": "gloves",
+        "group": "equipment",
+        "label": "Gloves"
+      },
+      {
+        "id": "back_accessory",
+        "group": "equipment",
+        "label": "Back Accessory"
+      },
+      {
+        "id": "neckwear",
+        "group": "equipment",
+        "label": "Neckwear"
+      },
+      {
+        "id": "sleeve_l",
+        "group": "clothing",
+        "label": "Sleeve L"
+      },
+      {
+        "id": "footwear_l",
+        "group": "clothing",
+        "label": "Footwear L"
+      },
+      {
+        "id": "hand_item_l",
+        "group": "equipment",
+        "label": "Hand Item L"
+      },
+      {
+        "id": "sleeve_r",
+        "group": "clothing",
+        "label": "Sleeve R"
+      },
+      {
+        "id": "footwear_r",
+        "group": "clothing",
+        "label": "Footwear R"
+      },
+      {
+        "id": "hand_item_r",
+        "group": "equipment",
+        "label": "Hand Item R"
+      }
+    ],
+    "palette_channels": [
+      {
+        "id": "skin",
+        "label": "Skin",
+        "default": [
+          230,
+          185,
+          145
+        ]
+      },
+      {
+        "id": "hair",
+        "label": "Hair",
+        "default": [
+          70,
+          45,
+          30
+        ]
+      },
+      {
+        "id": "fabric_primary",
+        "label": "Fabric Primary",
+        "default": [
+          50,
+          100,
+          105
+        ]
+      },
+      {
+        "id": "fabric_secondary",
+        "label": "Fabric Secondary",
+        "default": [
+          190,
+          95,
+          45
+        ]
+      },
+      {
+        "id": "leather",
+        "label": "Leather",
+        "default": [
+          100,
+          65,
+          40
+        ]
+      },
+      {
+        "id": "eyes",
+        "label": "Eyes",
+        "default": [
+          70,
+          100,
+          65
+        ]
+      }
+    ]
+  },
+  "states": [
+    "idle",
+    "walk",
+    "run"
+  ]
+}
