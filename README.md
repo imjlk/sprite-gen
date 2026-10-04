@@ -93,7 +93,8 @@ The fork also has experimental `parts-init` / `parts-validate` commands for sepa
 data-defined customization workspaces. Five body presets include SD and tall humanoids,
 a quadruped, a blob and an asymmetric six-limb fixture. Hash-bound
 [motion import/freeze](docs/parts/02-motion-snapshots.md) preserves final sources and exact time.
-Part import, composition and release approval are still planned. See the
+The [part importer](docs/parts/03-part-import.md) preserves small rasters, crop offsets
+and separate body pieces. Composition and release approval are still planned. See the
 [parts contract and CLI](docs/parts/01-contract.md).
 
 ## What you actually get

@@ -229,6 +229,9 @@ def activate_motion(assembly: Path, motion: dict, filename: str, original_hash: 
     next_registry[motion["id"]] = motion
     next_index["documents"][motion["id"]] = filename
     next_index["motion"] = contract.reference(motion)
+    next_index["body"] = [ref for ref in index["body"] if ref["id"] in next_registry and any(
+        binding["rig"] == next_index["rig"] and binding["motion"] == next_index["motion"]
+        for binding in next_registry[ref["id"]]["bindings"])]
     if next_index["appearance"] is not None:
         appearance = next_registry.get(next_index["appearance"]["id"])
         if appearance is None or appearance["motion"] != next_index["motion"]:

@@ -14,6 +14,7 @@ MODULE_DOMAIN = {
     'parts_workspace': 'spec',
     'parts_assets': 'spec',
     'parts_motion': 'curate',
+    'parts_import': 'frames',
     'tile': 'background',
     'shadow': 'effects',
     'motion': 'qa',

@@ -2,7 +2,7 @@
 
 > Owns: Implemented experimental v1 declarations and workspace commands · Index: [docs/README.md](../README.md)
 
-PR00–01의 초기 선언 계약이다. `parts-init`과 `parts-validate`는 실행할 수 있다. topology·rig·모션·다중 piece 파츠·catalog·외형 선택의 선언과 정확한 해시 참조를 검사한다. PR02의 [모션 import·freeze](02-motion-snapshots.md)도 구현했다. 파츠 이미지 import, 합성, 검수 승인과 export는 후속 구현이다. 이 문서의 계약은 experimental schema version 1이다.
+PR00–01의 초기 선언 계약이다. `parts-init`과 `parts-validate`는 실행할 수 있다. topology·rig·모션·다중 piece 파츠·catalog·외형 선택의 선언과 정확한 해시 참조를 검사한다. PR02의 [모션 import·freeze](02-motion-snapshots.md)와 PR03의 [body/파츠 import](03-part-import.md)도 구현했다. 합성, 검수 승인과 export는 후속 구현이다. 이 문서의 계약은 experimental schema version 1이다.
 
 ## 실행
 
@@ -56,9 +56,9 @@ unknown field, bool/float을 정수로 사용한 좌표·tick·canvas, duplicate
 | `parts-topology` | 하나의 root, nodes/parent/required/contact/symmetry, socket의 node, slot의 허용 node/socket·cardinality·empty policy |
 | `parts-rig` | 정확한 topology reference, 열린 style/view, canvas, default body 논리 ID와 mirror 정책 |
 | `parts-motion` | rig reference, 고유 state/view clip, 순서가 고정된 sample·이미지·ticks·socket·visibility·confidence, optional source/freeze provenance |
-| `parts-pack` | design ID, rig/motion/view binding, occupies/requires/excludes, 다중 piece, sample별 placement·mask·provides/replaces·join·palette region |
+| `parts-pack` | design ID, body/part role, segmented/flat body, rig/motion/view binding, occupies/requires/excludes, 다중 piece, sample별 placement·mask·provides/replaces·join·palette region·source provenance |
 | `parts-catalog` | rig/topology, group tree, slot별 options/default, palette channel, flat preset assignments |
-| `parts-appearance` | rig/motion/catalog, 상태 목록, slot 선택·preset·palette override |
+| `parts-appearance` | rig/motion/catalog, 정확한 body references, 상태 목록, slot 선택·preset·palette override |
 | `parts-review` | subject digest, part/binding/appearance scope, 상태 및 render/QA policy ID |
 | `parts-build-lock` | appearance·입력·review의 정확한 reference, toolchain·policy·output asset hash |
 
@@ -75,6 +75,8 @@ slot 선택은 null, 하나의 PartPack reference 또는 고유 reference 배열
 `empty_policy`는 후속 renderer를 위한 선언이다. 현재 `body-default`가 기본 artwork를 만들거나 누락된 파츠를 통과시키지 않는다. 완성 검증에는 required slot을 제공하는 선택 piece가 필요하다. palette override는 catalog에 있는 channel만 허용하며 RGB는 0..255의 정수 3개다. 실제 recolor는 후속 구현이다.
 
 placement에는 `image`, `pivot`, `target_socket`, `visible`, `offset`, optional `mask`, `before`/`after`가 있다. 정수 좌표를 보존하며 파일 이름/그림 크기로 scale이나 정렬을 추론하지 않는다. `mode: held`도 sample map을 명시해야 하며 모든 mapping이 동일한 file/hash 이미지 하나를 사용한다. visible piece의 target socket은 해당 motion sample에 있어야 한다. 가려진 piece도 완성 검증에서는 `visible: false` mapping으로 sample을 명시한다.
+
+PR03은 body를 null slot의 별도 pack으로 등록하고 appearance/assembly의 `body` references로 고정한다. Flat body는 root interface만 제공한다. Placement에 `allow_clip`, sample별 `palette_regions`와 원본 crop/pivot 정보를 추가했으며 mask channel은 luma/alpha를 명시한다. 이 초기 schema의 확장도 새 normalized content digest를 만든다. 기존 digest를 조용히 바꿔 호환 표시하지 않는다.
 
 ## 시간
 

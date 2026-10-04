@@ -77,3 +77,39 @@ def verified_annotations(root, result, *, point=(64, 64)):
 
 def tree_hashes(root):
     return {p.relative_to(root).as_posix(): assets.sha256(p.read_bytes()) for p in root.rglob("*") if p.is_file()}
+
+
+def frozen_workspace(base, *, preset="human.sd.v1"):
+    from sprite_gen.curate import parts_motion
+    base.mkdir(parents=True, exist_ok=True)
+    root, source = base / "library", base / "motion-source"
+    assembly = workspace_at(root, preset=preset)
+    index, registry = workspace.read_workspace(assembly)
+    rig = registry[index["rig"]["id"]]
+    size = (rig["canvas"]["width"], rig["canvas"]["height"])
+    index["states"] = ["walk"]
+    assembly.write_bytes(workspace.json_bytes(index))
+    external_source(source, size=size)
+    spec = import_spec(base / "motion-import.json", assembly, [source_request(source)])
+    imported = parts_motion.import_motion(assembly, spec, source)
+    annotations = verified_annotations(root, imported, point=(size[0] // 2, size[1] // 2))
+    parts_motion.freeze_motion(assembly, imported["candidate"], annotations)
+    return assembly
+
+
+def part_spec(path, assembly, source_root, *, slot="hair", node="hair_front", socket="head",
+              identity="test.part", role="part", format="local", pivot=(2, 2), crop_offset=(0, 0),
+              provides=(), replaces=(), body_mode="segmented"):
+    index, registry = workspace.read_workspace(assembly)
+    motion = registry[index["motion"]["id"]]
+    rig = registry[index["rig"]["id"]]
+    ref = {"file": "piece.png", "sha256": assets.sha256((source_root / "piece.png").read_bytes())}
+    value = {"kind": "parts-pack-import", "schema_version": 1, "id": identity, "design_id": "test-design",
+             "role": role, "body_mode": body_mode, "style": rig["style"], "rig": index["rig"], "motion": index["motion"],
+             "view": rig["view"], "binding_id": "test.binding", "occupies": [slot] if slot is not None else [],
+             "pieces": [{"id": "piece", "slot": slot, "node": node, "provides": list(provides), "replaces": list(replaces),
+                         "mode": "held", "sample_map": {clip["id"]: {sample["id"]: {
+                             "image": ref, "format": format, "crop_offset": list(crop_offset), "pivot": list(pivot), "target_socket": socket
+                         } for sample in clip["samples"]} for clip in motion["clips"]}}]}
+    path.write_bytes(workspace.json_bytes(value))
+    return path

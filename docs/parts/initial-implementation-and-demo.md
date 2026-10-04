@@ -6,7 +6,7 @@
 
 2026-10-04 요구를 반영해 SD explorer의 기본 사용자 데모를 헤어·표정·상의·하의·신발의 5slot으로 확장했다. 추가 장비, 독립 subslot, palette와 다른 체형의 variation도 PR01부터 데이터 계약에 포함한다. 상세 범위와 조합 규칙은 [커스터마이징과 베리에이션 계획](customization-and-variation.md)을 따른다. 두 slot의 12 clip은 내부 smoke이며 사용자 데모의 완료 기준은 기본 32외형·96 clip이다.
 
-작성일은 2026-10-04이다. PR00–02를 구현해 `parts-init`, `parts-validate`, `parts-motion-import`, `parts-motion-freeze`, 순수 parser와 다섯 preset을 추가했다. 현재 사용할 수 있는 범위는 [선언 계약](01-contract.md), [모션 snapshot](02-motion-snapshots.md)과 [기준선](00-baseline.md)을 따른다. 아래의 파츠 import·합성·실제 데모 제작은 아직 계획이다.
+작성일은 2026-10-04이다. PR00–03을 구현해 `parts-init`, `parts-validate`, `parts-motion-import`, `parts-motion-freeze`, `parts-import`, 순수 parser와 다섯 preset을 추가했다. 현재 사용할 수 있는 범위는 [선언 계약](01-contract.md), [모션 snapshot](02-motion-snapshots.md), [파츠 import](03-part-import.md)와 [기준선](00-baseline.md)을 따른다. 합성·실제 데모 제작은 아직 계획이다.
 
 ## 구현 현황
 
@@ -15,7 +15,8 @@
 | PR00 | 기준 커밋에서 직접 실행한 layer/non-layer golden, 회귀 테스트와 fork 자동 게시 차단 구현 |
 | PR01 | content digest·정확한 reference·sample binding·20개 humanoid slot·palette·preset·cardinality 검증, 다섯 체형의 선언 fixture 및 CLI 구현 |
 | PR02 | 공통 source adapter, exact timing, immutable candidate/freeze, 최종 raster annotation, stale binding 분리와 CLI 구현 |
-| PR03–04 | 실제 part raster import, body piece 교체와 renderer 미구현 |
+| PR03 | Body/part 분리, 실제 RGBA import, crop/pivot 보존, mask/region, coverage, immutable 등록 구현 |
+| PR04 | Body piece 교체와 공통 renderer 미구현 |
 | 실제 SD 데모 | 디자인 참고 PNG만 있음. 5slot 각 2종의 그림과 96 clip 검수는 제작 전 |
 
 ## 확인한 기준선
@@ -118,14 +119,14 @@ native source는 기존 `read_guard`와 finalized 결과를 사용하고 `heal_r
 
 snapshot은 staging에 완성·검증한 뒤 digest 경로로 게시한다. 실패 시 부분 객체를 공개하지 않고, 같은 digest 객체가 이미 있으면 동일성 확인 후 재사용한다.
 
-초기 CLI와 후속 명령은 다음과 같다. init/validate/motion-import/motion-freeze는 현재 실행 가능하다.
+초기 CLI와 후속 명령은 다음과 같다. init/validate/motion-import/motion-freeze/import는 현재 실행 가능하다.
 
 ```text
 parts-init             [구현] assembly와 profile/rig/catalog 초안 초기화
 parts-validate         [구현] 선언·digest·선택/coverage 검증, release 승인은 하지 않음
 parts-motion-import    [구현] finalized/external source를 draft candidate로 가져오기
 parts-motion-freeze    [구현] raster와 annotation을 검사하고 motion snapshot 게시
-parts-import           [예정] body/overlay/replacement piece와 sample binding 가져오기
+parts-import           [구현] body/overlay/replacement piece와 sample binding 가져오기
 parts-preview          [예정] 동일 resolver의 draw-list로 sample PNG와 검수용 preview 생성
 ```
 
@@ -242,4 +243,4 @@ canvas 크기는 fixture 데이터다. core가 SD/tall/animal에 따라 분기�
 
 PR04에서 같은 resolver의 다중 체형 동작과 SD 파츠 교체를 확인한다. 이후 PR05의 QA·해시 기반 승인과 PR06의 결정론적 export를 끝내 M1을 완성한다. PR07/08에서 기준 모션에 연결된 실제 생성·부분 재생성 workflow를 구현하고, PR09 UI와 PR10 실제 acceptance pack을 연결한다.
 
-현재 산출물은 PR00–02의 선언/CLI/모션 snapshot/회귀 보호 코드와 테스트, 본 계획, customization/variation 계획, 디자인 참고 PNG와 provenance다. catalog 선언과 source snapshot은 구현했고 options는 비어 있다. 실제 SD용 artwork, PartPack import/renderer, 승인된 기본 96 clip과 확장 wardrobe는 아직 제작하지 않았다.
+현재 산출물은 PR00–03의 선언/CLI/모션 snapshot/파츠 import/회귀 보호 코드와 테스트, 본 계획, customization/variation 계획, 디자인 참고 PNG와 provenance다. 초기 catalog의 options는 비어 있으며 실제 imported part를 등록하면 갱신된다. 실제 SD용 artwork, renderer, 승인된 기본 96 clip과 확장 wardrobe는 아직 제작하지 않았다.

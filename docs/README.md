@@ -134,13 +134,15 @@ grouping is derived from `sprite_gen/_modules.py`, the one taxonomy table.
 ## Fork parts system
 
 The experimental parts commands implement separate workspace scaffolding,
-strict declarations and hash-bound motion import/freeze. Part image import,
-composition, review and export remain planned; no part art is approved.
+strict declarations, hash-bound motion import/freeze and body/part raster import.
+Composition, review and export
+remain planned; no part art is approved.
 
 | Doc | Owns |
 |---|---|
 | [parts/00-baseline.md](parts/00-baseline.md) | Pinned legacy request/JSON/pixels, local test environment and fork release policy |
 | [parts/01-contract.md](parts/01-contract.md) | Implemented v1 contracts, five body presets, workspace CLI and validation limits |
 | [parts/02-motion-snapshots.md](parts/02-motion-snapshots.md) | Read-only final-source adapters, exact time, hash-bound annotation/freeze and motion revision invalidation |
+| [parts/03-part-import.md](parts/03-part-import.md) | Cropped/full-canvas geometry, separate body packs, masks/regions, coverage and immutable part registration |
 | [parts/initial-implementation-and-demo.md](parts/initial-implementation-and-demo.md) | PR00–04 execution plan, snapshot/digest/timing rules, and the five-slot SD parts demo art brief |
 | [parts/customization-and-variation.md](parts/customization-and-variation.md) | Basic and detailed slots, variation/palette/preset rules, rig-specific fitting, and expanded multi-body acceptance scope |

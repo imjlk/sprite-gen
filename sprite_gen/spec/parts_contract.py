@@ -189,12 +189,17 @@ _clip = _record({"id": _id, "state": _id, "view": _id, "timebase": _positive,
                  "loop": _boolean, "samples": _records(_sample, nonempty=True),
                  "source": _nullable(_motion_source)}, {"source": None})
 _mask = _record({"image": _asset, "target_node": _id,
-                 "space": _enum("part-local", "rig-canvas")})
+                 "space": _enum("part-local", "rig-canvas"), "channel": _enum("luma", "alpha")},
+                {"channel": "luma"})
+_part_source = _record({"image": _asset, "format": _enum("full-canvas", "cropped", "local"),
+                       "crop_offset": _point, "pivot": _point})
 _placement = _record({"image": _asset, "pivot": _point, "target_socket": _id,
                       "visible": _boolean, "offset": _point, "mask": _nullable(_mask),
-                      "before": _ids, "after": _ids},
-                     {"visible": True, "offset": [0, 0], "mask": None, "before": [], "after": []})
-_piece = _record({"id": _id, "slot": _id, "node": _id,
+                      "before": _ids, "after": _ids, "allow_clip": _boolean,
+                      "palette_regions": _mapping(_asset), "source": _nullable(_part_source)},
+                     {"visible": True, "offset": [0, 0], "mask": None, "before": [], "after": [],
+                      "allow_clip": False, "palette_regions": {}, "source": None})
+_piece = _record({"id": _id, "slot": _nullable(_id), "node": _id,
                   "mode": _enum("raster", "held"), "sample_map": _mapping(_mapping(_placement)),
                   "provides": _ids, "replaces": _ids, "join_interface": _nullable(_id),
                   "palette_regions": _mapping(_asset)},
@@ -208,6 +213,9 @@ _choice = _record({"id": _id, "group": _id, "label": _string,
                    "join_interface": _nullable(_id)}, {"options": [], "default": None, "join_interface": None})
 _palette = _record({"id": _id, "label": _string, "default": _rgb})
 _preset = _record({"id": _id, "label": _string, "assignments": _mapping(_selection)})
+_pack_import = _record({"request_sha256": _hash, "source_assets": _list(_asset, nonempty=True, unique=True),
+                       "style": _id, "encoding_policy": _id, "coverage": _enum("complete", "partial"),
+                       "states": _list(_id, nonempty=True, unique=True)})
 
 _COMMON = {"kind": _string, "schema_version": _positive, "id": _id}
 _SCHEMAS = {
@@ -219,7 +227,10 @@ _SCHEMAS = {
                          {"default_body_ids": [], "mirror_allowed": False}),
     "parts-motion": _record({**_COMMON, "rig": _ref, "clips": _records(_clip, nonempty=True),
                              "freeze": _nullable(_motion_freeze)}, {"freeze": None}),
-    "parts-pack": _record({**_COMMON, "design_id": _id, "bindings": _records(_binding, nonempty=True)}),
+    "parts-pack": _record({**_COMMON, "design_id": _id, "bindings": _records(_binding, nonempty=True),
+                           "role": _enum("part", "body"), "body_mode": _enum("segmented", "flat"),
+                           "import": _nullable(_pack_import)},
+                          {"role": "part", "body_mode": "segmented", "import": None}),
     "parts-catalog": _record({**_COMMON, "rig": _ref, "topology": _ref,
                               "groups": _records(_group), "slots": _records(_choice),
                               "palette_channels": _records(_palette), "presets": _records(_preset)},
@@ -227,8 +238,8 @@ _SCHEMAS = {
     "parts-appearance": _record({**_COMMON, "rig": _ref, "motion": _ref, "catalog": _ref,
                                  "states": _list(_id, nonempty=True, unique=True),
                                  "selections": _mapping(_selection), "presets": _ids,
-                                 "palette": _mapping(_rgb)},
-                                {"selections": {}, "presets": [], "palette": {}}),
+                                 "palette": _mapping(_rgb), "body": _list(_ref, unique=True)},
+                                {"selections": {}, "presets": [], "palette": {}, "body": []}),
     "parts-review": _record({**_COMMON, "subject_digest": _hash,
                              "scope": _enum("part", "binding", "appearance"),
                              "status": _enum("approved", "rejected", "unverified"),
@@ -331,10 +342,17 @@ def _local(document):
         if len(set(targets)) != len(targets):
             _fail(path, "duplicate rig/motion/view binding")
         for binding in document["bindings"]:
-            if not binding["occupies"]:
+            body = document["role"] == "body"
+            if body and (binding["occupies"] or binding["requires"] or binding["excludes"]):
+                _fail(path, "body bindings cannot occupy customization slots")
+            if not body and not binding["occupies"]:
                 _fail(path, "binding must declare its occupied slots")
+            if document["body_mode"] == "flat" and (not body or len(binding["pieces"]) != 1):
+                _fail(path, "flat body requires exactly one body piece")
             for piece in binding["pieces"]:
-                if piece["slot"] not in binding["occupies"]:
+                if body and (piece["slot"] is not None or not piece["provides"] or piece["replaces"]):
+                    _fail(path, "body pieces need null slots, provided nodes and no replacements")
+                if not body and piece["slot"] not in binding["occupies"]:
                     _fail(path, "piece slot is outside binding occupies")
                 _members(piece["replaces"], piece["provides"], f"{path}.{piece['id']}.provides")
                 images = {(p["image"]["file"], p["image"]["sha256"])
@@ -428,7 +446,14 @@ def _check_pack(document, registry):
         clips = {c["id"]: c for c in motion["clips"]}
         for piece in binding["pieces"]:
             _members([piece["node"], *piece["provides"], *piece["replaces"]], nodes, path)
-            slot = slots[piece["slot"]]
+            if document["role"] == "body":
+                if piece["node"] not in piece["provides"]:
+                    _fail(path, "body piece must provide its primary node")
+                if document["body_mode"] == "flat":
+                    root = next(n["id"] for n in topology["nodes"] if n["parent"] is None)
+                    if piece["node"] != root or piece["provides"] != [root]:
+                        _fail(path, "flat body can only provide the root interface")
+            slot = slots[piece["slot"]] if piece["slot"] is not None else {"nodes": [], "sockets": []}
             if slot["nodes"]:
                 _members([piece["node"]], slot["nodes"], f"{path}.{piece['id']}.slot_node")
             _members(piece["sample_map"], clips, path)
@@ -461,6 +486,15 @@ def _check_appearance(document, registry, complete):
     selected_bindings = {}
     occupied = {}
     covered_slots = set()
+    for ref in document["body"]:
+        pack = _get(registry, ref, "parts-pack", path)
+        if pack["role"] != "body":
+            _fail(path, "appearance body reference is not a body pack")
+        bindings = [b for b in pack["bindings"] if b["rig"] == document["rig"]
+                    and b["motion"] == document["motion"] and b["view"] == rig["view"]]
+        if not bindings:
+            _fail(path, f"no body binding for {pack['id']}")
+        selected_bindings[pack["id"]] = bindings[0]
     for slot in catalog["slots"]:
         refs = _selected_refs(selected[slot["id"]])
         if len(refs) > topology_slots[slot["id"]]["max_count"]:
@@ -471,6 +505,8 @@ def _check_appearance(document, registry, complete):
             if ref not in slot["options"]:
                 _fail(path, f"slot {slot['id']} selection is not an option")
             pack = _get(registry, ref, "parts-pack", path)
+            if pack["role"] != "part":
+                _fail(path, "body pack cannot be selected as a customization option")
             bindings = [b for b in pack["bindings"] if b["rig"] == document["rig"]
                         and b["motion"] == document["motion"] and b["view"] == rig["view"]]
             if not bindings:
@@ -559,6 +595,8 @@ def validate_bundle(documents: Iterable[dict], *, complete=False) -> dict[str, d
                     _fail(path, f"default exceeds max_count at {slot['id']}")
                 for ref in slot["options"]:
                     pack = _get(registry, ref, "parts-pack", path)
+                    if pack["role"] != "part":
+                        _fail(path, "catalog option must be a customization part")
                     if not any(b["rig"] == doc["rig"] and slot["id"] in b["occupies"]
                                and any(p["slot"] == slot["id"] for p in b["pieces"])
                                for b in pack["bindings"]):

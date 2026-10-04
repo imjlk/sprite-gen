@@ -14,6 +14,8 @@ PR00–01 구현 후 동일한 전체 명령을 실행한 결과는 **3241 passe
 
 PR02 모션 snapshot 구현 후 전체 결과는 **3274 passed, 2 skipped, 74 warnings, 323.06초**다. 이후 malformed annotation/lock 예외 처리 2개 테스트를 추가했고, 해당 변경을 포함한 adapter·motion·contract·workspace·CLI 관련 **130개 테스트**가 통과했다. 원본 finalized run의 내용 불변, source 교체·pixel budget·stale annotation·revision invalidation과 기존 atlas/layer golden도 확인했다.
 
+PR03 body/part import 구현 후 전체 결과는 **3298 passed, 2 skipped, 74 warnings, 325.72초**다. Crop/full-canvas 복원 픽셀 일치, tiny RGBA 보존, 다섯 체형의 같은 import 경로, 다중 body piece, mask/region 크기, missing coverage, snapshot 쓰기 실패 및 index 동시 변경을 확인했다. Legacy golden과 기존 전체 테스트도 통과했다. Renderer와 실제 아트의 96 clip 검수는 이 결과의 범위에 포함하지 않는다.
+
 ```bash
 python3.13 -m venv .venv
 .venv/bin/pip install -e ".[dev]"

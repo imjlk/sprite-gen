@@ -76,7 +76,8 @@ _INDEX = contract._record({
     "rig": contract._ref, "catalog": contract._ref,
     "motion": contract._nullable(contract._ref), "appearance": contract._nullable(contract._ref),
     "states": contract._list(contract._id, nonempty=True, unique=True),
-}, {"motion": None, "appearance": None})
+    "body": contract._list(contract._ref, unique=True),
+}, {"motion": None, "appearance": None, "body": []})
 
 
 def read_workspace(assembly: Path, *, complete=False):
@@ -100,10 +101,16 @@ def read_workspace(assembly: Path, *, complete=False):
         raise contract.PartsContractError("assembly: catalog/rig mismatch")
     if index["motion"] is not None and registry[index["motion"]["id"]]["rig"] != index["rig"]:
         raise contract.PartsContractError("assembly: motion/rig mismatch")
+    for ref in index["body"]:
+        pack = contract._get(registry, ref, "parts-pack", "assembly.body")
+        if pack["role"] != "body" or not any(b["rig"] == index["rig"] and b["motion"] == index["motion"] for b in pack["bindings"]):
+            raise contract.PartsContractError("assembly: body/rig/motion mismatch")
     if index["appearance"] is not None:
         appearance = registry[index["appearance"]["id"]]
         if any(appearance[key] != index[key] for key in ("rig", "catalog", "motion")):
             raise contract.PartsContractError("assembly: appearance differs from selected rig/catalog/motion")
+        if appearance["body"] != index["body"]:
+            raise contract.PartsContractError("assembly: appearance differs from selected body")
         if complete and appearance["states"] != index["states"]:
             raise contract.PartsContractError("assembly: requested states differ from appearance states")
     elif complete:
@@ -139,7 +146,7 @@ def initialize(directory: Path, preset: str) -> dict:
         "kind": "parts-workspace", "schema_version": 1, "id": preset + ".workspace",
         "documents": {d["id"]: name for d, name in zip(docs, filenames)},
         "rig": contract.reference(rig), "catalog": contract.reference(catalog),
-        "motion": None, "appearance": None, "states": states,
+        "motion": None, "appearance": None, "states": states, "body": [],
     }
     target.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix=".parts-init-", dir=target.parent))
