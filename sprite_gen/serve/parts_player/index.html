@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SD Explorer · Parts Lab</title><link rel="stylesheet" href="/player.css">
+</head>
+<body>
+  <header><div><strong>SD Explorer</strong><span>Parts Lab</span></div><p><i></i>라이브 레이어</p></header>
+  <main>
+    <aside aria-label="커스터마이징 파츠">
+      <div class="aside-title"><h1>커스터마이징</h1><button id="shuffle" type="button">랜덤 조합 ↗</button></div>
+      <div id="wardrobe"></div>
+      <details id="advanced"><summary>세부 파츠·장비</summary><div id="extras"></div></details>
+      <p class="aside-note">파츠를 바꿔도 같은 동작을 이어 재생합니다.</p>
+    </aside>
+    <section class="workspace" aria-label="캐릭터 미리보기">
+      <div class="stage-top"><div id="states" role="group" aria-label="동작"></div><label><input id="sockets" type="checkbox">기준점 보기</label></div>
+      <div class="stage"><canvas id="character" width="128" height="128" aria-label="SD 캐릭터 라이브 재생"></canvas><div class="stage-caption"><span>128 × 128</span><span id="layer-count"></span></div></div>
+      <div class="timeline"><button id="play" type="button" aria-label="일시정지">Ⅱ</button><input id="seek" type="range" min="0" max="999" value="0" aria-label="모션 재생 위치"><output id="frame-position">—</output></div>
+      <div class="details"><p id="sample-name">공통 모션 연결 중…</p><p id="selection-status" aria-live="polite"></p></div>
+      <p id="error" role="alert"></p>
+    </section>
+  </main>
+  <footer><span>공통 idle / walk / run</span><span>선택한 SD 디자인 기반 · 파츠 피팅 검수 중</span></footer>
+  <script type="module" src="/player.js"></script>
+</body></html>

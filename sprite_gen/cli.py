@@ -30,7 +30,7 @@ from sprite_gen.video import source as video_source
 from sprite_gen.video import rife_install
 from sprite_gen.effects import recolor, shadow
 from sprite_gen.scene import render, inspect_scene
-from sprite_gen.serve import serve_compose, serve_curation
+from sprite_gen.serve import serve_compose, serve_curation, serve_parts
 from sprite_gen.spec import migrate_breathe, migrate_request, parts_workspace
 from sprite_gen.curate import parts_motion, parts_appearance, parts_review
 from sprite_gen.qa import inspect_parts
@@ -469,6 +469,11 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         "Bake requested states into a deterministic atlas snapshot; release requires current appearance approval.",
         parts_build.add_arguments,
         parts_build.run,
+    ),
+    "parts-play": (
+        "Play the current shared-motion sample and swap part layers in a read-only local webview.",
+        serve_parts.add_arguments,
+        serve_parts.run,
     ),
     # The argument surface is `serve_curation.add_arguments` itself, not a copy of it: the
     # webview's own `--help` and this subcommand are the same declaration, so `sprite-gen

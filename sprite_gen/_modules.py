@@ -74,6 +74,7 @@ MODULE_DOMAIN = {
     'preview': 'qa',
     'serve_curation': 'serve',
     'serve_compose': 'serve',
+    'serve_parts': 'serve',
     'gif_utils': 'util',
     'resample': 'util',
 }

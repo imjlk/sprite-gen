@@ -40,6 +40,14 @@ never write an atlas, appearance snapshot or completed clip. `parts-preview`
 snapshots and `parts-build` are explicitly requested inspection/export tools.
 The 32 × 3 count is a validation space, not a default collection of 96 clips.
 
+`sprite-gen parts-play --assembly path/to/library/assembly.json --port 8766`
+opens the same runtime in a read-only local HTTP player at `127.0.0.1`. It needs
+a frozen motion and an active appearance; an imported candidate alone cannot
+be played as a fitted parts demo. Pause/seek, slot selections, optional equipment
+and independent subslots use the shared clock. The server renders only the
+requested sample, bounds its selection cache and refuses unknown or duplicate
+parameters. HTTP playback never writes an assembly or bakes an appearance.
+
 The body is an explicit pack. Segmented bodies must provide every required
 topology node. `provides` identifies indivisible raster interfaces, and `replaces`
 removes all body pieces providing those nodes. A raster supplying several nodes
