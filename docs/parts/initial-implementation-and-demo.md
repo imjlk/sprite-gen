@@ -16,6 +16,8 @@
 
 현재 데모는 `assets/sd-explorer-simple-layers-20261005/library/assembly.json`이다. 각 상태는 실제 영상의 96프레임 / 24fps / 4초 pinned 재생이며, 완성 외형별 모션을 제작하지 않는다. 눈·헤어·의상을 독립적으로 켜고 끄는 8가지 레이어 상태에서 기본 몸의 전체 image hash와 (0,0) 위치가 유지되는 2,304 sample 검사를 통과했다. `/api/layers`는 개별 texture와 상대좌표를 반환하며, 뷰어는 네 레이어를 유지하는 선택적인 검수 클라이언트다. 기준 몸 보존과 레이어 연결을 확인하는 최소 데모이며, 5slot 각 2종의 32외형 데모 완료나 아트 승인을 뜻하지 않는다. 포즈별 의상 피팅과 추가 베리에이션은 이 기준에서 이어간다.
 
+헤어 위치 검수에서 귀 주변과 앞머리의 정렬을 보정했다. 128px 기준으로 헤어 레이어에 공통 local offset `[2,-1]`을 적용하며, 기존 머리 위치 보간을 그대로 따른다. 기본 몸·공통 모션·파츠 이미지 바이트는 유지하고 binding 위치만 갱신했다. [위치 보정 화면](assets/sd-explorer-simple-layer-hair-aligned-20261005.jpg)을 별도로 남겼으며, 아래 실행 패키지에도 반영했다.
+
 - [실행 가능한 workspace·원본 영상·개별 파츠 패키지](assets/sd-explorer-simple-layers-20261005.tar.gz)
 - [출처·해시·검증 범위](assets/sd-explorer-simple-layers-20261005.provenance.json), [생성 prompt](assets/sd-explorer-simple-layers-20261005.prompts.json), [검수 화면](assets/sd-explorer-simple-layer-viewer-20261005.jpg)
 

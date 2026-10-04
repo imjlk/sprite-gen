@@ -1,10 +1,10 @@
 {
   "appearance_clips_baked": 0,
   "archive": {
-    "bytes": 15221561,
+    "bytes": 15316461,
     "file": "sd-explorer-simple-layers-20261005.tar.gz",
-    "files": 2088,
-    "sha256": "177d4df8c9234b5f6798186cd51103984742245b064c609e8ce1abf8d54498fa"
+    "files": 2096,
+    "sha256": "07410ce449aac072daca562e7691cf83ab413d324e59ecc9df282b8b16982c62"
   },
   "archive_roundtrip": "extracted with safe data filter; frozen workspace loaded and four layers rendered",
   "art_approved": false,
@@ -26,6 +26,10 @@
       ]
     },
     "hair": {
+      "layer_offset_128": [
+        2,
+        -1
+      ],
       "operation": "one-time asset size/position alignment; no per-frame warp",
       "reference_box": [
         333,
@@ -64,7 +68,24 @@
     "all_parts_on": 4,
     "base_texture_unchanged": true,
     "console_errors": 0,
+    "hair_relative_offset_verified": true,
+    "hair_toggle_body_unchanged": true,
+    "hair_toggle_sample_unchanged": true,
     "sample_unchanged": true
+  },
+  "hair_alignment": {
+    "body_ref_unchanged": true,
+    "head_track_unchanged": true,
+    "motion_ref_unchanged": true,
+    "offset_128": [
+      2,
+      -1
+    ],
+    "previous_archive_sha256": "177d4df8c9234b5f6798186cd51103984742245b064c609e8ce1abf8d54498fa",
+    "reason": "align ear opening and fringe to intact bald base",
+    "screenshot": "sd-explorer-simple-layer-hair-aligned-20261005.jpg",
+    "shared_across_states": true,
+    "texture_refs_unchanged": true
   },
   "kind": "sd-whole-body-layer-proof",
   "layout": [
@@ -81,7 +102,7 @@
     "sd-explorer-simple-shirt-20261005.png": "e6df72812f68a6f4661d8689751f6698059012a81a04986689307602b1c6cafc"
   },
   "recipes": {
-    "scripts/dev/sd_explorer_simple_layers.py": "2106a58f13e12dd1fdbf22230d47915ceab010d3d41797a2ab9e29765a96996d",
+    "scripts/dev/sd_explorer_simple_layers.py": "0c75e3bd901d6669e01290fc6b09f69a62a70d0c0d5443af34890cbc1e930d09",
     "sprite_gen/compose/parts_runtime.py": "961192ee4d35b46bc5b66ee9c79ef504cfd4ec7b0408a6bdbb0ed6ad82cd877d",
     "sprite_gen/serve/parts_player/player.js": "200dc0155112ad774191e4a556c19804b228af41dcfcbeeae9c18ea7874c958a"
   },

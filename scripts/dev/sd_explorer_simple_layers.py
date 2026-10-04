@@ -21,6 +21,10 @@ from sprite_gen.frames import parts_import
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 
 PARTS={'eyes':('eyes','head'),'hair':('hair','head'),'upper':('shirt','torso')}
+# The isolated hair was generated against the original haired reference. Match
+# its ear opening and fringe to the new bald base once, in the 128px grid.
+# This authored local offset follows the existing head track in every state.
+PART_OFFSETS={'hair':[2,-1]}
 
 
 def write(path,value):
@@ -111,6 +115,7 @@ def build(base):
                 # coordinates are always (0,0). Parts only follow a delta.
                 relative=image.relative_to(base).as_posix()
                 mapping[clip['id']][sample['id']]={'image':{'file':relative,'sha256':assets.sha256(image.read_bytes())},'format':'full-canvas','pivot':[0,0] if slot is None else origin[anchor],'target_socket':anchor,
+                    'offset':PART_OFFSETS.get(slot,[0,0])[:],
                     'after':[] if slot is None else ['root'] if slot=='eyes' else ['root','eyes'] if slot=='hair' else ['root','eyes','hair']}
         spec={'kind':'parts-pack-import','schema_version':1,'id':'sd.simple.'+name,'design_id':'explorer.'+name,'role':'body' if slot is None else 'part','body_mode':'flat' if slot is None else 'segmented',
             'style':rig['style'],'rig':index['rig'],'motion':index['motion'],'view':rig['view'],'binding_id':'sd.simple.'+name+'.binding','occupies':[] if slot is None else [slot],
@@ -118,7 +123,7 @@ def build(base):
         refs[slot]=parts_import.import_pack(assembly,write(base/f'import/{name}.json',spec),base)['part']
     selection=write(base/'selection.json',{'kind':'parts-appearance-selection','schema_version':1,'id':'sd.simple.layers','selections':{s:refs[s] for s in PARTS}})
     parts_appearance.create(assembly,selection)
-    write(base/'whole-body-provenance.json',{'kind':'sd-simple-layer-demo','motion_origin':'actual Grok bald-base videos','sources':native,'base_body_split':False,'body_replacements':0,'texture_warps':0,'appearance_clips_baked':0,'origin':origin,'selections':{s:refs[s] for s in PARTS},'art_approved':False,'release_ready':False})
+    write(base/'whole-body-provenance.json',{'kind':'sd-simple-layer-demo','motion_origin':'actual Grok bald-base videos','sources':native,'base_body_split':False,'body_replacements':0,'texture_warps':0,'appearance_clips_baked':0,'origin':origin,'part_offsets':PART_OFFSETS,'selections':{s:refs[s] for s in PARTS},'art_approved':False,'release_ready':False})
     return assembly
 
 
