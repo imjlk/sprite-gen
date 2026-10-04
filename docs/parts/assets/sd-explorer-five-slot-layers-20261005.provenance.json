@@ -1,0 +1,155 @@
+{
+  "archive": {
+    "bytes": 16740476,
+    "file": "sd-explorer-five-slot-layers-20261005.tar.gz",
+    "files": 2337,
+    "sha256": "20845116093899c3a8f7423bdcd68305c55469bbe5b0d58a1d03831ed2ccb058"
+  },
+  "archive_roundtrip": {
+    "all_file_hashes_equal": true,
+    "body_texture_preserved": true,
+    "clock_preserved": true,
+    "distinct_appearances_per_state": {
+      "idle": 32,
+      "run": 32,
+      "walk": 32
+    },
+    "safe_data_extraction": true
+  },
+  "art_approved": false,
+  "art_generator": "built-in image_gen",
+  "body": [
+    {
+      "digest": "e9dcea936fc895a145ab250bccf2b730db79beee2244d3336753de571499def9",
+      "id": "sd.wardrobe.body"
+    }
+  ],
+  "body_motion": {
+    "appearance_clips_baked": 0,
+    "art_approved": false,
+    "body_replacements": 0,
+    "body_split": false,
+    "change": "five slot declarations; full body images, socket tracks, sample order and timing unchanged",
+    "kind": "sd-five-slot-body-provenance",
+    "motion": {
+      "digest": "cd1924dcb54b5be9c47dfd151ae30158210302a98410e3246175fa7b9e88786a",
+      "id": "sd.wardrobe.video.motion"
+    },
+    "previous_motion": {
+      "digest": "b6c45275a24269de55bb613216ea507c8cc80c57765aa687eabda9ef8c27de14",
+      "id": "sd.simple.video.motion"
+    },
+    "previous_rig": {
+      "digest": "1ae749955b4a145525d5bffe422f8907be098b13344c611dbbfcbdf81c550e3b",
+      "id": "sd.simple.layers.rig"
+    },
+    "release_ready": false,
+    "rig": {
+      "digest": "ac2510c840cbbe9c6285c711ec0c7b9e113a775f3161a415fcf03c5b4fa7ed85",
+      "id": "sd.wardrobe.layers.rig"
+    },
+    "runtime_texture_warps": 0,
+    "schema_version": 1
+  },
+  "browser_check": {
+    "all_five_slots_swapped": true,
+    "body_texture_and_position_preserved": true,
+    "console_errors": 0,
+    "empty_layers": 1,
+    "kind": "sd-five-slot-browser-check",
+    "same_sample_after_empty": "run.right · sample.70",
+    "schema_version": 1,
+    "scope": "representative browser scenes; not visual acceptance of every frame",
+    "screenshots": [
+      "sd-explorer-five-slot-viewer-20261005.jpg",
+      "sd-explorer-five-slot-run-20261005.jpg"
+    ],
+    "selected_layers": 6,
+    "states_visually_checked": [
+      "idle",
+      "walk",
+      "run"
+    ],
+    "walk_playback_samples_observed": [
+      44,
+      83
+    ]
+  },
+  "kind": "sd-five-slot-layer-checkpoint",
+  "motion": {
+    "digest": "cd1924dcb54b5be9c47dfd151ae30158210302a98410e3246175fa7b9e88786a",
+    "id": "sd.wardrobe.video.motion"
+  },
+  "motion_generator": "three real Grok videos",
+  "pose_art": {
+    "binding_samples_per_design": 288,
+    "designs": 4,
+    "drawings_per_design": 16,
+    "operation": "one-time import fitting, immutable picture selection and translation at playback",
+    "source_poses": 16
+  },
+  "recipes": {
+    "scripts/dev/sd_explorer_five_slot_layers.py": "5776c39c596299aae718a1fa489737745742a7b4f8f0324fd5a25f045563ed1f",
+    "sprite_gen/serve/parts_player/player.js": "f9875beb4b7fc58e0b0eb2a19f5a4ff94853854dca09317a1d9b28313837aab2"
+  },
+  "regression_tests": {
+    "javascript_syntax": "passed",
+    "runtime_import_motion_player": {
+      "passed": 67,
+      "seconds": 18.01
+    }
+  },
+  "release_ready": false,
+  "remaining_goal_work": [
+    "visual fitting of every pose transition and arm/clothing occlusion",
+    "headwear/gloves/back_accessory overlays and risk pair/triple review"
+  ],
+  "rig": {
+    "digest": "ac2510c840cbbe9c6285c711ec0c7b9e113a775f3161a415fcf03c5b4fa7ed85",
+    "id": "sd.wardrobe.layers.rig"
+  },
+  "schema_version": 1,
+  "source_simple_layer_archive": {
+    "file": "sd-explorer-simple-layers-20261005.tar.gz",
+    "sha256": "07410ce449aac072daca562e7691cf83ab413d324e59ecc9df282b8b16982c62"
+  },
+  "source_wardrobe_archive": {
+    "file": "sd-explorer-layer-variations-20261005.tar.gz",
+    "sha256": "2542fccfaac125492d2e41ed6c764d55d720afdb6e9dc260c6ec284feb5f5fad"
+  },
+  "validation": {
+    "appearance_clips_baked": 0,
+    "appearances": 32,
+    "art_approved": false,
+    "designs_per_slot": {
+      "expression": 2,
+      "footwear": 2,
+      "hair": 2,
+      "lower": 2,
+      "upper": 2
+    },
+    "distinct_appearances_per_state": {
+      "idle": 32,
+      "run": 32,
+      "walk": 32
+    },
+    "release_ready": false,
+    "runtime_texture_warps": 0,
+    "sample_evaluations": 9216,
+    "slots": [
+      "expression",
+      "footwear",
+      "hair",
+      "lower",
+      "upper"
+    ],
+    "state_cases": 96,
+    "states": [
+      "idle",
+      "walk",
+      "run"
+    ],
+    "swap_clock_preserved": true,
+    "whole_body_preserved": true
+  }
+}

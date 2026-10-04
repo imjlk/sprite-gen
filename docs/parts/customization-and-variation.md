@@ -8,7 +8,7 @@ SD explorer의 기본 커스터마이징은 헤어·표정·상의·하의·신�
 
 이 문서는 2026-10-04 사용자 요구를 반영한 구현 계획이다. [초기 실행 계획](initial-implementation-and-demo.md)의 두 slot 데모를 내부 smoke로 두고, 사용자 데모와 후속 베리에이션 목표를 확장한다. PR01에서 group/slot/preset/palette와 체형별 binding의 첫 선언 검증을 구현했고, humanoid 초기 catalog는 기본 5종을 포함한 20개 slot을 제공한다. 실제 지원 범위는 [구현된 계약](01-contract.md)을 따른다. 아래의 추가 slot·아트 수량·합성·UI·승인은 후속 구현·제작 목표다.
 
-2026-10-05 사용자 검수로 기본 구현을 단순화했다. **온전한 기본 몸 + 눈 + 헤어 + 의상**을 순서대로 그린다. 위치 기준점은 머리·몸통의 상대좌표를 알려줄 뿐이며, 몸을 분해하거나 파츠를 변형하는 지시가 아니다. 기본 몸 프레임은 파츠를 모두 꺼도 그대로 남는다. 현재 데모는 눈·헤어·상의 각 2종을 독립 선택하며, [8외형·세 동작을 확인한 checkpoint](initial-implementation-and-demo.md)를 남겼다. 하의·신발은 16포즈 그림 후보를 제작했으나 전체 fitting과 binding은 남아 있다. 기본 5종 각 2개의 32외형 목표를 유지하며, 아직 그 완료로 판단하지 않는다. 앞서 분리·재질 투영으로 제작한 18slot 데모는 철회했으며, 그 기술 검사 수량을 아트 완료로 세지 않는다.
+2026-10-05 사용자 검수로 기본 구현을 단순화했다. **온전한 기본 몸 + 눈 + 헤어 + 의상**을 순서대로 그린다. 위치 기준점은 머리·몸통의 상대좌표를 알려줄 뿐이며, 몸을 분해하거나 파츠를 변형하는 지시가 아니다. 기본 몸 프레임은 파츠를 모두 꺼도 그대로 남는다. 현재 데모는 헤어·표정·상의·하의·신발 각 2종을 독립 선택한다. [32외형·세 동작의 실행 checkpoint](initial-implementation-and-demo.md)를 남겼으며, 하의·신발 네 디자인에는 각각 16포즈 그림을 연결했다. 96 상태 조합의 모든 96sample 기술 검사를 통과했지만, 전체 프레임의 시각적 피팅·추가 장비 검수까지 완료한 것은 아니다. 표정 두 종은 눈·눈썹을 바꾸며 입은 기본 몸에 남는다. 앞서 분리·재질 투영으로 제작한 18slot 데모는 철회했으며, 그 기술 검사 수량을 아트 완료로 세지 않는다.
 
 다리 자체는 기본 몸의 영상 스프라이트에 이미 들어 있는 동작을 따른다. 바지·신발의 포즈가 달라져야 한다면 필요한 **파츠의 포즈 그림**을 추가한다. 허벅지/종아리 회전·길이 보정·무릎 solver를 늘려 대응하지 않는다. 파츠 디자인 수와 포즈 수는 별도 축이며, 포즈 그림은 공통 motion sample에서 모든 외형이 공유한다. 다른 체형도 그 체형의 기준 몸과 상대좌표·포즈 그림을 명시적으로 준비하는 방식으로 확장한다.
 
@@ -91,7 +91,7 @@ M1 preset은 slot별 assignment 목록으로 정의하고 재귀 preset 호출�
 
 | 단계 | 실제 SD pack의 의무 | 완료 의미 |
 |---|---|---|
-| 내부 smoke | upper 2 × footwear 2, 세 상태, 12 clip | 초기 피팅·교체 경로 확인; 사용자 커스터마이징 데모 완료 판정에는 사용하지 않음 |
+| 내부 smoke | upper 2 × footwear 2, 세 상태, 12 상태 사례 | 초기 피팅·교체 경로 확인; 사용자 커스터마이징 데모 완료 판정에는 사용하지 않음 |
 | 기본 사용자 데모 | 공통 모션 3개 + hair/expression/upper/lower/footwear 각 2종 | 재생 중 5slot 독립 교체, clock 유지, 32외형·96 상태 조합 검증; 조합별 완성 clip 저장 없음 |
 | M1 추가 장비 | headwear/gloves/back_accessory 각각 `None`과 1종 | 기존 5slot과 함께 교체 가능, 위험 pair/triple 검수 기록 |
 | M2 SD wardrobe | hair 4, expression 5, upper 3, lower 3, footwear 3; 추가 장비·세부 subslot 확장 | 제작·부분 재생성·검수 workflow로 catalog를 확장하고 승인 coverage를 기록 |
@@ -101,12 +101,12 @@ M1 preset은 slot별 assignment 목록으로 정의하고 재귀 preset 호출�
 | 기본 선택 | variant A | variant B | 내부 piece의 예 |
 |---|---|---|---|
 | 헤어 | 짧은 textured hair | 단발 | front/back/side |
-| 표정 | 무표정 | 미소 | 눈·눈썹·입; preset과 독립 subslot |
-| 상의 | 청록색 짧은 jacket | 다른 collar/pocket/cuff 형태의 주황색 jacket | torso, sleeve_l/r |
+| 표정 | 기본 눈·눈썹 | 웃는 눈·눈썹 | 현재 눈 레이어; 입 subslot 아트는 후속 |
+| 상의 | 청록색 탱크탑 | collar/pocket 형태가 다른 주황색 베스트 | 현재 held 상의; 소매별 아트는 후속 |
 | 하의 | 반바지 | 긴바지 | waist/pelvis, leg_l/r |
-| 신발 | 낮은 운동화 | ankle boots | foot_l/r, 필요 시 cuff |
+| 신발 | 운동화 | ankle boots | 현재 포즈별 신발 pair; 독립 좌우 선택은 후속 |
 
-표정과 헤어를 바꾸기 위해 실제 기본 head에는 hair/eyes/brows/mouth가 분리돼 있어야 한다. 하의·신발 교체도 기본 의상·발 그림을 제거할 수 있는 자료가 필요하다. 합쳐진 body에서 일부 영역을 crop했다고 가려졌던 살색이나 신체 그림이 복원되는 것으로 처리하지 않는다.
+현재 기본 몸은 민머리이고 눈·눈썹이 없으며, 작은 입과 기본 옷·발은 그대로 남는다. 파츠 그림이 해당 위치 위에 덮이도록 제작·피팅한다. 몸의 그림 제거·복원이나 segmentation을 기본 overlay 경로의 전제로 두지 않는다. 다른 그림을 지워야 하는 replacement 기능을 쓸 때는 별도 body 자료와 검수된 binding이 필요하다.
 
 M1 추가 장비가 모두 기본 다섯 slot과 양립한다고 가정하면 후보 공간은 256외형·768 상태 조합이다. 이는 제작할 clip 수가 아니다. 기본 pack의 96 상태 조합을 런타임으로 검사하고, 추가 장비는 유효 조합의 pair coverage와 다음 위험 triple을 별도로 검사한다.
 
@@ -115,7 +115,7 @@ M1 추가 장비가 모두 기본 다섯 slot과 양립한다고 가정하면 �
 - upper × back_accessory × arm pose: strap, 소매, 팔의 앞뒤 관계.
 - lower × footwear × contact sample: 바짓단·boot cuff와 발 접점.
 
-M2의 기본 다섯 slot만으로 후보 공간은 `4 × 5 × 3 × 3 × 3 = 540`외형, 세 상태 기준 1620 clip이다. body pieces와 part raster는 필요한 디자인·pose별로 제작하고, 기본적으로 이 카테시안 곱 전체를 미리 굽지 않는다. 승인된 concrete appearance와 요청 states만 build하며, pairwise 검수·위험 triple·사용자 지정 preset의 coverage를 구분해 기록한다. pairwise 통과를 전 조합의 시각적 승인으로 확대하지 않는다.
+M2의 기본 다섯 slot만으로 후보 공간은 `4 × 5 × 3 × 3 × 3 = 540`외형, 세 상태 기준 1620 상태 조합이다. body pieces와 part raster는 필요한 디자인·pose별로 제작하고, 기본적으로 이 카테시안 곱 전체를 미리 굽지 않는다. 승인된 concrete appearance와 요청 states만 build하며, pairwise 검수·위험 triple·사용자 지정 preset의 coverage를 구분해 기록한다. pairwise 통과를 전 조합의 시각적 승인으로 확대하지 않는다.
 
 ## 다른 체형으로 확장하는 계약
 
@@ -141,7 +141,7 @@ M2의 다른 체형 acceptance는 슬롯 하나의 교체로 끝내지 않는다
 |---|---|
 | 01 | SlotDefinition/CustomizationCatalog, group/subslot/cardinality, palette channel, preset, footprint/compatibility 참조, asymmetric/6limb fixture의 순수 파싱 |
 | 02 | 얼굴·머리·waist·손목·발·appendage의 최종 geometry annotations를 profile 데이터로 처리; 필요한 socket만 검증 |
-| 03 | 기본 hair/face/clothing 제거가 가능한 body piece 등록, multi-piece variants, join interface, 여러 rig의 binding 수용·불일치 거절 |
+| 03 | 온전한 body와 overlay import, 필요할 때의 replacement 자료, multi-piece variants, join interface, 여러 rig의 binding 수용·불일치 거절 |
 | 04 | 공통 timeline의 런타임 파츠 합성·교체, 선택·preset·mask·replacement, 5slot/독립 subslot/palette와 96 상태 조합 검증 |
 | 05 | catalog/preset/palette/mask 포함 승인 subject, 조합·slot footprint 변화의 invalidation, 검수 coverage report |
 | 06 | 요청된 appearance만 export, 기본 96상태 사례과 추가 장비 case의 승인 범위 확인, 조합 전수 bake 금지 |

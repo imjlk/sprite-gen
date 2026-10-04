@@ -21,13 +21,19 @@
 - [실행 가능한 workspace·원본 영상·개별 파츠 패키지](assets/sd-explorer-simple-layers-20261005.tar.gz)
 - [출처·해시·검증 범위](assets/sd-explorer-simple-layers-20261005.provenance.json), [생성 prompt](assets/sd-explorer-simple-layers-20261005.prompts.json), [검수 화면](assets/sd-explorer-simple-layer-viewer-20261005.jpg)
 
-현재 실행 데모는 `assets/sd-explorer-wardrobe-20261005-v1/library/assembly.json`이다. 눈(기본/웃는 눈), 헤어(숏/단발), 상의(탱크탑/포켓 베스트) 각 2종을 연결했다. 새 디자인 세 개는 built-in imagegen 원본과 fitting 좌표를 보관하고, 기존 기본 몸·frozen motion reference를 그대로 재사용한다. 8외형 × 3상태의 실제 재생과, empty를 포함한 27선택 × 3상태 × 96sample의 7,776 검사를 통과했다. 교체 중 body image와 clock 유지, held texture 재사용, clip 미생성도 확인했다. 회귀는 runtime/part import 36 passed이며 JavaScript 문법과 브라우저의 세 동작을 확인했다.
+현재 실행 데모는 `assets/sd-explorer-five-slot-layers-20261005-v6/library/assembly.json`이다. [로컬 뷰어](http://127.0.0.1:8766/)에서 헤어(숏/단발), 표정(기본 눈/웃는 눈), 상의(탱크탑/포켓 베스트), 하의(카고 반바지/긴바지), 신발(운동화/앵클 부츠)을 각각 선택한다. 표정 두 종은 눈·눈썹 레이어이며 작은 입은 기본 몸에 남는다. 입 subslot의 실제 아트는 아직 포함하지 않는다.
 
-하의·신발은 실제 영상에서 다리 silhouette가 다른 16포즈를 골라 별도 그림을 제작했다. 전체 몸을 자르지 않고, 참고용 다리 crop의 offset을 기록해 파츠 좌표를 복원한다. 생성된 바지·부츠 후보는 아직 피팅·전체 sample coverage·두 디자인이 미완료이므로 runtime catalog에 연결하지 않았다. 실제 5slot·32외형·96 상태 사례와 추가 장비의 아트 검수는 계속 남아 있으며, 이 checkpoint를 그 완료로 취급하지 않는다.
+몸 전체의 원본 프레임·머리/몸통 위치·sample 순서·시간은 그대로 유지한다. 다섯 slot 선언 때문에 rig/motion의 메타데이터 digest는 새로 고정했으며, 이전 MotionSet과 세 clip의 sample 전체가 같은지 검사했다. 헤어의 `[2,-1]` 위치 보정을 유지하고, 상의는 제작 단계에서 한 번 폭을 맞춘 두 장의 held 그림을 가슴 중심으로 이동한다.
 
-- [현재 실행 workspace·원본 그림·포즈 후보 패키지](assets/sd-explorer-layer-variations-20261005.tar.gz)
-- [베리에이션 제작 recipe](../../scripts/dev/sd_explorer_layer_variations.py), [출처·검증·남은 범위](assets/sd-explorer-layer-variations-20261005.provenance.json), [생성 prompt](assets/sd-explorer-layer-variations-20261005.prompts.json)
-- [실제 뷰어 화면](assets/sd-explorer-wardrobe-viewer-20261005-v1.jpg), [8외형과 세 동작의 그림 비교](assets/sd-explorer-layer-variations-review-20261005.png)
+하의·신발은 실제 영상의 다리 silhouette가 다른 16포즈를 기준으로 제작한 그림이다. 네 디자인이 각각 16개 파츠 그림을 가지며, 같은 몸 sample에 맞는 그림을 선택하고 상대 위치만 이동한다. 런타임에 몸을 자르거나 관절을 회전하거나 그림을 변형하지 않는다. 포즈 그림은 32외형이 공유하며 조합별 clip은 생성하지 않았다. 생성 원본, 참고 crop의 좌표, 한 번 적용한 fitting 값과 전체 sample binding을 실행 패키지에 보존한다.
+
+32외형 × 3상태 × 96sample = 9,216개의 재생 검사를 통과했다. 각 상태에서 32개의 서로 다른 외형, 기본 몸과 정확한 clock 보존, 선택/empty 교체, canvas 밖 픽셀 0을 확인했다. 브라우저에서는 실제 재생과 같은 run sample에서 다섯 파츠 해제 전후의 동일한 body texture·위치를 확인했다. 관련 회귀는 67 passed이고 JavaScript 문법 검사도 통과했다. 이는 기술 coverage이며 모든 프레임의 시각적 승인이 아니다. nearest-pose 매칭의 뛰기 경계, 팔과 상의의 가림, 추가 장비 pair/triple 검수는 남아 있다. `art_approved=false`, `release_ready=false`를 유지한다.
+
+- [현재 실행 workspace·영상·원본 아트 패키지](assets/sd-explorer-five-slot-layers-20261005.tar.gz)
+- [5slot 제작 recipe](../../scripts/dev/sd_explorer_five_slot_layers.py), [출처·검증·남은 범위](assets/sd-explorer-five-slot-layers-20261005.provenance.json), [생성 prompt](assets/sd-explorer-five-slot-layers-20261005.prompts.json)
+- [실제 뷰어 화면](assets/sd-explorer-five-slot-viewer-20261005.jpg), [뛰기 화면](assets/sd-explorer-five-slot-run-20261005.jpg), [32외형·세 상태의 그림 비교](assets/sd-explorer-five-slot-review-20261005.png)
+
+이전 눈·헤어·상의 각 2종의 8외형 checkpoint는 [실행 패키지](assets/sd-explorer-layer-variations-20261005.tar.gz), [제작 recipe](../../scripts/dev/sd_explorer_layer_variations.py), [출처](assets/sd-explorer-layer-variations-20261005.provenance.json)에 보존한다.
 
 원래 영상 후보와 출처 기록은 [2026-10-04 패키지](assets/sd-explorer-video-motion-candidate-20261004.tar.gz)와 [provenance](assets/sd-explorer-video-motion-candidate-20261004.provenance.json)에 남겼다. 초기 수동 모션이나 반려된 장신 이미지는 현재 데모에 사용하지 않는다. 전체 엔진 회귀는 3,388 passed / 2 skipped / 기존 Pillow 경고 74개이며, 온전한 base-body 레이어 보존 회귀도 추가했다.
 
@@ -46,7 +52,7 @@
 | PR04 | 공통 timeline, 독립 layer/상대좌표 보간, subslot 우선순위, draw order, mask/palette/mirror, appearance/preview CLI 구현. 다섯 체형과 synthetic 32외형·96검증 사례 |
 | PR05 | 입력·render·QA evidence snapshot, contact/world travel 측정, 명시적 검수 결정, scope와 오래된 승인 차단 구현 |
 | PR06 | 결정론적 다중 state atlas·manifest·Aseprite mapping, 순서/ticks 유지 dedup, build lock와 승인 release gate 구현 |
-| 실제 SD 데모 | 몸 분해·재질 투영 데모 철회. 온전한 몸 위에 눈·헤어·상의 각 2종, 8외형과 실제 영상 3상태 연결. 하의·신발의 16포즈 아트 후보 제작. 전체 5slot·32외형과 추가 장비 아트 검수는 진행 중 |
+| 실제 SD 데모 | 몸 분해·재질 투영 데모 철회. 온전한 몸 위에 기본 5종 각 2디자인, 32외형과 실제 영상 3상태 연결. 9,216sample 기술 검사 통과. 전체 동작의 아트 피팅과 추가 장비 검수는 진행 중 |
 
 ## 확인한 기준선
 
@@ -176,15 +182,14 @@ parts-preview          [구현] 동일 resolver의 draw-list로 sample PNG와 �
 | view | 오른쪽을 보는 side view 1개, 자동 mirror 없음 |
 | canvas | 128×128 RGBA, 발을 놓을 공통 기준선과 source offset 명시 |
 | 스타일 | 정리된 pixel art, 간단한 명암, 24–32색 목표 palette, 배경·cast shadow 제외 |
-| body | head surface, hair front/back/side, eyes/brows/mouth, 몸통, 팔·손, waist/leg/clothing, 발의 분리 자료 |
-| hair A/B | 짧은 textured hair / 단발, 앞·뒤·옆 그림과 join interface |
-| expression A/B | 무표정 / 미소, eyes/brows/mouth preset와 독립 override |
-| upper A | 청록색 짧은 재킷: torso, sleeve_l, sleeve_r |
-| upper B | 주황색 짧은 재킷: A와 다른 collar/pocket/cuff 디자인, 같은 rig의 소매 피팅 |
-| lower A/B | 반바지 / 긴바지: waist/pelvis, leg_l/r |
-| footwear A | 어두운 낮은 운동화: foot_l, foot_r replacement |
-| footwear B | 갈색 ankle boots: 같은 발 길이·밑창 두께·contact interface의 replacement |
-| palette | 피부·헤어·천 주색/보조색·가죽의 선언된 region, shape variant 수량과 별도 |
+| body | 민머리와 눈·눈썹이 없는 온전한 영상 몸 프레임; 입·기본 옷·발은 유지 |
+| hair A/B | 짧은 textured hair / 단발, 현재 각각 held 그림 1개 |
+| expression A/B | 기본 눈 / 웃는 눈, 현재 눈·눈썹 레이어; 입 subslot 아트는 후속 |
+| upper A | 청록색 탱크탑, 현재 held 그림 1개 |
+| upper B | 주황색 포켓 베스트, 현재 held 그림 1개 |
+| lower A/B | 카고 반바지 / 긴바지: 디자인마다 공통 16포즈 그림 |
+| footwear A/B | 운동화 / 갈색 ankle boots: 디자인마다 공통 16포즈 pair 그림 |
+| palette | 선언 계약은 지원하며, 현재 실제 아트의 색상 region 제작은 후속; shape variant 수와 별도 |
 | 기본 교체 대상 | hair/expression/upper/lower/footwear, 각 2종 |
 | M1 추가 장비 | headwear/gloves/back_accessory, 각각 None과 실제 1종, 위험 조합 검수 |
 
@@ -192,25 +197,23 @@ slot/subslot의 허용 목록과 선택 cardinality는 profile/catalog 데이터
 
 ## 첫 모션과 필요한 파츠 수
 
-다음 수량과 시간은 제작 목표다. 실제 freeze된 sample 수·duration이 최종 binding 기준이며, 생성 결과를 이 표에 억지로 맞추지 않는다.
+현재 실제 몸 영상은 상태마다 96sample, 24fps, 4초 loop로 고정했다. 이 source의 sample 순서와 tick이 모든 파츠 binding의 기준이다. 초기 제안의 4/8/8sample은 synthetic smoke의 크기이며 실제 영상을 그 수량으로 바꾸지 않는다.
 
-| 상태 | 목표 sample 수 | 목표 frame duration | 검수할 특징 |
+| 상태 | 실제 sample 수 | sample duration | 검수할 특징 |
 |---|---:|---:|---|
-| idle | 4 | 250ms | 단순 weight shift, 손목·발 접점 유지 |
-| walk | 8 | 125ms | 좌우 limb 정체성, 소매와 손의 앞뒤 순서 |
-| run | 8 | 100ms | 더 큰 팔 swing, 공중 구간, 신발과 발의 피팅 |
+| idle | 96 | 1/24초 | 몸의 작은 이동과 머리·옷 정렬 |
+| walk | 96 | 1/24초 | 팔과 상의의 가림, 바지·신발의 포즈 변화 |
+| run | 96 | 1/24초 | 공중 구간, 더 큰 stride, 파츠 포즈 전환의 경계 |
 
-우선 20개 sample을 목표로 한다. 첫 idle에는 추가 breathe 후처리를 넣지 않는다. breathe 검증은 별도 synthetic 케이스에서 먼저 수행하고, 실제 사용 시 최종 변형을 freeze 전에 끝낸다.
+기본 다섯 slot 각 2종은 `2^5 = 32`외형이며 idle/walk/run까지 총 96상태 사례다. 32외형 × 3상태 × 96sample = 9,216번의 기술 평가를 실행했고, 전 프레임의 시각적 검수는 별도로 남아 있다. 이를 외형별 composed frame 자산으로 저장하지 않는다. 추가 장비와 확대된 wardrobe는 유효 pair·위험 triple·named appearance의 검수 coverage를 기록한다.
 
-기본 다섯 slot 각 2종의 후보는 `2^5 = 32`외형이며 idle/walk/run까지 총 96상태 사례를 검수한다. 이 기본 pack은 서로 양립하도록 제작해 전수 검수한다. 현재 영상은 상태별 총 108 sample이며, 32외형에서 3,456번 평가한다. 이를 외형별 composed frame 자산으로 저장하지 않는다. 추가 장비와 확대된 wardrobe는 유효 pair·위험 triple·named appearance의 검수 coverage를 기록하며 전체 조합을 기본으로 미리 굽지 않는다.
+각 디자인은 같은 288 target sample을 지원한다. 현재 held 그림 6개와 포즈 그림을 사용하는 디자인 4개 모두 sample map을 명시했다. 디자인 하나의 288 mapping이 288개 고유 그림을 뜻하지 않는다. 하의·신발은 디자인마다 16그림을 공유하고 각 sample에서 적합한 그림·위치를 선택한다.
 
-각 variant의 모든 piece는 같은 20개 target sample을 지원해야 한다. 예를 들어 upper는 `2 designs × 3 pieces × 20 samples = 120`개 mapping, 신발은 `2 designs × 2 pieces × 20 samples = 80`개 mapping이 필요하며 hair/face/lower mapping을 추가한다. piece 수는 데이터이고 mapping 수가 곧 고유 PNG 수는 아니다. 재사용은 held/per-sample map에 명시하고 각 sample의 피팅을 검사한다.
-
-hair/face/clothing/foot replacement를 보여주려면 이전 그림을 제거할 수 있는 분리 자료가 있어야 한다. 평면 body 한 장만 확보한 단계는 overlay-only candidate로 기록한다. 분리·보정이 완료되기 전에는 기본 다섯 slot의 교체 성공을 선언하지 않는다.
+기본 선택 교체는 온전한 몸 위에 그림을 덮는 overlay다. Body segmentation이나 원래 그림 제거는 이 데모의 필수 조건이 아니다. 별도의 replacement 기능이 필요한 디자인은 제거·복원 가능한 자료를 별도로 준비하고 검수한다.
 
 ## 이미지와 모션을 제작하는 순서
 
-1. SD identity와 기본 외형을 확정하고 기본 body의 한 자세를 제작한다. hair/face/clothing을 분리할 수 있는 자료를 준비하고 실제 rig-canvas와 pixel grid에서 정리한 PNG를 anchor로 고정한다.
+1. SD identity와 기본 외형을 확정하고 기본 body의 한 자세를 제작한다. 민머리와 눈·눈썹이 없는 온전한 기준 몸을 준비하고 실제 rig-canvas와 pixel grid에서 정리한 PNG를 고정한다.
 2. 기본 body만으로 idle/walk/run 후보를 만든다. 기존 image-row 또는 video route를 사용할 수 있으나, 포즈 수 일치만으로 품질을 승인하지 않는다.
 3. 모션을 curate/finalize하고 최종 raster에 head/face/waist/cuff/limb socket과 ID를 profile에 맞춰 annotation한다. 기본 body pieces를 분리하고 가려진 영역을 보정한 뒤 기준 motion을 freeze한다.
 4. hair/expression/upper/lower/footwear 각 두 디자인을 확정한다. 기준 sample을 가이드로 나머지 sample의 piece 그림을 제작하고 palette region과 preset·join 규칙을 등록한다.
@@ -219,7 +222,7 @@ hair/face/clothing/foot replacement를 보여주려면 이전 그림을 제거�
 
 생성 모델이 기준 pose와 좌표를 정확하게 지킬 것이라고 가정하지 않는다. AI 결과는 후보이며 피팅·분리·픽셀 정리가 필요할 수 있다. 파츠별로 독립 walk/run 영상을 만든 뒤 동기화된 것으로 취급하지 않는다.
 
-Grok은 후속 실제 후보 생성에 사용할 수 있다. 설치된 `grok` CLI는 개발 보조에 사용 가능하며, 이미지·영상 제작은 기존 [Grok provider](../../sprite_gen/gen/grok_provider.py)와 [video route](../../sprite_gen/gen/video.py)를 재사용한다. 이미지 provider는 Grok Build를 띄우지 않는 direct Imagine 경로다. 실제 호출에는 provider/model을 명시하고, chroma 처리를 거친 결과를 공통 좌표 import에 연결한다. PR07/08의 재개·부분 재생성·실패 기록은 아직 별도 구현이 필요하다.
+Grok provider로 현재 기본 몸의 실제 idle/walk/run 영상 세 개를 제작했다. 설치된 `grok` CLI는 개발 보조에 사용 가능하며, 이미지·영상 제작은 기존 [Grok provider](../../sprite_gen/gen/grok_provider.py)와 [video route](../../sprite_gen/gen/video.py)를 재사용한다. 이미지 provider는 Grok Build를 띄우지 않는 direct Imagine 경로다. 실제 호출에는 provider/model을 명시하고, chroma 처리를 거친 결과를 공통 좌표 import에 연결한다. PR07/08의 재개·부분 재생성·실패 기록은 아직 별도 구현이 필요하다.
 
 기본 body 디자인 prompt의 제안은 다음과 같다.
 
@@ -273,4 +276,4 @@ canvas 크기는 fixture 데이터다. core가 SD/tall/animal에 따라 분기�
 
 PR04에서 같은 resolver의 다중 체형 동작과 SD 파츠 교체를 확인한다. 이후 PR05의 QA·해시 기반 승인과 PR06의 결정론적 export를 끝내 M1을 완성한다. PR07/08에서 기준 모션에 연결된 실제 생성·부분 재생성 workflow를 구현하고, PR09 UI와 PR10 실제 acceptance pack을 연결한다.
 
-현재 산출물은 PR00–06의 선언/CLI/모션 snapshot/파츠 import/공통 renderer/QA·검수/결정론적 export와 회귀 테스트, 본 계획과 customization 계획이다. 초기 catalog의 options는 비어 있으며 실제 imported part를 등록하면 갱신된다. 디자인 참고 시트 외에 [새 body 후보](assets/sd-explorer-body-candidate-v2-20261004.png)와 [prompt·측정·미검증 사항](assets/sd-explorer-body-candidate-v2-20261004.provenance.json)을 보관했다. 첫 생성은 팔 중복과 등신 문제로 제외했고, 두 번째 후보도 palette·alpha·grid·view·분리·모션 검증이 필요하다. 실제 승인된 기본 96상태 사례과 확장 wardrobe는 아직 제작하지 않았다.
+현재 산출물은 PR00–06의 선언/CLI/모션 snapshot/파츠 import/공통 renderer/QA·검수/결정론적 export와 회귀 테스트, 본 계획과 customization 계획이다. 초기 catalog의 options는 비어 있으며 실제 imported part를 등록하면 갱신된다. 디자인 참고 시트 외에 [새 body 후보](assets/sd-explorer-body-candidate-v2-20261004.png)와 [prompt·측정·미검증 사항](assets/sd-explorer-body-candidate-v2-20261004.provenance.json)을 보관했다. 첫 생성은 팔 중복과 등신 문제로 제외했고, 두 번째 후보도 palette·alpha·grid·view·분리·모션 검증이 필요하다. 현재 실제 아트의 기본 32외형·96상태 사례는 실행 가능하고 기술 검사를 통과했다. 전체 프레임의 시각적 승인과 추가 장비·확장 wardrobe의 검수는 남아 있다.
