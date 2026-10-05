@@ -1,0 +1,58 @@
+{
+  "fitting": {
+    "art_approved": false,
+    "checked": 384,
+    "failed": 0,
+    "release_ready": false,
+    "status": "passed"
+  },
+  "body": [
+    "sd.equipment.body"
+  ],
+  "motion": {
+    "digest": "c3a5347550a914485961c85b14910d73f9b66a661c5b0d0028f5090ec36bae45",
+    "id": "sd.matched.video.motion"
+  },
+  "source_body_modified": false,
+  "new_body_clips": 0,
+  "appearance_clips_baked": 0,
+  "clothing_gap_samples_repaired": 9,
+  "clothing_pixels_added": 37,
+  "authored_mask_classifications_corrected": 2,
+  "tolerances_relaxed": false,
+  "art_approved": false,
+  "release_ready": false,
+  "snapshot_digest": "36cc88d36a7c08103a1e9b89308439b1b42e62b3de077bad3d9831fe9ca34b2d",
+  "portable_files": {
+    "sd-explorer-layers-20261005.html": {
+      "bytes": 1954415,
+      "sha256": "9270046b0c1a8da825ce63b302b1e253a65501c40ac9ed7c66aa8408595c045e"
+    },
+    "sd-explorer-layers-20261005.zip": {
+      "bytes": 755661,
+      "sha256": "5300dcac8f8dc1c35f2817a4c6dc6b8dadf3ce0d85221742610d9ef605bb0050"
+    }
+  },
+  "tests": {
+    "full_passed": 3443,
+    "full_skipped": 2,
+    "focused_passed": 32
+  },
+  "known_limits": [
+    "Original body video silhouette varies between frames.",
+    "Other bodies require their own native interfaces and bindings.",
+    "Portable adapter supports flat independent overlays only."
+  ],
+  "browser": {
+    "main_url": "http://127.0.0.1:8766/?layers=basic",
+    "independent_layers_visible": true,
+    "body_only_clock_preserved": true,
+    "five_part_swap_clock_and_body_texture_preserved": true,
+    "embedded_preview_http_verified": true,
+    "saved_zip_matches_http": true,
+    "file_url_execution_verified": false,
+    "file_url_limit": "The inspection browser permits http/https only. Direct local HTML opening was blocked; no protocol bypass was attempted.",
+    "screenshot_pixel_equality_claimed": false
+  },
+  "replay_matches_active_parts_and_appearance_and_fitting": true
+}

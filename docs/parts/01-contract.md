@@ -53,12 +53,14 @@ unknown field, bool/float을 정수로 사용한 좌표·tick·canvas, duplicate
 
 | kind | 현재 검사하는 선언 |
 |---|---|
-| `parts-topology` | 하나의 root, nodes/parent/required/contact/symmetry, socket의 node, slot의 허용 node/socket·cardinality·empty policy |
+| `parts-topology` | 하나의 root, nodes/parent/required/contact/symmetry, socket의 node, slot의 허용 node/socket·cardinality·empty policy, 선택 그리기 순서표 `layers` |
 | `parts-rig` | 정확한 topology reference, 열린 style/view, canvas, default body 논리 ID와 mirror 정책 |
 | `parts-motion` | rig reference, 고유 state/view clip, 순서가 고정된 sample·이미지·ticks·socket·visibility·confidence, optional source/freeze provenance |
-| `parts-pack` | design ID, body/part role, segmented/flat body, rig/motion/view binding, occupies/requires/excludes, 다중 piece, sample별 placement·mask·provides/replaces·join·palette region·source provenance |
+| `parts-pack` | design ID, body/part role, segmented/flat body, rig/motion/view binding, occupies/requires/excludes/covers, 다중 piece, sample별·포즈별 placement·mask·provides/replaces·join·palette region·cover rule·source provenance |
 | `parts-catalog` | rig/topology, group tree, slot별 options/default, palette channel, flat preset assignments |
 | `parts-appearance` | rig/motion/catalog, 정확한 body references, 상태 목록, slot 선택·preset·palette override |
+| `parts-fitting` | 정확한 rig/motion/part/binding/clip/sample reference, native 크기의 required/protected/allowed mask와 위치·크기·피복 기준 |
+| `parts-stability` | 정확한 rig/motion/part/binding/piece reference, 상대 좌표의 안정 영역·기준 sample·검사 clips, 원본 alpha/RGB 변화 기준과 source bytes |
 | `parts-review` | subject digest, part/binding/appearance scope, 상태 및 render/QA policy ID |
 | `parts-build-lock` | appearance·입력·review의 정확한 reference, toolchain·policy·output asset hash |
 
@@ -77,6 +79,19 @@ slot 선택은 null, 하나의 PartPack reference 또는 고유 reference 배열
 placement에는 `image`, `pivot`, `target_socket`, `visible`, `offset`, optional `mask`, `before`/`after`가 있다. 정수 좌표를 보존하며 파일 이름/그림 크기로 scale이나 정렬을 추론하지 않는다. `mode: held`도 sample map을 명시해야 하며 모든 mapping이 동일한 file/hash 이미지 하나를 사용한다. visible piece의 target socket은 해당 motion sample에 있어야 한다. 가려진 piece도 완성 검증에서는 `visible: false` mapping으로 sample을 명시한다.
 
 PR03은 body를 null slot의 별도 pack으로 등록하고 appearance/assembly의 `body` references로 고정한다. Flat body는 root interface만 제공한다. Placement에 `allow_clip`, sample별 `palette_regions`와 원본 crop/pivot 정보를 추가했으며 mask channel은 luma/alpha를 명시한다. 이 초기 schema의 확장도 새 normalized content digest를 만든다. 기존 digest를 조용히 바꿔 호환 표시하지 않는다.
+
+## 선택 필드: 포즈, 그리기 순서표, 가림 규칙
+
+다음 필드는 schema version 1의 선택 필드다. 적었을 때만 normalized 문서에 들어가므로, 이 필드가 없는 기존 문서의 내용과 digest는 그대로다.
+
+| 위치 | 필드 | 뜻 |
+|---|---|---|
+| topology | `layers` | node ID의 뒤→앞 순서(그리기 순서표, zmap). 모든 항목이 topology node여야 한다. [조합 규칙](04-composition.md#draw-table-and-cover-rules) |
+| pack binding | `covers` | 이 binding이 덮는 태그 목록(예: `headwear`) |
+| piece | `cover_rule` | `{"tag": ID, "show": "covered" \| "uncovered"}`: 그 태그가 덮였을 때만, 또는 덮이지 않았을 때만 보인다 |
+| piece | `pose_map` | 포즈 ID → placement. import가 그 포즈의 모든 sample로 `sample_map`에 펼친다 |
+
+`pose_map`의 키는 해당 motion sample의 `pose_id`여야 한다. 계약은 각 포즈를 보여 주는 모든 sample이 `sample_map`에 있는지 검사한다. 같은 sample의 `sample_map` 항목이 `pose_map`보다 우선한다. `held` piece는 `pose_map`의 그림까지 포함해 한 장만 쓴다.
 
 ## 시간
 

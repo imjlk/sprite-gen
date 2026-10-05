@@ -41,7 +41,20 @@ def _remove(suppressed, entry, targets, reason):
         suppressed[entry["id"]] = reason
 
 
-def _order(active, known, nodes):
+def layer_ranks(topology):
+    """Rank of each node in the topology's draw table (zmap); unlisted nodes draw after it."""
+    return {node: number for number, node in enumerate(topology.get("layers", []))}
+
+
+def rank(entry, ranks):
+    """An entry's draw-table position: its node, else the first listed node it provides."""
+    if entry["node"] in ranks:
+        return ranks[entry["node"]]
+    return min((ranks[n] for n in entry["provides"] if n in ranks), default=len(ranks))
+
+
+def _order(active, known, nodes, ranks=None):
+    ranks = ranks or {}
     by_id = {entry["id"]: entry for entry in active}
     edges = {name: set() for name in by_id}
     def targets(token):
@@ -66,16 +79,20 @@ def _order(active, known, nodes):
     for names in edges.values():
         for name in names:
             indegree[name] += 1
-    ready = [name for name, count in indegree.items() if count == 0]
+    # Explicit constraints first; among the drawable, the lowest draw-table rank, the body
+    # before what is worn on the same layer (a sleeve over its arm), then the ID.
+    # Without a draw table the order is the explicit constraints and the IDs alone.
+    key = {name: (rank(entry, ranks), bool(ranks) and entry["role"] != "body", name) for name, entry in by_id.items()}
+    ready = [key[name] for name, count in indegree.items() if count == 0]
     heapq.heapify(ready)
     ordered = []
     while ready:
-        name = heapq.heappop(ready)
+        *_, name = heapq.heappop(ready)
         ordered.append(by_id[name])
         for target in sorted(edges[name]):
             indegree[target] -= 1
             if indegree[target] == 0:
-                heapq.heappush(ready, target)
+                heapq.heappush(ready, key[target])
     if len(ordered) != len(active):
         raise contract.PartsContractError(f"draw-order cycle: {sorted(n for n, v in indegree.items() if v)}")
     return ordered
@@ -124,9 +141,17 @@ def resolve(appearance, documents):
         raise contract.PartsContractError("flat body supports overlays only; node replacement needs segmented artwork")
     precedence = _precedence({s["id"]: s for s in topology["slots"]})
     suppressed = {}
+    # Cover rules (vslot): a binding names the tags it covers; a piece shows only while
+    # its tag is covered, or only while it is not.
+    covering = {tag: sorted(name for name, b in bindings.items() if tag in b.get("covers", []))
+                for b in bindings.values() for tag in b.get("covers", [])}
+    for entry in entries:
+        rule = entry["piece"].get("cover_rule")
+        if rule is not None and (rule["tag"] in covering) != (rule["show"] == "covered"):
+            suppressed[entry["id"]] = f"cover:{rule['tag']}"
     body_provided = {n for e in entries if e["role"] == "body" for n in e["provides"]}
     for entry in entries:
-        if entry["role"] == "body":
+        if entry["role"] == "body" or entry["id"] in suppressed:
             continue
         if not set(entry["replaces"]) <= body_provided:
             raise contract.PartsContractError(f"{entry['id']} replaces a node with no body interface")
@@ -146,6 +171,7 @@ def resolve(appearance, documents):
         missing = {n["id"] for n in topology["nodes"] if n["required"]} - providers.keys()
         if missing:
             raise contract.PartsContractError(f"missing required body nodes: {sorted(missing)}")
+    ranks = layer_ranks(topology)
     palette = {c["id"]: c["default"] for c in catalog["palette_channels"]}
     palette.update(appearance["palette"])
     clips = []
@@ -171,7 +197,7 @@ def resolve(appearance, documents):
                 entry["socket_position"] = deepcopy(socket["position"])
                 contract._members([*entry["palette_regions"], *placement["palette_regions"]], palette, entry["id"])
                 active.append(entry)
-            ordered = _order(active, known, {n["id"] for n in topology["nodes"]})
+            ordered = _order(active, known, {n["id"] for n in topology["nodes"]}, ranks)
             for entry in ordered:
                 mask = entry["placement"]["mask"]
                 if mask is not None and not any(mask["target_node"] in e["provides"] for e in remaining):
@@ -185,5 +211,7 @@ def resolve(appearance, documents):
             "rig": contract.reference(rig), "motion": contract.reference(motion), "topology": contract.reference(topology),
             "catalog": contract.reference(catalog), "canvas": rig["canvas"], "mirror": appearance["mirror"],
             "render_policy": RENDER_POLICY, "palette": palette, "clips": clips}
+    if covering:
+        plan["covers"] = covering
     plan["digest"] = contract.content_digest(plan)
     return plan

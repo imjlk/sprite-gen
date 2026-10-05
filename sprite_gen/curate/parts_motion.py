@@ -91,7 +91,38 @@ def annotation_template(candidate: dict, topology: dict):
     }
 
 
-def import_motion(assembly: Path, spec: Path, source_root: Path) -> dict:
+GAIT_STATES = frozenset({"walk", "run"})
+
+
+def motion_quality(clip: dict, images: dict) -> dict:
+    """Measure a looping clip as it plays with the video pipeline's jolt and head criteria.
+
+    The same bounds `video-loop` reports (docs/loop-repair.md section 3) apply to the final
+    samples here, so a motion assembled outside that pipeline cannot slip past them.
+    Measurement only: no frame is moved, repaired or dropped.
+    """
+    from sprite_gen.video import repair
+    row = {"clip": clip["id"], "state": clip["state"], "samples": len(clip["samples"]), "loop": clip["loop"]}
+    if not clip["loop"] or len(clip["samples"]) < 3:
+        return {**row, "status": "unverified", "why": "jolt is measured on looping clips of three or more samples"}
+    frames = [library.image_bytes(images[sample["image"]["file"]]) for sample in clip["samples"]]
+    if len({sample["image"]["sha256"] for sample in clip["samples"]}) < 3:
+        return {**row, "status": "unverified", "why": "fewer than three distinct drawings"}
+    measured = repair.measure_jolt(frames, facing="left" if clip["view"].endswith("left") else "right")
+    reference = {"jolt_max": repair.JOLT_REFERENCE, "head_step_max": repair.HEAD_STEP_REFERENCE}
+    if clip["state"] not in GAIT_STATES:
+        # The bounds were judged on walks and runs; other motions are recorded, not gated.
+        return {**row, "jolt": measured, "reference": reference, "over": [], "status": "measured"}
+    # At native size one pixel is the smallest step the head can take; a bound under it would
+    # flag every quantized sway. The bound is the reference or 1.5 px, whichever is larger.
+    height = (measured.get("head") or {}).get("body_height_px")
+    pixel = 150/height if height else 0  # 1.5 px: a quantized step plus the centroid's shape change
+    reference["head_step_max"] = max(repair.HEAD_STEP_REFERENCE, round(pixel, 3))
+    over = repair.jolt_verdict(measured, head_step_max=reference["head_step_max"])
+    return {**row, "jolt": measured, "reference": reference, "over": over, "status": "warning" if over else "passed"}
+
+
+def import_motion(assembly: Path, spec: Path, source_root: Path, *, strict_motion: bool = False) -> dict:
     root, index, registry, _ = _active(assembly)
     spec_path = Path(spec).absolute()
     raw_request = library.read_file(spec_path.parent, spec_path.name, limit=workspace.MAX_JSON_BYTES)
@@ -111,6 +142,10 @@ def import_motion(assembly: Path, spec: Path, source_root: Path) -> dict:
             payloads.update(images)
             if sum(map(len, payloads.values())) + reader.total_bytes > library.MAX_SNAPSHOT_BYTES:
                 raise contract.PartsContractError("motion snapshot exceeds the byte budget")
+    quality = [motion_quality(clip, payloads) for clip in clips]
+    if strict_motion and any(row["status"] == "warning" for row in quality):
+        raise contract.PartsContractError("motion quality exceeds the loop bounds: " + "; ".join(
+            f"{row['clip']}: {', '.join(row['over'])}" for row in quality if row["status"] == "warning"))
     motion = contract.seal({"kind": "parts-motion", "schema_version": 1, "id": request["id"],
                             "rig": request["rig"], "clips": clips})
     # Preserve the actual source bytes too. Diagnostics never put an absolute
@@ -134,7 +169,9 @@ def import_motion(assembly: Path, spec: Path, source_root: Path) -> dict:
             atomic_write_text(target, workspace.json_bytes(annotation_template(candidate, topology)).decode("utf-8"))
     return {"candidate": (destination / "candidate.json").relative_to(root).as_posix(),
             "digest": candidate["digest"], "annotation_template": annotation_file,
-            "samples": sum(len(c["samples"]) for c in clips), "status": "draft", "release_ready": False}
+            "samples": sum(len(c["samples"]) for c in clips), "motion_quality": quality,
+            "warnings": [f"{row['clip']}: {item}" for row in quality for item in row.get("over", [])],
+            "status": "draft", "release_ready": False}
 
 
 def _references(value):
@@ -212,6 +249,8 @@ def activate_motion(assembly: Path, motion: dict, filename: str, original_hash: 
     next_index = deepcopy(index)
     next_registry = {name: doc for name, doc in registry.items() if name not in removed}
     next_index["documents"] = {name: path for name, path in index["documents"].items() if name not in removed}
+    next_index["fitting"] = [ref for ref in index["fitting"] if ref["id"] not in removed]
+    next_index["stability"] = [ref for ref in index["stability"] if ref["id"] not in removed]
     if index["catalog"]["id"] in removed:
         catalog = deepcopy(registry[index["catalog"]["id"]])
         catalog.pop("digest")
@@ -310,6 +349,8 @@ def add_import_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--assembly", required=True, type=Path)
     parser.add_argument("--spec", required=True, type=Path)
     parser.add_argument("--source-root", required=True, type=Path)
+    parser.add_argument("--strict-motion", action="store_true",
+                        help="refuse a looping clip whose jolt or head step exceeds the video-loop bounds")
 
 
 def add_freeze_arguments(parser: argparse.ArgumentParser):
@@ -318,8 +359,8 @@ def add_freeze_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--annotations", required=True, type=Path)
 
 
-def run_import(*, assembly: Path, spec: Path, source_root: Path) -> int:
-    return workspace._report(lambda: import_motion(assembly, spec, source_root))
+def run_import(*, assembly: Path, spec: Path, source_root: Path, strict_motion: bool = False) -> int:
+    return workspace._report(lambda: import_motion(assembly, spec, source_root, strict_motion=strict_motion))
 
 
 def run_freeze(*, assembly: Path, candidate: str, annotations: Path) -> int:

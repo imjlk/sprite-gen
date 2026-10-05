@@ -2,10 +2,10 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>SD Explorer · Parts Lab</title><link rel="stylesheet" href="/player.css">
+  <title>Parts Lab</title><link rel="stylesheet" href="/player.css">
 </head>
 <body>
-  <header><div><strong>SD Explorer</strong><span>Parts Lab</span></div><p><i></i>라이브 레이어</p></header>
+  <header><div><strong id="brand">Parts Lab</strong><span>레이어 검수</span></div><p><i></i><span id="playback-mode">공통 모션</span></p></header>
   <main>
     <aside aria-label="커스터마이징 파츠">
       <div class="aside-title"><h1>커스터마이징</h1><button id="shuffle" type="button">랜덤 조합 ↗</button></div>
@@ -14,13 +14,17 @@
       <p class="aside-note">파츠를 바꿔도 같은 동작을 이어 재생합니다.</p>
     </aside>
     <section class="workspace" aria-label="캐릭터 미리보기">
-      <div class="stage-top"><div id="states" role="group" aria-label="동작"></div><label><input id="sockets" type="checkbox">기준점 보기</label></div>
+      <div class="stage-top"><div id="states" role="group" aria-label="동작"></div><div class="stage-tools"><label><input id="body-only" type="checkbox">몸만 보기</label><label><input id="sockets" type="checkbox">기준점 보기</label></div></div>
       <div class="stage"><div id="character" role="img" aria-label="독립 파츠 레이어 재생"><canvas id="landmarks" aria-hidden="true"></canvas></div><div class="stage-caption"><span>128 × 128</span><span id="layer-count"></span></div></div>
-      <div class="timeline"><button id="play" type="button" aria-label="일시정지">Ⅱ</button><input id="seek" type="range" min="0" max="999" value="0" aria-label="모션 재생 위치"><output id="frame-position">—</output></div>
+      <div class="timeline"><button id="previous" type="button" aria-label="이전 프레임">‹</button><button id="play" type="button" aria-label="일시정지">Ⅱ</button><button id="next" type="button" aria-label="다음 프레임">›</button><input id="seek" type="range" min="0" max="999" value="0" aria-label="모션 재생 위치"><output id="frame-position">—</output></div>
       <div class="details"><p id="sample-name">공통 모션 연결 중…</p><p id="selection-status" aria-live="polite"></p></div>
+      <div class="review-line"><p id="fit-status" aria-live="polite">파츠 검사 준비 중…</p><button id="find-issue" type="button" disabled>오류 프레임</button></div>
+      <div class="review-line"><p id="source-status" aria-live="polite"></p><button id="find-source-issue" type="button" disabled>원본 오류 프레임</button></div>
+      <div class="export-line"><a id="standalone" href="/standalone" target="_blank" rel="noopener">독립 미리보기 ↗</a><a id="export" href="/api/export" download="parts-layers.zip">레이어 내려받기 ↓</a><span id="library-status"></span></div>
       <p id="error" role="alert"></p>
     </section>
   </main>
-  <footer><span>공통 idle / walk / run</span><span>아트 초안 · 최종 시각 검수 미승인</span></footer>
+  <footer><span id="shared-states">공통 모션</span><span>아트 초안 · 최종 시각 검수 미승인</span></footer>
+  <script src="/runtime.js"></script>
   <script type="module" src="/player.js"></script>
 </body></html>

@@ -59,7 +59,7 @@ class AssetLoader:
         return self.images[key].copy()
 
 
-def render_sample(plan, sample, load):
+def render_sample(plan, sample, load, *, only_ids=None):
     """Use the same sample plan for preview, QA and export; return image/evidence."""
     size = (plan["canvas"]["width"], plan["canvas"]["height"])
     if size[0] * size[1] > assets.MAX_FRAME_PIXELS:
@@ -83,6 +83,8 @@ def render_sample(plan, sample, load):
             masks.append((mask["target_node"], canvas_mask))
     output = Image.new("RGBA", size)
     for entry in sample["draw"]:
+        if only_ids is not None and entry["id"] not in only_ids:
+            continue
         image, placement = prepared[entry["id"]], entry["placement"]
         clipped = _clipped_pixels(image, tuple(entry["offset"]), size)
         if clipped and not placement["allow_clip"]:

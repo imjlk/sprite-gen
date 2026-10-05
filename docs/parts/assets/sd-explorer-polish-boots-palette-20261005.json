@@ -1,0 +1,33 @@
+{
+  "art_approved": false,
+  "colors": [
+    [
+      17,
+      6,
+      5
+    ],
+    [
+      62,
+      43,
+      28
+    ],
+    [
+      156,
+      99,
+      60
+    ],
+    [
+      182,
+      128,
+      80
+    ],
+    [
+      50,
+      54,
+      55
+    ]
+  ],
+  "kind": "parts-shared-native-palette",
+  "runtime_filter": false,
+  "source": "authored material subset of the existing shared 48 colors"
+}

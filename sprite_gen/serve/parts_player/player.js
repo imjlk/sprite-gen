@@ -5,7 +5,7 @@ const optionLabels = {'sd.simple.shirt':'탱크탑','sd.simple.shirt.b':'포켓 
 Object.assign(optionLabels, {'sd.wardrobe.hair.a':'숏 헤어','sd.wardrobe.hair.b':'단발','sd.wardrobe.expression.a':'기본','sd.wardrobe.expression.b':'눈 미소','sd.wardrobe.upper.a':'탱크탑','sd.wardrobe.upper.b':'포켓 베스트','sd.wardrobe.lower.a':'카고 반바지','sd.wardrobe.lower.b':'긴바지','sd.wardrobe.footwear.a':'운동화','sd.wardrobe.footwear.b':'앵클 부츠'});
 Object.assign(optionLabels, {'sd.equipment.headwear':'사파리 모자','sd.equipment.gloves':'가죽 장갑','sd.equipment.back_accessory':'탐험 백팩'});
 const stateNames = {idle:'아이들',walk:'걷기',run:'뛰기'};
-let metadata, state, selected={}, playing=true, origin=performance.now(), held=0, dirty=true, revision=0, busy=false, lastSent=0;
+let metadata, state, selected={}, playing=true, origin=performance.now(), held=0, dirty=true, revision=0, busy=false, lastSent=0, runtime=null, lastScene=null;
 const layerNodes=new Map(), textureCache=new Map();
 let scale=4;
 const number=value=>{const [a,b]=String(value).split('/').map(Number);return b===undefined?a:a/b;};
@@ -26,6 +26,9 @@ function coverage(asset,index,channel='luma'){
   return channel==='alpha'?d[k+3]:Math.floor((Math.floor((d[k]*19595+d[k+1]*38470+d[k+2]*7471+32768)/65536)*d[k+3]+127)/255);
 }
 async function draw(scene,snapshot){
+  lastScene=scene;
+  const bodyOnly=$('body-only').checked;
+  if(bodyOnly){const layers=scene.layers.filter(layer=>layer.slot===null),ids=new Set(layers.map(layer=>layer.id));scene={...scene,layers,masks:scene.masks.filter(mask=>ids.has(mask.issuer))};}
   const refs=scene.layers.flatMap(layer=>[layer.texture,...Object.values(layer.regions)]).concat(scene.masks.map(mask=>mask.texture));
   const loaded=new Map(await Promise.all(refs.map(async ref=>[ref.id,await texture(ref)])));
   // Finish asynchronous reads before committing any DOM changes. A selection
@@ -83,24 +86,36 @@ async function draw(scene,snapshot){
   const current=metadata.states.find(s=>s.id===state);
   $('frame-position').textContent=`${scene.sample_index+1} / ${current.samples}`;
   $('sample-name').textContent=`${scene.clip_id} · ${scene.sample_id}`;
-  $('seek').value=String(Math.floor((elapsed()%duration())/duration()*999));
+  const position=current.loop?elapsed()%duration():Math.min(elapsed(),duration());
+  $('seek').value=String(Math.floor(position/duration()*999));
+  const fit=scene.fit_summary||{status:'unverified',checked:0,failed:0};
+  $('fit-status').dataset.status=bodyOnly?'unverified':fit.status;
+  const errors=(scene.fits||[]).filter(row=>row.status==='error');
+  const terms={coverage:'피복',silhouette:'윤곽',occlusion:'가림',position:'위치',size:'크기',gap:'빈틈',clipping:'잘림','missing-interface':'검사 기준'};
+  $('fit-status').textContent=bodyOnly?'몸만 표시 · 파츠 선택과 재생 시점 유지':errors.length?
+    errors.map(row=>`${names[row.slot]||row.slot}: ${row.checks.filter(check=>check.status==='error').map(check=>terms[check.id]||check.id).join('·')}`).join(' / '):
+    fit.status==='passed'?`현재 포즈 ${fit.checked}파츠 기하 검사 통과 · 시각 검수 대기`:'기하 검사 기준 미등록 · 시각 검수 대기';
+  const sourceRows=(runtime?.data.stability?.results||[]).filter(row=>row.clip===scene.clip_id&&row.sample===scene.sample_id);
+  const sourceErrors=sourceRows.filter(row=>row.status==='error');
+  $('source-status').dataset.status=sourceErrors.length?'error':sourceRows.length?'passed':'unverified';
+  $('source-status').textContent=sourceRows.length?sourceRows.map(row=>`${row.label}: 윤곽 ${row.alpha_pixels??'—'}px · 색 변화 ${row.rgb_pixels??'—'}px${row.status==='error'?' · 기준 초과':''}`).join(' / '):'원본 안정 영역 검사 기준 미등록';
   return true;
 }
 const elapsed=()=>held+(playing?performance.now()-origin:0);
-const duration=()=>Number(metadata.states.find(s=>s.id===state).duration_ms.split('/').reduce((a,b)=>Number(a)/Number(b)));
+const duration=()=>number(metadata.states.find(s=>s.id===state).duration_ms);
 function invalidate(){revision++;dirty=true;}
 function showSelection(){
   document.querySelectorAll('[data-slot]').forEach(b=>b.setAttribute('aria-pressed',String(selected[b.dataset.slot]===b.dataset.option)));
 }
 async function render(now){
-  if(metadata&&!busy&&(dirty||(playing&&now-lastSent>33))){
+  if(metadata&&!busy&&(dirty||(playing&&(runtime||now-lastSent>33)))){
     busy=true;dirty=false;lastSent=now;
     const snapshot=revision;
     const params=new URLSearchParams({state,time_ms:String(Math.floor(elapsed())),...selected});
     try{
-      const response=await fetch(`/api/layers?${params}`);
-      const frame=await response.json();
-      if(!response.ok)throw new Error(frame.error||'미리보기를 가져오지 못했습니다.');
+      let frame;
+      if(runtime)frame=runtime.scene(state,Math.floor(elapsed()),selected);
+      else{const response=await fetch(`/api/layers?${params}`);frame=await response.json();if(!response.ok)throw new Error(frame.error||'미리보기를 가져오지 못했습니다.');}
       if(snapshot===revision){
         if(await draw(frame,snapshot))$('error').textContent='';
       }else dirty=true;
@@ -113,11 +128,48 @@ function setPlaying(value){held=elapsed();origin=performance.now();playing=value
 $('play').addEventListener('click',()=>setPlaying(!playing));
 $('seek').addEventListener('input',()=>{setPlaying(false);held=Number($('seek').value)/999*duration();invalidate();});
 $('sockets').addEventListener('change',invalidate);
+$('body-only').addEventListener('change',invalidate);
+function step(direction){
+  setPlaying(false);
+  const clip=metadata.states.find(item=>item.id===state),current=lastScene?.sample_index||0;
+  const index=clip.loop?(current+direction+clip.samples)%clip.samples:Math.max(0,Math.min(clip.samples-1,current+direction));
+  held=Math.ceil(number(clip.boundaries_ms[index]));invalidate();
+}
+$('previous').addEventListener('click',()=>step(-1));$('next').addEventListener('click',()=>step(1));
+$('find-issue').addEventListener('click',()=>{
+  if(!runtime)return;
+  const issue=Object.values(runtime.data.fitting).find(row=>row.status==='error');if(!issue)return;
+  setPlaying(false);state=issue.state;selected[issue.slot]=issue.part.id;showSelection();
+  document.querySelectorAll('[data-state]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.state===state)));
+  const clip=runtime.data.clips.find(item=>item.id===issue.clip),index=clip.samples.findIndex(sample=>sample.id===issue.sample);
+  held=Math.ceil(number(metadata.states.find(item=>item.id===state).boundaries_ms[index]));invalidate();
+});
+$('find-source-issue').addEventListener('click',()=>{
+  const issue=(runtime?.data.stability?.results||[]).find(row=>row.status==='error');if(!issue)return;
+  setPlaying(false);state=issue.state;$('body-only').checked=true;
+  document.querySelectorAll('[data-state]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.state===state)));
+  const clip=runtime.data.clips.find(item=>item.id===issue.clip),index=clip.samples.findIndex(sample=>sample.id===issue.sample);
+  held=Math.ceil(number(metadata.states.find(item=>item.id===state).boundaries_ms[index]));invalidate();
+});
 $('shuffle').addEventListener('click',()=>{for(const slot of metadata.slots){selected[slot.id]=slot.options[Math.floor(Math.random()*slot.options.length)].id;}showSelection();$('selection-status').textContent='파츠 교체 · 재생 시점 유지';invalidate();});
 async function boot(){
   try{
-    const response=await fetch('/api/metadata');if(!response.ok)throw new Error('파츠 정보를 가져오지 못했습니다.');
-    metadata=await response.json();state=metadata.states[0].id;
+    const embedded=document.getElementById('parts-data');
+    if(embedded){runtime=new LayerRuntime(JSON.parse(embedded.textContent));$('export').hidden=true;$('standalone').hidden=true;}
+    else{
+      const library=await fetch('/api/library');
+      if(library.ok)runtime=new LayerRuntime(await library.json());
+    }
+    if(runtime){metadata=runtime.metadata;$('playback-mode').textContent='브라우저 직접 재생';
+      const summary=metadata.fit_summary;$('library-status').textContent=summary.status==='unverified'?'검사 기준 미등록':`전체 파츠 ${summary.checked}건 · 오류 ${summary.failed}건`;
+      $('find-issue').disabled=summary.failed===0;
+      $('find-source-issue').disabled=!runtime.data.stability?.failed;
+    }else{
+      const response=await fetch('/api/metadata');if(!response.ok)throw new Error('파츠 정보를 가져오지 못했습니다.');metadata=await response.json();
+      $('export').hidden=true;$('standalone').hidden=true;$('playback-mode').textContent='서버 레이어 재생';
+    }
+    state=metadata.states[0].id;$('brand').textContent=metadata.title||metadata.id;document.title=`${metadata.title||metadata.id} · Parts Lab`;
+    $('shared-states').textContent=`공통 ${metadata.states.map(item=>stateNames[item.id]||item.id).join(' / ')}`;
     document.querySelector('.stage-caption span').textContent=`${metadata.canvas.width} × ${metadata.canvas.height}`;
     const stage=document.querySelector('.stage');
     new ResizeObserver(()=>{scale=Math.max(1,Math.floor(Math.min(stage.clientWidth/metadata.canvas.width,stage.clientHeight/metadata.canvas.height)));$('character').style.width=`${metadata.canvas.width*scale}px`;$('character').style.height=`${metadata.canvas.height*scale}px`;invalidate();}).observe(stage);
@@ -129,7 +181,7 @@ async function boot(){
       slot.options.forEach(option=>{
         const button=document.createElement('button');button.type='button';button.dataset.slot=slot.id;button.dataset.option=option.id;
         const index=slot.options.filter(o=>o.id!=='').findIndex(o=>o.id===option.id);
-        button.textContent=slot.options.length===2&&slot.options.some(o=>o.id==='')?(option.id?'켜기':'끄기'):option.id===''?option.label:optionLabels[option.id]||labels[slot.id]?.[index]||({headwear:'탐험 모자',gloves:'핑거리스',back_accessory:'백팩',neckwear:'스카프',eyewear:'라운드 안경'}[slot.id]||option.label);
+        button.textContent=slot.options.length===2&&slot.options.some(o=>o.id==='')?(option.id?'켜기':'끄기'):option.id===''?option.label:optionLabels[option.id]||option.label;
         button.addEventListener('click',()=>{selected[slot.id]=option.id;showSelection();$('selection-status').textContent='파츠 교체 · 재생 시점 유지';invalidate();});choices.append(button);
       });section.append(choices);(['hair','expression','eyes','upper','lower','footwear'].includes(slot.id)?$('wardrobe'):$('extras')).append(section);
     }
@@ -139,7 +191,9 @@ async function boot(){
       button.setAttribute('aria-pressed',String(item.id===state));
       button.addEventListener('click',()=>{state=item.id;held=0;origin=performance.now();document.querySelectorAll('[data-state]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.state===state)));invalidate();});$('states').append(button);
     }
-    showSelection();origin=performance.now();requestAnimationFrame(render);
+    showSelection();
+    if(runtime){$('sample-name').textContent='파츠 이미지 준비 중…';await Promise.all(Object.values(runtime.textures).map(texture));}
+    origin=performance.now();requestAnimationFrame(render);
   }catch(error){$('error').textContent=error.message;}
 }
 boot();

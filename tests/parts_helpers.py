@@ -98,6 +98,23 @@ def frozen_workspace(base, *, preset="human.sd.v1", states=("walk",)):
     return assembly
 
 
+def posed_workspace(base, *, names=()):
+    """A frozen walk with pose IDs: pose-0, pose-1, pose-0 is three samples and two drawings."""
+    from sprite_gen.curate import parts_motion, parts_poses
+    root, source = base / "library", base / "motion-source"
+    assembly = workspace_at(root)
+    index, _ = workspace.read_workspace(assembly)
+    index["states"] = ["walk"]
+    assembly.write_bytes(workspace.json_bytes(index))
+    external_source(source)
+    spec = import_spec(base / "motion-import.json", assembly, [source_request(source, id="walk.right", state="walk")])
+    imported = parts_motion.import_motion(assembly, spec, source)
+    annotations = verified_annotations(root, imported)
+    report = parts_poses.assign(assembly, annotations, names=names)
+    parts_motion.freeze_motion(assembly, imported["candidate"], annotations)
+    return assembly, report
+
+
 def part_spec(path, assembly, source_root, *, slot="hair", node="hair_front", socket="head",
               identity="test.part", role="part", format="local", pivot=(2, 2), crop_offset=(0, 0),
               provides=(), replaces=(), body_mode="segmented"):

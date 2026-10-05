@@ -67,6 +67,20 @@ unknown or duplicate parameters. HTTP playback never writes an assembly or
 bakes an appearance. The viewer is an optional inspection client, not a runtime
 dependency.
 
+For one body pack (flat, or segmented into node pieces) with independent layers, `/api/library` supplies the
+shared tracks and texture library once. The browser then samples the common
+clock locally, so continuous playback does not wait for a server frame request.
+The same client is exported by `parts-export` as `manifest.json`, individual
+PNGs and a self-contained `preview.html`. `/standalone` opens that embedded
+preview; `/api/export` downloads its portable ZIP. This draft export creates
+zero appearance clips and grants no release approval. The first adapter supports
+one choice per slot, a segmented body, ordering with the draw table, cover
+rules, palettes, masks (including a mask on another layer's node) and explicit
+mirror. Body replacement, slot precedence and multiple choices remain supported
+by the Python runtime but are explicit capability errors for this adapter; the
+local viewer uses the server-layer path for those profiles.
+See [layer authoring and export](08-layer-export.md).
+
 The body is an explicit pack. Segmented bodies must provide every required
 topology node. `provides` identifies indivisible raster interfaces, and `replaces`
 removes all body pieces providing those nodes. A raster supplying several nodes
@@ -84,6 +98,34 @@ Relations to known hidden/replaced pieces become inactive. Unknown or ambiguous
 targets and cycles fail. Unconstrained ties use lexical qualified IDs, so authors
 must declare meaningful overlaps. Socket visibility and placement visibility
 both apply; anatomical IDs retain their meaning through visibility and mirror.
+
+## Draw table and cover rules
+
+A topology may declare `layers`: its nodes from back to front, the draw table
+(MapleStory's zmap). Entries left unordered by explicit `before`/`after` draw by
+their rank in the table: an entry's own `node`, else the first listed node it
+provides; nodes missing from the table draw after it. On one rank the body
+draws before what is worn there, so a sleeve on `arm_r` covers the front arm and
+a sleeve on `arm_l` stays behind the torso. Remaining ties use the qualified ID.
+Explicit constraints still win over the table, and a topology without `layers`
+orders exactly as before. The table is per topology; a rig whose view swaps near
+and far limbs needs its own topology (or mirror).
+
+```json
+"layers": ["arm_l", "hand_l", "leg_l", "foot_l", "hair_back", "root", "torso",
+           "leg_r", "foot_r", "head", "eye_l", "eye_r", "brow_l", "brow_r", "mouth",
+           "hair_front", "arm_r", "hand_r"]
+```
+
+Cover rules replace masks for the common "a hat flattens the hair" case
+(MapleStory's vslot). A binding lists the tags it `covers`; a piece with
+`"cover_rule": {"tag": "headwear", "show": "uncovered"}` draws only while no
+selected binding covers that tag, and `"show": "covered"` only while one does.
+A hair pack therefore carries both its full and its capped drawing, and a cap
+declares `"covers": ["headwear"]`. The plan records the active covers, and a
+piece hidden by a rule appears in `suppressed` as `cover:<tag>`. Rules do not
+cut pixels; the capped drawing is authored like any other piece. A cross-layer
+mask remains available when a cut, not a different drawing, is wanted.
 
 Node order targets match `provides` interfaces. An accessory's primary `node`
 describes its attachment constraint; it does not automatically make the accessory

@@ -26,7 +26,9 @@ _INPUT_PIECE = contract._record({
     "sample_map": contract._mapping(contract._mapping(_INPUT_PLACEMENT)),
     "provides": contract._ids, "replaces": contract._ids,
     "join_interface": contract._nullable(contract._id), "palette_regions": contract._mapping(contract._asset),
-}, {"provides": [], "replaces": [], "join_interface": None, "palette_regions": {}})
+    "pose_map": contract._mapping(_INPUT_PLACEMENT), "cover_rule": contract._cover_rule,
+}, {"provides": [], "replaces": [], "join_interface": None, "palette_regions": {}, "sample_map": {}},
+   optional=("pose_map", "cover_rule"))
 _IMPORT = contract._record({
     "kind": contract._enum("parts-pack-import"), "schema_version": contract._positive,
     "id": contract._id, "design_id": contract._id, "role": contract._enum("part", "body"),
@@ -34,8 +36,9 @@ _IMPORT = contract._record({
     "rig": contract._ref, "motion": contract._ref, "view": contract._id, "binding_id": contract._id,
     "occupies": contract._ids, "requires": contract._ids, "excludes": contract._ids,
     "pieces": contract._records(_INPUT_PIECE, nonempty=True), "states": contract._ids,
-    "mirror_safe": contract._boolean,
-}, {"role": "part", "body_mode": "segmented", "occupies": [], "requires": [], "excludes": [], "states": [], "mirror_safe": False})
+    "mirror_safe": contract._boolean, "covers": contract._ids,
+}, {"role": "part", "body_mode": "segmented", "occupies": [], "requires": [], "excludes": [], "states": [], "mirror_safe": False},
+   optional=("covers",))
 
 
 def _normalize_asset(reader, reference, payloads, *, size=None):
@@ -116,6 +119,8 @@ def activate_pack(assembly, pack, filename, original_hash, index, registry):
     next_registry.update({pack["id"]: pack, catalog["id"]: catalog})
     next_index = deepcopy(index)
     next_index["documents"] = {name: path for name, path in index["documents"].items() if name not in removed}
+    next_index["fitting"] = [ref for ref in index["fitting"] if ref["id"] not in removed]
+    next_index["stability"] = [ref for ref in index["stability"] if ref["id"] not in removed]
     next_index["documents"][pack["id"]] = filename
     if catalog["digest"] != index["catalog"]["digest"]:
         folder = library.publish_object(root, "catalogs", catalog["id"], catalog["digest"],
@@ -168,42 +173,69 @@ def import_pack(assembly: Path, spec: Path, source_root: Path, *, allow_incomple
         for channel, region in value["palette_regions"].items():
             piece["palette_regions"][channel], _ = _normalize_asset(reader, region, payloads)
         contract._members(value["sample_map"], clips, f"{value['id']}.clips")
+
+        def normalize(placement, where):
+            expected_size = size if placement["format"] == "full-canvas" else None
+            image_ref, image = _normalize_asset(reader, placement["image"], payloads, size=expected_size)
+            if placement["format"] != "cropped" and placement["crop_offset"] != [0, 0]:
+                raise contract.PartsContractError("crop_offset is only valid for cropped input")
+            pivot = [v - d for v, d in zip(placement["pivot"], placement["crop_offset"])]
+            normalized = {key: deepcopy(placement[key]) for key in (
+                "target_socket", "visible", "offset", "allow_clip", "before", "after", "mask", "palette_regions")}
+            normalized.update(image=image_ref, pivot=pivot, source={
+                "image": placement["image"], "format": placement["format"],
+                "crop_offset": placement["crop_offset"], "pivot": placement["pivot"]})
+            if normalized["mask"] is not None:
+                mask = normalized["mask"]
+                mask["image"], _ = _normalize_asset(reader, mask["image"], payloads,
+                                                   size=image.size if mask["space"] == "part-local" else size)
+            for channel, region in placement["palette_regions"].items():
+                normalized["palette_regions"][channel], _ = _normalize_asset(reader, region, payloads, size=image.size)
+            for channel, region in piece["palette_regions"].items():
+                data = library.image_bytes(payloads[region["file"]])
+                if data.size != image.size:
+                    raise contract.PartsContractError(f"{where}: piece palette region differs from image size; use sample-specific regions")
+            return normalized, image
+
+        def place(normalized, image, clip_id, sample):
+            if normalized["visible"]:
+                socket = sample["sockets"].get(normalized["target_socket"])
+                if socket is None or socket["confidence"] != "verified":
+                    raise contract.PartsContractError("visible part requires a verified target sample socket")
+                offset = tuple(t - p + d for t, p, d in zip(socket["position"], normalized["pivot"], normalized["offset"]))
+                if not normalized["allow_clip"] and _clipped_pixels(image, offset, size):
+                    raise contract.PartsContractError(f"part clips rig canvas: {value['id']}/{clip_id}/{sample['id']}")
+            piece["sample_map"].setdefault(clip_id, {})[sample["id"]] = normalized
+
         for clip_id, mapping in value["sample_map"].items():
             samples = {sample["id"]: sample for sample in clips[clip_id]["samples"]}
             contract._members(mapping, samples, f"{value['id']}.samples")
             for sample_id, placement in mapping.items():
-                expected_size = size if placement["format"] == "full-canvas" else None
-                image_ref, image = _normalize_asset(reader, placement["image"], payloads, size=expected_size)
-                if placement["format"] != "cropped" and placement["crop_offset"] != [0, 0]:
-                    raise contract.PartsContractError("crop_offset is only valid for cropped input")
-                pivot = [v - d for v, d in zip(placement["pivot"], placement["crop_offset"])]
-                normalized = {key: deepcopy(placement[key]) for key in (
-                    "target_socket", "visible", "offset", "allow_clip", "before", "after", "mask", "palette_regions")}
-                normalized.update(image=image_ref, pivot=pivot, source={
-                    "image": placement["image"], "format": placement["format"],
-                    "crop_offset": placement["crop_offset"], "pivot": placement["pivot"]})
-                if normalized["mask"] is not None:
-                    mask = normalized["mask"]
-                    mask["image"], _ = _normalize_asset(reader, mask["image"], payloads,
-                                                       size=image.size if mask["space"] == "part-local" else size)
-                for channel, region in placement["palette_regions"].items():
-                    normalized["palette_regions"][channel], _ = _normalize_asset(reader, region, payloads, size=image.size)
-                for channel, region in piece["palette_regions"].items():
-                    data = library.image_bytes(payloads[region["file"]])
-                    if data.size != image.size:
-                        raise contract.PartsContractError("piece palette region differs from image size; use sample-specific regions")
-                if placement["visible"]:
-                    socket = samples[sample_id]["sockets"].get(placement["target_socket"])
-                    if socket is None or socket["confidence"] != "verified":
-                        raise contract.PartsContractError("visible part requires a verified target sample socket")
-                    offset = tuple(t - p + d for t, p, d in zip(socket["position"], pivot, placement["offset"]))
-                    if not placement["allow_clip"] and _clipped_pixels(image, offset, size):
-                        raise contract.PartsContractError(f"part clips rig canvas: {value['id']}/{clip_id}/{sample_id}")
-                piece["sample_map"][clip_id][sample_id] = normalized
+                normalized, image = normalize(placement, f"{value['id']}/{clip_id}/{sample_id}")
+                place(normalized, image, clip_id, samples[sample_id])
+        if "pose_map" in value:
+            # One drawing per pose, repeated on every sample of that pose; a sample listed
+            # in sample_map keeps its own entry (a held frame drawn differently).
+            used = set()
+            for pose_id, placement in value["pose_map"].items():
+                normalized, image = normalize(placement, f"{value['id']}/pose:{pose_id}")
+                piece["pose_map"][pose_id] = normalized
+                for clip in clips.values():
+                    for sample in clip["samples"]:
+                        if sample["pose_id"] != pose_id:
+                            continue
+                        used.add(pose_id)
+                        if sample["id"] not in value["sample_map"].get(clip["id"], {}):
+                            place(deepcopy(normalized), image, clip["id"], sample)
+            if set(value["pose_map"]) - used:
+                raise contract.PartsContractError(
+                    f"{value['id']}: pose_map names poses no motion sample has: {sorted(set(value['pose_map']) - used)}")
         pieces.append(piece)
     binding = {"id": request["binding_id"], "rig": request["rig"], "motion": request["motion"], "view": request["view"],
                "occupies": request["occupies"], "requires": request["requires"], "excludes": request["excludes"],
                "pieces": pieces, "mirror_safe": request["mirror_safe"]}
+    if "covers" in request:
+        binding["covers"] = request["covers"]
     missing = _coverage(binding, motion, request["states"] or index["states"])
     if missing and not allow_incomplete:
         raise contract.PartsContractError(f"missing part coverage: {missing}")

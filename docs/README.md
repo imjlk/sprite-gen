@@ -80,6 +80,7 @@ grouping is derived from `sprite_gen/_modules.py`, the one taxonomy table.
 | [gen.md](gen.md) | `sprite-gen gen` / `gen-set`: providers, default resolution, transparency strategy per provider, row usage |
 | [prompt-assembly.md](prompt-assembly.md) | What the engine adds to a still or clip prompt and when: the pieces, the 2.22.0 freeze without `--handed`, what counts as already said, and the notes on the caller's own words |
 | [video.md](video.md) | `sprite-gen video` / `video-extend` / `video-edit`: stills and clips to mp4 through Grok Imagine (image-to-video, last-frame pin, references, extension, editing) with the user's own credential |
+| [still-audit.md](still-audit.md) | `sprite-gen still-audit`: judging a base still as pixel art (grid, cleanliness, ramps, outline) with a remedy per finding, `--fix`, and the authoring guide for a base still that films and layers well |
 | [video-pipeline.md](video-pipeline.md) | Pipeline B engine contract: state canvas, keyed frames, true-period and one-shot cycles, strip/GIF/WebP, the batch, a set's directions on one sheet |
 | [loop-review.md](loop-review.md) | Automatic loop decisions, ambiguous gait review, visual evidence and explicit cut/alignment overrides |
 | [loop-repair.md](loop-repair.md) | RIFE (where it runs, cost, licences, `sprite-gen rife install`, what runs without it), jump-frame repair, the jolt index and its gate, one cycle length per direction set |
@@ -135,21 +136,26 @@ grouping is derived from `sprite_gen/_modules.py`, the one taxonomy table.
 
 The experimental parts commands implement separate workspace scaffolding,
 strict declarations, hash-bound motion import/freeze and body/part raster import.
-Composition, review and export
-remain planned; no part art is approved.
+Composition, measured fitting, exact revision review, baked export and a portable
+flat-body overlay adapter are implemented. The current SD art remains unapproved.
 
 | Doc | Owns |
 |---|---|
 | [parts/00-baseline.md](parts/00-baseline.md) | Pinned legacy request/JSON/pixels, local test environment and fork release policy |
+| [parts/09-avatar-process.md](parts/09-avatar-process.md) | The pose-first avatar process (MapleStory-style): body spec, base still, pose library, segmented body, part specs, AI-assisted part drawing, composition rules and expansion costs |
 | [parts/01-contract.md](parts/01-contract.md) | Implemented v1 contracts, five body presets, workspace CLI and validation limits |
-| [parts/02-motion-snapshots.md](parts/02-motion-snapshots.md) | Read-only final-source adapters, exact time, hash-bound annotation/freeze and motion revision invalidation |
-| [parts/03-part-import.md](parts/03-part-import.md) | Cropped/full-canvas geometry, separate body packs, masks/regions, coverage and immutable part registration |
-| [parts/04-composition.md](parts/04-composition.md) | Shared timeline, body replacement, subslot precedence, ordering, target masks, palette and immutable previews |
+| [parts/02-motion-snapshots.md](parts/02-motion-snapshots.md) | Final-source adapters and video loops onto a rig canvas (`parts-loop-native`), exact time, the loop quality gate, socket proposals (`parts-socket-track`), pose IDs (`parts-pose-assign`), clips recomposed from poses (`parts-motion-compose`), hash-bound freeze and revision invalidation |
+| [parts/03-part-import.md](parts/03-part-import.md) | Cropped/full-canvas geometry, body packs, masks/regions, coverage; pose-drawn parts (`pose_map`), pose sheets and slicing, pose classes, segmented bodies from painted labels (`parts-body-segments`), garment splitting (`parts-piece-split`), motion bodies and rebinding with follow-through |
+| [parts/04-composition.md](parts/04-composition.md) | Shared timeline, body replacement, subslot precedence, ordering and the draw table, cover rules, target masks, palette and previews |
 | [parts/05-review-and-qa.md](parts/05-review-and-qa.md) | Measured evidence, explicit world-travel/contact annotations, review scopes and stale approval rejection |
 | [parts/06-baked-export.md](parts/06-baked-export.md) | Deterministic multi-state atlas/manifest, ordered dedup, Aseprite mapping, build locks and atomic release pointers |
 | [parts/07-m1-verification.md](parts/07-m1-verification.md) | M1 test evidence, reproducible five-rig synthetic builds, exact art limitations and remaining acceptance work |
+| [parts/08-layer-export.md](parts/08-layer-export.md) | Authored fitting import, bounded repair proposals, portable independent layers and browser clock limits |
+| [parts/sd-explorer-contribution-demo-20261005.md](parts/sd-explorer-contribution-demo-20261005.md) | SD sneakers and clothing repair baseline, public QA integration and portable demo |
+| [parts/sd-explorer-polish-20261005.md](parts/sd-explorer-polish-20261005.md) | Current SD run-body, hair and boots improvements; pinned source stability checks, shared layer preview and reproducible inputs |
+| [parts/sd-explorer-session-handoff-20261005.md](parts/sd-explorer-session-handoff-20261005.md) | Session handoff: goal state, current checkpoint, implementation paths, verification and remaining art work |
 | [parts/initial-implementation-and-demo.md](parts/initial-implementation-and-demo.md) | PR00–06 status, snapshot/digest/timing rules, and the five-slot SD parts demo art brief |
-| [parts/sd-explorer-native-parts-20261005.md](parts/sd-explorer-native-parts-20261005.md) | Current 128px/48-colour body and parts, fixed footwear angles, joint foot interfaces and unapproved visual quality |
+| [parts/sd-explorer-native-parts-20261005.md](parts/sd-explorer-native-parts-20261005.md) | Native 128px/48-colour baseline, fixed footwear angles, joint foot interfaces and unapproved visual quality |
 | [parts/sd-explorer-full-run-cycle-20261005.md](parts/sd-explorer-full-run-cycle-20261005.md) | Historical full 16-frame cycle fix; footwear/noise were subsequently rejected |
 | [parts/sd-explorer-motion-repair-20261005.md](parts/sd-explorer-motion-repair-20261005.md) | Historical pose-matched repair; its half-stride run was rejected and superseded |
 | [parts/customization-and-variation.md](parts/customization-and-variation.md) | Basic and detailed slots, variation/palette/preset rules, rig-specific fitting, and expanded multi-body acceptance scope |

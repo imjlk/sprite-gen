@@ -97,6 +97,9 @@ The [part importer](docs/parts/03-part-import.md) preserves small rasters, crop 
 and separate body pieces. [Shared-timeline composition](docs/parts/04-composition.md)
 adds replacement, ordering, masks, palette and previews. [Review and QA](docs/parts/05-review-and-qa.md)
 bind explicit decisions to current bytes, timeline and policies.
+[Layer authoring and export](docs/parts/08-layer-export.md) register authored
+fitting and source stability criteria, propose bounded repairs and export independent overlays with
+one shared browser clock and a standalone preview, without appearance baking.
 [Baked export](docs/parts/06-baked-export.md) emits deterministic multi-state snapshots
 and requires a current appearance approval for release. See the
 [parts contract and CLI](docs/parts/01-contract.md).

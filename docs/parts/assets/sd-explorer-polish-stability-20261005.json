@@ -1,0 +1,1527 @@
+{
+  "after": {
+    "art_approved": false,
+    "checked": 28,
+    "declarations": [
+      {
+        "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+        "id": "sd.source.stability"
+      }
+    ],
+    "digest": "cd1991388efa941726ed32683d288512c4eac7ffc8f85516954c692dcaede549",
+    "failed": 0,
+    "kind": "parts-stability-report",
+    "motion": {
+      "digest": "6609318c91257e0a8806d2b72a4617d8edd1fad51f671059f5f2fbe1794baeb0",
+      "id": "sd.matched.video.motion"
+    },
+    "policy": "parts.authored-source-stability.v1",
+    "release_ready": false,
+    "results": [
+      {
+        "alpha_pixels": 0,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 0
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 0
+          }
+        ],
+        "clip": "idle.right",
+        "current_pixels": 937,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "idle.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 937,
+        "region": "head.idle",
+        "release_ready": false,
+        "rgb_pixels": 0,
+        "sample": "sample.0",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "idle",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 1,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 1
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 32
+          }
+        ],
+        "clip": "idle.right",
+        "current_pixels": 938,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "idle.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 937,
+        "region": "head.idle",
+        "release_ready": false,
+        "rgb_pixels": 32,
+        "sample": "sample.1",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "idle",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 12,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 12
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 74
+          }
+        ],
+        "clip": "idle.right",
+        "current_pixels": 925,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "idle.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 937,
+        "region": "head.idle",
+        "release_ready": false,
+        "rgb_pixels": 74,
+        "sample": "sample.2",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "idle",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 7,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 7
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 81
+          }
+        ],
+        "clip": "idle.right",
+        "current_pixels": 940,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "idle.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 937,
+        "region": "head.idle",
+        "release_ready": false,
+        "rgb_pixels": 81,
+        "sample": "sample.3",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "idle",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 0,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 0
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 0
+          }
+        ],
+        "clip": "walk.right",
+        "current_pixels": 941,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "walk.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 941,
+        "region": "head.walk",
+        "release_ready": false,
+        "rgb_pixels": 0,
+        "sample": "sample.0",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "walk",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 10,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 10
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 85
+          }
+        ],
+        "clip": "walk.right",
+        "current_pixels": 935,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "walk.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 941,
+        "region": "head.walk",
+        "release_ready": false,
+        "rgb_pixels": 85,
+        "sample": "sample.1",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "walk",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 3,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 3
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 68
+          }
+        ],
+        "clip": "walk.right",
+        "current_pixels": 942,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "walk.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 941,
+        "region": "head.walk",
+        "release_ready": false,
+        "rgb_pixels": 68,
+        "sample": "sample.2",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "walk",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 36,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 36
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 142
+          }
+        ],
+        "clip": "walk.right",
+        "current_pixels": 913,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "walk.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 941,
+        "region": "head.walk",
+        "release_ready": false,
+        "rgb_pixels": 142,
+        "sample": "sample.3",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "walk",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 1,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 1
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 19
+          }
+        ],
+        "clip": "walk.right",
+        "current_pixels": 942,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "walk.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 941,
+        "region": "head.walk",
+        "release_ready": false,
+        "rgb_pixels": 19,
+        "sample": "sample.4",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "walk",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 8,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 8
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 80
+          }
+        ],
+        "clip": "walk.right",
+        "current_pixels": 937,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "walk.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 941,
+        "region": "head.walk",
+        "release_ready": false,
+        "rgb_pixels": 80,
+        "sample": "sample.5",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "walk",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 3,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 3
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 73
+          }
+        ],
+        "clip": "walk.right",
+        "current_pixels": 938,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "walk.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 941,
+        "region": "head.walk",
+        "release_ready": false,
+        "rgb_pixels": 73,
+        "sample": "sample.6",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "walk",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 36,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 36
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 140
+          }
+        ],
+        "clip": "walk.right",
+        "current_pixels": 913,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "walk.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 941,
+        "region": "head.walk",
+        "release_ready": false,
+        "rgb_pixels": 140,
+        "sample": "sample.7",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "walk",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 0,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 0
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 0
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 956,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 0,
+        "sample": "sample.0",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 9,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 9
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 95
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 951,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 95,
+        "sample": "sample.1",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 4,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 4
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 52
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 958,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 52,
+        "sample": "sample.2",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 29,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 29
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 155
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 961,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 155,
+        "sample": "sample.3",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 16,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 16
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 159
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 954,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 159,
+        "sample": "sample.4",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 19,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 19
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 141
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 949,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 141,
+        "sample": "sample.5",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 14,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 14
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 104
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 956,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 104,
+        "sample": "sample.6",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 14,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 14
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 123
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 948,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 123,
+        "sample": "sample.7",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 10,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 10
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 114
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 950,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 114,
+        "sample": "sample.8",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 11,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 11
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 103
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 949,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 103,
+        "sample": "sample.9",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 9,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 9
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 114
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 949,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 114,
+        "sample": "sample.10",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 7,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 7
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 139
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 959,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 139,
+        "sample": "sample.11",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 9,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 9
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 120
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 951,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 120,
+        "sample": "sample.12",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 11,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 11
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 95
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 961,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 95,
+        "sample": "sample.13",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 11,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 11
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 111
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 955,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 111,
+        "sample": "sample.14",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      },
+      {
+        "alpha_pixels": 12,
+        "art_approved": false,
+        "checks": [
+          {
+            "id": "alpha_pixels",
+            "limit": 48,
+            "status": "passed",
+            "value": 12
+          },
+          {
+            "id": "rgb_pixels",
+            "limit": 160,
+            "status": "passed",
+            "value": 113
+          }
+        ],
+        "clip": "run.right",
+        "current_pixels": 948,
+        "declaration": {
+          "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+          "id": "sd.source.stability"
+        },
+        "label": "정렬한 머리 원본",
+        "part": {
+          "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+          "id": "sd.equipment.body"
+        },
+        "piece": "body",
+        "reference": {
+          "clip": "run.right",
+          "sample": "sample.0"
+        },
+        "reference_pixels": 956,
+        "region": "head.run",
+        "release_ready": false,
+        "rgb_pixels": 113,
+        "sample": "sample.15",
+        "source_scope": "unmasked source before appearance palettes",
+        "state": "run",
+        "status": "passed"
+      }
+    ],
+    "schema_version": 1,
+    "skipped": 0,
+    "status": "passed"
+  },
+  "art_approved": false,
+  "baseline_motion": {
+    "digest": "c3a5347550a914485961c85b14910d73f9b66a661c5b0d0028f5090ec36bae45",
+    "id": "sd.matched.video.motion"
+  },
+  "before": [
+    {
+      "alpha_pixels": 0,
+      "clip": "idle.right",
+      "current_pixels": 937,
+      "reference_pixels": 937,
+      "rgb_pixels": 0,
+      "sample": "sample.0"
+    },
+    {
+      "alpha_pixels": 1,
+      "clip": "idle.right",
+      "current_pixels": 938,
+      "reference_pixels": 937,
+      "rgb_pixels": 32,
+      "sample": "sample.1"
+    },
+    {
+      "alpha_pixels": 12,
+      "clip": "idle.right",
+      "current_pixels": 925,
+      "reference_pixels": 937,
+      "rgb_pixels": 86,
+      "sample": "sample.2"
+    },
+    {
+      "alpha_pixels": 7,
+      "clip": "idle.right",
+      "current_pixels": 940,
+      "reference_pixels": 937,
+      "rgb_pixels": 75,
+      "sample": "sample.3"
+    },
+    {
+      "alpha_pixels": 0,
+      "clip": "walk.right",
+      "current_pixels": 941,
+      "reference_pixels": 941,
+      "rgb_pixels": 0,
+      "sample": "sample.0"
+    },
+    {
+      "alpha_pixels": 10,
+      "clip": "walk.right",
+      "current_pixels": 935,
+      "reference_pixels": 941,
+      "rgb_pixels": 84,
+      "sample": "sample.1"
+    },
+    {
+      "alpha_pixels": 3,
+      "clip": "walk.right",
+      "current_pixels": 942,
+      "reference_pixels": 941,
+      "rgb_pixels": 63,
+      "sample": "sample.2"
+    },
+    {
+      "alpha_pixels": 36,
+      "clip": "walk.right",
+      "current_pixels": 913,
+      "reference_pixels": 941,
+      "rgb_pixels": 149,
+      "sample": "sample.3"
+    },
+    {
+      "alpha_pixels": 1,
+      "clip": "walk.right",
+      "current_pixels": 942,
+      "reference_pixels": 941,
+      "rgb_pixels": 18,
+      "sample": "sample.4"
+    },
+    {
+      "alpha_pixels": 8,
+      "clip": "walk.right",
+      "current_pixels": 937,
+      "reference_pixels": 941,
+      "rgb_pixels": 78,
+      "sample": "sample.5"
+    },
+    {
+      "alpha_pixels": 3,
+      "clip": "walk.right",
+      "current_pixels": 938,
+      "reference_pixels": 941,
+      "rgb_pixels": 69,
+      "sample": "sample.6"
+    },
+    {
+      "alpha_pixels": 36,
+      "clip": "walk.right",
+      "current_pixels": 913,
+      "reference_pixels": 941,
+      "rgb_pixels": 144,
+      "sample": "sample.7"
+    },
+    {
+      "alpha_pixels": 0,
+      "clip": "run.right",
+      "current_pixels": 916,
+      "reference_pixels": 916,
+      "rgb_pixels": 0,
+      "sample": "sample.0"
+    },
+    {
+      "alpha_pixels": 22,
+      "clip": "run.right",
+      "current_pixels": 918,
+      "reference_pixels": 916,
+      "rgb_pixels": 132,
+      "sample": "sample.1"
+    },
+    {
+      "alpha_pixels": 32,
+      "clip": "run.right",
+      "current_pixels": 928,
+      "reference_pixels": 916,
+      "rgb_pixels": 148,
+      "sample": "sample.2"
+    },
+    {
+      "alpha_pixels": 50,
+      "clip": "run.right",
+      "current_pixels": 892,
+      "reference_pixels": 916,
+      "rgb_pixels": 138,
+      "sample": "sample.3"
+    },
+    {
+      "alpha_pixels": 37,
+      "clip": "run.right",
+      "current_pixels": 905,
+      "reference_pixels": 916,
+      "rgb_pixels": 135,
+      "sample": "sample.4"
+    },
+    {
+      "alpha_pixels": 31,
+      "clip": "run.right",
+      "current_pixels": 941,
+      "reference_pixels": 916,
+      "rgb_pixels": 140,
+      "sample": "sample.5"
+    },
+    {
+      "alpha_pixels": 24,
+      "clip": "run.right",
+      "current_pixels": 928,
+      "reference_pixels": 916,
+      "rgb_pixels": 124,
+      "sample": "sample.6"
+    },
+    {
+      "alpha_pixels": 33,
+      "clip": "run.right",
+      "current_pixels": 939,
+      "reference_pixels": 916,
+      "rgb_pixels": 133,
+      "sample": "sample.7"
+    },
+    {
+      "alpha_pixels": 30,
+      "clip": "run.right",
+      "current_pixels": 944,
+      "reference_pixels": 916,
+      "rgb_pixels": 158,
+      "sample": "sample.8"
+    },
+    {
+      "alpha_pixels": 33,
+      "clip": "run.right",
+      "current_pixels": 931,
+      "reference_pixels": 916,
+      "rgb_pixels": 156,
+      "sample": "sample.9"
+    },
+    {
+      "alpha_pixels": 47,
+      "clip": "run.right",
+      "current_pixels": 913,
+      "reference_pixels": 916,
+      "rgb_pixels": 162,
+      "sample": "sample.10"
+    },
+    {
+      "alpha_pixels": 32,
+      "clip": "run.right",
+      "current_pixels": 908,
+      "reference_pixels": 916,
+      "rgb_pixels": 122,
+      "sample": "sample.11"
+    },
+    {
+      "alpha_pixels": 19,
+      "clip": "run.right",
+      "current_pixels": 909,
+      "reference_pixels": 916,
+      "rgb_pixels": 62,
+      "sample": "sample.12"
+    },
+    {
+      "alpha_pixels": 6,
+      "clip": "run.right",
+      "current_pixels": 914,
+      "reference_pixels": 916,
+      "rgb_pixels": 90,
+      "sample": "sample.13"
+    },
+    {
+      "alpha_pixels": 19,
+      "clip": "run.right",
+      "current_pixels": 907,
+      "reference_pixels": 916,
+      "rgb_pixels": 102,
+      "sample": "sample.14"
+    },
+    {
+      "alpha_pixels": 22,
+      "clip": "run.right",
+      "current_pixels": 904,
+      "reference_pixels": 916,
+      "rgb_pixels": 101,
+      "sample": "sample.15"
+    }
+  ],
+  "criteria": [
+    {
+      "binding": "sd.equipment.body.binding",
+      "bounds": [
+        -20,
+        0,
+        20,
+        28
+      ],
+      "clips": [
+        "idle.right"
+      ],
+      "id": "head.idle",
+      "label": "정렬한 머리 원본",
+      "max_alpha_pixels": 48,
+      "max_rgb_pixels": 160,
+      "min_alpha": 128,
+      "part": {
+        "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+        "id": "sd.equipment.body"
+      },
+      "piece": "body",
+      "reference": {
+        "clip": "idle.right",
+        "sample": "sample.0"
+      },
+      "rgb_threshold": 24,
+      "socket": "head"
+    },
+    {
+      "binding": "sd.equipment.body.binding",
+      "bounds": [
+        -20,
+        0,
+        20,
+        28
+      ],
+      "clips": [
+        "walk.right"
+      ],
+      "id": "head.walk",
+      "label": "정렬한 머리 원본",
+      "max_alpha_pixels": 48,
+      "max_rgb_pixels": 160,
+      "min_alpha": 128,
+      "part": {
+        "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+        "id": "sd.equipment.body"
+      },
+      "piece": "body",
+      "reference": {
+        "clip": "walk.right",
+        "sample": "sample.0"
+      },
+      "rgb_threshold": 24,
+      "socket": "head"
+    },
+    {
+      "binding": "sd.equipment.body.binding",
+      "bounds": [
+        -20,
+        0,
+        20,
+        28
+      ],
+      "clips": [
+        "run.right"
+      ],
+      "id": "head.run",
+      "label": "정렬한 머리 원본",
+      "max_alpha_pixels": 48,
+      "max_rgb_pixels": 160,
+      "min_alpha": 128,
+      "part": {
+        "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+        "id": "sd.equipment.body"
+      },
+      "piece": "body",
+      "reference": {
+        "clip": "run.right",
+        "sample": "sample.0"
+      },
+      "rgb_threshold": 24,
+      "socket": "head"
+    }
+  ],
+  "kind": "sd-source-stability-comparison",
+  "motion": {
+    "digest": "6609318c91257e0a8806d2b72a4617d8edd1fad51f671059f5f2fbe1794baeb0",
+    "id": "sd.matched.video.motion"
+  },
+  "release_ready": false,
+  "schema_version": 1,
+  "scope": "40x28 head ROI, integer native attachment alignment; each clip reference is its first pose"
+}

@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-05",
+  "provider": "builtin image_gen.imagegen",
+  "operation": "edit",
+  "prompt": "Use case: precise-object-edit\nAsset type: a production sprite footwear template sheet for an existing 128x128 SD character.\nInput image 1 is the edit target: six footwear angles in a 3-column by 2-row sheet. Input image 2 is the character/style reference only.\nChange the first sheet's brown bulky footwear into compact low-top off-white and muted teal sneakers with a dark warm charcoal outline. Keep all six angles, the exact 3x2 layout, each shoe's orientation, and the same relative bounding box proportions. Each cell must contain exactly one shoe with generous clear margin.\nTop row: flat side profile toe right; toe raised side profile right; toe lowered side profile right.\nBottom row: rear foot lifted, toe downward; rear foot rolling diagonally; heel strike side profile toe right.\nStyle: true simple native pixel sprite artwork. Think 18-19 pixels long and 12-14 pixels high per shoe, displayed enlarged with clean square pixel blocks. One-pixel outline, a single pale sole, two flat upper tones, one tiny teal panel. Same sneaker design, same outline weight and palette in every angle. These must remain clearly readable at tiny native resolution, matching the reference character. Remove the current fluffy edge glow, noisy texture, bulky cuffs and excessive tiny details. Low-top ankle opening must be clear.\nConstraints: preserve sheet layout and poses; do not add feet, legs, characters, text, labels, boxes, ground shadows, gradients or glow. Output genuinely transparent outside each shoe. This is one shared asset set reused over existing motion; do not create an animation or video.",
+  "selected_output": "sd-explorer-sneakers-source-20261005.png",
+  "references": [
+    {
+      "role": "target",
+      "file": "raw-footwear-templates/footwear.a.png",
+      "baseline": "sd-explorer-native-parts-20261005.tar.gz"
+    },
+    {
+      "role": "style only",
+      "file": "native-style-reference.png"
+    }
+  ],
+  "processing": [
+    "one-time native size and binary alpha import",
+    "existing authored six angles and sole anchors",
+    "existing fixed 48-colour palette",
+    "same glyph size per angle across all shared samples"
+  ],
+  "new_body_clips": 0,
+  "appearance_clips_baked": 0,
+  "art_approved": false,
+  "release_ready": false,
+  "selected_sha256": "adc3da90c7fbaace42949571390042d5401e1d86109d3a02b1ced6fb91bb9c9a"
+}

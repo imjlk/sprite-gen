@@ -4,7 +4,9 @@
 
 `parts-inspect` verifies declarations, coverage and input bytes, renders through
 the shared PR04 engine, and records bounds, clipping and exact sample timing.
-Checks distinguish `error`, `warning`, `unverified` and `passed`. Fitting,
+Checks distinguish `error`, `warning`, `unverified` and `passed`. Authored
+part fitting declarations add measured coverage, protection and silhouette
+checks to this same QA and approval path. Visual fitting,
 occlusion, animation, contact truth and style stay unverified until explicitly
 reviewed. A socket array or a successful render is not animation approval.
 
@@ -13,6 +15,17 @@ sprite-gen parts-inspect --assembly ./library/assembly.json
 sprite-gen parts-review --assembly ./library/assembly.json
 sprite-gen parts-approve --assembly ./library/assembly.json \
   --review-hash <candidate-digest> --checks ./checks.json --reviewer <name>
+```
+
+Before review, `parts-coverage` shows the part × clip × pose matrix to fill:
+for each body and catalog piece, covered/total samples per clip, distinct
+drawings, samples filled from a `pose_map`, poses never drawn and gaps in the
+requested states (`--markdown FILE` writes the table). It measures what exists;
+it approves nothing. Check it before adding a pose: every pose-drawn part needs a
+drawing for the new pose.
+
+```sh
+sprite-gen parts-coverage --assembly ./library/assembly.json --markdown coverage.md
 ```
 
 The decision file explicitly contains all five checks:
@@ -77,7 +90,7 @@ accumulation must be supplied by the game rather than guessed from one cycle.
 World-preview allocation obeys the existing per-image and total pixel budgets.
 The preview metadata, generated image hashes and contact annotations participate
 in the review evidence. Modifying a world image blocks approval. This evidence
-format uses `parts.evidence.v2`, so an older policy decision cannot approve it.
+format uses `parts.evidence.v4`, so an older policy decision cannot approve it.
 
 Structural/measurement errors block review. Warnings and unverified facts remain
 visible in the evidence even after an explicit decision. Release requires a
@@ -86,6 +99,52 @@ same evidence verification immediately before export. Local review records are
 content-addressed decisions, not cryptographic reviewer signatures.
 
 ## Layer fitting and bounded corrections
+
+`parts-fit-import` registers native-canvas interfaces as a sealed `parts-fitting`
+document. Each row pins the exact part, binding, clip and sample. The workspace
+indexes these under `fitting`; QA verifies both normalized masks and captured
+source bytes. Once a fitting policy is installed, any visible part sample with
+no interface is an error. A workspace with no policy remains unverified.
+`fitting.json` is included in preview/review evidence, and fitting errors block
+review and release through the existing gates. Changing a fit policy invalidates
+reviews; replacing its part or motion detaches the stale declaration.
+
+```sh
+sprite-gen parts-fit-import --assembly ./library/assembly.json \
+  --spec ./fit.json --source-root ./fit-source
+sprite-gen parts-inspect --assembly ./library/assembly.json
+sprite-gen parts-repair-plan --assembly ./library/assembly.json \
+  --part garment.a --radius 2 --patch-gaps --out ./repair/garment.json
+```
+
+The repair command produces an import proposal and a `.repair.json` report;
+it neither activates a part nor approves art. Translation is limited to three
+pixels and the shared three-retry ceiling. `--patch-gaps` can propose up to
+twelve missing local pixels for a raster piece, using nearby existing part ink.
+It requires authored coverage, honors declared protection and silhouette masks,
+keeps the same size, and rechecks the original rules and other passing parts.
+Large gaps, mirrored raster edits, missing criteria and unrepairable fits stay
+unresolved. The body and motion are untouched. Inspect the proposal, import it
+with `parts-import`, rebind the fitting declaration to the new part revision,
+then run QA again. See [layer authoring and export](08-layer-export.md).
+
+## Authored source stability
+
+`parts-stability-import --assembly ./library/assembly.json --spec ./stability.json`
+registers exact part/binding/piece references and stable source regions. Each
+region names a socket, a relative half-open rectangle, a reference clip/sample,
+clips to measure, and explicit alpha/RGB pixel budgets. Integer attachment
+alignment excludes authored position movement. Moving limbs and deliberate
+shape changes must remain outside a declared stable region.
+
+The checker reads the unmasked piece PNG before appearance palettes or other
+overlays. It counts opaque alpha differences and visible RGB differences above
+the declared threshold, ignoring invisible RGB. `stability.json` enters the
+same QA/review/build evidence. Source failures block review; missing criteria
+remain unverified. Source/policy revisions invalidate stale evidence. This is a
+measurement of declared regions, never automatic approval of anatomy, motion,
+palette, or style. The viewer displays current-pose deltas and can seek to a
+source failure independently of part-fitting failures.
 
 `sprite_gen.qa.parts_fitting` measures an authored layer interface: maximum
 picture size, allowed placement, required coverage, protected pixels,

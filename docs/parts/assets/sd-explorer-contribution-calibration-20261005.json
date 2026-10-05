@@ -1,0 +1,1458 @@
+{
+  "back_air_feet": [
+    [
+      15,
+      0
+    ],
+    [
+      16,
+      0
+    ],
+    [
+      17,
+      0
+    ],
+    [
+      18,
+      0
+    ],
+    [
+      23,
+      0
+    ],
+    [
+      24,
+      0
+    ],
+    [
+      25,
+      0
+    ],
+    [
+      26,
+      0
+    ]
+  ],
+  "confidence": "Authored native-canvas foot envelopes for selected full run stride; no anatomical left/right inference",
+  "feet_boxes": [
+    [
+      [
+        50,
+        104,
+        64,
+        114
+      ],
+      [
+        67,
+        104,
+        83,
+        114
+      ]
+    ],
+    [
+      [
+        50,
+        104,
+        64,
+        114
+      ],
+      [
+        67,
+        104,
+        83,
+        114
+      ]
+    ],
+    [
+      [
+        50,
+        104,
+        64,
+        114
+      ],
+      [
+        67,
+        104,
+        83,
+        114
+      ]
+    ],
+    [
+      [
+        50,
+        104,
+        64,
+        114
+      ],
+      [
+        67,
+        104,
+        83,
+        114
+      ]
+    ],
+    [
+      [
+        50,
+        104,
+        65,
+        114
+      ],
+      [
+        70,
+        103,
+        86,
+        113
+      ]
+    ],
+    [
+      [
+        49,
+        102,
+        64,
+        114
+      ],
+      [
+        68,
+        104,
+        83,
+        114
+      ]
+    ],
+    [
+      [
+        54,
+        102,
+        69,
+        113
+      ],
+      [
+        63,
+        104,
+        77,
+        114
+      ]
+    ],
+    [
+      [
+        57,
+        105,
+        71,
+        114
+      ],
+      [
+        62,
+        102,
+        75,
+        112
+      ]
+    ],
+    [
+      [
+        52,
+        104,
+        65,
+        114
+      ],
+      [
+        67,
+        103,
+        83,
+        113
+      ]
+    ],
+    [
+      [
+        49,
+        103,
+        64,
+        114
+      ],
+      [
+        66,
+        104,
+        81,
+        114
+      ]
+    ],
+    [
+      [
+        54,
+        101,
+        65,
+        111
+      ],
+      [
+        60,
+        104,
+        75,
+        114
+      ]
+    ],
+    [
+      [
+        55,
+        105,
+        68,
+        114
+      ],
+      [
+        63,
+        101,
+        76,
+        113
+      ]
+    ],
+    [
+      [
+        54,
+        104,
+        68,
+        114
+      ],
+      [
+        58,
+        100,
+        72,
+        110
+      ]
+    ],
+    [
+      [
+        50,
+        103,
+        64,
+        114
+      ],
+      [
+        59,
+        100,
+        73,
+        112
+      ]
+    ],
+    [
+      [
+        46,
+        103,
+        61,
+        113
+      ],
+      [
+        65,
+        100,
+        80,
+        112
+      ]
+    ],
+    [
+      [
+        40,
+        95,
+        51,
+        106
+      ],
+      [
+        69,
+        101,
+        85,
+        113
+      ]
+    ],
+    [
+      [
+        38,
+        94,
+        50,
+        104
+      ],
+      [
+        67,
+        103,
+        84,
+        114
+      ]
+    ],
+    [
+      [
+        41,
+        95,
+        54,
+        105
+      ],
+      [
+        65,
+        103,
+        82,
+        114
+      ]
+    ],
+    [
+      [
+        47,
+        99,
+        62,
+        109
+      ],
+      [
+        62,
+        104,
+        78,
+        114
+      ]
+    ],
+    [
+      [
+        54,
+        104,
+        69,
+        114
+      ],
+      [
+        62,
+        100,
+        76,
+        111
+      ]
+    ],
+    [
+      [
+        50,
+        104,
+        64,
+        114
+      ],
+      [
+        61,
+        100,
+        76,
+        111
+      ]
+    ],
+    [
+      [
+        48,
+        103,
+        62,
+        114
+      ],
+      [
+        63,
+        100,
+        77,
+        112
+      ]
+    ],
+    [
+      [
+        43,
+        102,
+        57,
+        114
+      ],
+      [
+        68,
+        100,
+        83,
+        112
+      ]
+    ],
+    [
+      [
+        38,
+        97,
+        50,
+        108
+      ],
+      [
+        72,
+        100,
+        89,
+        112
+      ]
+    ],
+    [
+      [
+        36,
+        94,
+        48,
+        104
+      ],
+      [
+        71,
+        103,
+        89,
+        114
+      ]
+    ],
+    [
+      [
+        38,
+        94,
+        49,
+        105
+      ],
+      [
+        70,
+        103,
+        87,
+        114
+      ]
+    ],
+    [
+      [
+        41,
+        96,
+        53,
+        106
+      ],
+      [
+        67,
+        103,
+        83,
+        114
+      ]
+    ],
+    [
+      [
+        51,
+        100,
+        66,
+        111
+      ],
+      [
+        59,
+        104,
+        74,
+        114
+      ]
+    ]
+  ],
+  "fit_interface_overrides": [
+    {
+      "cell": 10,
+      "evidence": "diagnostics/walk6-interface.png",
+      "protected_regions": [
+        [
+          79,
+          87,
+          80,
+          88
+        ]
+      ],
+      "reason": "Source walk sample 6 has an isolated gray pixel next to the front hand, four pixels beyond the tank-top hem. The former RGB/y detector incorrectly required upper garments to paint it. Classify this hand-edge/source-art pixel as protected for both garment variants. Source body art remains unapproved.",
+      "slot": "upper",
+      "source_body_modified": false,
+      "tolerances_relaxed": false
+    },
+    {
+      "cell": 17,
+      "evidence": "diagnostics/run5-interface.png",
+      "protected_regions": [
+        [
+          50,
+          71,
+          51,
+          72
+        ]
+      ],
+      "reason": "The source run sample 5 has a gray pixel at the bare outer shoulder, outside both authored garment silhouettes. The old RGB/y mask classified it as clothing. Protect this shoulder/source-art pixel for both variants; do not paint detached garment pixels over it.",
+      "slot": "upper",
+      "source_body_modified": false,
+      "tolerances_relaxed": false
+    }
+  ],
+  "foot_drawing_sources": [
+    [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    [
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    [
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        1
+      ]
+    ],
+    [
+      [
+        3,
+        0
+      ],
+      [
+        3,
+        1
+      ]
+    ],
+    [
+      [
+        4,
+        0
+      ],
+      [
+        4,
+        1
+      ]
+    ],
+    [
+      [
+        5,
+        0
+      ],
+      [
+        5,
+        1
+      ]
+    ],
+    [
+      [
+        13,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    [
+      [
+        0,
+        0
+      ],
+      [
+        5,
+        0
+      ]
+    ],
+    [
+      [
+        8,
+        0
+      ],
+      [
+        8,
+        1
+      ]
+    ],
+    [
+      [
+        9,
+        0
+      ],
+      [
+        9,
+        1
+      ]
+    ],
+    [
+      [
+        13,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    [
+      [
+        0,
+        0
+      ],
+      [
+        5,
+        0
+      ]
+    ],
+    [
+      [
+        12,
+        0
+      ],
+      [
+        12,
+        1
+      ]
+    ],
+    [
+      [
+        13,
+        0
+      ],
+      [
+        13,
+        1
+      ]
+    ],
+    [
+      [
+        14,
+        0
+      ],
+      [
+        14,
+        1
+      ]
+    ],
+    [
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        1
+      ]
+    ],
+    [
+      [
+        16,
+        0
+      ],
+      [
+        16,
+        1
+      ]
+    ],
+    [
+      [
+        17,
+        0
+      ],
+      [
+        17,
+        1
+      ]
+    ],
+    [
+      [
+        18,
+        0
+      ],
+      [
+        18,
+        1
+      ]
+    ],
+    [
+      [
+        19,
+        0
+      ],
+      [
+        19,
+        1
+      ]
+    ],
+    [
+      [
+        20,
+        0
+      ],
+      [
+        20,
+        1
+      ]
+    ],
+    [
+      [
+        21,
+        0
+      ],
+      [
+        21,
+        1
+      ]
+    ],
+    [
+      [
+        22,
+        0
+      ],
+      [
+        22,
+        1
+      ]
+    ],
+    [
+      [
+        23,
+        0
+      ],
+      [
+        23,
+        1
+      ]
+    ],
+    [
+      [
+        24,
+        0
+      ],
+      [
+        24,
+        1
+      ]
+    ],
+    [
+      [
+        25,
+        0
+      ],
+      [
+        25,
+        1
+      ]
+    ],
+    [
+      [
+        26,
+        0
+      ],
+      [
+        26,
+        1
+      ]
+    ],
+    [
+      [
+        27,
+        0
+      ],
+      [
+        27,
+        1
+      ]
+    ]
+  ],
+  "foot_drawing_sources_by_variant": {
+    "b": {
+      "17": [
+        [
+          24,
+          0
+        ],
+        [
+          17,
+          0
+        ]
+      ],
+      "18": [
+        [
+          26,
+          0
+        ],
+        [
+          18,
+          0
+        ]
+      ]
+    }
+  },
+  "footwear_allowed_padding": {
+    "a": [
+      4,
+      4,
+      4,
+      4
+    ],
+    "b": [
+      4,
+      6,
+      4,
+      3
+    ]
+  },
+  "footwear_interface_notes": {
+    "27": "Foreground shin/ankle overlaps the rear-foot rectangle at (64,102)/(65,102). It is above the forward foot interface, not exposed foot needing shoe coverage.",
+    "b_padding": "The ankle boot shaft extends above the bare foot; soles and side volume remain bounded. This is a QA envelope, never a runtime mask."
+  },
+  "footwear_pair_cells": [
+    12,
+    20,
+    27,
+    13
+  ],
+  "footwear_placements": {
+    "0": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          57,
+          115
+        ],
+        "template": "heel-down",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          75,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "1": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          57,
+          115
+        ],
+        "template": "heel-down",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          75,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "10": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          59,
+          112
+        ],
+        "template": "toe-down",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          67,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "11": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          61,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          69,
+          114
+        ],
+        "template": "toe-down",
+        "visible": true
+      }
+    ],
+    "12": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          61,
+          115
+        ],
+        "template": "rear-roll",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          65,
+          111
+        ],
+        "template": "toe-down",
+        "visible": true
+      }
+    ],
+    "13": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          57,
+          115
+        ],
+        "template": "rear-roll",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          66,
+          113
+        ],
+        "template": "toe-down",
+        "visible": true
+      }
+    ],
+    "14": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          53,
+          114
+        ],
+        "template": "rear-roll",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          72,
+          113
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "15": [
+      {
+        "back_air": true,
+        "sole_anchor": [
+          45,
+          107
+        ],
+        "template": "rear-lift",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          77,
+          114
+        ],
+        "template": "toe-up",
+        "visible": true
+      }
+    ],
+    "16": [
+      {
+        "back_air": true,
+        "sole_anchor": [
+          44,
+          105
+        ],
+        "template": "rear-lift",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          75,
+          115
+        ],
+        "template": "toe-up",
+        "visible": true
+      }
+    ],
+    "17": [
+      {
+        "back_air": true,
+        "sole_anchor": [
+          47,
+          106
+        ],
+        "template": "rear-lift",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          73,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "18": [
+      {
+        "back_air": true,
+        "sole_anchor": [
+          54,
+          110
+        ],
+        "template": "rear-lift",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          70,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "19": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          61,
+          115
+        ],
+        "template": "rear-roll",
+        "visible": false
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          69,
+          112
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "2": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          57,
+          115
+        ],
+        "template": "heel-down",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          75,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "20": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          57,
+          115
+        ],
+        "template": "rear-roll",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          68,
+          112
+        ],
+        "template": "heel-down",
+        "visible": true
+      }
+    ],
+    "21": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          55,
+          115
+        ],
+        "template": "rear-roll",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          70,
+          113
+        ],
+        "template": "toe-down",
+        "visible": true
+      }
+    ],
+    "22": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          50,
+          115
+        ],
+        "template": "rear-roll",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          75,
+          113
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "23": [
+      {
+        "back_air": true,
+        "sole_anchor": [
+          44,
+          109
+        ],
+        "template": "rear-lift",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          80,
+          113
+        ],
+        "template": "toe-up",
+        "visible": true
+      }
+    ],
+    "24": [
+      {
+        "back_air": true,
+        "sole_anchor": [
+          42,
+          105
+        ],
+        "template": "rear-lift",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          80,
+          115
+        ],
+        "template": "toe-up",
+        "visible": true
+      }
+    ],
+    "25": [
+      {
+        "back_air": true,
+        "sole_anchor": [
+          43,
+          106
+        ],
+        "template": "rear-lift",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          78,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "26": [
+      {
+        "back_air": true,
+        "sole_anchor": [
+          47,
+          107
+        ],
+        "template": "rear-lift",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          75,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "27": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          58,
+          112
+        ],
+        "template": "toe-down",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          66,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "3": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          57,
+          115
+        ],
+        "template": "heel-down",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          75,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "4": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          57,
+          115
+        ],
+        "template": "heel-down",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          78,
+          114
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "5": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          56,
+          115
+        ],
+        "template": "toe-down",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          75,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "6": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          61,
+          114
+        ],
+        "template": "toe-down",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          70,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "7": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          64,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          68,
+          113
+        ],
+        "template": "toe-down",
+        "visible": true
+      }
+    ],
+    "8": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          58,
+          115
+        ],
+        "template": "heel-down",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          75,
+          114
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ],
+    "9": [
+      {
+        "back_air": false,
+        "sole_anchor": [
+          56,
+          115
+        ],
+        "template": "toe-down",
+        "visible": true
+      },
+      {
+        "back_air": false,
+        "sole_anchor": [
+          73,
+          115
+        ],
+        "template": "flat",
+        "visible": true
+      }
+    ]
+  },
+  "footwear_required_exclusions": {
+    "27": [
+      [
+        63,
+        100,
+        67,
+        104
+      ]
+    ]
+  },
+  "footwear_templates": [
+    {
+      "cell": 0,
+      "id": "flat",
+      "size": [
+        18,
+        12
+      ],
+      "variant_sizes": {
+        "b": [
+          19,
+          14
+        ]
+      }
+    },
+    {
+      "cell": 1,
+      "id": "toe-up",
+      "size": [
+        19,
+        13
+      ],
+      "variant_sizes": {
+        "b": [
+          19,
+          15
+        ]
+      }
+    },
+    {
+      "cell": 2,
+      "id": "toe-down",
+      "size": [
+        18,
+        14
+      ],
+      "variant_sizes": {
+        "b": [
+          18,
+          15
+        ]
+      }
+    },
+    {
+      "cell": 3,
+      "id": "rear-lift",
+      "mirror": true,
+      "size": [
+        13,
+        14
+      ],
+      "variant_sizes": {
+        "b": [
+          13,
+          15
+        ]
+      }
+    },
+    {
+      "cell": 4,
+      "id": "rear-roll",
+      "mirror": true,
+      "size": [
+        15,
+        14
+      ],
+      "variant_sizes": {
+        "b": [
+          15,
+          15
+        ]
+      }
+    },
+    {
+      "cell": 5,
+      "id": "heel-down",
+      "size": [
+        18,
+        12
+      ],
+      "variant_sizes": {
+        "b": [
+          19,
+          14
+        ]
+      }
+    }
+  ],
+  "kind": "sd-authored-pose-layer-calibration",
+  "manual_reference": "feet-coordinate-reference.png",
+  "schema_version": 1
+}

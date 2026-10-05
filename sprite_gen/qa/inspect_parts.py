@@ -15,9 +15,10 @@ from PIL import __version__ as pillow_version
 
 from sprite_gen.compose import compose_parts, parts_resolve, export_aseprite
 from sprite_gen.curate import parts_motion
+from sprite_gen.qa import parts_fit
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 
-QA_POLICY = "parts.evidence.v2"
+QA_POLICY = "parts.evidence.v4"
 REVIEW_CHECKS = ("fitting", "occlusion", "motion", "contact", "style")
 
 _STANCE = contract._record({"node": contract._id, "socket": contract._id,
@@ -33,6 +34,7 @@ def toolchain():
     # Package version alone cannot identify code edited in a source checkout.
     paths = ("spec/parts_contract.py", "spec/parts_assets.py", "compose/parts_resolve.py",
              "compose/parts_runtime.py", "compose/compose_parts.py", "compose/compose_layers.py", "qa/inspect_parts.py",
+             "qa/parts_fit.py", "qa/parts_fitting.py", "qa/parts_stability.py", "spec/parts_workspace.py",
              "curate/parts_review.py", "compose/parts_build.py", "compose/export_aseprite.py")
     digest = hashlib.sha256()
     for name in paths:
@@ -44,8 +46,8 @@ def toolchain():
             "export_policy": EXPORT_POLICY, "parts_code_sha256": digest.hexdigest()}
 
 
-def input_references(appearance, registry):
-    result, pending = {}, [contract.reference(appearance)]
+def input_references(appearance, registry, extra=()):
+    result, pending = {}, [contract.reference(appearance), *extra]
     while pending:
         ref = pending.pop()
         if ref["id"] in result:
@@ -177,7 +179,7 @@ def collect(root, index, registry, contacts=None):
         raise contract.PartsContractError("requested states differ from active appearance; create a new selection revision")
     plan = parts_resolve.resolve(appearance, registry.values())
     loader = compose_parts.AssetLoader(root, index)
-    inputs = input_references(appearance, registry)
+    inputs = input_references(appearance, registry, [*index["fitting"], *index["stability"]])
     # Byte-check the frozen motion, annotation and captured original sources,
     # not merely the pieces that happen to be visible in this appearance.
     for ref in inputs:
@@ -198,6 +200,8 @@ def collect(root, index, registry, contacts=None):
                             declarations.extend(placement["palette_regions"].values())
                             if placement["mask"] is not None:
                                 declarations.append(placement["mask"]["image"])
+        elif doc["kind"] in {"parts-fitting", "parts-stability"}:
+            declarations = list(doc["source_assets"])
         else:
             declarations = []
         for asset in declarations:
@@ -221,6 +225,13 @@ def collect(root, index, registry, contacts=None):
             if clipped:
                 checks.append({"id": f"clip.{clip['id']}.{sample['id']}", "status": "warning", "message": f"{clipped} pixels clipped with explicit permission"})
     motion = registry[appearance["motion"]["id"]]
+    fitting, fit_checks = parts_fit.inspect(plan, loader, [registry[ref["id"]] for ref in index["fitting"]])
+    checks += fit_checks
+    payloads["fitting.json"] = workspace.json_bytes(fitting)
+    from sprite_gen.qa import parts_stability
+    stability, stability_checks = parts_stability.inspect(index, registry, loader)
+    checks += stability_checks
+    payloads["stability.json"] = workspace.json_bytes(stability)
     topology = registry[plan["topology"]["id"]]
     contact_checks = _contact_checks(contacts, motion, topology, plan["mirror"], plan["canvas"]["width"])
     checks += contact_checks
@@ -231,6 +242,8 @@ def collect(root, index, registry, contacts=None):
     qa = {"kind": "parts-qa", "schema_version": 1, "appearance": index["appearance"], "inputs": inputs,
           "plan_digest": plan["digest"], "preview_digest": preview["digest"], "render_policy": parts_resolve.RENDER_POLICY,
           "qa_policy": QA_POLICY, "toolchain": toolchain(), "checks": checks, "measurements": measurements,
+          "fitting": {key: fitting[key] for key in ("digest", "status", "checked", "failed", "declarations")},
+          "stability": {key: stability[key] for key in ("digest", "status", "checked", "failed", "declarations")},
           "asset_hashes": {name: assets.sha256(data) for name, data in sorted(loader.reader.data.items())},
           "contacts_sha256": assets.sha256(workspace.json_bytes(contacts)) if contacts is not None else None,
           "status": "error" if any(c["status"] == "error" for c in checks) else "unverified", "release_ready": False}

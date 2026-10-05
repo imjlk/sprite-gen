@@ -1,0 +1,19 @@
+{
+  "appearance_clips_baked": 0,
+  "art_approved": false,
+  "basic_combinations": 32,
+  "body_samples": 28,
+  "body_unchanged": true,
+  "browser_matches_python": true,
+  "fitting": {
+    "art_approved": false,
+    "checked": 384,
+    "failed": 0,
+    "release_ready": false,
+    "status": "passed"
+  },
+  "motion_unchanged": true,
+  "release_ready": false,
+  "sampled_scenes": 896,
+  "shared_clips": 3
+}

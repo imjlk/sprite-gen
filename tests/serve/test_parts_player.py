@@ -19,6 +19,7 @@ from sprite_gen.curate import parts_appearance
 from sprite_gen.frames import parts_import
 from sprite_gen.serve import serve_parts
 from sprite_gen.spec import parts_contract as contract
+from sprite_gen.spec import parts_workspace as workspace
 
 
 @pytest.fixture
@@ -139,6 +140,24 @@ def test_interpolation_cli_defaults_and_validation(session):
         serve_parts.PartsSession(assembly, interpolation="unknown")
 
 
+def test_player_accepts_a_catalog_with_unused_optional_slots_omitted(tmp_path):
+    from copy import deepcopy
+    assembly, selection, _ = populated_workspace(tmp_path)
+    index, registry = workspace.read_workspace(assembly)
+    catalog = deepcopy(registry[index["catalog"]["id"]])
+    catalog.pop("digest")
+    catalog["slots"] = [slot for slot in catalog["slots"] if slot["id"] == "hair"]
+    catalog["presets"] = []
+    catalog = contract.seal(catalog)
+    (assembly.parent / index["documents"][catalog["id"]]).write_bytes(workspace.json_bytes(catalog))
+    index["catalog"] = contract.reference(catalog)
+    assembly.write_bytes(workspace.json_bytes(index))
+    parts_appearance.create(assembly, selection)
+    workspace.read_workspace(assembly, complete=True)
+    player = serve_parts.PartsSession(assembly)
+    assert player.frame({"time_ms": ["300"]})["sample_id"] == "sample.1"
+
+
 def test_parallel_viewers_keep_state_and_time_isolated(session):
     player,_=session
     requests=[{"state":[state],"time_ms":[str(time)]} for _ in range(3)
@@ -175,7 +194,7 @@ def test_http_routes_return_frames_errors_and_packaged_view_without_writes(sessi
             assert response.headers["Cache-Control"]=="no-store"
             assert json.load(response)["sample_id"]=="sample.1"
         with urlopen(url+"/") as response:
-            assert b"SD Explorer" in response.read()
+            assert b"Parts Lab" in response.read()
         with urlopen(url+"/api/layers?state=walk&time_ms=300&hair=hair.b") as response:
             scene=json.load(response)
             assert scene["sample_id"]=="sample.1" and "image" not in scene
@@ -193,6 +212,49 @@ def test_http_routes_return_frames_errors_and_packaged_view_without_writes(sessi
         with pytest.raises(HTTPError) as outside:
             urlopen(url+"/../assembly.json")
         assert outside.value.code==404
+        # This segmented fixture uses slot precedence, so the browser must
+        # keep its existing server-layer fallback instead of flattening it.
+        with pytest.raises(HTTPError) as unsupported:
+            urlopen(url+"/api/library")
+        assert unsupported.value.code==400
     finally:
         server.shutdown();server.server_close();thread.join(timeout=5)
     assert tree_hashes(assembly.parent)==before
+
+
+def test_http_portable_layers_and_download_match_without_workspace_writes(tmp_path):
+    import zipfile
+    from compose.test_export_parts import flat_workspace
+    assembly = flat_workspace(tmp_path)
+    before = tree_hashes(assembly.parent)
+    player = serve_parts.PartsSession(assembly, interpolation="frame", title="Generic character")
+    server = ThreadingHTTPServer(("127.0.0.1", 0), serve_parts.handler_for(player))
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    url = f"http://127.0.0.1:{server.server_port}"
+    try:
+        with urlopen(url + "/api/library") as response:
+            bundle = json.load(response)
+        manifest = bundle["manifest"]
+        assert manifest["title"] == "Generic character"
+        assert manifest["appearance_clips_baked"] == 0
+        assert len(manifest["clips"]) == 2 and len(manifest["textures"]) == 3
+        with urlopen(url + "/standalone") as response:
+            html = response.read()
+        assert b'id="parts-data"' in html and b'data:image/png;base64,' in html
+        with urlopen(url + "/api/export") as response:
+            assert response.headers["Content-Type"] == "application/zip"
+            assert 'filename="parts-layers.zip"' in response.headers["Content-Disposition"]
+            archive = response.read()
+        with urlopen(url + "/api/export") as response:
+            assert response.read() == archive
+        with zipfile.ZipFile(BytesIO(archive)) as zipped:
+            assert json.loads(zipped.read("manifest.json")) == manifest
+            assert zipped.read("preview.html") == html
+            for ref in manifest["textures"].values():
+                from sprite_gen.spec import parts_assets
+                assert parts_assets.sha256(zipped.read(ref["file"])) == ref["sha256"]
+            assert set(zipped.namelist()) == {"manifest.json", "preview.html", *[ref["file"] for ref in manifest["textures"].values()]}
+    finally:
+        server.shutdown(); server.server_close(); thread.join(timeout=5)
+    assert tree_hashes(assembly.parent) == before

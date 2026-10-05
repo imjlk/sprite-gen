@@ -98,19 +98,22 @@ def _mapping(check, *, keys=_id):
     return validate
 
 
-def _record(fields, defaults=None):
+def _record(fields, defaults=None, optional=()):
+    """A closed object. An ``optional`` field is kept only when supplied, so adding one
+    leaves the normalized form, and the digest, of every older document unchanged."""
     defaults = defaults or {}
+    optional = frozenset(optional)
     def validate(value, path):
         if not isinstance(value, dict):
             _fail(path, "expected an object")
         unknown = set(value) - set(fields)
-        missing = set(fields) - set(value) - set(defaults)
+        missing = set(fields) - set(value) - set(defaults) - optional
         if unknown:
             _fail(path, f"unknown fields: {sorted(unknown, key=str)}")
         if missing:
             _fail(path, f"missing fields: {sorted(missing)}")
         return {key: check(value[key] if key in value else deepcopy(defaults[key]), f"{path}.{key}")
-                for key, check in fields.items()}
+                for key, check in fields.items() if key in value or key not in optional}
     return validate
 
 
@@ -135,6 +138,13 @@ def _rgb(value, path):
     result = _list(_integer)(value, path)
     if len(result) != 3 or any(v < 0 or v > 255 for v in result):
         _fail(path, "expected three RGB integers in 0..255")
+    return result
+
+
+def _rectangle(value, path):
+    result = _list(_integer)(value, path)
+    if len(result) != 4 or result[0] >= result[2] or result[1] >= result[3]:
+        _fail(path, "expected a nonempty [left, top, right, bottom] rectangle")
     return result
 
 
@@ -199,15 +209,23 @@ _placement = _record({"image": _asset, "pivot": _point, "target_socket": _id,
                       "palette_regions": _mapping(_asset), "source": _nullable(_part_source)},
                      {"visible": True, "offset": [0, 0], "mask": None, "before": [], "after": [],
                       "allow_clip": False, "palette_regions": {}, "source": None})
+# A cover rule shows a piece only while some selected binding covers its tag (a capped
+# hair under a hat) or only while none does (the full hair).
+_cover_rule = _record({"tag": _id, "show": _enum("covered", "uncovered")})
+# pose_map holds one placement per motion pose_id; import expands it into sample_map
+# for every sample of that pose, and an explicit sample_map entry wins.
 _piece = _record({"id": _id, "slot": _nullable(_id), "node": _id,
                   "mode": _enum("raster", "held"), "sample_map": _mapping(_mapping(_placement)),
                   "provides": _ids, "replaces": _ids, "join_interface": _nullable(_id),
-                  "palette_regions": _mapping(_asset)},
-                 {"provides": [], "replaces": [], "join_interface": None, "palette_regions": {}})
+                  "palette_regions": _mapping(_asset), "pose_map": _mapping(_placement),
+                  "cover_rule": _cover_rule},
+                 {"provides": [], "replaces": [], "join_interface": None, "palette_regions": {}},
+                 optional=("pose_map", "cover_rule"))
 _binding = _record({"id": _id, "rig": _ref, "motion": _ref, "view": _id,
                     "occupies": _ids, "requires": _ids, "excludes": _ids,
-                    "pieces": _records(_piece, nonempty=True), "mirror_safe": _boolean},
-                   {"requires": [], "excludes": [], "mirror_safe": False})
+                    "pieces": _records(_piece, nonempty=True), "mirror_safe": _boolean,
+                    "covers": _ids},
+                   {"requires": [], "excludes": [], "mirror_safe": False}, optional=("covers",))
 _group = _record({"id": _id, "label": _string, "parent": _nullable(_id)}, {"parent": None})
 _choice = _record({"id": _id, "group": _id, "label": _string,
                    "options": _list(_ref, unique=True), "default": _selection,
@@ -222,10 +240,34 @@ _review_evidence = _record({"appearance": _ref, "inputs": _list(_ref, nonempty=T
     "artifacts": _list(_asset, nonempty=True, unique=True), "contacts": _nullable(_asset),
     "subject": _ref, "binding_id": _nullable(_id)}, {"contacts": None, "binding_id": None})
 
+_fit_mask = _record({"image": _asset, "channel": _enum("luma", "alpha")}, {"channel": "luma"})
+_fit_rules = _record({"max_size": _point, "bounds": _rectangle,
+    "gap_region": _nullable(_rectangle), "required_cover": _list(_rectangle),
+    "keep_clear": _list(_rectangle), "max_gap_pixels": _integer,
+    "max_uncovered_pixels": _integer, "max_occluded_pixels": _integer},
+    {"gap_region": None, "required_cover": [], "keep_clear": [], "max_gap_pixels": 0,
+     "max_uncovered_pixels": 0, "max_occluded_pixels": 0})
+_fit_entry = _record({"id": _id, "part": _ref, "binding": _id, "piece": _id,
+    "clip": _id, "sample": _id, "rules": _fit_rules,
+    "required": _nullable(_fit_mask), "protected": _nullable(_fit_mask), "allowed": _nullable(_fit_mask)},
+    {"required": None, "protected": None, "allowed": None})
+
+_stable_region = _record({"id": _id, "label": _string, "part": _ref, "binding": _id,
+    "piece": _id, "socket": _id, "bounds": _rectangle,
+    "reference": _record({"clip": _id, "sample": _id}),
+    "clips": _list(_id, nonempty=True, unique=True),
+    "max_alpha_pixels": _integer, "max_rgb_pixels": _integer,
+    "rgb_threshold": _integer, "min_alpha": _integer, "skip_hidden": _boolean},
+    {"max_alpha_pixels": 0, "max_rgb_pixels": 0, "rgb_threshold": 24,
+     "min_alpha": 128, "skip_hidden": False})
+
 _COMMON = {"kind": _string, "schema_version": _positive, "id": _id}
 _SCHEMAS = {
+    # layers is the draw table (back to front) by node: the zmap. Explicit before/after
+    # constraints still win; the table orders everything they leave open.
     "parts-topology": _record({**_COMMON, "nodes": _records(_node, nonempty=True),
-                               "sockets": _records(_socket), "slots": _records(_slot)}),
+                               "sockets": _records(_socket), "slots": _records(_slot),
+                               "layers": _ids}, optional=("layers",)),
     "parts-rig": _record({**_COMMON, "topology": _ref, "view": _id, "style": _id,
                           "canvas": _record({"width": _positive, "height": _positive}),
                           "default_body_ids": _ids, "mirror_allowed": _boolean},
@@ -246,6 +288,12 @@ _SCHEMAS = {
                                  "palette": _mapping(_rgb), "body": _list(_ref, unique=True),
                                  "mirror": _boolean},
                                 {"selections": {}, "presets": [], "palette": {}, "body": [], "mirror": False}),
+    "parts-fitting": _record({**_COMMON, "rig": _ref, "motion": _ref,
+                               "entries": _records(_fit_entry, nonempty=True),
+                               "source_assets": _list(_asset, unique=True)}, {"source_assets": []}),
+    "parts-stability": _record({**_COMMON, "rig": _ref, "motion": _ref,
+                                "regions": _records(_stable_region, nonempty=True),
+                                "source_assets": _list(_asset, unique=True)}, {"source_assets": []}),
     "parts-review": _record({**_COMMON, "subject_digest": _hash,
                              "scope": _enum("part", "binding", "appearance"),
                              "status": _enum("approved", "rejected", "unverified"),
@@ -307,6 +355,7 @@ def _local(document):
             if partner is not None and (partner == node["id"] or partner not in nodes
                                         or nodes[partner]["symmetric_with"] != node["id"]):
                 _fail(f"{path}.nodes", "symmetry must name a reciprocal, distinct node")
+        _members(document.get("layers", []), nodes, f"{path}.layers")
         sockets = {s["id"]: s for s in document["sockets"]}
         for socket in sockets.values():
             _members([socket["node"]], nodes, f"{path}.sockets.node")
@@ -385,6 +434,7 @@ def _local(document):
                 _members(piece["replaces"], piece["provides"], f"{path}.{piece['id']}.provides")
                 images = {(p["image"]["file"], p["image"]["sha256"])
                           for samples in piece["sample_map"].values() for p in samples.values()}
+                images.update((p["image"]["file"], p["image"]["sha256"]) for p in piece.get("pose_map", {}).values())
                 if piece["mode"] == "held" and len(images) != 1:
                     _fail(path, "held piece must explicitly reuse exactly one image")
     elif kind == "parts-catalog":
@@ -485,6 +535,18 @@ def _check_pack(document, registry):
             if slot["nodes"]:
                 _members([piece["node"]], slot["nodes"], f"{path}.{piece['id']}.slot_node")
             _members(piece["sample_map"], clips, path)
+            poses = piece.get("pose_map", {})
+            if poses:
+                known = {s["pose_id"] for c in clips.values() for s in c["samples"]} - {None}
+                _members(poses, known, f"{path}.{piece['id']}.pose_map")
+                for pose_id, placement in poses.items():
+                    _members([placement["target_socket"]], sockets, path)
+                    if placement["mask"] is not None:
+                        _members([placement["mask"]["target_node"]], nodes, path)
+                for clip in clips.values():
+                    for sample in clip["samples"]:
+                        if sample["pose_id"] in poses and sample["id"] not in piece["sample_map"].get(clip["id"], {}):
+                            _fail(path, f"{piece['id']}: pose {sample['pose_id']} is not expanded to {clip['id']}/{sample['id']}")
             for clip_id, mapping in piece["sample_map"].items():
                 samples = {s["id"]: s for s in clips[clip_id]["samples"]}
                 _members(mapping, samples, path)
@@ -641,6 +703,72 @@ def validate_bundle(documents: Iterable[dict], *, complete=False) -> dict[str, d
                         _fail(path, f"preset option is unavailable at {slot}")
         elif kind == "parts-appearance":
             _check_appearance(doc, registry, complete)
+        elif kind == "parts-fitting":
+            rig = _get(registry, doc["rig"], "parts-rig", path)
+            motion = _get(registry, doc["motion"], "parts-motion", path)
+            if motion["rig"] != doc["rig"]:
+                _fail(path, "fitting rig/motion mismatch")
+            clips = {clip["id"]: clip for clip in motion["clips"]}
+            seen = set()
+            for entry in doc["entries"]:
+                pack = _get(registry, entry["part"], "parts-pack", path)
+                bindings = [b for b in pack["bindings"] if b["id"] == entry["binding"]
+                            and b["rig"] == doc["rig"] and b["motion"] == doc["motion"]]
+                if len(bindings) != 1:
+                    _fail(path, "fitting requires the exact active part binding")
+                pieces = {p["id"]: p for p in bindings[0]["pieces"]}
+                _members([entry["piece"]], pieces, path)
+                _members([entry["clip"]], clips, path)
+                _members([entry["sample"]], {s["id"] for s in clips[entry["clip"]]["samples"]}, path)
+                _members([entry["sample"]], pieces[entry["piece"]]["sample_map"].get(entry["clip"], {}), path)
+                key = (pack["id"], entry["piece"], entry["clip"], entry["sample"])
+                if key in seen:
+                    _fail(path, "duplicate fitting entry for the same part/piece/sample")
+                seen.add(key)
+                rules = entry["rules"]
+                if any(n <= 0 for n in rules["max_size"]) or any(rules[name] < 0 for name in
+                        ("max_gap_pixels", "max_uncovered_pixels", "max_occluded_pixels")):
+                    _fail(path, "fitting sizes must be positive and pixel tolerances nonnegative")
+                rectangles = [rules["bounds"], *rules["required_cover"], *rules["keep_clear"]]
+                if rules["gap_region"] is not None:
+                    rectangles.append(rules["gap_region"])
+                if any(not (0 <= r[0] < r[2] <= rig["canvas"]["width"] and
+                            0 <= r[1] < r[3] <= rig["canvas"]["height"]) for r in rectangles):
+                    _fail(path, "fitting region must be inside the rig canvas")
+        elif kind == "parts-stability":
+            rig = _get(registry, doc["rig"], "parts-rig", path)
+            motion = _get(registry, doc["motion"], "parts-motion", path)
+            if motion["rig"] != doc["rig"]:
+                _fail(path, "stability rig/motion mismatch")
+            clips = {c["id"]: c for c in motion["clips"]}
+            topology = _get(registry, rig["topology"], "parts-topology", path)
+            for region in doc["regions"]:
+                pack = _get(registry, region["part"], "parts-pack", path)
+                bindings = [b for b in pack["bindings"] if b["id"] == region["binding"]
+                            and b["rig"] == doc["rig"] and b["motion"] == doc["motion"]]
+                if len(bindings) != 1:
+                    _fail(path, "stability binding differs from rig/motion")
+                pieces = [p for p in bindings[0]["pieces"] if p["id"] == region["piece"]]
+                if len(pieces) != 1:
+                    _fail(path, "stability piece is missing")
+                piece = pieces[0]
+                _members(region["clips"], clips, path)
+                _members([region["socket"]], {s["id"] for s in topology["sockets"]}, path)
+                reference = region["reference"]
+                _members([reference["clip"]], region["clips"], path)
+                _members([reference["sample"]], piece["sample_map"].get(reference["clip"], {}), path)
+                x0, y0, x1, y1 = region["bounds"]
+                area = (x1-x0)*(y1-y0)
+                if (x1-x0 > rig["canvas"]["width"] or y1-y0 > rig["canvas"]["height"]
+                    or max(abs(x0), abs(x1)) > rig["canvas"]["width"]
+                    or max(abs(y0), abs(y1)) > rig["canvas"]["height"]):
+                    _fail(path, "stability region exceeds the native canvas budget")
+                if (not 1 <= region["min_alpha"] <= 255 or not 0 <= region["rgb_threshold"] <= 255
+                    or any(not 0 <= region[key] <= area for key in ("max_alpha_pixels", "max_rgb_pixels"))):
+                    _fail(path, "invalid stability threshold")
+                for clip_id in region["clips"]:
+                    if set(piece["sample_map"].get(clip_id, {})) != {s["id"] for s in clips[clip_id]["samples"]}:
+                        _fail(path, "stability piece lacks declared clip coverage")
         elif kind == "parts-review" and doc["evidence"] is not None:
             evidence = doc["evidence"]
             _get(registry, evidence["appearance"], "parts-appearance", path)

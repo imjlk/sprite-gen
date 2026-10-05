@@ -1,0 +1,188 @@
+{
+  "appearance": {
+    "digest": "e54014786bea4660a5c6cb708ae037a9c6975a3b39d9cba1679c4adc54ffd232",
+    "id": "sd.matched.layers"
+  },
+  "appearance_clips_baked": 0,
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "09a80e40684a9540a6595459e4c28f340acd83c730896041a4b59603ba5beae3",
+      "id": "sd.equipment.body"
+    }
+  ],
+  "body_source": "run PNG redraw follows sixteen previous Grok video poses; idle/walk retain existing opaque silhouettes with the common native palette",
+  "body_split": false,
+  "browser": {
+    "exact_canvas_pixel_comparison": false,
+    "file_url_execution_verified": false,
+    "idle_walk_run_checked": true,
+    "main": "http://127.0.0.1:8766/?layers=basic",
+    "paused_body_texture_preserved_with_body_only": true,
+    "standalone": "http://127.0.0.1:8766/standalone",
+    "warnings_or_errors_observed": 0
+  },
+  "files": {
+    "sd-explorer-polish-20261005.html": "3e959565ce82ef5dcd087282d54b9b80af7df1cf35145a33c2b17aaee0616b22",
+    "sd-explorer-polish-20261005.zip": "5136bfca41702812fd5b676954809d4a1b9356cd5fe702a18d47dc436439765e",
+    "sd-explorer-polish-body-palette-20261005.json": "5d14b4f63f3ad45672998b5fcdb95482a4874e0a4f5e155483b7d5fa09fcec6e",
+    "sd-explorer-polish-body-run-source-20261005.png": "918dbe86aed997363edac361498666fe6fe014140f3871b26147fc1da81177e4",
+    "sd-explorer-polish-boots-palette-20261005.json": "9879f8183c4b858f36e8ed59b1e22c9057b0a3207f48cab52e0e7a36decaf732",
+    "sd-explorer-polish-boots-source-20261005.png": "38a08ac2b9ceb92e9b982c33bba5f4cba4fe45b99020554c5385039b567d24e5",
+    "sd-explorer-polish-calibration-20261005.json": "00e2ccbdce181512100c1034b72365657c850c0a768dc18409b526363296a3c0",
+    "sd-explorer-polish-comparison-20261005.png": "dca10dc320ab4554d1321ff5e36ce89373f1b704a846ab17bbf6c802a73d519c",
+    "sd-explorer-polish-hair-a-source-20261005.png": "5dfcec2acd329bfb6e0911139fc97b5f47e6e79f50aeedd0687c931f2ca981a1",
+    "sd-explorer-polish-hair-b-source-20261005.png": "ea8e70a9d22db9229c6d525e3a1877af1fcd9f960cad919b6b70fb8b6da94ba0",
+    "sd-explorer-polish-hair-palette-20261005.json": "d1d2d0e74250b9f612b37d819dea27b3e831f4098b41417928746000e3484fa7",
+    "sd-explorer-polish-replay-20261005.json": "04c7ce2caac22421e07904438a3e411058466bf0c12d5313ba0eed55886b8583",
+    "sd-explorer-polish-runtime-20261005.json": "2cf9ffb438068a744f498ba5909f73272cb26e063cef5a51adb0214d75587993",
+    "sd-explorer-polish-stability-20261005.json": "9b554132b69c2f90f6d86edb7e10b153c6e66565d04dc467b6aabf492f6e1302",
+    "sd-explorer-polish-viewer-20261005.jpg": "cd29482a9d70bf4633bb8b1d628c2f90708e6acfbfff02a22f89c6c31068e4ba"
+  },
+  "fit_checks": {
+    "art_approved": false,
+    "checked": 384,
+    "failed": 0,
+    "release_ready": false,
+    "status": "passed"
+  },
+  "fitting": [
+    {
+      "digest": "d7b8b090b49c501081adec2e0fb48931556958cf495bdf0db119ca6fb2e5395c",
+      "id": "sd.authored.fitting"
+    }
+  ],
+  "kind": "sd-polish-provenance",
+  "manifest_digest": "d2289f40dba97378d4eb4fcab60b74e46da843caf4ac4d54686f9bf612103b33",
+  "motion": {
+    "digest": "6609318c91257e0a8806d2b72a4617d8edd1fad51f671059f5f2fbe1794baeb0",
+    "id": "sd.matched.video.motion"
+  },
+  "new_body_videos": 0,
+  "rejected_sources": [
+    {
+      "asset": "body.run.candidate-1",
+      "reason": "native body area grew about 1.6 times; poor silhouette registration"
+    },
+    {
+      "asset": "body.walk.candidate-1",
+      "reason": "changed native pose scale and grid registration"
+    },
+    {
+      "asset": "body.idle.candidate-1",
+      "reason": "changed grid registration; preserve approved SD pose direction"
+    }
+  ],
+  "release_ready": false,
+  "replay": {
+    "appearance_equal": true,
+    "catalog_equal": true,
+    "fitting_equal": true,
+    "motion_equal": true,
+    "parts_equal": true,
+    "stability_equal": true
+  },
+  "runtime_cases": 896,
+  "runtime_texture_warps": 0,
+  "schema_version": 1,
+  "selected_sources": [
+    {
+      "asset": "hair.a.png",
+      "file": "sd-explorer-polish-hair-a-source-20261005.png",
+      "prompt": "Use case: precise-object-edit\nAsset: one transparent native pixel sprite hair cap for an existing 128x128 SD character.\nImage 1 is the edit target, a hair-only layer. Image 2 is style and head proportion reference, never part of the output.\nRedraw only the short brown hair cap into clean game sprite art. Preserve its side-facing-right outline, overall proportion, scalp curve, forehead opening and position in the square transparent canvas. Keep the cropped native footprint about 44x38 pixels when imported. Keep the face/eye opening empty. Replace the noisy many tiny strands with 3 large, deliberate brown color clusters: dark outline, medium brown mass, one restrained warm highlight. Simplify the spikes to a few readable tufts. One native pixel outline, no dithering, no micro texture, no shine speckles, no gradients, no edge glow. All edges should look like deliberate square native pixel steps, not blurry illustration reduced to pixels. No skin, eyes, face, ears, head, neck, text, other objects or background. This single held PNG will be positioned over the same bald body in every shared motion frame; do not make an animation or sprite sheet. Genuinely transparent outside the cap.",
+      "provider": "builtin image_gen",
+      "references": [
+        {
+          "file": "assets/sd-explorer-polish-20261005-v1/references/hair.a.png",
+          "role": "edit target",
+          "sha256": "ca9e4974e9ae5469ddcf98c6bf1935186bf73428b708c6aa85599afd8d9ee94b"
+        },
+        {
+          "file": "assets/sd-explorer-polish-20261005-v1/references/run-body.png",
+          "role": "body proportion/style reference",
+          "sha256": "ec121faa7e600965147df79e1e8bc05ba7655d5b6805d838e8cee8f21dd6af63"
+        }
+      ],
+      "sha256": "5dfcec2acd329bfb6e0911139fc97b5f47e6e79f50aeedd0687c931f2ca981a1"
+    },
+    {
+      "asset": "hair.b.png",
+      "file": "sd-explorer-polish-hair-b-source-20261005.png",
+      "prompt": "Use case: precise-object-edit\nAsset: one transparent native pixel sprite bob hairstyle cap for an existing 128x128 SD character.\nImage 1 is the edit target, a hair-only layer. Image 2 is body proportion and native sprite density reference only.\nRedraw the brown bob cap as clean, simple game sprite art while preserving the same facing-right view, rounded bob outline, scalp curvature, open face region and position in its square canvas. Preserve its crop proportions so it fits the existing bald head after one native import calibration. Keep the full face/eye/mouth region transparent. Use 3 deliberate contiguous brown colors: warm dark outline, medium brown main mass, restrained lighter cluster along the crown. The hair volume must be smooth with a few designed pixel steps. Remove all scattered individual strand lines, glossy loops, noisy highlights, gradients, dithering and edge glow. One native pixel outline consistent with the character. No skin, face, eyes, ears, head, neck, text, other objects or background. Output one reusable held hair PNG, not an animation or sheet. Genuinely transparent outside the cap.",
+      "provider": "builtin image_gen",
+      "references": [
+        {
+          "file": "assets/sd-explorer-polish-20261005-v1/references/hair.b.png",
+          "role": "edit target",
+          "sha256": "42f1cd679a8b3843e4a83c3160e2ab6e5261bc12d2c8e03c0d4a3bf5e081e37a"
+        },
+        {
+          "file": "assets/sd-explorer-polish-20261005-v1/references/run-body.png",
+          "role": "body proportion/style reference",
+          "sha256": "ec121faa7e600965147df79e1e8bc05ba7655d5b6805d838e8cee8f21dd6af63"
+        }
+      ],
+      "sha256": "ea8e70a9d22db9229c6d525e3a1877af1fcd9f960cad919b6b70fb8b6da94ba0"
+    },
+    {
+      "asset": "footwear.b.png",
+      "file": "sd-explorer-polish-boots-source-20261005.png",
+      "prompt": "Use case: precise-object-edit\nAsset: a transparent footwear template sheet, exactly 3 columns by 2 rows, for an existing 128x128 SD pixel character.\nImage 1 is the edit target. Image 2 is the body style and pixel density reference only.\nRedraw the same six brown ankle-boot angles into compact, clean game sprite art. Preserve every cell's current orientation and approximate bounding-box proportions. Top row: flat side toe right; toe raised right; toe lowered right. Bottom row: rear foot lifted toe downward-left; rear foot rolling diagonally; heel strike toe right. Exactly one boot in each of the six cells. One shared consistent boot design, short clear ankle opening, shaped toe box, a simple dark sole, small heel block, 2 large brown upper tones and a one-native-pixel warm charcoal outline. Think 18-19 pixels long and 12-14 pixels high per boot, displayed as deliberate square blocks. Make the sole, toe and ankle opening distinguishable at that tiny size. Remove fuzzy glow, gradients, noisy texture, bulky cuffs, laces, buckles and scattered speckles. No legs, feet, characters, text, labels, grid lines, cell borders, ground shadows or extra objects. Keep generous transparent margins. Genuinely transparent background. These six drawings are reused over the existing common animation; output no video or extra poses.",
+      "provider": "builtin image_gen",
+      "references": [
+        {
+          "file": "assets/sd-explorer-contribution-demo-20261005-v1/raw-footwear-templates/footwear.b.png",
+          "role": "edit target",
+          "sha256": "cd5da7fe0abab27cce195fbf184c9dc09c76f64ba4f5c2b73ff97ec4195e46e4"
+        },
+        {
+          "file": "assets/sd-explorer-polish-20261005-v1/references/run-body.png",
+          "role": "body proportion/style reference",
+          "sha256": "ec121faa7e600965147df79e1e8bc05ba7655d5b6805d838e8cee8f21dd6af63"
+        }
+      ],
+      "sha256": "38a08ac2b9ceb92e9b982c33bba5f4cba4fe45b99020554c5385039b567d24e5"
+    },
+    {
+      "asset": "body.run.candidate-2.png",
+      "file": "sd-explorer-polish-body-run-source-20261005.png",
+      "prompt": "Use case: precise-object-edit\nPrimary request: pixel restoration of the supplied sprite sheet, not a new character design.\nInput is a 512x512 transparent sheet with exactly 4 columns and 4 rows of native 128x128 cells. Keep EXACTLY the same layout, all 16 source poses and all figure positions. Each figure is only about 85 pixels tall in its 128px cell (66% of cell height), with the top of the bald head around y=28 and feet no lower than y=113. Each bald head is about 38 pixels wide (30% of cell width), centered around x=65. Preserve that scale and those margins. DO NOT enlarge the figures, head or feet, or recenter the figures to fill cells. Preserve the individual source hand, knee, ankle and toe positions and both step phases. No pose invention or replacement.\nChange only pixel craftsmanship: consistent 1-native-pixel dark warm outline, a consistent bald head silhouette and face shape across frames, 2 clean flat skin tones, 2 clean gray vest tones and 2 clean dark-gray shorts tones. No gradients or grain. Remove red, yellow and green chroma fringes and isolated edge pixels; all final edges must be dark outline or their natural flat material color, without a glowing border. Clean tiny jagged contours while keeping each original silhouette within about one native pixel of the source. The same blank-eyed bald SD person in every cell, facing right with the source angle and small positional bob. Mouth and ear consistent. No eye art or hair because those are independent overlays.\nThe base body has ONLY a plain gray sleeveless garment, dark gray shorts and bare feet. In particular, NO backpack, straps, bag, brown block behind the shoulder, accessories or extra limbs. Correct two-arm/two-leg anatomy, with the source's legitimate hidden overlaps. Do not turn the shaded back arm or vest edge into a backpack.\nGenuinely transparent background. No text, grids, border lines, captions, shadows or extra objects. This is a source-only cleanup of one intact body per frame, keeping the existing common motion timing.",
+      "provider": "builtin image_gen",
+      "references": [
+        {
+          "file": "assets/sd-explorer-polish-20261005-v1/references/run-body.png",
+          "role": "edit target: sixteen original full-stride body poses",
+          "sha256": "ec121faa7e600965147df79e1e8bc05ba7655d5b6805d838e8cee8f21dd6af63"
+        }
+      ],
+      "sha256": "918dbe86aed997363edac361498666fe6fe014140f3871b26147fc1da81177e4"
+    }
+  ],
+  "source_checks": 28,
+  "source_measurement_scope": "40x28 aligned head ROI, reference is first pose of each clip; includes redraw and integer anchor correction, not whole-body quality approval",
+  "stability": [
+    {
+      "digest": "254080a3a459d02f23bc2b349b3f1b84184613e60aae8b3e30545509bc389784",
+      "id": "sd.source.stability"
+    }
+  ],
+  "tests": {
+    "passed": 3454,
+    "skipped": 2
+  },
+  "timing": {
+    "idle": {
+      "fps": 1,
+      "samples": 4
+    },
+    "run": {
+      "fps": 24,
+      "samples": 16,
+      "steps": 2
+    },
+    "walk": {
+      "fps": 8,
+      "samples": 8
+    }
+  }
+}

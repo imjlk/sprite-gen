@@ -12,7 +12,7 @@ from sprite_gen.background import tile
 from sprite_gen.curate import anchor
 from sprite_gen.compose import compose_atlas, compose_cycle, compose_gif, compose_layers, export_aseprite, export_pngs
 from sprite_gen.qa import correction_loop, inspect, preview, score, motion
-from sprite_gen.qa import handed as handed_check
+from sprite_gen.qa import handed as handed_check, still_audit
 from sprite_gen.frames import cutout, extract, slice_sheet, unpack_atlas
 from sprite_gen.gen import gen_set, prepare, video
 from sprite_gen.video import batch as video_batch
@@ -32,10 +32,10 @@ from sprite_gen.effects import recolor, shadow
 from sprite_gen.scene import render, inspect_scene
 from sprite_gen.serve import serve_compose, serve_curation, serve_parts
 from sprite_gen.spec import migrate_breathe, migrate_request, parts_workspace
-from sprite_gen.curate import parts_motion, parts_appearance, parts_review
-from sprite_gen.qa import inspect_parts
-from sprite_gen.compose import compose_parts, parts_build
-from sprite_gen.frames import parts_import
+from sprite_gen.curate import parts_motion, parts_appearance, parts_poses, parts_review, parts_sockets
+from sprite_gen.qa import inspect_parts, parts_fit, parts_stability
+from sprite_gen.compose import compose_parts, parts_build, export_parts
+from sprite_gen.frames import parts_import, parts_loop_native, parts_pose_sheet, parts_rebind, parts_segments
 from sprite_gen.gen.prepare import BODY_PLAN_HELP, STYLE_DEFAULT, _outline_config
 from sprite_gen.spec.subject import SUBJECTS
 from sprite_gen.workflow import guide, preferences
@@ -389,6 +389,11 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         handed_check.add_arguments,
         handed_check.run,
     ),
+    "still-audit": (
+        "Judge a base still as pixel art (grid, cleanliness, ramps, outline) with a remedy per finding; --fix snaps it.",
+        still_audit.add_arguments,
+        still_audit.run,
+    ),
     "video-cycle-align": (
         "One cycle length for every direction of a set: resample each loop to the median length (RIFE between source frames only), start on a foot strike.",
         video_align.add_arguments,
@@ -425,10 +430,25 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         parts_workspace.add_validate_arguments,
         parts_workspace.run_validate,
     ),
+    "parts-loop-native": (
+        "Project finished video loops onto the rig canvas as native pixel frames and write a parts-motion-import spec.",
+        parts_loop_native.add_arguments,
+        parts_loop_native.run,
+    ),
     "parts-motion-import": (
         "Snapshot finalized/external motion into an immutable draft; preserve exact timing and canvas.",
         parts_motion.add_import_arguments,
         parts_motion.run_import,
+    ),
+    "parts-socket-track": (
+        "Propose annotation socket positions by matching one authored reference region; unverified unless accepted.",
+        parts_sockets.add_arguments,
+        parts_sockets.run,
+    ),
+    "parts-pose-assign": (
+        "Give each distinct drawing in a motion annotation draft one pose_id, reusing names the active motion gave it.",
+        parts_poses.add_assign_arguments,
+        parts_poses.run_assign,
     ),
     "parts-motion-freeze": (
         "Freeze final raster/socket annotations and invalidate consumers of changed motion revisions.",
@@ -439,6 +459,51 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         "Import body or customization parts with exact crop/pivot geometry and frozen-motion coverage.",
         parts_import.add_arguments,
         parts_import.run,
+    ),
+    "parts-pose-classes": (
+        "Group motion samples whose drawing around one socket looks alike, so a part variant is drawn once per group.",
+        parts_pose_sheet.add_class_arguments,
+        parts_pose_sheet.run_classes,
+    ),
+    "parts-pose-sheet": (
+        "Lay frozen motion body frames on one flat-key guide sheet for drawing a part per sample.",
+        parts_pose_sheet.add_sheet_arguments,
+        parts_pose_sheet.run_sheet,
+    ),
+    "parts-pose-slice": (
+        "Slice a drawn pose sheet into native full-canvas part rasters and a parts-import spec; no import or approval.",
+        parts_pose_sheet.add_slice_arguments,
+        parts_pose_sheet.run_slice,
+    ),
+    "parts-body-from-motion": (
+        "Write a flat body parts-import spec whose drawing per sample is the frozen motion raster itself.",
+        parts_rebind.add_body_arguments,
+        parts_rebind.run_body,
+    ),
+    "parts-motion-compose": (
+        "Build clips from existing poses (order, duration, whole-pixel offset), then import and freeze the new motion.",
+        parts_poses.add_compose_arguments,
+        parts_poses.run_compose,
+    ),
+    "parts-body-segments": (
+        "Cut the motion's body into node pieces by painted label colors and write a segmented body parts-import spec.",
+        parts_segments.add_segment_arguments,
+        parts_segments.run_segment,
+    ),
+    "parts-piece-split": (
+        "Split a drawn garment piece into pieces by the body segment under each pixel (torso, front and back sleeve).",
+        parts_segments.add_split_arguments,
+        parts_segments.run_split,
+    ),
+    "parts-coverage": (
+        "Report the part x clip x pose drawing matrix: what is drawn, reused by pose, hidden or missing.",
+        parts_poses.add_coverage_arguments,
+        parts_poses.run_coverage,
+    ),
+    "parts-rebind": (
+        "Carry a held or pose-drawn part over to the active frozen motion as a parts-import spec; refuses per-sample rasters.",
+        parts_rebind.add_arguments,
+        parts_rebind.run,
     ),
     "parts-appearance": (
         "Pin customization selections to the active frozen motion and body; no release approval.",
@@ -455,6 +520,21 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         inspect_parts.add_arguments,
         inspect_parts.run,
     ),
+    "parts-fit-import": (
+        "Pin authored per-part/sample fit interfaces; measured errors block review and release.",
+        parts_fit.add_arguments,
+        parts_fit.run,
+    ),
+    "parts-stability-import": (
+        "Pin authored stable source regions; measure contour and color deltas without retargeting or art approval.",
+        parts_stability.add_arguments,
+        parts_stability.run,
+    ),
+    "parts-repair-plan": (
+        "Propose bounded offsets or raster gap repairs; preserve size, body and motion, never activate or auto-approve.",
+        parts_fit.add_repair_arguments,
+        parts_fit.run_repair,
+    ),
     "parts-review": (
         "Snapshot exact render and QA evidence for appearance, part or binding review.",
         parts_review.add_review_arguments,
@@ -469,6 +549,11 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         "Bake requested states into a deterministic atlas snapshot; release requires current appearance approval.",
         parts_build.add_arguments,
         parts_build.run,
+    ),
+    "parts-export": (
+        "Export independent PNG layers and one shared clock with a portable preview; no appearance clip baking.",
+        export_parts.add_arguments,
+        export_parts.run,
     ),
     "parts-play": (
         "Play the current shared-motion sample and swap part layers in a read-only local webview.",

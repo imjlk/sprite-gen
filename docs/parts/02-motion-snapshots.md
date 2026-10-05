@@ -71,6 +71,26 @@ native 입력을 읽는 동안 기존 `read_guard`를 사용하고, 그 경우�
 
 bitmap이 반복돼도 `sample.0`, `sample.1` 같은 timeline 위치는 합치지 않는다. PNG만 content hash로 dedup한다. curated 재정렬과 clone은 finalized atlas의 재생 위치대로 가져오며, `source_frame_id`는 최종 source의 state/ordinal/rect 또는 외부 frame ID를 가리킨다. raw pool의 clone ID와 이전 landmark geometry를 추측해 복원하지 않는다.
 
+## 영상 루프에서 기준 모션 만들기
+
+파츠의 기준 모션은 `video-set`(또는 `video-loop`)이 자른 최종 루프를 그대로 쓰는 것이 기본 경로다. 손으로 고른 프레임 구간은 걸음 주기·드로잉 hold·흔들림 검사를 거치지 않는다. `parts-loop-native`는 루프의 `cycle/` 프레임을 rig canvas로 옮긴다.
+
+```bash
+.venv/bin/sprite-gen video-set --base side=base.png --facing right --states walk,run \
+  --out-dir video --character "The bald chibi mannequin" --anchor motion-auto --key green
+.venv/bin/sprite-gen parts-loop-native --assembly assets/my-parts/assembly.json --out native \
+  --loop idle=idle-frames@1 --loop walk=video/side-walk/loop --loop run=video/side-run/loop \
+  --body-height 83 --baseline 112 --palette body-palette.json --motion-id explorer.motion.v1
+.venv/bin/sprite-gen parts-motion-import --assembly assets/my-parts/assembly.json \
+  --spec native/motion-import.json --source-root native --strict-motion
+```
+
+기본 `--resample lattice`는 영상이 그린 픽셀 격자 자체를 읽는다. 업스케일한 픽셀아트 still로 찍은 클립은 still의 격자를 유지한다. 그래서 `가장 큰 포즈 높이 / --body-height` 근처(±3%)에서 셀 안 색 분산이 가장 작은 간격과 위상을 찾고, 셀 하나를 native 픽셀 하나로 읽는다(안쪽 픽셀의 중앙값 색, 다수결 alpha). 평균 축소(`smooth`)나 블록 대표색(`kcentroid`)은 격자가 어긋나면 1px 외곽선을 두 픽셀로 나눠 지운다. SD 실험에서 간격은 10.1, native 키는 85–86px였다. 이미 native 크기인 입력(간격 1.5 미만)은 그대로 쓴다. `--silhouette-outline darkest`는 바깥 윤곽(투명과 닿은 픽셀)을 팔레트의 가장 어두운 색으로 칠하고, 그 전에 한 픽셀짜리 돌기를 지워 끊긴 외곽선을 닫는다.
+
+`smooth`/`kcentroid`에서는 루프마다 가장 큰 포즈를 `--body-height`로, 가장 낮은 발을 `--baseline` 행으로 맞추는 **한 번의** 배율·이동을 적용한다. `lattice`에서는 격자 그대로 두고 이동만 적용한다. 프레임별로 다시 맞추지 않으므로 걸음의 상하 움직임과 흔들림은 그대로 남는다. Alpha는 이진화하고, `--palette`를 주면 가장 가까운 색으로 맞춘다. 배경색이 번진 팔다리 색도 여기서 정리된다. `loop.report.json`의 `cycle_drawings.hold`가 있으면(예: 한 그림을 두 프레임씩 보여 준 클립) 그 hold로 묶어 한 sample의 길이를 늘린다. 없으면 `--hold-tolerance`(기본 0, 완전히 같은 프레임만) 안의 연속 프레임만 묶는다. 결과의 `projection`·`holds`로 무엇을 했는지 확인한다.
+
+`parts-motion-import`의 결과에는 루프 clip마다 `motion_quality`가 붙는다. `video-loop`과 같은 jolt index와 머리 좌우 이동 기준([loop repair](../loop-repair.md) 3절)을 최종 sample에 적용한 값이다. native 크기에서는 1px이 머리가 움직일 수 있는 최소 단위다. 그래서 머리 좌우 이동 기준은 참조값(0.75%)과 1.5px 중 큰 값으로 한다. walk/run이 기준을 넘으면 `warnings`에 남고, `--strict-motion`이면 import를 거절한다. 다른 state는 측정만 기록한다. 이 값은 흔들림 신호일 뿐 동작의 시각 승인이 아니다.
+
 ## Annotation과 freeze
 
 초안에는 최종 PNG hash와 topology의 socket 이름을 넣지만 좌표는 `[0,0]`, `visible: false`, `confidence: unverified`다. 최종 PNG를 보고 정확한 rig-canvas 좌표와 visibility를 입력해야 한다. 제공한 socket 중 하나라도 unverified이면 freeze를 거절한다. topology의 required socket은 각 sample에 반드시 있어야 한다. 후속 파츠가 쓸 optional socket도 이 단계에서 annotation하는 것이 좋다.
@@ -87,7 +107,7 @@ bitmap이 반복돼도 `sample.0`, `sample.1` 같은 timeline 위치는 합치�
       "root": {"position": [64,120], "visible": true, "confidence": "verified"},
       "face": {"position": [74,40], "visible": true, "confidence": "verified"}
     },
-    "pose_id": null
+    "pose_id": "walk.01"
   }}}
 }
 ```
@@ -104,6 +124,78 @@ bitmap이 반복돼도 `sample.0`, `sample.1` 같은 timeline 위치는 합치�
 candidate digest와 각 sample의 raster hash가 일치해야 한다. 이미지가 6px 이동했는데 예전 hash의 좌표를 제출하면 오류다. freeze는 저장한 source 바이트로 같은 adapter를 다시 실행해 순서·시간·normalized pixel을 재구성하고 candidate와 비교한다. JSON/image hash만 다시 계산해 원본과 다른 geometry를 같은 provenance로 표시하는 것도 차단한다. 현재 PNG encoder가 다른 byte를 만들더라도 decoded pixels가 같으면 원래 PNG와 annotation hash를 보존한다.
 
 성공하면 `motions/<id>/<digest>/motion.json`, images, sources, `annotations.json`을 staging에서 한 폴더로 게시하고 assembly의 active motion을 갱신한다. source와 motion은 독립적이다. 결과는 `status: frozen`, `release_ready: false`다.
+
+## Socket 좌표 제안
+
+모든 sample 좌표를 손으로 입력하는 대신 `parts-socket-track`으로 초안을 채울 수 있다. 한 sample에서 socket 위치와 그 상대 영역(`bounds`)을 한 번 저작하면, 같은 영역 그림을 다른 sample에서 정수 이동으로 찾는다. 기준 그림이 고정이므로 위치가 누적해서 밀리지 않는다. 비용은 alpha 불일치 × `alpha_weight` + RGB 차이 픽셀 수다. 각 sample은 직전 결과에서 `radius` 안을 탐색한다.
+
+```json
+{
+  "kind": "parts-socket-track",
+  "schema_version": 1,
+  "tracks": [
+    {"socket": "head", "clips": ["walk.right"], "bounds": [-20, 0, 20, 28], "radius": 3, "max_cost": 200,
+     "reference": {"clip": "walk.right", "sample": "sample.0", "position": [64, 30]}},
+    {"socket": "head", "clips": ["run.right"], "bounds": [-20, 0, 20, 28], "radius": 3, "max_cost": 200,
+     "reference": {"clip": "run.right", "sample": "sample.0", "position": [65, 28]}},
+    {"socket": "root", "mode": "constant",
+     "reference": {"clip": "walk.right", "sample": "sample.0", "position": [64, 120]}}
+  ]
+}
+```
+
+```bash
+.venv/bin/sprite-gen parts-socket-track \
+  --assembly assets/my-parts/assembly.json \
+  --candidate candidates/explorer.motion.v1/<digest>/candidate.json \
+  --annotations assets/my-parts/annotations/<digest>.draft.json \
+  --spec socket-track.json --out assets/my-parts/annotations/tracked.json \
+  --preview socket-track.png
+```
+
+clip마다 그림이 다르면 같은 socket을 clip별 기준으로 나눠 선언한다. 한 clip에서 같은 socket을 두 번 추적하는 것은 거절한다. `mode: constant`는 지정 좌표를 그대로 기록한다. 결과의 각 sample은 `cost`, 2px 이상 떨어진 차선과의 차이인 `margin`, 탐색 경계에서 멈췄는지 나타내는 `at_edge`를 가진다. `max_cost`를 넘거나 경계에 닿은 sample은 `needs-review`다.
+
+기본 결과는 좌표만 채우고 `unverified`로 남기므로 그대로는 freeze할 수 없다. `--preview` contact sheet에서 영역과 socket 위치를 확인한 뒤 `--accept`로 다시 실행하면 `needs-review`가 아닌 제안만 `verified`가 된다. 나머지와 추적하지 않은 socket은 직접 입력한다. 이 명령은 raster를 수정하지 않고 draft 파일도 덮어쓰지 않으며(`--out`에 새로 기록), 해부학적 위치를 추론하지 않는다. 가장 위 불투명 픽셀처럼 머리카락 한 가닥에 흔들리는 기준 대신, 저작한 영역 전체의 그림을 맞춘다.
+
+## 포즈 ID
+
+포즈는 승인된 몸 그림 하나다. 같은 raster를 보여 주는 sample은 같은 포즈이고, 파츠는 sample이 아니라 포즈마다 그린다([pose_map](03-part-import.md#포즈마다-한-번-그리기)). freeze 전에 annotation 초안의 `pose_id`를 채운다.
+
+```bash
+.venv/bin/sprite-gen parts-pose-assign \
+  --assembly assets/my-parts/assembly.json \
+  --annotations assets/my-parts/annotations/<digest>.draft.json \
+  --pose run.right/sample.4=run.passing
+```
+
+같은 raster hash의 sample은 하나의 ID를 받는다. 우선순위는 `--pose CLIP/SAMPLE=ID`로 준 이름, 초안에 이미 있는 `pose_id`, active motion이 같은 raster에 준 이름, 마지막으로 `<clip 앞부분>.<번호>`(예: `run.03`) 순서다. 한 raster에 두 이름을 주면 거절한다. 결과는 포즈 수, 생성·재사용한 이름 수와 여러 sample이 공유하는 포즈 목록이다. 모션 revision을 다시 import해도 같은 그림은 같은 포즈 ID를 유지하므로, 포즈별 파츠가 그대로 대응한다.
+
+## 기존 포즈로 클립 만들기
+
+재생 속도 변경, 순서 재조합, 정지 프레임, 착지 때 몸 전체를 몇 px 내리는 변주는 새 포즈가 아니다. `parts-motion-compose`는 active frozen motion의 포즈만으로 새 클립을 만들고, 남길 기존 클립과 함께 새 motion revision으로 import·freeze한다.
+
+```json
+{
+  "kind": "parts-motion-compose",
+  "schema_version": 1,
+  "id": "explorer.motion.v2",
+  "keep": ["idle.right", "walk.right", "run.right"],
+  "clips": [{"id": "hop.right", "state": "hop", "loop": false, "timebase": 120000, "samples": [
+    {"pose": "run.02", "duration_ticks": 12000},
+    {"pose": "run.05", "duration_ticks": 6000, "offset": [0, -3]},
+    {"pose": "run.02", "duration_ticks": 12000}
+  ]}]
+}
+```
+
+```bash
+.venv/bin/sprite-gen parts-motion-compose \
+  --assembly assets/my-parts/assembly.json --spec compose.json --out assets/compose-v2
+```
+
+`keep`을 생략하면 기존 클립을 모두 남긴다. 남긴 클립은 sample 순서와 tick을 그대로 복사한다. 새 sample은 포즈의 raster와 모든 socket을 `offset`만큼 정수 이동하고, `pose_id`를 유지한다. 이동으로 불투명 픽셀이나 보이는 socket이 canvas 밖으로 나가면 거절한다. 클립 ID와 state는 각각 하나여야 한다. 중간 산출물(프레임, `motion-import.json`, 채운 `annotations.json`)은 `--out`에 남고, `--no-freeze`는 candidate까지만 만든다.
+
+새 motion을 freeze하면 이전 motion에 묶인 파츠는 [일반 revision 규칙](#revision과-실패-복구)대로 분리된다. 포즈별로 그린 파츠는 `parts-rebind`가 새 클립의 같은 포즈에 그대로 옮기므로 그림을 새로 만들지 않는다. 반전(mirror)은 sample 단위가 아니라 appearance 단위다.
 
 ## Revision과 실패 복구
 

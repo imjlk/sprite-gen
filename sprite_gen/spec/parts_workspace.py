@@ -77,7 +77,9 @@ _INDEX = contract._record({
     "motion": contract._nullable(contract._ref), "appearance": contract._nullable(contract._ref),
     "states": contract._list(contract._id, nonempty=True, unique=True),
     "body": contract._list(contract._ref, unique=True),
-}, {"motion": None, "appearance": None, "body": []})
+    "fitting": contract._list(contract._ref, unique=True),
+    "stability": contract._list(contract._ref, unique=True),
+}, {"motion": None, "appearance": None, "body": [], "fitting": [], "stability": []})
 
 
 def read_workspace(assembly: Path, *, complete=False):
@@ -101,6 +103,14 @@ def read_workspace(assembly: Path, *, complete=False):
         raise contract.PartsContractError("assembly: catalog/rig mismatch")
     if index["motion"] is not None and registry[index["motion"]["id"]]["rig"] != index["rig"]:
         raise contract.PartsContractError("assembly: motion/rig mismatch")
+    for ref in index["fitting"]:
+        fitting = contract._get(registry, ref, "parts-fitting", "assembly.fitting")
+        if fitting["rig"] != index["rig"] or fitting["motion"] != index["motion"]:
+            raise contract.PartsContractError("assembly: fitting/rig/motion mismatch")
+    for ref in index["stability"]:
+        stability = contract._get(registry, ref, "parts-stability", "assembly.stability")
+        if stability["rig"] != index["rig"] or stability["motion"] != index["motion"]:
+            raise contract.PartsContractError("assembly: stability/rig/motion mismatch")
     for ref in index["body"]:
         pack = contract._get(registry, ref, "parts-pack", "assembly.body")
         if pack["role"] != "body" or not any(b["rig"] == index["rig"] and b["motion"] == index["motion"] for b in pack["bindings"]):

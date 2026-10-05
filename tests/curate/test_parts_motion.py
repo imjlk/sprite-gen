@@ -302,3 +302,41 @@ def test_unavailable_publish_lock_is_a_structured_error(tmp_path, monkeypatch, c
     monkeypatch.setattr(parts_motion, "read_guard", unavailable)
     assert parts_motion.run_import(assembly=assembly, spec=spec, source_root=source) == 2
     assert "no lock backend" in json.loads(capsys.readouterr().out)["error"]
+
+
+def _swing_source(root, offsets):
+    from PIL import ImageDraw
+    root.mkdir(parents=True)
+    entries = []
+    for n, dx in enumerate(offsets):
+        image = Image.new("RGBA", (128, 128))
+        draw = ImageDraw.Draw(image)
+        draw.ellipse((48, 20, 80, 52), fill=(230, 180, 140, 255))
+        draw.rectangle((54, 52, 74, 100), fill=(60, 90, 80, 255))
+        draw.rectangle((60 + dx, 100, 68 + dx, 120), fill=(60, 90, 80, 255))
+        image.save(root / f"pose-{n}.png")
+        entries.append(f'{{"file":"pose-{n}.png","duration":0.125}}')
+    (root / "motion.json").write_text('{"kind":"sprite-gen-asset","version":1,"frames":[' + ",".join(entries) + "]}")
+
+
+@pytest.mark.parametrize("offsets,status", [
+    ([0, 3, 6, 9, 12, 9, 6, 3], "passed"),
+    ([0, 1, 9, 10, 0, 1, 9, 10], "warning"),
+])
+def test_import_reports_loop_jolt_and_strict_refuses_it(tmp_path, offsets, status):
+    root, source = tmp_path / "library", tmp_path / "source"
+    assembly = workspace_at(root)
+    _swing_source(source, offsets)
+    spec = import_spec(tmp_path / "import.json", assembly, [source_request(source, loop=True)])
+    result = parts_motion.import_motion(assembly, spec, source)
+    quality = result["motion_quality"][0]
+    assert quality["status"] == status and quality["jolt"]["index"] >= 0
+    assert bool(result["warnings"]) == (status == "warning")
+    if status == "warning":
+        with pytest.raises(contract.PartsContractError, match="motion quality"):
+            parts_motion.import_motion(assembly, spec, source, strict_motion=True)
+
+
+def test_short_or_repeated_clips_are_not_measured(tmp_path):
+    root, source, assembly, spec, result = setup_motion(tmp_path)
+    assert result["motion_quality"][0]["status"] == "unverified" and not result["warnings"]

@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass
 from typing import Callable
+from itertools import product
 
 from PIL import Image
 
@@ -234,3 +235,67 @@ def retry(candidate: FitCandidate, evaluate: Callable, correct: Callable, *, max
         result["rework"] = {"part_id": original_id, "failed_checks": failed,
                             "body_and_motion": "preserve", "activation": "blocked"}
     return accepted, result
+
+
+def translation_repair(candidate, evaluate, *, radius=2):
+    """Try bounded binding offsets; preserve the image bytes and authored rules.
+
+    An unresolved fit returns an explicit rework request. Search never relaxes
+    coverage/occlusion tolerances, resizes artwork or approves an appearance.
+    """
+    if type(radius) is not int or not 0 <= radius <= 3:
+        raise contract.PartsContractError("translation repair radius must be between 0 and 3 pixels")
+    reports = {}
+
+    def measured(value):
+        if value.offset not in reports:
+            reports[value.offset] = evaluate(value)
+        return reports[value.offset]
+
+    def score(report):
+        failed = [c for c in report["checks"] if c["status"] == "error"]
+        magnitude = sum(c["value"] for c in failed if type(c.get("value")) is int)
+        return len(failed), magnitude
+
+    def correct(current, report, attempt):
+        choices = []
+        for dx, dy in product(range(-radius, radius + 1), repeat=2):
+            value = FitCandidate(current.part_id, current.image, (candidate.offset[0] + dx, candidate.offset[1] + dy),
+                                 "adjust-binding-offset")
+            result = measured(value)
+            choices.append(((*score(result), abs(dx) + abs(dy), dx, dy), value))
+        best = min(choices, key=lambda row: row[0])[1]
+        return best if score(measured(best)) < score(report) else None
+
+    return retry(candidate, measured, correct)
+
+
+def patch_declared_pixels(candidate, points, *, radius=3, max_pixels=12):
+    """Fill a few explicitly supplied local coverage pixels from nearby part ink.
+
+    This authoring operation cannot infer regions, expand an image, alter a body
+    or relax fit rules. The caller must re-render and recheck the candidate.
+    """
+    if type(radius) is not int or not 1 <= radius <= 3 or type(max_pixels) is not int or not 1 <= max_pixels <= 12:
+        raise contract.PartsContractError("pixel repair must be bounded to 12 pixels and a 3-pixel neighborhood")
+    points = tuple(tuple(point) for point in points)
+    if not points or len(set(points)) != len(points) or len(points) > max_pixels:
+        return None
+    image = assets.image_bytes(candidate.image)
+    pixels = np.array(image, copy=True)
+    original = pixels.copy()
+    for point in points:
+        if len(point) != 2 or any(type(v) is not int for v in point):
+            raise contract.PartsContractError("declared repair pixels must be integer local points")
+        x, y = point
+        if not 0 <= x < image.width or not 0 <= y < image.height or original[y, x, 3] >= 128:
+            return None
+        nearby = [(dx*dx+dy*dy, abs(dx)+abs(dy), dy, dx) for dx, dy in product(range(-radius, radius+1), repeat=2)
+                  if 0 <= x+dx < image.width and 0 <= y+dy < image.height and original[y+dy, x+dx, 3] >= 128]
+        if not nearby:
+            return None
+        _, _, dy, dx = min(nearby)
+        pixels[y, x, :3] = original[y+dy, x+dx, :3]
+        pixels[y, x, 3] = 255
+    return FitCandidate(candidate.part_id, assets.png_bytes(Image.fromarray(pixels)), candidate.offset,
+                        "fill-authored-interface-gap")
