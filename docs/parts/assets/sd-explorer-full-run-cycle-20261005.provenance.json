@@ -1,0 +1,156 @@
+{
+  "date": "2026-10-05",
+  "workspace": "assets/sd-explorer-run-cycle-20261005-v1",
+  "archive": {
+    "file": "sd-explorer-full-run-cycle-20261005.tar.gz",
+    "sha256": "5ff9ba673da2229d71a82b9a0daf4b986c3a2383600ffcf8df8cb4d6bb251fe3",
+    "bytes": 8184712,
+    "files": 1605,
+    "every_member_sha256_verified": true
+  },
+  "runtime_motion": {
+    "digest": "cd6df9e05443f973fc0a9a402f4feb924423e2ff97ae2ae273a16fd9e5b370d4",
+    "id": "sd.matched.video.motion"
+  },
+  "body_origin": "Existing shared Grok video body; no new part or appearance video generation",
+  "part_origin": "Built-in imagegen PNG artwork; native-pose/reference guides and one-time import preparation",
+  "validation": {
+    "appearance_clips_baked": 0,
+    "art_approved": false,
+    "base_appearances": 32,
+    "clipped_pixels": 0,
+    "curated_body_samples": 28,
+    "release_ready": false,
+    "runtime_texture_warps": 0,
+    "scene_evaluations": 896,
+    "shared_states": 3,
+    "whole_body_pixels_preserved": true
+  },
+  "fitting": {
+    "art_approved": false,
+    "calibration": "SD source-specific palette/y-region masks and authored bounds; no general anatomy or retargeting model",
+    "failed_checks": 16,
+    "kind": "parts-all-slot-fit-evidence",
+    "motion": {
+      "digest": "cd6df9e05443f973fc0a9a402f4feb924423e2ff97ae2ae273a16fd9e5b370d4",
+      "id": "sd.matched.video.motion"
+    },
+    "part_piece_pose_checks": 384,
+    "release_ready": false,
+    "rework_parts": [
+      "sd.wardrobe.footwear.a",
+      "sd.wardrobe.footwear.b",
+      "sd.wardrobe.lower.a",
+      "sd.wardrobe.lower.b",
+      "sd.wardrobe.upper.a",
+      "sd.wardrobe.upper.b"
+    ],
+    "schema_version": 1,
+    "slots_checked": [
+      "hair",
+      "expression",
+      "upper",
+      "lower",
+      "footwear",
+      "headwear",
+      "gloves",
+      "back_accessory"
+    ]
+  },
+  "motion_provenance": {
+    "appearance_clips_baked": 0,
+    "art_approved": false,
+    "body_split": false,
+    "curated_cadence": {
+      "idle": 1,
+      "run": 24,
+      "walk": 8
+    },
+    "cycle": {
+      "run": {
+        "half_cycle_rejected": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "phase_period": 16,
+        "source_fps": 24,
+        "source_samples": [
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75
+        ],
+        "steps": 2
+      }
+    },
+    "motion": {
+      "digest": "cd6df9e05443f973fc0a9a402f4feb924423e2ff97ae2ae273a16fd9e5b370d4",
+      "id": "sd.matched.video.motion"
+    },
+    "native_source_cadence": 24,
+    "release_ready": false,
+    "runtime_texture_warps": 0,
+    "source_geometry_and_body_pixels_preserved": true,
+    "source_motion": {
+      "digest": "7d915eea4b2eb110a70f2696e1a891b56ab19fcad8dcaf40efa1bfbc839dc62c",
+      "id": "sd.equipment.video.motion"
+    },
+    "source_samples": {
+      "idle": [
+        "sample.0",
+        "sample.24",
+        "sample.48",
+        "sample.72"
+      ],
+      "run": [
+        "sample.60",
+        "sample.61",
+        "sample.62",
+        "sample.63",
+        "sample.64",
+        "sample.65",
+        "sample.66",
+        "sample.67",
+        "sample.68",
+        "sample.69",
+        "sample.70",
+        "sample.71",
+        "sample.72",
+        "sample.73",
+        "sample.74",
+        "sample.75"
+      ],
+      "walk": [
+        "sample.12",
+        "sample.15",
+        "sample.18",
+        "sample.21",
+        "sample.24",
+        "sample.27",
+        "sample.30",
+        "sample.33"
+      ]
+    }
+  },
+  "recipe_sha256": "499ef2c409c8521e752c073ecdd37daa4109ca4992f224e51b98e73410cbfe64",
+  "art_approved": false,
+  "release_ready": false
+}

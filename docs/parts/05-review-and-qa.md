@@ -103,10 +103,27 @@ unmeasured when no forbidden-gap region has been authored, such as intentional
 negative space around backpack straps. Passing other measurements does not
 claim those undeclared interfaces are verified.
 
-The [walk/run repair](sd-explorer-motion-repair-20261005.md) runs the shared
+The [native-parts repair](sd-explorer-native-parts-20261005.md) runs the shared
 checker across every visible installed piece/pose in eight slots. Its evidence
-retains tank-top and footwear coverage failures rather than promoting them to approval.
+retains upper/lower clothing coverage failures rather than promoting them to approval.
 Frame-synchronized rendering is checked separately from geometric fitting.
+
+`sprite_gen.frames.parts_palette.normalize` optionally uses an authored shared
+palette and the existing exact recolor bake. Source image bytes remain saved;
+size and alpha must match after baking. Its cache is keyed by both source and
+palette policy so revising the policy cannot reuse stale pixels. RGB changes
+require new motion/pack digests, even when geometry and timing are unchanged.
+The SD recipe uses the same 128px canvas and fixed 48-colour palette for the
+body and part artwork. This reduces colour noise; it does not repair a source
+video's changing outlines or prove a part's anatomy/style.
+
+`sprite_gen.qa.parts_cycles.verify` compares a recipe's selected samples and
+cadence with its explicitly authored complete source cycle. Missing, repeated
+or reordered samples and an undeclared slowdown fail before import. The author
+must inspect both step phases and declare the reference; this checker does not
+infer anatomy, find a video's period or grant art approval. The SD run reference
+contains source samples 60–75 at 24fps. The earlier eight-frame half stride was
+rejected despite passing layer/geometry checks.
 
 `retry(initial, evaluate, correct, max_retries=3)` evaluates the initial asset
 and each corrected revision. The correction adapter receives the failed checks

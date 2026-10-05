@@ -74,12 +74,25 @@ tests. This is geometric verification, not full art acceptance.
 
 ## Follow-up: pose-synchronized walk/run repair
 
-The [current repair](sd-explorer-motion-repair-20261005.md) replaces nearest-pose
-clothing with direct source-pose drawings and holds attachments with the body
-frame (`parts-play --interpolation frame`). The 20 selected body PNGs retain
-their exact original bytes; motion sampling/cadence and binding digests change.
-The three shared states serve 32 appearances without Cartesian clip generation.
-Eight-slot fit evidence has 274 visible piece/pose checks and retains five
-1–2-pixel tank-top failures plus three 1–4-pixel footwear coverage failures. Browser playing and all-empty/mixed swaps
-preserve the selected body and clock. The current regression is **227 passed in
-31.12 seconds**; art and release remain unapproved.
+The [previous repair](sd-explorer-motion-repair-20261005.md) removed nearest-pose
+clothing and part-only interpolation, but its eight-frame run was a half stride
+and the user rejected it. Technical checks had not detected the missing swing.
+The [current full-cycle correction](sd-explorer-full-run-cycle-20261005.md) uses
+source run samples 60–75 at native 24fps and both arm/leg phases, with directly
+matched garment/footwear drawings. The 28 selected body PNGs retain their exact
+bytes; new motion and binding digests reflect the changed run timeline.
+Three shared states serve all appearances. The previous idle/walk RGBA results
+are identical across 36 body-only/A/B comparisons. Eight-slot fit evidence has
+384 visible piece/pose checks, with 16 coverage failures still recorded.
+Browser playback and removal/restoration of five parts preserve body texture,
+placement and paused clock. Authored-cycle checks reject missing, duplicated,
+reordered samples and implicit timing changes; they do not infer gait quality.
+That checkpoint's regression was **369 passed in 43.46 seconds**; its footwear
+and visual noise were subsequently rejected. The [current native-parts revision](sd-explorer-native-parts-20261005.md)
+uses fixed footwear angle images, fits the joint visible-foot interface and
+normalizes body/part RGB to one 48-colour palette on the existing 128px grid.
+Body geometry/alpha/timing remain identical; RGB changes and therefore motion
+and binding digests change. All 56 footwear state/design checks pass; 11 garment
+coverage failures remain. The current regression is **372 passed in 44.08 seconds**.
+Source outline jitter and final visual acceptance remain open; art and release
+stay unapproved.

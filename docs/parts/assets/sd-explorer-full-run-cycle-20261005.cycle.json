@@ -1,0 +1,54 @@
+{
+  "coverage": {
+    "art_approved": false,
+    "cycles": [
+      {
+        "duration_seconds": "2/3",
+        "samples_per_step": 8,
+        "source_samples": [
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75
+        ],
+        "state": "run",
+        "steps": 2
+      }
+    ],
+    "kind": "authored-source-cycle-coverage",
+    "release_ready": false
+  },
+  "diagnostic": {
+    "kind": "source-pixel-cycle-diagnostics",
+    "source_motion": {
+      "id": "sd.equipment.video.motion",
+      "digest": "7d915eea4b2eb110a70f2696e1a891b56ab19fcad8dcaf40efa1bfbc839dc62c"
+    },
+    "source_state": "run",
+    "roi": [
+      30,
+      66,
+      100,
+      116
+    ],
+    "mean_absolute_rgb_difference": {
+      "8": 28.279950793650794,
+      "16": 12.716257142857144
+    },
+    "wrap_75_to_60": 17.472190476190477,
+    "native_75_to_76": 17.071142857142856,
+    "scope": "pixel periodicity supports visual phase inspection; does not infer foot identity or approve anatomy"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "coverage": {
+    "art_approved": false,
+    "cycles": [
+      {
+        "duration_seconds": "2/3",
+        "samples_per_step": 8,
+        "source_samples": [
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75
+        ],
+        "state": "run",
+        "steps": 2
+      }
+    ],
+    "kind": "authored-source-cycle-coverage",
+    "release_ready": false
+  }
+}

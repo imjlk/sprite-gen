@@ -1,0 +1,522 @@
+{
+  "date": "2026-10-05",
+  "workspace": "assets/sd-explorer-run-cleanup-20261005-v1",
+  "archive": {
+    "file": "sd-explorer-native-parts-20261005.tar.gz",
+    "sha256": "ee867a87e8bafdf89f839763392319eb5bc24da2ccde4b3408521e140487a3d9",
+    "bytes": 11613839,
+    "files": 2702,
+    "every_member_sha256_verified": true
+  },
+  "runtime_motion": {
+    "digest": "c3a5347550a914485961c85b14910d73f9b66a661c5b0d0028f5090ec36bae45",
+    "id": "sd.matched.video.motion"
+  },
+  "body_origin": "Existing shared Grok video body; no new part or appearance video generation",
+  "part_origin": "Built-in imagegen PNG artwork; native-pose/reference guides and one-time import preparation",
+  "validation": {
+    "appearance_clips_baked": 0,
+    "art_approved": false,
+    "base_appearances": 32,
+    "clipped_pixels": 0,
+    "curated_body_samples": 28,
+    "release_ready": false,
+    "runtime_texture_warps": 0,
+    "scene_evaluations": 896,
+    "shared_states": 3,
+    "whole_body_alpha_preserved": true,
+    "whole_body_geometry_preserved": true,
+    "whole_body_pixels_preserved": false
+  },
+  "fitting": {
+    "art_approved": false,
+    "calibration": "SD source-specific palette/y-region masks and authored bounds; no general anatomy or retargeting model",
+    "failed_checks": 11,
+    "kind": "parts-all-slot-fit-evidence",
+    "motion": {
+      "digest": "c3a5347550a914485961c85b14910d73f9b66a661c5b0d0028f5090ec36bae45",
+      "id": "sd.matched.video.motion"
+    },
+    "part_piece_pose_checks": 384,
+    "release_ready": false,
+    "rework_parts": [
+      "sd.wardrobe.lower.a",
+      "sd.wardrobe.lower.b",
+      "sd.wardrobe.upper.a",
+      "sd.wardrobe.upper.b"
+    ],
+    "schema_version": 1,
+    "slots_checked": [
+      "hair",
+      "expression",
+      "upper",
+      "lower",
+      "footwear",
+      "headwear",
+      "gloves",
+      "back_accessory"
+    ]
+  },
+  "motion_provenance": {
+    "appearance_clips_baked": 0,
+    "art_approved": false,
+    "body_split": false,
+    "curated_cadence": {
+      "idle": 1,
+      "run": 24,
+      "walk": 8
+    },
+    "cycle": {
+      "run": {
+        "half_cycle_rejected": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "phase_period": 16,
+        "source_fps": 24,
+        "source_samples": [
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75
+        ],
+        "steps": 2
+      }
+    },
+    "motion": {
+      "digest": "c3a5347550a914485961c85b14910d73f9b66a661c5b0d0028f5090ec36bae45",
+      "id": "sd.matched.video.motion"
+    },
+    "native_source_cadence": 24,
+    "palette_policy": {
+      "alpha_and_geometry_unchanged": true,
+      "art_approved": false,
+      "colors": [
+        [
+          249,
+          190,
+          125
+        ],
+        [
+          62,
+          43,
+          28
+        ],
+        [
+          94,
+          48,
+          30
+        ],
+        [
+          111,
+          64,
+          48
+        ],
+        [
+          110,
+          96,
+          62
+        ],
+        [
+          17,
+          6,
+          5
+        ],
+        [
+          249,
+          190,
+          129
+        ],
+        [
+          250,
+          185,
+          126
+        ],
+        [
+          249,
+          193,
+          135
+        ],
+        [
+          156,
+          99,
+          60
+        ],
+        [
+          215,
+          213,
+          211
+        ],
+        [
+          237,
+          224,
+          206
+        ],
+        [
+          20,
+          144,
+          142
+        ],
+        [
+          212,
+          177,
+          149
+        ],
+        [
+          89,
+          88,
+          88
+        ],
+        [
+          97,
+          92,
+          91
+        ],
+        [
+          73,
+          132,
+          129
+        ],
+        [
+          104,
+          61,
+          47
+        ],
+        [
+          124,
+          113,
+          94
+        ],
+        [
+          123,
+          125,
+          124
+        ],
+        [
+          153,
+          92,
+          61
+        ],
+        [
+          50,
+          54,
+          55
+        ],
+        [
+          75,
+          66,
+          57
+        ],
+        [
+          34,
+          14,
+          12
+        ],
+        [
+          58,
+          25,
+          19
+        ],
+        [
+          174,
+          139,
+          114
+        ],
+        [
+          219,
+          158,
+          113
+        ],
+        [
+          11,
+          117,
+          122
+        ],
+        [
+          17,
+          142,
+          143
+        ],
+        [
+          133,
+          75,
+          44
+        ],
+        [
+          134,
+          77,
+          51
+        ],
+        [
+          146,
+          78,
+          45
+        ],
+        [
+          148,
+          90,
+          50
+        ],
+        [
+          182,
+          128,
+          80
+        ],
+        [
+          174,
+          134,
+          95
+        ],
+        [
+          178,
+          104,
+          71
+        ],
+        [
+          235,
+          157,
+          111
+        ],
+        [
+          236,
+          178,
+          117
+        ],
+        [
+          158,
+          151,
+          145
+        ],
+        [
+          172,
+          172,
+          175
+        ],
+        [
+          169,
+          82,
+          51
+        ],
+        [
+          188,
+          82,
+          54
+        ],
+        [
+          69,
+          75,
+          57
+        ],
+        [
+          86,
+          81,
+          67
+        ],
+        [
+          229,
+          144,
+          85
+        ],
+        [
+          232,
+          151,
+          95
+        ],
+        [
+          244,
+          177,
+          121
+        ],
+        [
+          246,
+          188,
+          124
+        ]
+      ],
+      "kind": "parts-shared-native-palette",
+      "runtime_filter": false,
+      "size": 48,
+      "source": "84 native BODY/A/B frames, all three states; fixed shared palette using existing extraction median-cut"
+    },
+    "release_ready": false,
+    "runtime_texture_warps": 0,
+    "source_body_alpha_preserved": true,
+    "source_body_pixels_preserved": false,
+    "source_geometry_preserved": true,
+    "source_motion": {
+      "digest": "7d915eea4b2eb110a70f2696e1a891b56ab19fcad8dcaf40efa1bfbc839dc62c",
+      "id": "sd.equipment.video.motion"
+    },
+    "source_samples": {
+      "idle": [
+        "sample.0",
+        "sample.24",
+        "sample.48",
+        "sample.72"
+      ],
+      "run": [
+        "sample.60",
+        "sample.61",
+        "sample.62",
+        "sample.63",
+        "sample.64",
+        "sample.65",
+        "sample.66",
+        "sample.67",
+        "sample.68",
+        "sample.69",
+        "sample.70",
+        "sample.71",
+        "sample.72",
+        "sample.73",
+        "sample.74",
+        "sample.75"
+      ],
+      "walk": [
+        "sample.12",
+        "sample.15",
+        "sample.18",
+        "sample.21",
+        "sample.24",
+        "sample.27",
+        "sample.30",
+        "sample.33"
+      ]
+    }
+  },
+  "recipe_sha256": "499ef2c409c8521e752c073ecdd37daa4109ca4992f224e51b98e73410cbfe64",
+  "art_approved": false,
+  "release_ready": false,
+  "consistency": {
+    "kind": "native-parts-consistency-evidence",
+    "body_color_comparison": [
+      {
+        "sample": 0,
+        "before_colors": 1024,
+        "after_colors": 44,
+        "alpha_identical": true
+      },
+      {
+        "sample": 1,
+        "before_colors": 1215,
+        "after_colors": 43,
+        "alpha_identical": true
+      },
+      {
+        "sample": 2,
+        "before_colors": 1266,
+        "after_colors": 44,
+        "alpha_identical": true
+      },
+      {
+        "sample": 3,
+        "before_colors": 1261,
+        "after_colors": 44,
+        "alpha_identical": true
+      },
+      {
+        "sample": 4,
+        "before_colors": 1234,
+        "after_colors": 44,
+        "alpha_identical": true
+      },
+      {
+        "sample": 5,
+        "before_colors": 1293,
+        "after_colors": 42,
+        "alpha_identical": true
+      },
+      {
+        "sample": 6,
+        "before_colors": 1231,
+        "after_colors": 44,
+        "alpha_identical": true
+      },
+      {
+        "sample": 7,
+        "before_colors": 1183,
+        "after_colors": 44,
+        "alpha_identical": true
+      },
+      {
+        "sample": 8,
+        "before_colors": 1079,
+        "after_colors": 44,
+        "alpha_identical": true
+      },
+      {
+        "sample": 9,
+        "before_colors": 1108,
+        "after_colors": 44,
+        "alpha_identical": true
+      },
+      {
+        "sample": 10,
+        "before_colors": 1160,
+        "after_colors": 41,
+        "alpha_identical": true
+      },
+      {
+        "sample": 11,
+        "before_colors": 1195,
+        "after_colors": 45,
+        "alpha_identical": true
+      },
+      {
+        "sample": 12,
+        "before_colors": 1195,
+        "after_colors": 44,
+        "alpha_identical": true
+      },
+      {
+        "sample": 13,
+        "before_colors": 1232,
+        "after_colors": 45,
+        "alpha_identical": true
+      },
+      {
+        "sample": 14,
+        "before_colors": 1210,
+        "after_colors": 45,
+        "alpha_identical": true
+      },
+      {
+        "sample": 15,
+        "before_colors": 1041,
+        "after_colors": 43,
+        "alpha_identical": true
+      }
+    ],
+    "footwear_template_instances": 110,
+    "fixed_variant_angle_assets": 12,
+    "per_pose_resize": false,
+    "runtime_footwear_clipping": false,
+    "runtime_appearance_clips": 0,
+    "art_approved": false
+  },
+  "regression": {
+    "passed": 372,
+    "seconds": 44.08,
+    "log_sha256": "22bd0600111e5fe2c1c7fcbc3b9b17a4954bf41c911ddc9b2655e9380d7489db"
+  },
+  "palette_module_sha256": "b362c3919f098cd19689846e5dc500a00b2f4c383d694f77064fa18deed92127",
+  "archive_restore_rgba_checks": 84
+}

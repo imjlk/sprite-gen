@@ -20,9 +20,9 @@ from PIL import Image, ImageDraw, ImageFilter
 from sprite_gen._deps import np
 from sprite_gen.compose.parts_runtime import PartsPlayer
 from sprite_gen.compose import compose_parts
-from sprite_gen.qa import parts_fitting
+from sprite_gen.qa import parts_fitting, parts_cycles
 from sprite_gen.curate import parts_appearance, parts_motion
-from sprite_gen.frames import parts_import
+from sprite_gen.frames import parts_import, parts_palette
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 
 SLOTS = ("hair", "expression", "upper", "lower", "footwear")
@@ -32,6 +32,9 @@ CADENCE = {"idle": 1, "walk": 8, "run": 12}
 def write(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(workspace.json_bytes(data))
+
+
+normalize_palette = parts_palette.normalize
 
 
 def components(image, *, pixels=False):
@@ -122,19 +125,87 @@ def garment_fit(drawing, target, required):
     return best[1], best[2]
 
 
+def load_footwear_templates(base, calibration, variant):
+    """Crop/size each supplied angle once; never scale a shoe per body pose."""
+    declared = calibration.get("footwear_templates")
+    if declared is None:
+        return {}
+    plate = Image.open(base/"raw-footwear-templates"/("footwear."+variant+".png")).convert("RGBA")
+    width, height = plate.width//3, plate.height//2
+    result = {}
+    folder = base/"footwear-templates"/variant
+    folder.mkdir(parents=True, exist_ok=True)
+    for template in declared:
+        n = template["cell"]
+        image = plate.crop((n%3*width, n//3*height, (n%3+1)*width, (n//3+1)*height))
+        image.putalpha(image.getchannel("A").point(lambda a: 255 if a >= 128 else 0))
+        objects = components(image, pixels=True)
+        if not objects:
+            raise ValueError(f"empty footwear template {variant}/{n}")
+        bounds, _ = max(objects, key=lambda value: len(value[1]))
+        image = image.crop(bounds)
+        if template.get("mirror"):
+            image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+        size = template.get("variant_sizes", {}).get(variant, template["size"])
+        image = image.resize(tuple(size), Image.Resampling.NEAREST)
+        path = folder/(template["id"]+".png")
+        path.write_bytes(assets.png_bytes(image))
+        result[template["id"]] = image
+    return result
+
+
+def footwear_area(calibration, variant, box):
+    left, top, right, bottom = calibration.get("footwear_allowed_padding", {}).get(variant, [3, 3, 3, 3])
+    x0, y0, x1, y1 = box
+    area = np.zeros((128, 128), dtype=bool)
+    area[max(0,y0-top):min(128,y1+bottom), max(0,x0-left):min(128,x1+right)] = True
+    return area
+
+
+def place_footwear_pair(drawings, origins, required, allowed):
+    """Fit the combined foot interface; overlapping boxes do not own skin."""
+    candidates = []
+    for drawing, (x, y) in zip(drawings, origins):
+        options = []
+        for dx, dy in product(range(-3, 4), range(-3, 4)):
+            canvas = Image.new("RGBA", (128, 128))
+            canvas.alpha_composite(drawing, (x+dx, y+dy))
+            options.append((canvas, np.asarray(canvas)[..., 3] >= 128, [x+dx, y+dy], abs(dx)+abs(dy)))
+        candidates.append(options)
+    best = None
+    for options in product(*candidates):
+        occupied = np.logical_or.reduce([o[1] for o in options])
+        score = (int((required & ~occupied).sum()), int((occupied & ~allowed).sum()), sum(o[3] for o in options))
+        if best is None or score < best[0]:
+            best = score, options
+    canvas = Image.new("RGBA", (128, 128))
+    for option in best[1]:
+        canvas.alpha_composite(option[0])
+    return canvas, [option[2] for option in best[1]]
+
+
 def prepare_art(base, rows):
     calibration = workspace.decode_json((base/"pose-layer-calibration.json").read_bytes())
+    by_cell = {row["cell"]: row for row in rows}
     fits = []
     for variant in ("a", "b"):
+        templates = load_footwear_templates(base, calibration, variant)
         sheets = {}
-        for slot in ("upper", "lower", "footwear"):
-            path = base/"raw-art"/(slot+"."+variant+".png")
-            picture = Image.open(path).convert("RGBA").resize((320, 400), Image.Resampling.NEAREST)
-            picture.putalpha(picture.getchannel("A").point(lambda a: 255 if a >= 128 else 0))
-            sheets[slot] = picture
+        for group in {r.get("art_group", "base") for r in rows}:
+            for slot in ("upper", "lower", "footwear"):
+                path = base/("raw-run-art" if group == "run" else "raw-art")/(slot+"."+variant+".png")
+                picture = Image.open(path).convert("RGBA").resize((320, 320 if group == "run" else 400), Image.Resampling.NEAREST)
+                picture.putalpha(picture.getchannel("A").point(lambda a: 255 if a >= 128 else 0))
+                sheets[slot, group] = picture
 
-        def cell_image(slot, cell):
-            return sheets[slot].crop((cell % 4*80, cell//4*80, cell % 4*80+80, cell//4*80+80))
+        def cell_image(slot, cell, *, group=None):
+            row = by_cell[cell]
+            group = row.get("art_group", "base") if group is None else group
+            # Legacy walk poses borrow shoes from their original 20-cell
+            # sheet. Replacing run rows must not redirect those references
+            # into the new run sheet at an unrelated pose.
+            n = cell if group == "base" else row.get("art_cell", cell)
+            return sheets[slot, group].crop((n % 4*80, n//4*80, n % 4*80+80, n//4*80+80))
 
         for row in rows:
             cell, body = row["cell"], row["body"]
@@ -189,6 +260,9 @@ def prepare_art(base, rows):
                 folder = base/"parts-source"/("sd.matched."+slot+"."+variant)
                 folder.mkdir(parents=True, exist_ok=True)
                 (folder/f"{cell:02d}.png").write_bytes(assets.png_bytes(layer))
+                normalized, path = normalize_palette(base, layer)
+                if path is not None:
+                    (folder/f"{cell:02d}.normalized.png").write_bytes(assets.png_bytes(normalized))
                 mask = Image.new("RGBA", (128, 128), (255, 255, 255, 0))
                 mask.putalpha(Image.fromarray(coverage.astype(np.uint8)*255))
                 (folder/f"{cell:02d}.mask.png").write_bytes(assets.png_bytes(mask))
@@ -198,28 +272,90 @@ def prepare_art(base, rows):
                              "raw_bbox": list(raw_bbox), "target_bbox": target, "mask_target": "part only", **fit})
             shoe = Image.new("RGBA", (128, 128))
             shoe_required = np.zeros((128, 128), dtype=bool)
-            for number, (source_cell, side) in enumerate(calibration["foot_drawing_sources"][cell]):
-                drawing = cell_image("footwear", source_cell)
+            template_placements = calibration.get("footwear_placements", {}).get(str(cell))
+            if template_placements is not None:
+                drawings, origins, template_evidence = [], [], []
+                pair_allowed = np.zeros((128, 128), dtype=bool)
+                for number, placement in enumerate(template_placements):
+                    if not placement["visible"]:
+                        continue
+                    drawing = templates[placement["template"]]
+                    foot_box = calibration["feet_boxes"][cell][number]
+                    required = foot_region(foot_box, skin, back_air=placement.get("back_air", False))
+                    for x0, y0, x1, y1 in calibration.get("footwear_required_exclusions", {}).get(str(cell), []):
+                        required[y0:y1, x0:x1] = False
+                    allowed = footwear_area(calibration, variant, foot_box)
+                    anchor = placement["sole_anchor"]
+                    origin = [anchor[0]-drawing.width//2, anchor[1]-drawing.height]
+                    drawings.append(drawing)
+                    origins.append(origin)
+                    pair_allowed |= allowed
+                    shoe_required |= required
+                    template_evidence.append({"slot": "footwear", "variant": variant, "cell": cell, "foot": number,
+                                 "template": placement["template"], "image_sha256": assets.sha256(assets.png_bytes(drawing)),
+                                 "fixed_import_size": list(drawing.size),
+                                 "per_pose_resize": False, "runtime_mask": False})
+                shoe, positions = place_footwear_pair(drawings, origins, shoe_required, pair_allowed)
+                fits.extend({**evidence, "placement": position} for evidence, position in zip(template_evidence, positions))
+            elif cell in calibration.get("footwear_pair_cells", []):
+                boxes = calibration["feet_boxes"][cell]
+                target = [min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes)]
+                for number, box in enumerate(boxes):
+                    shoe_required |= foot_region(box, skin, back_air=False)
+                drawing = cell_image("footwear", cell)
+                shoe, evidence = garment_fit(drawing.crop(drawing.getbbox()), target, shoe_required)
+                fits.append({"slot": "footwear", "variant": variant, "cell": cell,
+                             "fitting": "authored overlapping shoe pair", **evidence})
+            foot_sources = calibration.get("foot_drawing_sources_by_variant", {}).get(variant, {}).get(
+                str(cell), calibration["foot_drawing_sources"][cell])
+            for number, (source_cell, side) in enumerate(foot_sources):
+                if template_placements is not None or cell in calibration.get("footwear_pair_cells", []):
+                    break
+                drawing = cell_image("footwear", source_cell, group=row.get("art_group", "base"))
                 objects = components(drawing)
                 if len(objects) > 2 or side >= len(objects):
                     raise ValueError(f"shoe drawing {variant}/{source_cell}/{side} is invalid")
+                back_air = ([cell, number] in calibration["back_air_feet"] if "back_air_feet" in calibration
+                            else cell >= 16 and number == 0)
                 fitted, evidence = foot_fit(drawing.crop(objects[side]), calibration["feet_boxes"][cell][number],
-                                            skin, back_air=cell >= 16 and number == 0)
+                                            skin, back_air=back_air)
                 shoe.alpha_composite(fitted)
                 shoe_required |= foot_region(calibration["feet_boxes"][cell][number], skin,
-                                             back_air=cell >= 16 and number == 0)
+                                             back_air=back_air)
                 fits.append({"slot": "footwear", "variant": variant, "cell": cell,
                              "foot": number, "drawing_source": [source_cell, side], **evidence})
             folder = base/"parts-source"/("sd.matched.footwear."+variant)
             folder.mkdir(parents=True, exist_ok=True)
             (folder/f"{cell:02d}.png").write_bytes(assets.png_bytes(shoe))
+            normalized, path = normalize_palette(base, shoe)
+            if path is not None:
+                (folder/f"{cell:02d}.normalized.png").write_bytes(assets.png_bytes(normalized))
             Image.fromarray(shoe_required.astype(np.uint8)*255).save(folder/f"{cell:02d}.required.png")
+            if template_placements is not None:
+                # This is QA evidence, not a runtime clipping stencil: the
+                # complete shoe silhouette is rendered unchanged.
+                area = np.zeros((128, 128), dtype=bool)
+                for number, (x0, y0, x1, y1) in enumerate(calibration["feet_boxes"][cell]):
+                    if template_placements[number]["visible"]:
+                        area |= footwear_area(calibration, variant, [x0, y0, x1, y1])
+                Image.fromarray(area.astype(np.uint8)*255).save(folder/f"{cell:02d}.allowed.png")
+            elif row.get("art_group") == "run":
+                # The shoe's own matte permits a one-pixel sole/heel volume
+                # around visible body pixels. Hidden feet cannot create a
+                # detached shoe in empty space; the body remains untouched.
+                support = np.asarray(body.getchannel("A").filter(ImageFilter.MaxFilter(3))) >= 128
+                area = np.zeros((128, 128), dtype=bool)
+                for x0, y0, x1, y1 in calibration["feet_boxes"][cell]:
+                    area[max(0,y0-2):min(128,y1+2), max(0,x0-2):min(128,x1+2)] = True
+                mask = Image.new("RGBA", (128, 128), (255, 255, 255, 0))
+                mask.putalpha(Image.fromarray((support & area).astype(np.uint8)*255))
+                (folder/f"{cell:02d}.mask.png").write_bytes(assets.png_bytes(mask))
     write(base/"part-fitting.json", {"kind": "explicit-source-pose-part-fitting", "schema_version": 1,
           "drawings": fits, "runtime_warp": False, "body_changed": False,
           "operation": "one-time artwork fitting and explicit part-only coverage; no nearest-pose selection"})
 
 
-def build(base, source, player, rows):
+def build(base, source, player, rows, *, cadence=CADENCE, cycle=None):
     library = base/"library"
     if library.exists():
         raise ValueError("destination library must be new")
@@ -249,16 +385,18 @@ def build(base, source, player, rows):
         expected, frames = {}, []
         for number, row in enumerate(selected):
             filename = f"{number:03d}.png"
-            data = assets.png_bytes(row["body"])
-            assert assets.sha256(data) == row["source_image"]["sha256"]
+            assert assets.sha256(assets.png_bytes(row["body"])) == row["source_image"]["sha256"]
+            image, _ = normalize_palette(base, row["body"])
+            data = assets.png_bytes(image)
+            row["render_image_sha256"] = assets.sha256(data)
             (folder/filename).write_bytes(data)
             expected[f"{state}/{filename}"] = assets.sha256(data)
             frames.append({"id": row["source_sample"], "file": filename,
-                           "duration": 1 / CADENCE[state]})
+                           "duration": 1 / cadence[state]})
         path = folder/"motion.json"
-        write(path, {"kind": "sprite-gen-asset", "version": 1, "fps": CADENCE[state], "frames": frames})
+        write(path, {"kind": "sprite-gen-asset", "version": 1, "fps": cadence[state], "frames": frames})
         expected[f"{state}/motion.json"] = assets.sha256(path.read_bytes())
-        clips.append({"id": state+".right", "state": state, "file": state+"/motion.json", "fps": str(CADENCE[state]),
+        clips.append({"id": state+".right", "state": state, "file": state+"/motion.json", "fps": str(cadence[state]),
                       "loop": True, "timebase": 120000, "timing_policy": "round-boundaries",
                       "source_mode": "external", "expected_files": expected})
     request = base/"motion-import.json"
@@ -278,10 +416,13 @@ def build(base, source, player, rows):
         return {"file": path.relative_to(base).as_posix(), "sha256": assets.sha256(path.read_bytes())}
 
     captured = {}
-    def capture(owner, reference):
-        key = owner["id"], reference["sha256"]
+    def capture(owner, reference, *, normalize=False):
+        key = owner["id"], reference["sha256"], normalize
         if key not in captured:
-            data = assets.png_bytes(player.load(owner, reference))
+            image = player.load(owner, reference)
+            if normalize:
+                image, _ = normalize_palette(base, image)
+            data = assets.png_bytes(image)
             path = base/"captured-art"/(assets.sha256(data)+".png")
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(data)
@@ -313,7 +454,7 @@ def build(base, source, player, rows):
                     value = deepcopy(piece["sample_map"][clip["id"]][row["source_sample"]])
                     value.pop("source", None)
                     value["format"] = "full-canvas"
-                    value["image"] = capture(original, value["image"])
+                    value["image"] = capture(original, value["image"], normalize=True)
                     # Retain each glove's source-local image and the pivot/
                     # offset already normalized by its original import.
                     if piece["mode"] == "raster" and slot == "gloves":
@@ -337,10 +478,11 @@ def build(base, source, player, rows):
             def placement(clip, row, number):
                 folder = base/"parts-source"/("sd.matched."+slot+"."+variant)
                 socket = "torso" if slot == "upper" else "root"
-                result = {"image": image_ref(folder/f"{row['cell']:02d}.png"), "format": "full-canvas",
+                filename = f"{row['cell']:02d}.normalized.png" if (base/"palette-policy.json").exists() else f"{row['cell']:02d}.png"
+                result = {"image": image_ref(folder/filename), "format": "full-canvas",
                     "pivot": row["sockets"][socket]["position"], "offset": [0, 0], "target_socket": socket,
                     "after": ["root", "lower_clothing", "footwear"] if slot == "upper" else ["root", "lower_clothing"] if slot == "footwear" else ["root"]}
-                if slot in ("upper", "lower"):
+                if (folder/f"{row['cell']:02d}.mask.png").exists():
                     result["mask"] = {"image": image_ref(folder/f"{row['cell']:02d}.mask.png"), "target_node": provided,
                                       "space": "rig-canvas", "channel": "alpha"}
                 return result
@@ -358,54 +500,60 @@ def build(base, source, player, rows):
                                   "selections": {slot: options[0] for slot, options in choices.items()}})
     parts_appearance.create(assembly, base/"selection.json")
     write(base/"motion-provenance.json", {"source_motion": old_index["motion"], "motion": index["motion"],
-        "source_geometry_and_body_pixels_preserved": True, "native_source_cadence": 24, "curated_cadence": CADENCE,
-        "sampling": "idle four source poses; walk one 24-source-frame cycle sampled every three; run eight consecutive poses slowed 2x",
+        "source_geometry_preserved": True, "source_body_alpha_preserved": True,
+        "source_body_pixels_preserved": not (base/"palette-policy.json").exists(),
+        "palette_policy": workspace.decode_json((base/"palette-policy.json").read_bytes()) if (base/"palette-policy.json").exists() else None,
+        "native_source_cadence": 24, "curated_cadence": cadence,
+        "cycle": cycle, "source_samples": {s: [r["source_sample"] for r in selected] for s, selected in by_state.items()},
         "body_split": False, "runtime_texture_warps": 0, "appearance_clips_baked": 0, "art_approved": False, "release_ready": False})
     return assembly
 
 
-def check(base, rows):
+def check(base, rows, *, cadence=CADENCE):
     player = PartsPlayer.from_workspace(base/"library/assembly.json")
     choices = workspace.decode_json((base/"choices.json").read_bytes())
-    by_state = {state: [r for r in rows if r["state"] == state] for state in CADENCE}
+    by_state = {state: [r for r in rows if r["state"] == state] for state in cadence}
     count = 0
     for selections in product(*(choices[slot] for slot in SLOTS)):
         player.seek(Fraction(1, 7))
         before = player.elapsed_seconds
         player.set_selection(dict(zip(SLOTS, selections)))
         assert player.elapsed_seconds == before
-        for state in CADENCE:
+        for state in cadence:
             player.set_state(state)
             for number, row in enumerate(by_state[state]):
-                player.seek(Fraction(number, CADENCE[state]))
+                player.seek(Fraction(number, cadence[state]))
                 scene = player.layers(interpolate=False)
                 body = next(l for l in scene["layers"] if l["slot"] is None)
-                assert body["position"] == ["0", "0"] and body["image"]["sha256"] == row["source_image"]["sha256"]
+                assert body["position"] == ["0", "0"] and body["image"]["sha256"] == row.get("render_image_sha256", row["source_image"]["sha256"])
+                assert np.array_equal(np.asarray(player.load(body["pack"], body["image"]))[...,3], np.asarray(row["body"])[...,3])
                 assert all(m["target_node"] != "root" for m in scene["masks"])
                 image, evidence = player.frame()
                 assert sum(d["clipped_pixels"] for d in evidence["evidence"]["draw"]) == 0
                 count += 1
     for variant in ("a", "b"):
         player.set_selection({slot: choices[slot][0 if variant == "a" else 1] for slot in SLOTS})
-        sheet = Image.new("RGBA", (4*128, 5*146), (239, 240, 234, 255))
+        sheet = Image.new("RGBA", (4*128, ((len(rows)+3)//4)*146), (239, 240, 234, 255))
         draw = ImageDraw.Draw(sheet)
         for row in rows:
             player.set_state(row["state"])
             number = by_state[row["state"]].index(row)
-            player.seek(Fraction(number, CADENCE[row["state"]]))
+            player.seek(Fraction(number, cadence[row["state"]]))
             image, _ = player.frame()
             cell = row["cell"]
             sheet.alpha_composite(image, (cell % 4*128, cell//4*146+18))
             draw.text((cell % 4*128+3, cell//4*146+2), str(cell)+" "+row["state"], fill=(20, 20, 20, 255))
-        sheet.resize((1024, 1460), Image.Resampling.NEAREST).save(base/("matched-review-"+variant+".png"))
+        sheet.resize((1024, sheet.height*2), Image.Resampling.NEAREST).save(base/("matched-review-"+variant+".png"))
     report = {"base_appearances": 32, "shared_states": 3, "curated_body_samples": len(rows), "scene_evaluations": count,
-              "whole_body_pixels_preserved": True, "clipped_pixels": 0, "appearance_clips_baked": 0,
+              "whole_body_pixels_preserved": not (base/"palette-policy.json").exists(),
+              "whole_body_alpha_preserved": True, "whole_body_geometry_preserved": True,
+              "clipped_pixels": 0, "appearance_clips_baked": 0,
               "runtime_texture_warps": 0, "art_approved": False, "release_ready": False}
     write(base/"validation.json", report)
     return report
 
 
-def check_part_fits(base, rows):
+def check_part_fits(base, rows, *, cadence=CADENCE):
     """Every installed part/piece, all poses; geometry never implies art approval."""
     player = PartsPlayer.from_workspace(base/"library/assembly.json")
     choices = workspace.decode_json((base/"choices.json").read_bytes())
@@ -420,12 +568,12 @@ def check_part_fits(base, rows):
         "back_accessory": ((40, 40), (30, 58, 99, 103)),
     }
     results, seen = [], set()
-    by_state = {state: [r for r in rows if r["state"] == state] for state in CADENCE}
+    by_state = {state: [r for r in rows if r["state"] == state] for state in cadence}
     for variant in (0, 1):
         player.set_selection({s: opts[variant] if s in SLOTS else opts[-1] for s, opts in choices.items()})
         for row in rows:
             player.set_state(row["state"])
-            player.seek(Fraction(by_state[row["state"]].index(row), CADENCE[row["state"]]))
+            player.seek(Fraction(by_state[row["state"]].index(row), cadence[row["state"]]))
             _, sample, clock = player.current()
             for entry in sample["draw"]:
                 slot = entry["slot"]
@@ -444,6 +592,10 @@ def check_part_fits(base, rows):
                     folder = base/"parts-source"/("sd.matched."+slot+"."+("a" if variant == 0 else "b"))
                     names = (("required_mask", "required"),) if slot == "footwear" else (
                         ("required_mask", "required"), ("protected_mask", "protected"), ("allowed_mask", "mask"))
+                    if slot == "footwear" and (folder/f"{row['cell']:02d}.mask.png").exists():
+                        names += (("allowed_mask", "mask"),)
+                    elif slot == "footwear" and (folder/f"{row['cell']:02d}.allowed.png").exists():
+                        names += (("allowed_mask", "allowed"),)
                     masks = {name: Image.open(folder/f"{row['cell']:02d}.{suffix}.png").copy()
                              for name, suffix in names}
                 fit = parts_fitting.measure(row["body"], part, rules, **masks)
@@ -460,7 +612,7 @@ def check_part_fits(base, rows):
     return {k: v for k, v in report.items() if k != "results"}
 
 
-def review_videos(base):
+def review_videos(base, *, cadence=CADENCE):
     """Two side-by-side inspection recordings; never installed as runtime clips."""
     player = PartsPlayer.from_workspace(base/"library/assembly.json")
     choices = workspace.decode_json((base/"choices.json").read_bytes())
@@ -468,8 +620,9 @@ def review_videos(base):
         folder = base/(state+"-review-frames")
         folder.mkdir(exist_ok=True)
         player.set_state(state)
-        for number in range(8):
-            player.seek(Fraction(number, CADENCE[state]))
+        count = len(player.current()[0]["samples"])
+        for number in range(count):
+            player.seek(Fraction(number, cadence[state]))
             sheet = Image.new("RGBA", (384, 146), (239, 240, 234, 255))
             draw = ImageDraw.Draw(sheet)
             for column, variant in enumerate((None, 0, 1)):
@@ -479,12 +632,13 @@ def review_videos(base):
                 draw.text((column*128+4, 3), ("BODY", "PARTS A", "PARTS B")[column], fill=(20, 20, 20, 255))
             sheet.resize((768, 292), Image.Resampling.NEAREST).save(folder/f"{number:03d}.png")
         subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-stream_loop", "3",
-                        "-framerate", str(CADENCE[state]), "-i", str(folder/"%03d.png"),
+                        "-framerate", str(cadence[state]), "-i", str(folder/"%03d.png"),
                         "-c:v", "libx264", "-r", "24", "-crf", "18", "-pix_fmt", "yuv420p",
                         str(base/(state+"-review.mp4"))], check=True)
     write(base/"review-media.json", {"kind": "parts-inspection-recordings", "runtime_assets": False,
         "motion": player.appearance["motion"], "columns": ["unmodified body", "parts A", "parts B"],
-        "states": {s: {"source_fps": CADENCE[s], "samples": 8, "cycles": 4, "video_fps": 24} for s in ("walk", "run")}})
+        "states": {s: {"source_fps": cadence[s], "samples": len(next(c for c in player.plan["clips"] if c["state"] == s)["samples"]),
+                       "cycles": 4, "video_fps": 24} for s in ("walk", "run")}})
 
 
 if __name__ == "__main__":
@@ -493,11 +647,16 @@ if __name__ == "__main__":
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--review-video", action="store_true", help="Requires ffmpeg; records two inspection videos only.")
     args = parser.parse_args()
-    guide = workspace.decode_json((args.base/"body-pose-guide-20.json").read_bytes())
+    guide_file = args.base/"pose-guide.json"
+    if not guide_file.exists():
+        guide_file = args.base/"body-pose-guide-20.json"
+    guide = workspace.decode_json(guide_file.read_bytes())
+    cadence = guide.get("cadence", CADENCE)
+    write(args.base/"source-cycle-coverage.json", parts_cycles.verify(guide))
     player, rows = source_poses(args.source, guide)
     prepare_art(args.base, rows)
-    build(args.base, args.source, player, rows)
-    print(json.dumps(check(args.base, rows), indent=2))
-    print(json.dumps(check_part_fits(args.base, rows), indent=2))
+    build(args.base, args.source, player, rows, cadence=cadence, cycle=guide.get("cycle"))
+    print(json.dumps(check(args.base, rows, cadence=cadence), indent=2))
+    print(json.dumps(check_part_fits(args.base, rows, cadence=cadence), indent=2))
     if args.review_video:
-        review_videos(args.base)
+        review_videos(args.base, cadence=cadence)

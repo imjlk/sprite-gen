@@ -149,5 +149,7 @@ remain planned; no part art is approved.
 | [parts/06-baked-export.md](parts/06-baked-export.md) | Deterministic multi-state atlas/manifest, ordered dedup, Aseprite mapping, build locks and atomic release pointers |
 | [parts/07-m1-verification.md](parts/07-m1-verification.md) | M1 test evidence, reproducible five-rig synthetic builds, exact art limitations and remaining acceptance work |
 | [parts/initial-implementation-and-demo.md](parts/initial-implementation-and-demo.md) | PR00–06 status, snapshot/digest/timing rules, and the five-slot SD parts demo art brief |
-| [parts/sd-explorer-motion-repair-20261005.md](parts/sd-explorer-motion-repair-20261005.md) | Direct pose-matched layers, synchronized walk/run playback, all-slot fitting evidence and remaining art defects |
+| [parts/sd-explorer-native-parts-20261005.md](parts/sd-explorer-native-parts-20261005.md) | Current 128px/48-colour body and parts, fixed footwear angles, joint foot interfaces and unapproved visual quality |
+| [parts/sd-explorer-full-run-cycle-20261005.md](parts/sd-explorer-full-run-cycle-20261005.md) | Historical full 16-frame cycle fix; footwear/noise were subsequently rejected |
+| [parts/sd-explorer-motion-repair-20261005.md](parts/sd-explorer-motion-repair-20261005.md) | Historical pose-matched repair; its half-stride run was rejected and superseded |
 | [parts/customization-and-variation.md](parts/customization-and-variation.md) | Basic and detailed slots, variation/palette/preset rules, rig-specific fitting, and expanded multi-body acceptance scope |
