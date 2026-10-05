@@ -84,3 +84,43 @@ visible in the evidence even after an explicit decision. Release requires a
 current approved appearance review with all five decisions, and reruns the
 same evidence verification immediately before export. Local review records are
 content-addressed decisions, not cryptographic reviewer signatures.
+
+## Layer fitting and bounded corrections
+
+`sprite_gen.qa.parts_fitting` measures an authored layer interface: maximum
+picture size, allowed placement, required coverage, protected pixels,
+clipping and declared newly enclosed transparent gaps. Rectangles follow the existing
+attachment delta. Preexisting body holes are reported separately; they never
+request a redraw of the hair. The engine does not infer anatomy, fill holes,
+resize pictures during playback or approve visual quality from these numbers.
+
+The same checker accepts native-canvas `L` or `RGBA` authored pixel masks for
+`required_mask`, `protected_mask` and `allowed_mask`. Clothing can require leg
+coverage, protect front arms and restrict its silhouette for each exact body
+pose. These masks are already in current-frame coordinates; no anatomy or pose
+matching is inferred and no mask is resized. `gap_region=None` leaves seam gaps
+unmeasured when no forbidden-gap region has been authored, such as intentional
+negative space around backpack straps. Passing other measurements does not
+claim those undeclared interfaces are verified.
+
+The [walk/run repair](sd-explorer-motion-repair-20261005.md) runs the shared
+checker across every visible installed piece/pose in eight slots. Its evidence
+retains tank-top and footwear coverage failures rather than promoting them to approval.
+Frame-synchronized rendering is checked separately from geometric fitting.
+
+`retry(initial, evaluate, correct, max_retries=3)` evaluates the initial asset
+and each corrected revision. The correction adapter receives the failed checks
+and changes only that part. Offset errors can change the binding; oversized art
+can be calibrated once on import; mismatched openings need a redrawn part.
+Three retries is the ceiling. Repeated RGBA pixels and placement stop even when
+PNG metadata differs. Exhaustion, absent corrections and provider errors never
+activate a failed candidate or silently reuse an approval. Automatic network
+retries are a separate provider concern.
+
+The [SD hair repair recipe](../../scripts/dev/sd_explorer_hair_repair.py) consumes
+a supplied imagegen output, checks all 288 native samples, and imports a new
+hair revision only after every authored fitting check passes. It preserves the
+body, other parts, frozen motion and clock. The provider call runs in the
+authoring workflow; this recipe does not contain a live Grok/imagegen client.
+The fitted short cap is 44×38 instead of 56×49. `fit-repair.json` retains the
+failed and corrected measurements; `art_approved` and `release_ready` stay false.

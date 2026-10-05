@@ -24,7 +24,9 @@ STATIC = Path(__file__).resolve().parent / "parts_player"
 class PartsSession:
     """Immutable workspace snapshot with a bounded cache of resolved selections."""
 
-    def __init__(self, assembly):
+    def __init__(self, assembly, *, interpolation="linear"):
+        contract._enum("linear", "frame")(interpolation, "interpolation")
+        self.interpolate = interpolation == "linear"
         root, index, registry, _ = parts_motion._active(assembly)
         if index["appearance"] is None:
             raise contract.PartsContractError("parts player requires an active appearance")
@@ -47,7 +49,8 @@ class PartsSession:
         resolved = contract.resolve_selections(self.appearance, catalog)
         self.metadata = {"id": self.appearance["id"], "canvas": registry[index["rig"]["id"]]["canvas"],
             "motion": index["motion"], "states": [], "slots": [], "release_ready": False,
-            "mode": "independent-layers", "appearance_clips_baked": 0}
+            "mode": "independent-layers", "appearance_clips_baked": 0,
+            "interpolation": interpolation}
         motion = registry[index["motion"]["id"]]
         for state in index["states"]:
             clip = next(c for c in motion["clips"] if c["state"] == state)
@@ -118,7 +121,7 @@ class PartsSession:
     def layer_frame(self, query):
         """Return separate cached textures and relative tracks, never a merged PNG."""
         with self._at(query) as player:
-            scene = player.layers()
+            scene = player.layers(interpolate=self.interpolate)
             for layer in scene["layers"]:
                 layer["texture"] = self._texture(layer["pack"],layer["image"])
                 layer["regions"] = {name:self._texture(layer["pack"],reference)
@@ -181,10 +184,12 @@ def handler_for(session):
 def add_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--assembly",required=True,type=Path)
     parser.add_argument("--port",type=int,default=8766)
+    parser.add_argument("--interpolation", choices=("linear", "frame"), default="linear",
+                        help="Use frame for parts authored against discrete body sprite poses.")
 
 
-def run(*,assembly,port=8766):
-    session = PartsSession(assembly)
+def run(*,assembly,port=8766,interpolation="linear"):
+    session = PartsSession(assembly, interpolation=interpolation)
     server = ThreadingHTTPServer(("127.0.0.1",port),handler_for(session))
     print(f"Parts player: http://127.0.0.1:{server.server_port}",flush=True)
     try:

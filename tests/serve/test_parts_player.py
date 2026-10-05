@@ -96,6 +96,49 @@ def test_layer_api_keeps_separate_textures_and_tweens_without_cpu_composition(se
     assert tree_hashes(assembly.parent)==before
 
 
+def test_frame_interpolation_holds_attachments_until_body_pose_changes(session):
+    _, assembly = session
+    source = assembly.parent.parent / "body-source"
+    spec = part_spec(assembly.parent.parent / "moving-hair.json", assembly, source,
+                     identity="hair.a", slot="hair", node="hair_front", socket="head")
+    request = json.loads(spec.read_bytes())
+    for mapping in request["pieces"][0]["sample_map"].values():
+        mapping["sample.2"]["offset"] = [4, 0]
+    spec.write_text(json.dumps(request))
+    parts_import.import_pack(assembly, spec, source)
+    parts_appearance.create(assembly, assembly.parent.parent / "selection.json")
+    player = serve_parts.PartsSession(assembly, interpolation="frame")
+    common = {"state": ["run"], "hair": ["hair.a"]}
+    first = player.layer_frame({**common, "time_ms": ["250"]})
+    middle = player.layer_frame({**common, "time_ms": ["300"]})
+    next_pose = player.layer_frame({**common, "time_ms": ["375"]})
+    assert player.metadata["interpolation"] == "frame"
+    assert middle["elapsed_seconds"] == "3/10" and middle["sample_tick"] == "6000"
+    assert first["sample_id"] == middle["sample_id"] == "sample.1"
+    assert next_pose["sample_id"] == "sample.2"
+    assert first["layers"] == middle["layers"]
+    assert middle["sample_fraction"] == "0" and not any(l["tweened"] for l in middle["layers"])
+    hair = lambda scene: next(l for l in scene["layers"] if l["slot"] == "hair")
+    assert hair(middle)["position"] != hair(next_pose)["position"]
+    linear = serve_parts.PartsSession(assembly).layer_frame({**common, "time_ms": ["300"]})
+    assert hair(linear)["position"] != hair(middle)["position"]
+    changed = player.layer_frame({"state": ["run"], "time_ms": ["300"], "hair": ["hair.b"]})
+    assert hair(changed)["position"] == hair(middle)["position"]
+    assert changed["sample_tick"] == middle["sample_tick"]
+    assert hair(changed)["texture"] != hair(middle)["texture"]
+
+
+def test_interpolation_cli_defaults_and_validation(session):
+    import argparse
+    _, assembly = session
+    parser = argparse.ArgumentParser()
+    serve_parts.add_arguments(parser)
+    assert parser.parse_args(["--assembly", str(assembly)]).interpolation == "linear"
+    assert parser.parse_args(["--assembly", str(assembly), "--interpolation", "frame"]).interpolation == "frame"
+    with pytest.raises(contract.PartsContractError):
+        serve_parts.PartsSession(assembly, interpolation="unknown")
+
+
 def test_parallel_viewers_keep_state_and_time_isolated(session):
     player,_=session
     requests=[{"state":[state],"time_ms":[str(time)]} for _ in range(3)

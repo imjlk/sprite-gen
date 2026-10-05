@@ -41,8 +41,9 @@ exports only one concrete selection twice to verify byte-identical results.
 
 ## Verification limits
 
-The implementation and functional runtime demos are verified. Actual art is a
-review draft: nearest-pose matching, palm estimates, all pose transitions,
+The implementation has structural verification. The user rejected the previous
+layered walk/run art, so those structural counts are not successful animation
+evidence. Actual art is a review draft: palm estimates, all pose transitions,
 anatomical hand identity, style and foot contact are not fully accepted.
 Representative rendered/browser checks are not approval of every frame or
 every combination. The demo records `art_approved=false` and
@@ -53,3 +54,32 @@ rejected three-arm tall artwork is excluded. Actual wardrobe art for other
 body shapes, further face/subslot/palette artwork, generation planning and
 resume workflows, engine adapters and art release are subsequent scope; this
 M1 result does not claim their completion.
+
+## Follow-up: short-hair fitting repair
+
+The user's subsequent size/gap finding supersedes the earlier `[2,-1]` offset
+adjustment. The [fitted revision](assets/sd-explorer-hair-repair-20261005.tar.gz)
+redraws only short hair, imports it once at 44×38 rather than 56×49, and checks
+288 shared native samples. The old cap fails size/placement throughout and
+introduces enclosed head gaps in 240 samples. The corrected cap passes the
+authored bounds, coverage, face/ear protection, clipping and gap checks; the
+body, frozen motion, other part revisions and swap clock are preserved.
+
+The [part-only bounded retry implementation](../../sprite_gen/qa/parts_fitting.py)
+supports at most three corrections, rechecks each candidate, stops repeated
+RGBA/placement and keeps failed candidates inactive. The demo adapter consumes
+an imagegen output; it has no live generation API client. The follow-up parts
+regression is **221 passed in 30.21 seconds**, including twelve fitting/repair
+tests. This is geometric verification, not full art acceptance.
+
+## Follow-up: pose-synchronized walk/run repair
+
+The [current repair](sd-explorer-motion-repair-20261005.md) replaces nearest-pose
+clothing with direct source-pose drawings and holds attachments with the body
+frame (`parts-play --interpolation frame`). The 20 selected body PNGs retain
+their exact original bytes; motion sampling/cadence and binding digests change.
+The three shared states serve 32 appearances without Cartesian clip generation.
+Eight-slot fit evidence has 274 visible piece/pose checks and retains five
+1–2-pixel tank-top failures plus three 1–4-pixel footwear coverage failures. Browser playing and all-empty/mixed swaps
+preserve the selected body and clock. The current regression is **227 passed in
+31.12 seconds**; art and release remain unapproved.

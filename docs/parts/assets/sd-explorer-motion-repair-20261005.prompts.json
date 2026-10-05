@@ -1,0 +1,81 @@
+{
+  "attempts": [
+    {
+      "file": "raw-art/upper.a.png",
+      "key": "upper.a",
+      "prompt": "Use case: stylized-concept. Create a TRANSPARENT PAPER-DOLL CLOTHING OVERLAY sprite sheet for the exact pixel-art body poses in the reference. The reference is AUTHORITATIVE GEOMETRY, not an inspiration: 4 columns and 5 rows, exactly 20 cells, each the same square size. Output a portrait 4:5 canvas with exactly the same 4-by-5 grid and cell positions. In each cell, trace the garment onto the corresponding reference pose at its EXACT position and size. Preserve the original body pose, orientation, waist, shoulder, knees, ankles and foot positions as an invisible fitting guide. Do NOT recenter objects, spread legs differently, change stride, rotate a pose, reorder cells, or invent poses. Crisp coarse pixel art, dark 1-logical-pixel outlines, restrained shading, same pixel scale as the body. The grid's first row is idle, rows 2 and 3 are walking, rows 4 and 5 are running. Respect the visible arms and hands: transparent openings where those front limbs occlude the garment. Output ONLY the requested garment pixels, no skin, no body, no head, no face, no arms/hands, no bare feet, no text, no borders, no grid lines, no ground, no shadows. True transparent background and transparent space between objects. Every cell must contain the requested clothing in the matching source pose. Requested garment: a fitted teal sleeveless tank top, modest cream piping at the neckline, matching the current explorer's casual style. Draw only the shirt, shaped to the EXACT gray tank top in each reference. Match the shoulder opening, waist hem and torso lean precisely. Do not add sleeves or large collar points. The shirt must not cover visible arms or hands, and must not extend down past the gray shirt hem.",
+      "reference": "body-pose-guide-20.png",
+      "sha256": "c5e216a3ae3debc9b1e9a0c2915d3255bcd609c950c6d34326f7793232f97862",
+      "status": "active",
+      "transparent_background": true
+    },
+    {
+      "file": "raw-art/lower.a.png",
+      "key": "lower.a",
+      "prompt": "Use case: stylized-concept. Create a TRANSPARENT PAPER-DOLL CLOTHING OVERLAY sprite sheet for the exact pixel-art body poses in the reference. The reference is AUTHORITATIVE GEOMETRY, not an inspiration: 4 columns and 5 rows, exactly 20 cells, each the same square size. Output a portrait 4:5 canvas with exactly the same 4-by-5 grid and cell positions. In each cell, trace the garment onto the corresponding reference pose at its EXACT position and size. Preserve the original body pose, orientation, waist, shoulder, knees, ankles and foot positions as an invisible fitting guide. Do NOT recenter objects, spread legs differently, change stride, rotate a pose, reorder cells, or invent poses. Crisp coarse pixel art, dark 1-logical-pixel outlines, restrained shading, same pixel scale as the body. The grid's first row is idle, rows 2 and 3 are walking, rows 4 and 5 are running. Respect the visible arms and hands: transparent openings where those front limbs occlude the garment. Output ONLY the requested garment pixels, no skin, no body, no head, no face, no arms/hands, no bare feet, no text, no borders, no grid lines, no ground, no shadows. True transparent background and transparent space between objects. Every cell must contain the requested clothing in the matching source pose. Requested garment: fitted tan/olive CARGO SHORTS with small patch pockets. Draw only the shorts at the EXACT position and leg directions of the dark-gray reference shorts in each cell. The waistband, crotch, separate short legs and hems must follow that reference pose precisely, including crossed/occluded legs. Shorts must be compact and hug the actual thighs. Do not make a skirt, wide flared shorts, or swing the fabric independently of the legs. No skin or legs.",
+      "reference": "body-pose-guide-20.png",
+      "sha256": "45ab69becb9dfe7ca6968488cff9276c5246c9ff807a978e7abbb5a6104c208a",
+      "status": "active",
+      "transparent_background": true
+    },
+    {
+      "file": "raw-art/upper.b.png",
+      "key": "upper.b",
+      "prompt": "Use case: stylized-concept. Transparent pixel-art CLOTHING OVERLAY sheet fitted to the reference body poses. Preserve exact 4 columns by 5 rows, 20 cells, portrait 4:5 and same cell order: first row idle, rows 2-3 walk, rows 4-5 run. Each garment must follow its corresponding reference's exact torso or leg shape, pose and direction. The reference body is invisible geometry; output ONLY the requested clothing pixels on true transparent background. No skin, head, face, arms/hands, bare feet, ground, shadows, labels, grid lines or other items. Coarse crisp pixel art matching the source, dark restrained contour, modest shading. Respect the front arms and hands with transparent openings; do not cover them. Do not invent a pose, change stride, swap feet, duplicate limbs or create extra clothing pieces. Design: a compact olive/tan sleeveless pocket vest with a small front opening and two modest patch pockets, fitted over the exact gray tank top shape in each reference. No sleeves, no tall collar, no huge shoulder flare. Match shoulder opening, torso lean and waist hem.",
+      "reference": "body-pose-guide-20.png",
+      "sha256": "2c6b2bf075e35de48337d00cd5c6bf97e87595b5ba455362951125d067e86e56",
+      "status": "active",
+      "transparent_background": true
+    },
+    {
+      "file": "raw-art/lower.b-original.png",
+      "key": "lower.b.initial",
+      "prompt": "Use case: stylized-concept. Transparent pixel-art CLOTHING OVERLAY sheet fitted to the reference body poses. Preserve exact 4 columns by 5 rows, 20 cells, portrait 4:5 and same cell order: first row idle, rows 2-3 walk, rows 4-5 run. Each garment must follow its corresponding reference's exact torso or leg shape, pose and direction. The reference body is invisible geometry; output ONLY the requested clothing pixels on true transparent background. No skin, head, face, arms/hands, bare feet, ground, shadows, labels, grid lines or other items. Coarse crisp pixel art matching the source, dark restrained contour, modest shading. Respect the front arms and hands with transparent openings; do not cover them. Do not invent a pose, change stride, swap feet, duplicate limbs or create extra clothing pieces. Design: fitted dark olive-brown full-length work trousers, narrow cuffs at the actual ankles. Exact waistband, crotch, thigh and calf directions of the reference. Two trouser legs maximum, respecting crossed and occluded legs. Follow bent knees naturally. No skirt, no wide flares, no extra legs, no shoes or exposed skin. Stop trousers at the ankle, leaving actual feet clear.",
+      "reason": "Bare-leg coverage fails several run poses; replaced by legs-only-reference artwork.",
+      "reference": "body-pose-guide-20.png",
+      "sha256": "4488e7adecf87468aa5ef51f4e776237dc822a1a99a2bc2c4cd22f98bcb75b53",
+      "status": "superseded",
+      "transparent_background": true
+    },
+    {
+      "file": "raw-art/footwear.a-rejected.png",
+      "key": "footwear.a.rejected",
+      "prompt": "Use case: stylized-concept. Asset: transparent pixel-art shoe overlay sprite sheet for the exact body reference poses. AUTHORITATIVE reference: 4 columns by 5 rows, 20 equal square cells on a portrait 4:5 sheet; preserve cell order. Row 1 idle, rows 2-3 walking, rows 4-5 running. In each cell draw ONLY the two shoes, covering the actual corresponding visible bare feet, with the same ankle and sole positions, same toe directions, same heel lifts and exactly the same relative distance between the feet. If a foot is occluded by the other leg, do not invent a new shoe outside that silhouette. Do not put both shoes on a shared ground line when one foot is lifted. Do not add new feet. Compact SD low-top dark-brown sneakers with small cream soles and minimal cream laces, matching the source character's coarse crisp pixel art and dark contour. Shoe volume must stay small, approximately 1-2 logical pixels beyond the bare foot; no gigantic boots or high collars. Respect every foot angle in the reference, including toes pointing downward and heels lifted. The reference is invisible fitting geometry: output NO skin, NO legs, NO shorts, NO body, NO face, NO arms, NO ground, NO shadows, NO text or grid lines. True transparent background. Exactly 20 shoe pairs in the 4x5 layout; do not reorder or duplicate the source poses.",
+      "reason": "Three shoe forms in source cells; excluded from active parts.",
+      "reference": "body-pose-guide-20.png",
+      "sha256": "da9e7d113ca34520fe35df1ccf61de8691859aa684845196a6662e2e756d11e6",
+      "status": "rejected",
+      "transparent_background": true
+    },
+    {
+      "file": "raw-art/footwear.a.png",
+      "key": "footwear.a",
+      "prompt": "Use case: precise-object-edit. Create only pixel-art SHOES on true transparent background for the reference FEET-ONLY sheet. Exact 4 columns by 5 rows, 20 cells, portrait 4:5. The reference contains only the actual feet and cropped lower calves; it is AUTHORITATIVE fitting geometry. Replace each visible foot with a small opaque shoe at that same ankle/sole position and angle, retaining the stride, elevation and toe direction. Exactly two physical shoes maximum per cell. Where one foot is fully hidden, show only the visible shoe. Never add a third shoe. No central shoe, no floating detached shoe, no shoe on a calf, and no duplicated foot. The ankle opening should join the cropped calf, and the sole should extend at most one logical pixel below the original foot. Keep shoes compact, about 1-2 logical pixels wider than each foot. All cells must follow their respective original poses and positions, not a generic pair on a common baseline. Coarse crisp pixel art matching the reference pixel scale, dark contour and simple shading, no antialiasing. Output ONLY shoes: erase all skin, calves, legs and remaining clothes. No text, border, guides, ground or shadow. Preserve 4x5 grid order. Design: dark brown low-top sneakers, thin cream soles and minimal cream laces, rugged casual explorer style.",
+      "reference": "feet-only-pose-guide-20.png",
+      "sha256": "508111d1df278fd4683b68b4b778da54011db362e4f08dcdfe611124b2e240f5",
+      "status": "active",
+      "transparent_background": true
+    },
+    {
+      "file": "raw-art/footwear.b.png",
+      "key": "footwear.b",
+      "prompt": "Use case: precise-object-edit. Create only pixel-art SHOES on true transparent background for the reference FEET-ONLY sheet. Exact 4 columns by 5 rows, 20 cells, portrait 4:5. The reference contains only the actual feet and cropped lower calves; it is AUTHORITATIVE fitting geometry. Replace each visible foot with a small opaque shoe at that same ankle/sole position and angle, retaining the stride, elevation and toe direction. Exactly two physical shoes maximum per cell. Where one foot is fully hidden, show only the visible shoe. Never add a third shoe. No central shoe, no floating detached shoe, no shoe on a calf, and no duplicated foot. The ankle opening should join the cropped calf, and the sole should extend at most one logical pixel below the original foot. Keep shoes compact, about 1-2 logical pixels wider than each foot. All cells must follow their respective original poses and positions, not a generic pair on a common baseline. Coarse crisp pixel art matching the reference pixel scale, dark contour and simple shading, no antialiasing. Output ONLY shoes: erase all skin, calves, legs and remaining clothes. No text, border, guides, ground or shadow. Preserve 4x5 grid order. Design: warm medium-brown compact ankle work boots, darker toes, narrow dark soles, one small strap, no tall shafts, no oversized combat boots.",
+      "reference": "feet-only-pose-guide-20.png",
+      "sha256": "32ad231e5166373663b6af28d60e24a9eea4ae2ac1086a82ec71dbc249725b95",
+      "status": "active",
+      "transparent_background": true
+    },
+    {
+      "file": "raw-art/lower.b.png",
+      "key": "lower.b.legs",
+      "prompt": "Use case: stylized-concept. Edit this 4-column by 5-row, 20-cell pixel-art LEG-ONLY fitting guide into a transparent LONG TROUSERS overlay. Each source cell contains the exact visible shorts and bare leg silhouettes from a common body animation, with the feet already removed. These are authoritative poses, not suggestions. Replace EVERY shorts pixel and EVERY visible bare-leg pixel in each corresponding cell with fitted dark olive expedition TROUSERS down to the ankle openings. This must be an exact trace at the same coordinates and same leg angles: preserve the waistband, crotch, bends, crossed legs, stride, rear raised leg, left and right garment contours in each original cell. No new pose, no wider stride, no new ankle, no recentering, no stretching, no cell reordering. Output only garment pixels, NO skin, no feet, no shoes, no arms, no body or head, no shadow, no ground, no lettering or grid lines. The silhouette needs to fully cover the source bare legs, not become cropped shorts. Crisp coarse pixel art with dark outlines and restrained olive shading, small practical seams and belt, identical styling throughout the 20 poses. True transparent background. Portrait 4:5 canvas and exactly the original 4x5 cell arrangement. Do not add pixels in the large empty area above each source garment. Do not paint skin colour inside the trousers.",
+      "reference": "legs-only-pose-guide-20.png",
+      "sha256": "1cddd83cc873ff930fda4ee59c2a852d9fafca680382d7031fcd7acd9fba3266",
+      "status": "active",
+      "transparent_background": true
+    }
+  ],
+  "kind": "motion-matched-part-prompts",
+  "mode": "built-in imagegen",
+  "schema_version": 1
+}

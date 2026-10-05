@@ -1,0 +1,89 @@
+{
+  "appearance": {
+    "digest": "20e73128fc9c26510a985c0267be28b766722651952af6303c2ee111f54d7416",
+    "id": "sd.equipment.layers"
+  },
+  "archive": "sd-explorer-hair-repair-20261005.tar.gz",
+  "archive_bytes": 13510462,
+  "archive_sha256": "f592fd34e8c33508525fc6cc62ed01ff43d37bdf85a1f28e459f22bf1949ef5b",
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "f21f50fe8696ac42625c33614b3dbdd11dbed875e3d47cc1da4f6dfa77d69724",
+      "id": "sd.equipment.body"
+    }
+  ],
+  "code_sha256": {
+    "scripts/dev/sd_explorer_hair_repair.py": "5f20ea4b28f7481773a22e332e7434dfa05c22a09a7c38f5dbb819486a1ef3b5",
+    "sprite_gen/qa/parts_fitting.py": "704631d43774eaf6876d81c9f90829e05b29c5967ef4f1f4822529c07725717a"
+  },
+  "corrected_fitting_failed_samples": 0,
+  "corrected_size": [
+    44,
+    38
+  ],
+  "evidence_sha256": {
+    "asset-calibration.json": "e80c4aeed2087de5089b6e4c7957845a2759800c3b27af80da8c571f5808fec1",
+    "before-after-fit.png": "81f50ca29726dd1b65b20e23e9c36ac54e96ed75869491363c9a484ac8a5e84c",
+    "fit-repair.json": "a7f5b5d54b4574e5d9fb1e0b3a698116e2180348b1eba85c9cf36dc291788d1a",
+    "fit-rules.json": "f2a6773f024009c46b3cc9d14512fd4a89bdafd8e5171b2400c7fc460519eeff",
+    "generation-prompts.json": "ba52ff4d483d7142598ea851e76f0b33f10efbc61b351cc7f5b7f9fb5f2bfa82",
+    "validation.json": "2f0901de92ad2d8553f509154673728f4176912ee1964fd9c4661b92054bb594"
+  },
+  "fitting_policy": "parts.authored-layer-fit.v1",
+  "fitting_samples_per_attempt": 288,
+  "kind": "sd-hair-fitted-revision",
+  "limits": [
+    "manual calibration for one SD short-hair design",
+    "geometric fit is separate from visual/style acceptance",
+    "other wardrobe and equipment artwork is unchanged",
+    "provider calls remain in the authoring workflow; no live generator client in the retry recipe"
+  ],
+  "max_retries": 3,
+  "motion": {
+    "digest": "7d915eea4b2eb110a70f2696e1a891b56ab19fcad8dcaf40efa1bfbc839dc62c",
+    "id": "sd.equipment.video.motion"
+  },
+  "old_gap_failed_samples": 240,
+  "old_size": [
+    56,
+    49
+  ],
+  "part": "parts/sd.wardrobe.hair.a/b9bb5960fcdda3d88e3267395deea573a79fbad1343d5381c84468d6fa37236f/part.json",
+  "prompts": "sd-explorer-hair-repair-20261005.prompts.json",
+  "provider": "built-in imagegen",
+  "regression": {
+    "elapsed_seconds": 30.21,
+    "passed": 221,
+    "scope": "parts regression command in regression.log"
+  },
+  "release_ready": false,
+  "retries_used": 1,
+  "roundtrip": {
+    "all_file_hashes_match": true,
+    "files": 3366,
+    "restored_layer_and_rgba_samples": 9
+  },
+  "schema_version": 1,
+  "source_checkpoint": "sd-explorer-m1-layers-20261005.tar.gz",
+  "structural_validation": {
+    "appearance_clips_baked": 0,
+    "art_approved": false,
+    "body_motion_other_layers_preserved": true,
+    "clipped_pixels": 0,
+    "library_bytes_preserved": true,
+    "release_ready": false,
+    "runtime_texture_warps": 0,
+    "sample_evaluations": 288,
+    "states": 3,
+    "swap_clock_preserved": true
+  },
+  "toolchain": {
+    "export_policy": "parts.atlas-dedup.v1",
+    "numpy": "2.5.3",
+    "parts_code_sha256": "40d70142ecac98520f527f58310144fd79ef6a0c00a7af6b1ddcf59e5048a025",
+    "pillow": "12.3.0",
+    "python": "3.13.2",
+    "sprite-gen": "2.20.0"
+  }
+}

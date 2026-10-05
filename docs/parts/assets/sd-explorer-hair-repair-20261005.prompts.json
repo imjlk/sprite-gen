@@ -1,0 +1,32 @@
+{
+  "import": {
+    "canvas": [
+      128,
+      128
+    ],
+    "operation": "one-time nearest-neighbor sizing",
+    "playback": "immutable held picture plus existing head delta",
+    "target_bbox": [
+      42,
+      25,
+      86,
+      63
+    ]
+  },
+  "inputs": [
+    {
+      "file": "short-hair-reference.png",
+      "role": "edit target: old short hair"
+    },
+    {
+      "file": "bald-head-reference.png",
+      "role": "exact bald body geometry reference"
+    }
+  ],
+  "kind": "sd-hair-repair-prompts",
+  "mode": "built-in imagegen",
+  "output": "raw-hair-attempt-1.png",
+  "prompt": "Use case: precise-object-edit. Asset: transparent pixel-art HAIR LAYER for an SD paper-doll game, right-facing 3/4 view. Input image 1 is the old isolated short brown hair to revise; input image 2 is the EXACT bald base whose head and ear geometry must fit the new hair. Redraw only the hair layer. Keep the same short textured dark-brown hairstyle and restrained pixel palette. The old cap is far too wide and tall, with an oversized hollow opening; make the hair much more compact and snug on image 2. Hair volume should be only 3 to 6 logical pixels beyond the bald scalp, not an enormous helmet. Fill the hair cap continuously at the crown and rear of the scalp, so there is no empty detached-looking gap between hair and head. The inside edge must match the actual forehead, temple and ear of image 2; leave the real ear and face entirely visible, with a small precisely placed ear notch, not a huge hollow cavity. Preserve the scalp attachment and hairline position relative to that real ear. Coarse crisp hand-painted PIXEL ART with a dark 1 to 2 logical pixel contour, matching the existing sprite, no thin high-resolution wisps, no antialiasing. Output ONE isolated opaque brown hair cap only on true transparent background, with NO skin, NO face, NO ear drawing, NO neck, NO body, NO eyes, NO canvas border, NO guide lines, NO text. Keep a generous transparent margin around the cap. This is a smaller fitted revision of the first hair layer, not a full character.",
+  "schema_version": 1,
+  "transparent_background": true
+}

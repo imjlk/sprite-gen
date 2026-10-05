@@ -149,4 +149,5 @@ remain planned; no part art is approved.
 | [parts/06-baked-export.md](parts/06-baked-export.md) | Deterministic multi-state atlas/manifest, ordered dedup, Aseprite mapping, build locks and atomic release pointers |
 | [parts/07-m1-verification.md](parts/07-m1-verification.md) | M1 test evidence, reproducible five-rig synthetic builds, exact art limitations and remaining acceptance work |
 | [parts/initial-implementation-and-demo.md](parts/initial-implementation-and-demo.md) | PR00–06 status, snapshot/digest/timing rules, and the five-slot SD parts demo art brief |
+| [parts/sd-explorer-motion-repair-20261005.md](parts/sd-explorer-motion-repair-20261005.md) | Direct pose-matched layers, synchronized walk/run playback, all-slot fitting evidence and remaining art defects |
 | [parts/customization-and-variation.md](parts/customization-and-variation.md) | Basic and detailed slots, variation/palette/preset rules, rig-specific fitting, and expanded multi-body acceptance scope |

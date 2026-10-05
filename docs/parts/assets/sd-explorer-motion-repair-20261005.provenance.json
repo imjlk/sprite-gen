@@ -1,0 +1,109 @@
+{
+  "archive": {
+    "bytes": 5930771,
+    "file": "sd-explorer-motion-repair-20261005.tar.gz",
+    "files": 1119,
+    "sha256": "c494126c0356fc46c4cca79e7cc5ec2be6cfc6485887c0c158b94141a27e2138"
+  },
+  "archive_roundtrip": {
+    "all_file_hashes_match": true,
+    "restored_layer_and_pixel_cases": 9
+  },
+  "art_approved": false,
+  "browser_check": {
+    "all_empty_and_mixed_preserve_body_texture_position_clock": true,
+    "mode": "independent layers; frame interpolation",
+    "sample": "run.right/sample.3",
+    "seek": 475,
+    "states": [
+      "walk",
+      "run"
+    ]
+  },
+  "fitting": {
+    "art_approved": false,
+    "calibration": "SD source-specific palette/y-region masks and authored bounds; no general anatomy or retargeting model",
+    "failed_checks": 8,
+    "kind": "parts-all-slot-fit-evidence",
+    "motion": {
+      "digest": "b72157efc86f8c3a1143c84d1f562cc462f15aec8acc1cb5b94833807ea9da43",
+      "id": "sd.matched.video.motion"
+    },
+    "part_piece_pose_checks": 274,
+    "release_ready": false,
+    "rework_parts": [
+      "sd.wardrobe.footwear.a",
+      "sd.wardrobe.footwear.b",
+      "sd.wardrobe.upper.a"
+    ],
+    "schema_version": 1,
+    "slots_checked": [
+      "hair",
+      "expression",
+      "upper",
+      "lower",
+      "footwear",
+      "headwear",
+      "gloves",
+      "back_accessory"
+    ]
+  },
+  "generation": "built-in imagegen garment/footwear drawings; existing three shared real Grok body videos",
+  "kind": "sd-pose-synchronized-layer-repair",
+  "known_limits": [
+    "Five tank-top poses (1–2 px) and three footwear cases (1–4 px) retain required-coverage errors: 15 pixels total.",
+    "Coverage calibration uses this SD source palette/regions; undeclared anatomy, garment style and contact remain unverified.",
+    "Review videos are diagnostic outputs, not installed appearance motion clips."
+  ],
+  "motion": {
+    "appearance_clips_baked": 0,
+    "art_approved": false,
+    "body_split": false,
+    "curated_cadence": {
+      "idle": 1,
+      "run": 12,
+      "walk": 8
+    },
+    "motion": {
+      "digest": "b72157efc86f8c3a1143c84d1f562cc462f15aec8acc1cb5b94833807ea9da43",
+      "id": "sd.matched.video.motion"
+    },
+    "native_source_cadence": 24,
+    "release_ready": false,
+    "runtime_texture_warps": 0,
+    "sampling": "idle four source poses; walk one 24-source-frame cycle sampled every three; run eight consecutive poses slowed 2x",
+    "source_geometry_and_body_pixels_preserved": true,
+    "source_motion": {
+      "digest": "7d915eea4b2eb110a70f2696e1a891b56ab19fcad8dcaf40efa1bfbc839dc62c",
+      "id": "sd.equipment.video.motion"
+    }
+  },
+  "recipes": {
+    "scripts/dev/sd_explorer_matched_layers.py": "ab04d6879eb5066118fc3c60bcaa0cef1a0f3412c360c7e5fd612dde2a6ec980",
+    "sprite_gen/qa/parts_fitting.py": "59284f129cae12dbc9a4fdd3c83670d2a47b88e75e5b5f0732b13a093ae3277b",
+    "sprite_gen/serve/serve_parts.py": "1f33a34d017df4c7d4980fcb0d6a1eaa62fc2c3f0507f483da31d077aa4cf635"
+  },
+  "regression_tests": {
+    "full_suite_rerun": false,
+    "javascript_syntax": "passed",
+    "parts_and_legacy": "227 passed in 31.12s"
+  },
+  "release_ready": false,
+  "schema_version": 1,
+  "toolchain": {
+    "pillow": "12.3.0",
+    "python": "3.13.2"
+  },
+  "validation": {
+    "appearance_clips_baked": 0,
+    "art_approved": false,
+    "base_appearances": 32,
+    "clipped_pixels": 0,
+    "curated_body_samples": 20,
+    "release_ready": false,
+    "runtime_texture_warps": 0,
+    "scene_evaluations": 640,
+    "shared_states": 3,
+    "whole_body_pixels_preserved": true
+  }
+}
