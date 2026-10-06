@@ -30,12 +30,12 @@ from sprite_gen.video import source as video_source
 from sprite_gen.video import rife_install
 from sprite_gen.effects import recolor, shadow
 from sprite_gen.scene import render, inspect_scene
-from sprite_gen.serve import serve_compose, serve_curation, serve_parts
+from sprite_gen.serve import serve_compose, serve_curation, serve_parts, serve_parts_review
 from sprite_gen.spec import migrate_breathe, migrate_request, parts_workspace
 from sprite_gen.curate import parts_motion, parts_appearance, parts_poses, parts_review, parts_sockets
 from sprite_gen.qa import inspect_parts, parts_fit, parts_stability
 from sprite_gen.compose import compose_parts, parts_build, export_parts
-from sprite_gen.frames import parts_import, parts_loop_native, parts_pose_sheet, parts_rebind, parts_segments
+from sprite_gen.frames import parts_import, parts_loop_native, parts_pose_sheet, parts_production, parts_rebind, parts_segments
 from sprite_gen.gen.prepare import BODY_PLAN_HELP, STYLE_DEFAULT, _outline_config
 from sprite_gen.spec.subject import SUBJECTS
 from sprite_gen.workflow import guide, preferences
@@ -494,6 +494,66 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         "Split a drawn garment piece into pieces by the body segment under each pixel (torso, front and back sleeve).",
         parts_segments.add_split_arguments,
         parts_segments.run_split,
+    ),
+    "parts-part-init": (
+        "Start a part production from a config: slot, node, socket, how drawings are cut, pieces.",
+        parts_production.add_init_arguments,
+        parts_production.run_init,
+    ),
+    "parts-part-config": (
+        "Change a production's prompt, sheet, cut, wearing or pieces for the drawings still to come.",
+        parts_production.add_config_arguments,
+        parts_production.run_config,
+    ),
+    "parts-part-sheet": (
+        "Pose sheets for a production's poses still to draw (never drawn or rejected), over worn parts.",
+        parts_production.add_sheet_arguments,
+        parts_production.run_sheet,
+    ),
+    "parts-part-draw": (
+        "Ask an image provider to draw a production's pending sheet pages (optional; pages may be drawn by hand).",
+        parts_production.add_draw_arguments,
+        parts_production.run_draw,
+    ),
+    "parts-part-slice": (
+        "Cut drawn pages into immutable per-pose candidates (drawn cell, mask, part) and select them.",
+        parts_production.add_slice_arguments,
+        parts_production.run_slice,
+    ),
+    "parts-part-mask": (
+        "Replace a pose's part region with an explicit mask on its drawn cell.",
+        parts_production.add_mask_arguments,
+        parts_production.run_mask,
+    ),
+    "parts-part-adopt": (
+        "Take an existing pack's drawings into a production as per-pose candidates.",
+        parts_production.add_adopt_arguments,
+        parts_production.run_adopt,
+    ),
+    "parts-part-check": (
+        "Check each selected drawing per pose: alignment, cut loss, specks, holes, palette, jumps between poses.",
+        parts_production.add_part_arguments,
+        parts_production.run_check,
+    ),
+    "parts-part-build": (
+        "Build a production's selected drawings into pieces and import the part pack.",
+        parts_production.add_build_arguments,
+        parts_production.run_build,
+    ),
+    "parts-part-review": (
+        "Render the built part on the body alone and approve or reject it pose by pose (a part review).",
+        parts_production.add_review_arguments,
+        parts_production.run_review,
+    ),
+    "parts-part-status": (
+        "Report every production's poses: missing, checked, approved, rejected, and the next step.",
+        parts_production.add_status_arguments,
+        parts_production.run_status,
+    ),
+    "parts-review-serve": (
+        "Open a local review desk for part productions: approve or reject poses, redraw the rejected ones.",
+        serve_parts_review.add_arguments,
+        serve_parts_review.run,
     ),
     "parts-coverage": (
         "Report the part x clip x pose drawing matrix: what is drawn, reused by pose, hidden or missing.",

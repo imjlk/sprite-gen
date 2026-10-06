@@ -19,7 +19,7 @@ from pathlib import Path
 from PIL import Image
 
 from sprite_gen._deps import np
-from sprite_gen.compose import compose_parts
+from sprite_gen.compose import compose_parts, parts_resolve
 from sprite_gen.frames import extract, pixel_grid
 from sprite_gen.curate import parts_motion
 from sprite_gen.qa import parts_stability
@@ -29,14 +29,15 @@ from sprite_gen.spec.runio import atomic_write_text
 SHEET_POLICY = "parts.pose-sheet.v1"
 CLASS_POLICY = "parts.pose-classes.v1"
 _CELL = contract._record({"clip": contract._id, "sample": contract._id, "body_sha256": contract._hash,
-                          "origin": contract._point})
+                          "origin": contract._point, "under_sha256": contract._hash}, optional=("under_sha256",))
 _GUIDE = contract._record({
     "kind": contract._enum("parts-pose-sheet"), "schema_version": contract._positive,
     "policy": contract._string, "motion": contract._ref, "canvas": contract._point,
     "crop": contract._rectangle, "scale": contract._positive, "gutter": contract._integer,
     "columns": contract._positive, "size": contract._point, "key": contract._rgb,
     "sheet": contract._asset, "cells": contract._list(_CELL, nonempty=True), "prompt_hint": contract._string,
-})
+    "wearing": contract._list(contract._ref, unique=True),
+}, optional=("wearing",))
 
 
 _MEMBER = contract._record({"clip": contract._id, "sample": contract._id})
@@ -155,8 +156,49 @@ def _one_per_pose(samples):
     return kept
 
 
+def worn_packs(registry, index, wearing):
+    """The active packs a sheet is drawn over, each bound to the active motion."""
+    packs = []
+    for name in wearing or ():
+        pack = registry.get(name)
+        if pack is None or pack["kind"] != "parts-pack" or pack["role"] != "part":
+            raise contract.PartsContractError(f"--wearing {name} is not an active part")
+        if not any(b["motion"] == index["motion"] and b["rig"] == index["rig"] for b in pack["bindings"]):
+            raise contract.PartsContractError(f"--wearing {name} has no binding for the active motion")
+        packs.append(pack)
+    return packs
+
+
+def dressed_body(motion, index, topology, clip_id, sample, load, packs):
+    """The motion raster with worn parts on it for this sample, in draw-table order.
+
+    A part drawn over others (boots over trousers) is drawn and cut against this, so the
+    model sees where it ends and the cut keeps only what is new. Masks are not applied.
+    """
+    canvas = load(motion, sample["image"]).convert("RGBA").copy()
+    if not packs:
+        return canvas
+    ranks = parts_resolve.layer_ranks(topology)
+    entries = []
+    for pack in packs:
+        binding = next(b for b in pack["bindings"] if b["motion"] == index["motion"] and b["rig"] == index["rig"])
+        for piece in binding["pieces"]:
+            placement = piece["sample_map"].get(clip_id, {}).get(sample["id"])
+            socket = None if placement is None else sample["sockets"].get(placement["target_socket"])
+            if placement is None or not placement["visible"] or socket is None or not socket["visible"]:
+                continue
+            entries.append((parts_resolve.rank({"node": piece["node"], "provides": piece["provides"]}, ranks),
+                            f"{pack['id']}.{piece['id']}", pack, placement, socket))
+    for _, _, pack, placement, socket in sorted(entries, key=lambda entry: entry[:2]):
+        offset = [t - p + d for t, p, d in zip(socket["position"], placement["pivot"], placement["offset"])]
+        layer = Image.new("RGBA", canvas.size)
+        layer.paste(load(pack, placement["image"]).convert("RGBA"), tuple(offset))
+        canvas.alpha_composite(layer)
+    return canvas
+
+
 def build_sheet(assembly, out, *, clips=None, scale=4, crop=None, key="#ff00ff", gutter=8, columns=None, part="part",
-                classes=None, page_size=None, aspect=None, by_pose=False, poses=None):
+                classes=None, page_size=None, aspect=None, by_pose=False, poses=None, wearing=None):
     root, index, registry, _ = parts_motion._active(assembly)
     motion = registry[index["motion"]["id"]]
     if motion["freeze"] is None:
@@ -192,6 +234,10 @@ def build_sheet(assembly, out, *, clips=None, scale=4, crop=None, key="#ff00ff",
             raise contract.PartsContractError("aspect must be W:H, e.g. 1:1 or 3:2")
         aspect = (int(ratio[0]), int(ratio[1]))
     load = compose_parts.AssetLoader(root, index)
+    packs = worn_packs(registry, index, wearing)
+    topology = registry[rig["topology"]["id"]]
+    def body_of(clip_id, sample):
+        return dressed_body(motion, index, topology, clip_id, sample, load, packs)
     out = Path(out).absolute()
     pages = [samples] if page_size is None else [samples[i:i+page_size] for i in range(0, len(samples), page_size)]
     # Every page keeps the first page's grid: a short last page with fewer columns is a smaller
@@ -201,15 +247,17 @@ def build_sheet(assembly, out, *, clips=None, scale=4, crop=None, key="#ff00ff",
     written = []
     for number, chunk in enumerate(pages, 1):
         folder = out if len(pages) == 1 else out / f"page-{number}"
-        written.append(_page(folder, chunk, motion, index, load, canvas=canvas, crop=crop, scale=scale, key=key,
-                             gutter=gutter, columns=columns, part=part, aspect=aspect, rows=rows))
+        written.append(_page(folder, chunk, motion, index, body_of, canvas=canvas, crop=crop, scale=scale, key=key,
+                             gutter=gutter, columns=columns, part=part, aspect=aspect, rows=rows,
+                             wearing=[contract.reference(pack) for pack in packs]))
     first = written[0]
     return {"policy": SHEET_POLICY, "sheet": first["sheet"], "guide": first["guide"], "pages": written,
             "cells": sum(p["cells"] for p in written), "size": first["size"], "scale": scale, "crop": crop,
             "prompt_hint": first["prompt_hint"], "status": "draft", "release_ready": False}
 
 
-def _page(out, samples, motion, index, load, *, canvas, crop, scale, key, gutter, columns, part, aspect=None, rows=None):
+def _page(out, samples, motion, index, body_of, *, canvas, crop, scale, key, gutter, columns, part, aspect=None, rows=None,
+          wearing=()):
     columns = columns or math.ceil(math.sqrt(len(samples)))
     cell = [(crop[2]-crop[0])*scale, (crop[3]-crop[1])*scale]
     rows = max(rows or 0, math.ceil(len(samples)/columns))
@@ -224,9 +272,10 @@ def _page(out, samples, motion, index, load, *, canvas, crop, scale, key, gutter
     cells = []
     for n, (clip_id, sample) in enumerate(samples):
         origin = [gutter+n % columns*(cell[0]+gutter), gutter+n//columns*(cell[1]+gutter)]
-        body = load(motion, sample["image"]).convert("RGBA").crop(tuple(crop))
-        sheet.alpha_composite(body.resize(tuple(cell), Image.Resampling.NEAREST), tuple(origin))
-        cells.append({"clip": clip_id, "sample": sample["id"], "body_sha256": sample["image"]["sha256"], "origin": origin})
+        dressed = body_of(clip_id, sample)
+        sheet.alpha_composite(dressed.crop(tuple(crop)).resize(tuple(cell), Image.Resampling.NEAREST), tuple(origin))
+        cells.append({"clip": clip_id, "sample": sample["id"], "body_sha256": sample["image"]["sha256"], "origin": origin}
+                     | ({"under_sha256": assets.sha256(assets.png_bytes(dressed))} if wearing else {}))
     out.mkdir(parents=True, exist_ok=True)
     data = assets.png_bytes(sheet)
     (out/"pose-sheet.png").write_bytes(data)
@@ -235,6 +284,7 @@ def _page(out, samples, motion, index, load, *, canvas, crop, scale, key, gutter
         "kind": "parts-pose-sheet", "schema_version": 1, "policy": SHEET_POLICY, "motion": index["motion"],
         "canvas": canvas, "crop": crop, "scale": scale, "gutter": gutter, "columns": columns, "size": size,
         "key": key, "sheet": {"file": "pose-sheet.png", "sha256": assets.sha256(data)}, "cells": cells,
+        **({"wearing": list(wearing)} if wearing else {}),
         "prompt_hint": (f"Keep this {size[0]}x{size[1]} image and its {len(cells)}-cell grid exactly. In every cell, "
             f"draw only the {part} worn by that exact pose, at the same scale and position, as {scale}x{scale} pixel blocks. "
             f"Erase the body: every other pixel stays flat {hex_key}. Do not move, mirror or resize any cell."),
@@ -381,10 +431,108 @@ def drawn_cells(pairs, index, clips, tolerance):
                                              size=(cell[0]//scale, cell[1]//scale)), sheet
 
 
+def _under(sheet, entry, sample, motion, index, registry, topology, load):
+    """The raster a cell was drawn over: the body, or the body wearing the guide's parts."""
+    if not sheet.get("wearing"):
+        return load(motion, sample["image"])
+    packs = []
+    for ref in sheet["wearing"]:
+        if registry.get(ref["id"], {}).get("digest") != ref["digest"]:
+            raise contract.PartsContractError(f"pose sheet was drawn over {ref['id']}, which has changed since")
+        packs.append(registry[ref["id"]])
+    dressed = dressed_body(motion, index, topology, entry["clip"], sample, load, packs)
+    if assets.sha256(assets.png_bytes(dressed)) != entry["under_sha256"]:
+        raise contract.PartsContractError(f"{entry['clip']}/{entry['sample']}: the worn parts render differently than when drawn")
+    return dressed
+
+
+def enclosed(mask):
+    """Transparent pixels enclosed by the mask: not reachable from the image border."""
+    from collections import deque
+    height, width = mask.shape
+    free, seen = ~mask, np.zeros(mask.shape, dtype=bool)
+    queue = deque((y, x) for y in range(height) for x in range(width)
+                  if (y in (0, height-1) or x in (0, width-1)) and free[y, x])
+    for y, x in queue:
+        seen[y, x] = True
+    while queue:
+        y, x = queue.popleft()
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            ny, nx = y+dy, x+dx
+            if 0 <= ny < height and 0 <= nx < width and free[ny, nx] and not seen[ny, nx]:
+                seen[ny, nx] = True
+                queue.append((ny, nx))
+    return free & ~seen
+
+
+def cover(dressed, body, *, threshold=24, minimum=6, prune=2):
+    """A part that covers the body, taken whole: what the drawing changed, its enclosed gaps filled.
+
+    Subtracting the body pixel by pixel (with slack for redraw drift) also removes the part's
+    pixels that match the body's outline or shading underneath, so the body shows through a
+    hair or a hat band. Here the region is the silhouette of change, gaps inside it are the
+    drawing's own pixels, and only rim pixels identical to the body under them are trimmed.
+    """
+    d, b = np.asarray(dressed).astype(int), np.asarray(body).astype(int)
+    changed = (np.abs(d[..., :3]-b[..., :3]).max(-1) > threshold) | ((d[..., 3] > 0) != (b[..., 3] > 0))
+    mask = changed & (d[..., 3] > 0)
+    part = drop_islands(Image.fromarray(np.where(mask[..., None], d, 0).astype(np.uint8)), minimum, dark_share=1.01)
+    mask = np.asarray(part)[..., 3] > 0
+    mask |= enclosed(mask) & (d[..., 3] > 0)
+    part = keep_outline(Image.fromarray(np.where(mask[..., None], d, 0).astype(np.uint8)), dressed, luma=60)
+    mask = np.asarray(part)[..., 3] > 0
+    same = np.abs(d - b).max(-1) == 0
+    for _ in range(prune):
+        padded = np.pad(mask, 1)
+        rim = mask & ~(padded[2:, 1:-1] & padded[:-2, 1:-1] & padded[1:-1, 2:] & padded[1:-1, :-2])
+        mask &= ~(rim & same)
+    return Image.fromarray(np.where(mask[..., None], d, 0).astype(np.uint8))
+
+
+METHODS = ("difference", "covering")
+
+
+def cut_cell(drawn, body, *, method="difference", body_threshold=None, near_body=None, min_island=0, outline=False,
+             fill_holes=0, close_body=0, colors=None, cover_threshold=24):
+    """One drawn cell to the part alone, on the cell's own crop of the canvas.
+
+    `difference` removes what still matches the body (garments drawn over a dressed sheet);
+    `covering` keeps everything the drawing changed, whole (hair, hats, loose hoods).
+    Returns the part and {alignment with the body, holes filled}.
+    """
+    contract._enum(*METHODS)(method, "method")
+    if near_body is not None:
+        drawn = within_body(drawn, body, near_body)
+    alignment = None
+    part = drawn
+    if body_threshold is not None or method == "covering":
+        # A dressed cell redraws the body: its figure should cover the body's own pixels.
+        # A model that rescaled or shifted the page shows up here before anything is cut.
+        drawn_alpha, body_alpha = np.asarray(drawn)[..., 3] > 0, np.asarray(body)[..., 3] > 0
+        alignment = round(float((drawn_alpha & body_alpha).sum() / max(1, (drawn_alpha | body_alpha).sum())), 3)
+    if method == "covering":
+        part = cover(drawn, body, threshold=cover_threshold)
+    elif body_threshold is not None:
+        part = subtract_body(drawn, body, body_threshold)
+        if min_island:
+            part = drop_islands(part, min_island, body=body)
+        if outline:
+            part = keep_outline(part, drawn)
+    holes = 0
+    if fill_holes:
+        part, holes = pixel_grid.fill_small_holes(part, fill_holes)
+    if close_body:
+        part, closed = pixel_grid.close_over(part, body, neighbours=close_body)
+        holes += closed
+    if colors is not None:
+        part = pixel_grid.snap(part, colors)
+    return part, {"alignment": alignment, "holes": holes}
+
+
 def slice_sheet(assembly, guide=None, art=None, out=None, *, part_id, slot, node, socket, piece="piece", design_id=None,
                 binding_id=None, tolerance=48, body_threshold=None, mode="raster", pages=(), classes=None,
                 palette=None, outline=False, near_body=None, min_island=0, region=None, fill_holes=0,
-                close_body=0, by_pose=False):
+                close_body=0, by_pose=False, method="difference"):
     root, index, registry, _ = parts_motion._active(assembly)
     pairs = list(pages) + ([(guide, art)] if guide is not None else [])
     if not pairs or any(g is None or a is None for g, a in pairs) or out is None:
@@ -421,29 +569,11 @@ def slice_sheet(assembly, guide=None, art=None, out=None, *, part_id, slot, node
         crop, canvas = sheet["crop"], sheet["canvas"]
         if (entry["clip"], entry["sample"]) in drawn_samples:
             raise contract.PartsContractError(f"{entry['clip']}/{entry['sample']} is drawn on two pages")
-        body = load(motion, sample["image"]).crop(tuple(crop))
-        if near_body is not None:
-            reduced = within_body(reduced, body, near_body)
-        alignment = None
-        if body_threshold is not None:
-            dressed = reduced
-            # A dressed cell redraws the body: its figure should cover the body's own pixels.
-            # A model that rescaled or shifted the page shows up here before anything is cut.
-            drawn_alpha, body_alpha = np.asarray(dressed)[..., 3] > 0, np.asarray(body)[..., 3] > 0
-            alignment = round(float((drawn_alpha & body_alpha).sum() / max(1, (drawn_alpha | body_alpha).sum())), 3)
-            reduced = subtract_body(reduced, body, body_threshold)
-            if min_island:
-                reduced = drop_islands(reduced, min_island, body=body)
-            if outline:
-                reduced = keep_outline(reduced, dressed)
-        holes = 0
-        if fill_holes:
-            reduced, holes = pixel_grid.fill_small_holes(reduced, fill_holes)
-        if close_body:
-            reduced, closed = pixel_grid.close_over(reduced, body, neighbours=close_body)
-            holes += closed
-        if colors is not None:
-            reduced = pixel_grid.snap(reduced, colors)
+        body = _under(sheet, entry, sample, motion, index, registry, topology, load).crop(tuple(crop))
+        reduced, info = cut_cell(reduced, body, method=method, body_threshold=body_threshold, near_body=near_body,
+                                 min_island=min_island, outline=outline, fill_holes=fill_holes, close_body=close_body,
+                                 colors=colors)
+        alignment, holes = info["alignment"], info["holes"]
         native = Image.new("RGBA", tuple(canvas))
         native.alpha_composite(reduced, tuple(crop[:2]))
         if region is not None:
@@ -545,6 +675,8 @@ def add_sheet_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--page-size", type=int, help="at most this many cells per sheet; pages go to page-N/ folders")
     parser.add_argument("--aspect", help="pad each sheet to this W:H ratio (an image model's output, e.g. 1:1 or 3:2)")
     parser.add_argument("--by-pose", action="store_true", help="one cell per pose_id instead of one per sample")
+    parser.add_argument("--wearing", action="append", default=None,
+                        help="active part ID already worn in every cell (repeatable); slicing removes it again")
     parser.add_argument("--poses", type=lambda v: [p for p in v.split(",") if p],
                         help="with --by-pose: comma-separated pose IDs to draw (new or failed poses only)")
 
@@ -581,6 +713,8 @@ def add_slice_arguments(parser: argparse.ArgumentParser):
                         help="drop pixels within this channel distance of the body; for sheets returned dressed")
     parser.add_argument("--by-pose", action="store_true",
                         help="write a pose_map (one drawing per pose_id, reused by every sample of the pose)")
+    parser.add_argument("--method", choices=METHODS, default="difference",
+                        help="difference: remove what matches the body; covering: keep everything the drawing changed (hair, hats)")
 
 
 def _page_pair(value):

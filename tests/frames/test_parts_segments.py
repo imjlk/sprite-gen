@@ -169,3 +169,16 @@ def test_split_by_component_keeps_pixel_cut_for_strokes_without_a_clear_owner(tm
     whole = parts_segments.split_piece(garment / "import.json", body["segments"], tmp_path / "c", piece="pair", into=into,
                                        by_component=True)
     assert whole["pieces"]["upper"]["pixels"] > 0 and whole["pieces"]["lower"]["pixels"] > 0
+
+
+def test_near_lighter_swaps_a_pair_painted_the_wrong_way_round():
+    body = Image.new("RGBA", (10, 4), (0, 0, 0, 0))
+    for x in range(5):
+        for y in range(4):
+            body.putpixel((x, y), (60, 40, 40, 255))      # left limb: dark, the far one
+            body.putpixel((x+5, y), (230, 190, 170, 255))  # right limb: light, the near one
+    labels = np.zeros((4, 10), dtype=np.int16)
+    labels[:, 5:] = 1  # painted: left as "near" (1)... wrong way round below
+    labels = 1 - labels
+    swapped = parts_segments.swap_by_shading(labels, body, ["far", "near"], [("far", "near")])
+    assert swapped == ["far/near"] and (labels[:, :5] == 0).all() and (labels[:, 5:] == 1).all()

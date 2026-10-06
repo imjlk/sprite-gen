@@ -247,3 +247,43 @@ def test_poses_limit_a_sheet_to_the_poses_still_to_draw(tmp_path):
         sheets.build_sheet(assembly, tmp_path / "x", by_pose=True, poses=["run.01"])
     with pytest.raises(contract.PartsContractError, match="--by-pose"):
         sheets.build_sheet(assembly, tmp_path / "y", poses=["walk.02"])
+
+
+def test_a_sheet_drawn_over_worn_parts_cuts_only_the_new_drawing(tmp_path):
+    from parts_helpers import part_spec
+    assembly = frozen_workspace(tmp_path)
+    source = tmp_path / "worn"
+    source.mkdir()
+    Image.new("RGBA", (6, 6), (20, 160, 60, 255)).save(source / "piece.png")
+    worn = parts_import.import_pack(assembly, part_spec(tmp_path / "worn.json", assembly, source, pivot=(3, 3)), source)
+    sheets.build_sheet(assembly, tmp_path / "sheet", scale=2, wearing=[worn["part"]["id"]])
+    guide = json.loads((tmp_path / "sheet/pose-sheet.json").read_text())
+    assert guide["wearing"] == [worn["part"]] and all(c["under_sha256"] != c["body_sha256"] for c in guide["cells"])
+    dressed = Image.open(tmp_path / "sheet/pose-sheet.png").convert("RGBA")
+    expected = drawn_sheet(guide, tmp_path / "drawn.png", body=dressed)
+    sliced = sheets.slice_sheet(assembly, tmp_path / "sheet/pose-sheet.json", tmp_path / "drawn.png", tmp_path / "out",
+                                part_id="test.badge", slot="hair", node="hair_front", socket="head", body_threshold=8)
+    for row in sliced["results"]:
+        image = Image.open(tmp_path / "out" / row["file"])
+        x, y = expected[(row["clip"], row["sample"])]
+        assert image.getbbox() == (x, y, x+6, y+4)  # the worn green square is not in the cut
+    plain = sheets.slice_sheet(assembly, tmp_path / "sheet/pose-sheet.json", tmp_path / "drawn.png", tmp_path / "x",
+                               part_id="test.badge", slot="hair", node="hair_front", socket="head", body_threshold=8)
+    assert plain["results"][0]["pixels"] == sliced["results"][0]["pixels"]
+    with pytest.raises(contract.PartsContractError, match="not an active part"):
+        sheets.build_sheet(assembly, tmp_path / "bad", wearing=["nope"])
+
+
+def test_covering_keeps_part_pixels_that_match_the_body_under_them():
+    body = Image.new("RGBA", (24, 24))
+    draw = ImageDraw.Draw(body)
+    draw.rectangle((4, 4, 19, 19), fill=(230, 180, 150, 255), outline=(40, 20, 20, 255))
+    hat = body.copy()
+    ImageDraw.Draw(hat).rectangle((2, 2, 21, 9), fill=(200, 170, 110, 255))
+    ImageDraw.Draw(hat).rectangle((2, 6, 21, 7), fill=(40, 20, 20, 255))  # a band in the body's outline color
+    band = [(x, 6) for x in range(2, 22)]
+    cut, _ = sheets.cut_cell(hat, body, body_threshold=40)
+    kept, info = sheets.cut_cell(hat, body, method="covering")
+    assert sum(cut.getpixel(p)[3] > 0 for p in band) < len(band)  # pixel subtraction loses band pixels
+    assert all(kept.getpixel(p)[3] > 0 for p in band) and info["alignment"] is not None
+    assert kept.getpixel((10, 15))[3] == 0  # the body below the hat stays out of the part

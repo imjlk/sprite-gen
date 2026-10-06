@@ -28,6 +28,13 @@ drawing for the new pose.
 sprite-gen parts-coverage --assembly ./library/assembly.json --markdown coverage.md
 ```
 
+Part productions ([10-production.md](10-production.md)) add a part review that
+does not depend on any appearance: `parts-part-review` renders the built pack on
+the body alone, records a decision per pose (`pose.<id>` checks) and seals a
+`parts-review` with scope `part` and `evidence.appearance: null`. It survives
+imports of other parts and goes when its own pack, body or motion changes;
+only appearance reviews are dropped on every pack change.
+
 The decision file explicitly contains all five checks:
 
 ```json

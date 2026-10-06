@@ -119,6 +119,24 @@ def label_image(painted, body, colors, tolerance):
     return labels, painted_share
 
 
+def swap_by_shading(labels, body, nodes, pairs):
+    """Swap a far/near label pair when the "near" one covers the darker body pixels.
+
+    A side view shades the far limb darker. Painters, and image models more often, mix up
+    which arm or leg is near; the shading of the body under the labels settles it.
+    """
+    swapped = []
+    pixels = np.asarray(body.convert("RGBA")).astype(float)
+    luma = pixels[..., :3] @ np.array([0.299, 0.587, 0.114])
+    for far, near in pairs:
+        a, b = nodes.index(far), nodes.index(near)
+        on_far, on_near = labels == a, labels == b
+        if on_far.sum() >= 4 and on_near.sum() >= 4 and luma[on_near].mean() < luma[on_far].mean():
+            labels[on_far], labels[on_near] = b, a
+            swapped.append(f"{far}/{near}")
+    return swapped
+
+
 def _labels_image(labels, colors):
     palette = np.array([(*c, 255) for c in colors.values()] + [(0, 0, 0, 0)], dtype=np.uint8)
     return Image.fromarray(palette[np.where(labels >= 0, labels, len(colors))], "RGBA")
@@ -147,7 +165,7 @@ def _painted(labels_dir, pages, index, motion, tolerance):
 
 
 def segment_body(assembly, out, *, colors, body_id, labels=None, pages=(), design_id=None, binding_id=None,
-                 tolerance=40, key_tolerance=48, by_pose=None):
+                 tolerance=40, key_tolerance=48, by_pose=None, near_lighter=()):
     root, index, registry, _ = parts_motion._active(assembly)
     motion = registry[index["motion"]["id"]]
     if motion["freeze"] is None:
@@ -157,6 +175,8 @@ def segment_body(assembly, out, *, colors, body_id, labels=None, pages=(), desig
     rig = registry[index["rig"]["id"]]
     topology = registry[rig["topology"]["id"]]
     colors, provides = read_colors(colors)
+    for far, near in near_lighter:
+        contract._members([far, near], colors, "near_lighter")
     contract._members([n for nodes in provides.values() for n in nodes], {n["id"] for n in topology["nodes"]}, "colors")
     root_node = next(n["id"] for n in topology["nodes"] if n["parent"] is None)
     root_socket = next((s["id"] for s in topology["sockets"] if s["node"] == root_node), None)
@@ -185,6 +205,7 @@ def segment_body(assembly, out, *, colors, body_id, labels=None, pages=(), desig
             raise contract.PartsContractError(f"label image for {clip['id']}/{sample['id']} is not the rig canvas {size}")
         body = load(motion, sample["image"])
         labels, painted_pixels = label_image(paint, body, colors, tolerance)
+        swapped = swap_by_shading(labels, body, list(colors), near_lighter)
         pixels = np.asarray(body)
         files = {}
         for number, node in enumerate(colors):
@@ -202,7 +223,7 @@ def segment_body(assembly, out, *, colors, body_id, labels=None, pages=(), desig
         cut[key] = cut[clip["id"], sample["id"]] = (files, list(sample["sockets"][root_socket]["position"]))
         report.append({"clip": clip["id"], "sample": sample["id"], "pose": sample["pose_id"],
                        "pixels": {node: count for node, (_, count) in files.items()},
-                       "painted_share": round(painted_pixels / area, 3) if area else 0.0})
+                       "painted_share": round(painted_pixels / area, 3) if area else 0.0, "swapped": swapped})
     # Label maps for every sample, also the ones that share a pose, for garment splitting.
     for clip, sample in samples:
         target = out / "labels" / clip["id"] / f"{sample['id']}.png"
@@ -421,6 +442,13 @@ def _assets(value):
             yield from _assets(item)
 
 
+def _pair(value):
+    far, sep, near = value.partition(":")
+    if not sep or not far or not near:
+        raise argparse.ArgumentTypeError("expected FAR:NEAR")
+    return far, near
+
+
 def add_segment_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--assembly", required=True, type=Path)
     parser.add_argument("--out", required=True, type=Path)
@@ -434,6 +462,8 @@ def add_segment_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--binding-id")
     parser.add_argument("--tolerance", type=int, default=40, help="max channel distance from a label color (default 40)")
     parser.add_argument("--key-tolerance", type=int, default=48, help="sheet key distance when reading pages (default 48)")
+    parser.add_argument("--near-lighter", action="append", default=[], type=_pair,
+                        help="FAR:NEAR label pair swapped when the near label lies on darker body pixels (repeatable)")
     parser.add_argument("--by-sample", dest="by_pose", action="store_const", const=False,
                         help="cut every sample even when poses repeat (default: by pose when every sample has one)")
 

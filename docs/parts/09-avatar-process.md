@@ -94,6 +94,8 @@ SD 인간형의 최소 몸 조각은 뒷팔 / 뒷다리 / 몸통+머리 / 앞다
 
 ### 5. 파츠 제작 — AI 보조 + 자동 검수 + 사람 승인
 
+이 단계는 [제작 기록](10-production.md)으로 돌린다. 파츠마다 `parts-part-init`으로 시작한다. 이후 시트, 그리기, 자르기, 검사, 빌드, 검수를 반복하고, 반려한 포즈만 다시 그린다.
+
 요청은 완성 이미지가 아니라 **파츠 단위**로 한다.
 
 > ✗ "이 캐릭터에게 빨간 후드티를 입혀서 달리게 만들어줘."
@@ -112,7 +114,7 @@ SD 인간형의 최소 몸 조각은 뒷팔 / 뒷다리 / 몸통+머리 / 앞다
 
 | 산출물 | 도구 | 관문 |
 |---|---|---|
-| 파츠 pack(조각 × 포즈 그림, 부착점, node, 가림 규칙) | `gen`, `parts-pose-sheet`, `parts-pose-slice`, `parts-piece-split`, `parts-rebind`, `parts-import`, `parts-fit-import`, `parts-inspect`, `parts-coverage` | 자동 검수 통과 + 파츠 단위 승인(`parts-review`/`parts-approve`) |
+| 제작 기록(포즈별 후보: 그린 칸, 마스크, 파츠, 출처), 파츠 pack | `parts-part-init/sheet/draw/slice/mask/check/build`, `parts-review-serve` | 포즈별 검사 + 몸 위 파츠 단위 승인(`parts-part-review`, scope `part`) |
 
 ### 6. 조합과 런타임 — 도구
 
@@ -150,4 +152,4 @@ SD 인간형의 최소 몸 조각은 뒷팔 / 뒷다리 / 몸통+머리 / 앞다
 - 그리기 순서표는 topology 단위다. 가까운 팔다리가 바뀌는 다른 방향은 별도 topology나 mirror로 다룬다.
 - 가림 규칙은 그림을 고를 뿐 픽셀을 자르지 않는다. 일부를 잘라야 하면 mask를 쓴다.
 - portable 레이어 export는 몸 하나(flat 또는 segmented), 슬롯당 선택 하나, 그리기 순서표와 가림 규칙을 지원한다. 몸 교체, 슬롯 우선순위, 다중 선택은 Python 런타임에만 있다.
-- 모든 결과는 `release_ready: false`다. 시각 품질은 사람의 파츠 단위 승인으로만 통과한다.
+- 모든 결과는 `release_ready: false`다. 시각 품질은 사람의 판정으로만 통과한다. 파츠는 몸 위에서 포즈별로 승인하고, 조합은 appearance 검수로 따로 승인한다. 릴리스는 둘 다 요구한다.

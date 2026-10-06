@@ -1004,6 +1004,58 @@ def stage_showcase(base, out=Path("docs/parts/assets"), tag="20261006"):
     return {"looks": len(looks), "walk_samples": len(walk["samples"])}
 
 
+def stage_productions(base):
+    """Every per-pose garment as a part production: config, adopted drawings, checks, rebuilt pack."""
+    from sprite_gen.frames import parts_production as production
+    assembly = base / "library/assembly.json"
+    root = assembly.parent
+    index, registry = workspace.read_workspace(assembly)
+    inputs = root / "inputs"
+    shutil.copytree(base / "body/labels", inputs / "body/labels", dirs_exist_ok=True)
+    shutil.copy2(base / "body/segments.json", inputs / "body/segments.json")
+    garment, shoe, style = _garment_prompts()
+    hq_body = eval((HQ / "generate_garments.py").read_text().split("BODY = ", 1)[1].split("\n}\n", 1)[0] + "\n}")
+    hq_shoes = eval((HQ / "generate_garments.py").read_text().split("SHOES = ", 1)[1].split("}\n", 1)[0] + "}")
+    report = {}
+    for name in [*GARMENTS, *(n for n in NEW if rebuild.PARTS[n][-1] == "raster")]:
+        slot, _, socket, _, region, threshold, _ = rebuild.PARTS[name]
+        feet = slot == "footwear"
+        palette = base / "design" / (f"{name}.palette5.json" if feet and (base / "design" / f"{name}.palette5.json").exists()
+                                     else f"{name}.palette.json")
+        (inputs / "design").mkdir(parents=True, exist_ok=True)
+        shutil.copy2(palette, inputs / "design" / palette.name)
+        reference = base / "design" / (f"{name}.zoom.png" if feet else f"{name}.raw.png")
+        shutil.copy2(reference, inputs / "design" / reference.name)
+        if feet:
+            desc = NEW[name][1] if name in NEW else hq_shoes[name]
+            text = shoe.format(desc=desc) + style.format(px=8)
+        else:
+            desc, where = (NEW[name][1], GARMENT_WORDS[name]) if name in NEW else hq_body[name]
+            text = garment.format(garment=desc, where=where) + style.format(px=4)
+        config = {"kind": "parts-production-config", "schema_version": 1, "part_id": rebuild.PART_ID[name],
+                  "design_id": rebuild.PART_ID[name], "slot": slot, "node": SLOTS[slot][2][0], "socket": socket,
+                  "sheet": {"crop": [int(v) for v in (FEET_CROP if feet else CLOTHING_CROP).split(",")],
+                            "scale": 8 if feet else 4, "page_size": 12, "aspect": "3:2" if feet else "1:1",
+                            "columns": 3 if feet else None},
+                  "cut": {"method": "difference", "body_threshold": threshold, "tolerance": 80,
+                          "near_body": NEAR_BODY.get(name, 2), "min_island": 6 if feet else 12, "outline": True,
+                          "fill_holes": 6, "close_body": 5, "region": region, "palette": f"inputs/design/{palette.name}"},
+                  "wearing": ["sd.wardrobe.lower.b"] if name == "footwear.b" else [],
+                  "pieces": [{"id": p, "node": n, "segments": segs} for p, n, segs in SPLITS[slot]],
+                  "by_component": slot in WHOLE, "segments": "inputs/body/segments.json",
+                  "prompt": {"text": text + KEEP_LAYOUT, "refs": [f"inputs/design/{reference.name}"]},
+                  "draw": {"provider": "codex", "model": "gpt-5.6-sol"}}
+        config_file = write(base / "production-configs" / f"{name}.json", config)
+        if not (root / "productions" / config["part_id"] / "production.json").exists():
+            production.init(assembly, config_file)
+            index, registry = workspace.read_workspace(assembly)
+            production.adopt(assembly, config["part_id"], root / index["documents"][config["part_id"]])
+        report[name] = production.check(assembly, config["part_id"])["summary"]
+    for name in report:
+        production.build(assembly, rebuild.PART_ID[name])
+    return report
+
+
 def stage_appearance(base, selection):
     assembly = base / "library/assembly.json"
     index, registry = workspace.read_workspace(assembly)
@@ -1021,7 +1073,7 @@ if __name__ == "__main__":
     parser.add_argument("stage", choices=("library", "labels", "label-gen", "labels-fix", "segments", "garments", "capped-gen",
                                           "capped-extract", "hair-extract", "hat-extract", "held", "appearance", "redraw", "new-designs", "new-extract",
                                           "new-sheets", "new-draw", "new-slice", "walk22", "added-sheets", "added-draw",
-                                          "added-slice", "added-redraw", "showcase",
+                                          "added-slice", "added-redraw", "showcase", "productions",
                                           "coverage", "export"))
     parser.add_argument("--only", nargs="*")
     parser.add_argument("--select", type=Path)
@@ -1045,6 +1097,8 @@ if __name__ == "__main__":
         result = stage_capped_extract(args.base)
     elif stage == "hat-extract":
         result = stage_hat_extract(args.base)
+    elif stage == "productions":
+        result = stage_productions(args.base)
     elif stage == "showcase":
         result = stage_showcase(args.base)
     elif stage == "walk22":

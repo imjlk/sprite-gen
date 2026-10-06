@@ -21,6 +21,7 @@ MODULE_DOMAIN = {
     'parts_loop_native': 'frames',
     'parts_rebind': 'frames',
     'parts_segments': 'frames',
+    'parts_production': 'frames',
     'parts_resolve': 'compose',
     'parts_runtime': 'compose',
     'compose_parts': 'compose',
@@ -85,6 +86,7 @@ MODULE_DOMAIN = {
     'serve_curation': 'serve',
     'serve_compose': 'serve',
     'serve_parts': 'serve',
+    'serve_parts_review': 'serve',
     'gif_utils': 'util',
     'resample': 'util',
 }

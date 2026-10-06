@@ -95,7 +95,9 @@ def _release_evidence(root, index, registry):
     if (set(review["checks"]) != set(inspect_parts.REVIEW_CHECKS) or any(v != "approved" for v in review["checks"].values())
         or review["reviewer"] is None):
         raise contract.PartsContractError("release review lacks explicit visual/motion/contact approval checks")
-    return parts_review.verify(root, index, registry, review), [contract.reference(review)]
+    from sprite_gen.frames import parts_production
+    parts = parts_production.release_reviews(root, registry, registry[index["appearance"]["id"]])
+    return parts_review.verify(root, index, registry, review), [contract.reference(review), *parts]
 
 
 def build(assembly, out, *, mode="preview"):

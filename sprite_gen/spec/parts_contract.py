@@ -235,7 +235,9 @@ _preset = _record({"id": _id, "label": _string, "assignments": _mapping(_selecti
 _pack_import = _record({"request_sha256": _hash, "source_assets": _list(_asset, nonempty=True, unique=True),
                        "style": _id, "encoding_policy": _id, "coverage": _enum("complete", "partial"),
                        "states": _list(_id, nonempty=True, unique=True)})
-_review_evidence = _record({"appearance": _ref, "inputs": _list(_ref, nonempty=True, unique=True),
+# A part or binding review judges the part on the body alone (appearance None); combinations
+# are judged by appearance reviews.
+_review_evidence = _record({"appearance": _nullable(_ref), "inputs": _list(_ref, nonempty=True, unique=True),
     "plan_digest": _hash, "preview_digest": _hash, "qa_digest": _hash,
     "artifacts": _list(_asset, nonempty=True, unique=True), "contacts": _nullable(_asset),
     "subject": _ref, "binding_id": _nullable(_id)}, {"contacts": None, "binding_id": None})
@@ -771,7 +773,11 @@ def validate_bundle(documents: Iterable[dict], *, complete=False) -> dict[str, d
                         _fail(path, "stability piece lacks declared clip coverage")
         elif kind == "parts-review" and doc["evidence"] is not None:
             evidence = doc["evidence"]
-            _get(registry, evidence["appearance"], "parts-appearance", path)
+            if evidence["appearance"] is None:
+                if doc["scope"] == "appearance":
+                    _fail(path, "an appearance review needs its appearance evidence")
+            else:
+                _get(registry, evidence["appearance"], "parts-appearance", path)
             subject = _get(registry, evidence["subject"], "parts-appearance" if doc["scope"] == "appearance" else "parts-pack", path)
             for ref in evidence["inputs"]:
                 _get(registry, ref, None, path)

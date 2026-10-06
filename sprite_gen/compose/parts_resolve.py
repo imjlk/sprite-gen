@@ -98,7 +98,7 @@ def _order(active, known, nodes, ranks=None):
     return ordered
 
 
-def resolve(appearance, documents):
+def resolve(appearance, documents, *, complete=True):
     """Return serializable sample plans; no IO, image decoding or inferred anatomy.
 
     A provided node is an indivisible raster interface. Several pieces in the
@@ -111,7 +111,8 @@ def resolve(appearance, documents):
     docs = [d for d in documents if d["id"] != appearance["id"]
             and d["kind"] not in {"parts-review", "parts-build-lock"}] + [appearance]
     registry = contract.validate_bundle(docs)
-    contract._check_appearance(appearance, registry, True)
+    # complete=False renders one part on the body alone (a part review) with required slots empty.
+    contract._check_appearance(appearance, registry, complete)
     rig = registry[appearance["rig"]["id"]]
     motion = registry[appearance["motion"]["id"]]
     topology = registry[rig["topology"]["id"]]

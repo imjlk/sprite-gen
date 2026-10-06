@@ -105,9 +105,11 @@ def activate_pack(assembly, pack, filename, original_hash, index, registry):
         removed.add(catalog["id"])
     if pack["role"] == "body":
         removed.update(doc["id"] for doc in registry.values() if doc["kind"] == "parts-appearance")
-    # A changed pack can alter global occlusion. v1 lacks review dependency
-    # evidence, so conservative invalidation never promotes an old approval.
-    removed.update(doc["id"] for doc in registry.values() if doc["kind"] == "parts-review")
+    # A changed pack can alter global occlusion, so every combination (appearance) review goes.
+    # A part or binding review judges its pack on the body alone; it goes only when its own
+    # subject or one of its inputs changes (the reference cascade below).
+    removed.update(doc["id"] for doc in registry.values() if doc["kind"] == "parts-review"
+                   and (doc["scope"] == "appearance" or doc["evidence"] is None or doc["evidence"]["appearance"] is not None))
     changed = True
     while changed:
         changed = False
