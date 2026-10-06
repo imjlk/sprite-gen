@@ -12,8 +12,9 @@ order: the body and each part are cut into pieces by bone, each piece at its bod
     calibrate the template's foot (heel, toe, sole) measured on the base drawing; cycles re-posed
     frames    a cycle (idle 3, walk 6, run 6) -> guide sheet -> drawn frames (the stick route, optional)
     puppet    the base cut along its skeleton, posed per frame (joints closed), mended by the model
-    part      a slot's design (hair, upper, lower, footwear): drawn once alone on the base by the model,
+    part      a slot's design (expression, hair, upper, lower, footwear): drawn once alone on the base,
               registered, cut by the slot's bones and posed on every frame exactly as the body is
+    mend      a posed garment redrawn clean by the model per cycle, put back where the skeleton put it
     dress     every frame in every look, one sheet
     library   the cycles as a frozen motion with the skeleton's sockets
     segments  the body cut into far arm/leg, root, near leg/arm by bone, as the body pack
@@ -62,6 +63,21 @@ BODIES = {
         "stand": {"near": (16, 4, -12), "far": (-16, 4, 20), "arms": {"near": (22, 15), "far": (-32, 10)}},
     },
 }
+# Two heads tall, MapleStory-like: a big head in three-quarter view (the face, where the expression part
+# goes, turned toward the viewer), a small body walking right with short stubby limbs.
+BODIES["maple"] = {
+    "prompt": "a cute MapleStory-style character base mannequin, two heads tall: a big round head as tall as the whole "
+              "body below it, a small short body, short stubby arms and legs, small round hands and feet",
+    "view": "MapleStory-style side-scroller view facing right (the big head in three-quarter view turned toward the "
+            "viewer, the face on its right half; the body and legs in three-quarter side view)",
+    "style": " MapleStory character art: clean dark brown outline, soft cel shading, rounded shapes.",
+    "ground": 116, "head": {"center": [64, 44], "radius": 21, "ear": [-9, 4]}, "neck": [64, 65], "shoulder": [64, 67],
+    "hip": [64, 89], "torso": {"top": 14, "bottom": 15}, "thigh": 12, "shin": 11,
+    "heel": [-3, 3], "toe": [7, 3], "upper_arm": 9, "forearm": 8, "width": {"thigh": 7, "shin": 6, "arm": 5},
+    "stand": {"near": (20, 4, -16), "far": (-20, 4, 24), "arms": {"near": (20, 15), "far": (-40, 10)}},
+}
+SIDE = "pure side view facing right"
+VIEW = {"text": SIDE, "style": ""}  # the character's own view and style, read from body.json by _out
 # Standing for the base: both feet and both hands in sight.
 STAND = {"near": (10, 4, 0), "far": (-10, 4, 0), "arms": {"near": (22, 15), "far": (-32, 10)}}
 
@@ -231,6 +247,7 @@ def _clean_native(drawn_path, sheet_path, origin, scale, crop=CROP, colors=None,
 
 
 def _draw(prompt_text, folder, sheet, refs, name):
+    prompt_text = prompt_text.replace(SIDE, VIEW["text"]).replace(" no text.", " no text." + VIEW["style"])
     (folder / f"{name}-prompt.txt").write_text(prompt_text)
     out = folder / f"{name}.png"
     if out.exists():
@@ -276,15 +293,19 @@ FRAMES_PROMPT = (
     "figure exactly in its own cell; empty space stays flat #FF00FF. Keep this {w}x{h} image and its grid exactly.")
 
 
-def _out(base_dir):
+def _out(base_dir, body=None):
     folder = base_dir / "rig"
     folder.mkdir(parents=True, exist_ok=True)
+    if body is None and (folder / "body.json").exists():
+        body = json.loads((folder / "body.json").read_text())["body"]
+    if body is not None:
+        VIEW.update(text=body.get("view", SIDE), style=body.get("style", ""))
     return folder
 
 
 def stage_base(base_dir, body_name):
     body = BODIES[body_name]
-    out = _out(base_dir)
+    out = _out(base_dir, body)
     pose = stand_pose(body)
     guide = draw_guide(body, pose)
     sheet, origins = _sheet([guide], 8, 1, gutter=0)
@@ -669,16 +690,24 @@ SLOTS = {
         "designs": {"bob": "a chin-length chestnut-brown bob with straight-cut bangs, a 4-step warm brown ramp",
                     "ponytail": "glossy black hair with side-swept bangs, pulled back into a high ponytail that hangs "
                                 "behind the head down to the nape"}},
+    "expression": {
+        "bones": ["upper"], "zone": "head", "nodes": {"upper": "eyes"}, "sheet": True, "margin": 3, "what": "the face",
+        "fit": "a MapleStory-style face: big glossy dark-brown eyes with a white highlight, short soft brows, a small "
+               "mouth, a faint pink blush.",
+        "designs": {"neutral": "calm, eyes open, small closed mouth",
+                    "smile": "happy: a wide open smile, eyes curved up",
+                    "blink": "eyes closed as short downward curves, otherwise calm",
+                    "surprised": "round wide eyes, a small round open mouth"}},
     "upper": {
-        "bones": ["upper"] + LIMBS_ARM, "zone": "chest", "core": ["upper"], "nodes": {"upper": "torso", "near": "arm_front", "far": "arm_back"},
+        "bones": ["upper"] + LIMBS_ARM, "mend": True, "zone": "chest", "core": ["upper"], "nodes": {"upper": "torso", "near": "arm_front", "far": "arm_back"},
         "margin": 6, "fill": True, "view": "the upper body", "what": "the top",
         "fit": "The top covers the whole torso from the neck down to just over the hips, hiding the undershirt "
                "completely, and its sleeves lie along the arms as the design has them (the near sleeve in front of "
                "the torso, the far sleeve behind it). The hands stay bare: leave them out.",
-        "designs": {"tee": "a short-sleeved navy-blue crew-neck t-shirt",
+        "designs": {"tee": "a short-sleeved mustard-yellow crew-neck t-shirt with a small white star on the chest",
                     "sweater": "a long-sleeved cream knit sweater with red horizontal stripes, sleeves to the wrists"}},
     "lower": {
-        "bones": ["upper"] + LIMBS_LEG, "zone": "hips", "core": ["upper", "near_thigh", "far_thigh"], "nodes": {"upper": "waist", "near": "leg_front", "far": "leg_back"},
+        "bones": ["upper"] + LIMBS_LEG, "mend": True, "zone": "hips", "core": ["upper", "near_thigh", "far_thigh"], "core_zone": "seat", "nodes": {"upper": "waist", "near": "leg_front", "far": "leg_back"},
         "margin": 6, "fill": True, "view": "the lower body", "what": "the bottoms",
         "fit": "The bottoms start at the waist, covering the charcoal shorts completely, and follow each leg as the design "
                "has them (the near leg in front, the far leg behind). The feet stay bare: leave them out.",
@@ -713,7 +742,7 @@ def _zone(slot, stand):
     """Rows of the upper body that belong to a slot."""
     ys = np.mgrid[0:CANVAS, 0:CANVAS][0]
     neck, hip = stand["neck"][1], stand["hip"][1]
-    return {"head": ys <= neck, "crown": ys <= stand["head"]["center"][1], "chest": (ys >= neck - 1) & (ys <= hip + 2), "hips": ys >= hip - 5}.get(
+    return {"head": ys <= neck, "crown": ys <= stand["head"]["center"][1], "chest": (ys >= neck - 1) & (ys <= hip + 2), "hips": ys >= hip - 5, "seat": (ys >= hip) & (ys <= hip + 6)}.get(
         slot.get("zone"), np.zeros((CANVAS, CANVAS), bool))
 
 
@@ -734,7 +763,7 @@ def _dilate(mask, n=1):
     return mask
 
 
-def _register(part, target, body_alpha, reach=4):
+def _register(part, target, body_alpha, reach=8):
     """A drawn part moved by whole pixels onto the base: most of its target covered, least of the rest of the
     body (the model shifts its output a few pixels)."""
     alpha = np.asarray(part)[..., 3] > 0
@@ -839,7 +868,7 @@ def design_part(out, slot_name, design):
     core = _target(dict(slot, bones=slot["core"], zone=slot.get("core_zone", slot.get("zone"))), base_owner, stand)
     prompt = PART_PROMPT.format(view=slot["view"], what=slot["what"], desc=slot["designs"][design], fit=slot["fit"],
                                 style=STYLE.format(px=scale))
-    rounds = []
+    rounds, best = [], None
     for k in range(3):  # a first drawing, then up to two redraws over the outlined core
         name = "sheet" if k == 0 else f"sheet-{k + 1}"
         if k == 0:
@@ -862,8 +891,11 @@ def design_part(out, slot_name, design):
         covered = float(((part[..., 3] > 0) & core).sum() / max(core.sum(), 1))
         why = "too small, away from the body" if covered < 0.8 else ""
         rounds.append({"round": k + 1, "core": round(covered, 2), "why": why})
+        if best is None or covered > best[0]:
+            best = (covered, part, palette, shift)
         if not why:
             break
+    _, part, palette, shift = best  # the round that covered most, not merely the last
     if slot.get("rim"):
         part = _rim(part, base, core, slot["rim"])
     pieces = cut_puppet(part, body, stand, slot["bones"], slot.get("whole", False))
@@ -910,6 +942,198 @@ def _fit(canvas, owner, frame, body, stand, pose, reach=2):
     return out, out_owner
 
 
+FACE_PROMPT = (
+    "Image 1 is a pixel-art sheet: every grid cell shows the same bald, blank-faced head of one character, pure side "
+    "view facing right, on a flat pure magenta #FF00FF background. In each cell draw ONLY the face, {fit} The cells, "
+    "left to right then top to bottom, show these expressions: {faces}. The face sits on the front of the head turned "
+    "toward the viewer, at the same size and place and in the same style in every cell; only the expression changes. "
+    "Keep the head's dark outline exactly where it is in every cell (it aligns the layers), and turn every skin pixel "
+    "of the head into flat #FF00FF: a cell shows only that outline and the face. {style} Keep every cell exactly in "
+    "place; keep this {w}x{h} image and its grid exactly.")
+
+
+def _block_reduce(drawn_path, sheet_path, origin, scale, crop, share=0.12):
+    """One drawn cell to native pixels block by block: a block takes the commonest color of its drawn pixels
+    once they cover `share` of it. Thin strokes (eye lines, brows) survive, which reading one pixel per
+    block loses; the cell's own grid places every pixel, no bounding box."""
+    drawn = Image.open(drawn_path).convert("RGBA")
+    ratio = drawn.width / Image.open(sheet_path).width
+    w, h = crop[2] - crop[0], crop[3] - crop[1]
+    step = scale*ratio
+    cell = np.asarray(drawn).astype(int)
+    key = (np.abs(cell[..., :3] - np.array(KEY)).max(-1) <= 60) | (cell[..., 3] < 128)
+    out = np.zeros((CANVAS, CANVAS, 4), np.uint8)
+    for j in range(h):
+        for i in range(w):
+            x0, y0 = int(round(origin[0]*ratio + i*step)), int(round(origin[1]*ratio + j*step))
+            x1, y1 = int(round(origin[0]*ratio + (i + 1)*step)), int(round(origin[1]*ratio + (j + 1)*step))
+            block, empty = cell[y0:y1, x0:x1, :3].reshape(-1, 3), key[y0:y1, x0:x1].reshape(-1)
+            if block.size == 0 or (~empty).mean() < share:
+                continue
+            ink = block[~empty]
+            codes = (ink[:, 0] >> 4)*256 + (ink[:, 1] >> 4)*16 + (ink[:, 2] >> 4)
+            values, counts = np.unique(codes, return_counts=True)
+            out[crop[1] + j, crop[0] + i] = (*ink[codes == values[counts.argmax()]].mean(0).astype(np.uint8), 255)
+    return out
+
+
+def design_faces(out, slot_name):
+    """Every expression of a face slot in ONE model call (one cell each, so they share one hand), each cell
+    aligned by the head outline the model was told to keep, then only the face inside the head kept."""
+    slot = SLOTS[slot_name]
+    info = json.loads((out / "body.json").read_text())
+    body, stand = info["body"], info["pose"]
+    folder = out / "parts" / slot_name
+    folder.mkdir(parents=True, exist_ok=True)
+    base = Image.open(out / "base.png").convert("RGBA")
+    rgba = np.asarray(base)
+    owner = _owners(base, body, stand)
+    head = (owner == "upper") & _zone(slot, stand)
+    ring = head & _dilate(~head, 1)
+    inside = head & ~_dilate(~head, 2)  # the head's skin, for the guard against painted skin
+    ys, xs = np.nonzero(head)
+    m = slot["margin"]
+    crop = (int(xs.min()) - m, int(ys.min()) - m, int(xs.max()) + m + 1, int(ys.max()) + m + 1)
+    names = list(slot["designs"])
+    scale = int(np.clip(400 // max(crop[2] - crop[0], crop[3] - crop[1]), 4, 12))
+    sheet, origins = _sheet([base]*len(names), scale, 2, crop=crop)
+    sheet.save(folder / "sheet.png")
+    faces = "; ".join(f"{k + 1} {n} ({slot['designs'][n]})" for k, n in enumerate(names))
+    drawn = _draw(FACE_PROMPT.format(fit=slot["fit"], faces=faces, style=STYLE.format(px=scale), w=sheet.width,
+                                     h=sheet.height), folder, folder / "sheet.png", [], "drawn")
+    skin = rgba[inside][:, :3].astype(int)
+    report = {}
+    for name, origin in zip(names, origins):
+        art = _block_reduce(drawn, folder / "sheet.png", origin, scale, crop)
+        palette = np.unique(art[art[..., 3] > 0][:, :3], axis=0)
+        luma = art[..., :3].astype(float) @ np.array([0.299, 0.587, 0.114])
+        dark = (art[..., 3] > 0) & (luma < 90)
+        band = _dilate(ring, 1)
+        def score(d):
+            moved = np.roll(np.roll(dark, d[1], 0), d[0], 1)
+            return int((moved & ring).sum()) + int((moved & band).sum()), -abs(d[0]) - abs(d[1])
+        d = max(((dx, dy) for dy in range(-5, 6) for dx in range(-5, 6)), key=score)
+        art = np.roll(np.roll(art, d[1], 0), d[0], 1)
+        # A three-quarter face reaches the outline (the far eye): keep what is on the outline unless it only
+        # restates the head's own outline there.
+        same = np.abs(art[..., :3].astype(int) - rgba[..., :3].astype(int)).max(-1) <= 48
+        face = (art[..., 3] > 0) & head & ~(_dilate(~head, 1) & head & same) & ~(band & ~head)
+        if face.sum() > 0.35*inside.sum():  # skin painted after all: drop what is the head's own skin
+            near_skin = np.abs(art[..., None, :3].astype(int) - skin[None, None]).max(-1).min(-1) <= 24
+            face &= ~near_skin
+        for c in _components(face):
+            if c.sum() < 2:
+                face &= ~c
+        piece = np.where(face[..., None], art, 0).astype(np.uint8)
+        target = folder / name
+        target.mkdir(exist_ok=True)
+        Image.fromarray(piece).save(target / "design.png")
+        Image.fromarray(piece).save(target / "piece-upper.png")
+        report[name] = {"slot": slot_name, "design": name, "shift": list(d), "outline_hits": score(d)[0],
+                        "ring": int(ring.sum()), "pixels": int(face.sum())}
+        (target / "design.json").write_text(json.dumps(dict(report[name], palette=palette.tolist()), indent=1))
+    return report
+
+
+MEND_PROMPT = (
+    "Image 1 is a pixel-art sheet: each grid cell shows the same character {verb}, pure side view facing right, on a "
+    "flat pure magenta #FF00FF background, wearing {what} that was cut apart and moved onto the pose - so it has seams, "
+    "gaps, jagged edges and broken lines at the shoulders, elbows, hips and knees. Image 2 is that character standing "
+    "in {what} as designed.\n\nIn every cell redraw ONLY {what}, clean, as one well-drawn piece of clothing on that "
+    "pose: close the seams, smooth the jagged edges, keep the design, colors, pattern, folds, outline and shading of "
+    "image 2, and keep it exactly where and as big as it is in the cell. Draw nothing else - no skin, no head, no hands, "
+    "no feet, no shoes, no body - every other pixel is flat #FF00FF. {style} Keep every figure exactly in its own "
+    "cell; keep this {w}x{h} image and its grid exactly.")
+
+
+def _spread_owner(owner, mask, steps=4):
+    """Bone names carried onto new pixels from the nearest named ones."""
+    owner = owner.copy()
+    for _ in range(steps):
+        empty = mask & (owner == "")
+        if not empty.any():
+            break
+        for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+            moved = np.roll(np.roll(owner, dy, 0), dx, 1)
+            take = empty & (owner == "") & (moved != "")
+            owner[take] = moved[take]
+    return owner
+
+
+def stage_mend(base_dir, slot_name, design):
+    """A posed garment redrawn clean by the model, one sheet per cycle (all its frames at once, the body
+    under each for context), then put back where the skeleton put it: registered onto the posed layer,
+    only pixels on or next to it kept, whatever the model dropped kept from the posed layer, each pixel's
+    body node from the posed layer. A frame the model drew badly (under 85% of the posed layer) stays posed."""
+    out = _out(base_dir)
+    slot = SLOTS[slot_name]
+    folder = out / "parts" / slot_name / design
+    palette = np.array(json.loads((folder / "design.json").read_text())["palette"])
+    standing = Image.open(out / "base.png").convert("RGBA")
+    standing.alpha_composite(Image.open(folder / "design.png").convert("RGBA"))
+    standing.save(folder / "standing.png")
+    nodes = sorted(set(slot["nodes"].values()))
+    report = {}
+    for cycle_name in CYCLES:
+        path = out / cycle_name / "skeleton.json"
+        work = out / cycle_name / slot_name / design
+        if not path.exists() or not work.exists():
+            continue
+        n = len(json.loads(path.read_text())["poses"])
+        roughs, owners, cells = [], [], []
+        mend = work / "mend"
+        for t in range(n):  # the posed layer: kept aside the first time, so mending again starts from it
+            for name in [f"{t}"] + [f"{t}-{node}" for node in nodes]:
+                if not (mend / f"rough-{name}.png").exists():
+                    mend.mkdir(exist_ok=True)
+                    Image.open(work / f"{name}.png").save(mend / f"rough-{name}.png")
+            rough = np.asarray(Image.open(mend / f"rough-{t}.png").convert("RGBA"))
+            owner = np.full(rough.shape[:2], "", dtype=object)
+            for node in nodes:
+                owner[np.asarray(Image.open(mend / f"rough-{t}-{node}.png"))[..., 3] > 0] = node
+            dressed = Image.open(out / cycle_name / f"frame-{t}.png").convert("RGBA")
+            dressed.alpha_composite(Image.fromarray(rough))
+            roughs.append(rough), owners.append(owner), cells.append(dressed)
+        sheet, origins = _sheet(cells, 4, 3)
+        sheet.save(mend / "sheet.png")
+        drawn = _draw(MEND_PROMPT.format(verb=CYCLES[cycle_name]["verb"], what=slot["what"], style=STYLE.format(px=4),
+                                         w=sheet.width, h=sheet.height), mend, mend / "sheet.png", [folder / "standing.png"],
+                      "drawn")
+        report[cycle_name] = []
+        for t, (origin, rough, owner) in enumerate(zip(origins, roughs, owners)):
+            ra = rough[..., 3] > 0
+            box = Image.fromarray(rough).getbbox()
+            clean, _ = _clean_native(drawn, mend / "sheet.png", origin, 4, palette=palette,
+                                     expect=(box[2] - box[0], box[3] - box[1]))
+            clean = np.asarray(clean)
+            ca = clean[..., 3] > 0
+            if ca.any():  # the model moves a whole cell's drawing up to ~10 px: centroids first, then the outline
+                (cy, cx), (ry, rx) = np.argwhere(ca).mean(0), np.argwhere(ra).mean(0)
+                coarse = (int(round(rx - cx)), int(round(ry - cy)))
+                clean = np.roll(np.roll(clean, coarse[1], 0), coarse[0], 1)
+            else:
+                coarse = (0, 0)
+            clean, fine = _onto_guide(Image.fromarray(clean), Image.fromarray(rough), reach=3)
+            shift = (coarse[0] + fine[0], coarse[1] + fine[1])
+            clean = np.asarray(clean)
+            keep = (clean[..., 3] > 0) & _dilate(ra, 1)
+            covered = float((keep & ra).sum() / max(ra.sum(), 1))
+            if covered < 0.85:
+                report[cycle_name].append({"frame": t, "covered": round(covered, 2), "kept": "posed"})
+                continue
+            image = np.where(keep[..., None], clean, 0).astype(np.uint8)
+            dropped = ra & ~_dilate(keep, 1)
+            image[dropped] = rough[dropped]
+            alpha = image[..., 3] > 0
+            node_of = _spread_owner(np.where(alpha, owner, ""), alpha)
+            Image.fromarray(image).save(work / f"{t}.png")
+            for node in nodes:
+                Image.fromarray(np.where((node_of == node)[..., None], image, 0).astype(np.uint8)).save(work / f"{t}-{node}.png")
+            report[cycle_name].append({"frame": t, "covered": round(covered, 2), "shift": list(shift), "kept": "mended"})
+    (folder / "mend.json").write_text(json.dumps(report, indent=1))
+    return report
+
+
 def stage_part(base_dir, slot_name, design):
     """A part on every frame: designed once, its bone pieces posed as the body's are, split by body node."""
     out = _out(base_dir)
@@ -917,6 +1141,8 @@ def stage_part(base_dir, slot_name, design):
     info = json.loads((out / "body.json").read_text())
     body, stand = info["body"], info["pose"]
     folder = out / "parts" / slot_name / design
+    if slot.get("sheet") and not (folder / "design.json").exists():
+        design_faces(out, slot_name)
     report = design_part(out, slot_name, design) if not (folder / "design.json").exists() else \
         {k: v for k, v in json.loads((folder / "design.json").read_text()).items() if k != "palette"}
     pieces = {p.stem[len("piece-"):]: np.asarray(Image.open(p).convert("RGBA")) for p in folder.glob("piece-*.png")}
@@ -928,6 +1154,8 @@ def stage_part(base_dir, slot_name, design):
             continue
         work = out / cycle_name / slot_name / design
         work.mkdir(parents=True, exist_ok=True)
+        for stale in (work / "mend").glob("rough-*.png"):  # posed again: a mend starts from this pose
+            stale.unlink()
         for t, pose in enumerate(json.loads(path.read_text())["poses"]):
             canvas, owner = pose_pieces(pieces, body, stand, pose, ground)
             frame = np.asarray(Image.open(out / cycle_name / f"frame-{t}.png").convert("RGBA"))
@@ -982,11 +1210,11 @@ def stage_dress(base_dir, looks=None):
 
 
 def _looks(out):
-    """bare, then one outfit per design index (the first design of every slot, the second, ...)."""
+    """bare, then one full outfit per design index (the first design of every slot, the second, ...)."""
     made = {s: [d for d in slot["designs"] if (out / "parts" / s / d / "design.json").exists()] for s, slot in SLOTS.items()}
     looks = {"bare": {}}
     for k in range(max((len(v) for v in made.values()), default=0)):
-        looks[f"look{k + 1}"] = {s: v[k] for s, v in made.items() if len(v) > k}
+        looks[f"look{k + 1}"] = {s: v[k % len(v)] for s, v in made.items() if v}  # short slots cycle
     return looks
 
 
@@ -1237,7 +1465,7 @@ def stage_play(base_dir, prefix):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--base", required=True, type=Path, help="the character's folder")
-    parser.add_argument("stage", choices=("base", "calibrate", "frames", "puppet", "part", "dress", "library", "segments", "packs", "play"))
+    parser.add_argument("stage", choices=("base", "calibrate", "frames", "puppet", "part", "mend", "dress", "library", "segments", "packs", "play"))
     parser.add_argument("--prefix", default="sd.rig.slim")
     parser.add_argument("--body", default="slim", choices=tuple(BODIES))
     parser.add_argument("--cycle", default="walk", choices=tuple(CYCLES))
@@ -1254,6 +1482,8 @@ if __name__ == "__main__":
         result = stage_calibrate(args.base)
     elif args.stage == "part":
         result = [stage_part(args.base, args.slot, d) for d in ([args.design] if args.design else SLOTS[args.slot]["designs"])]
+    elif args.stage == "mend":
+        result = [stage_mend(args.base, args.slot, d) for d in ([args.design] if args.design else SLOTS[args.slot]["designs"])]
     elif args.stage == "dress":
         result = stage_dress(args.base)
     elif args.stage == "library":
