@@ -56,9 +56,11 @@ _CUT = contract._record({"method": contract._enum(*sheets.METHODS), "body_thresh
                          "tolerance": contract._integer, "near_body": contract._nullable(contract._integer),
                          "min_island": contract._integer, "outline": contract._boolean, "fill_holes": contract._integer,
                          "close_body": contract._integer, "region": contract._nullable(contract._rectangle),
-                         "palette": contract._nullable(contract._relative_file)},
+                         "palette": contract._nullable(contract._relative_file),
+                         "keep_palette": contract._nullable(contract._integer), "prune": contract._integer},
                         {"method": "difference", "body_threshold": 40, "tolerance": 80, "near_body": 2, "min_island": 12,
-                         "outline": True, "fill_holes": 6, "close_body": 5, "region": None, "palette": None})
+                         "outline": True, "fill_holes": 6, "close_body": 5, "region": None, "palette": None,
+                         "keep_palette": None, "prune": 0})
 _PIECE = contract._record({"id": contract._id, "node": contract._id, "segments": contract._list(contract._string, nonempty=True)})
 _PROMPT = contract._record({"text": contract._string, "refs": contract._list(contract._relative_file)}, {"refs": []})
 _DRAW = contract._record({"provider": contract._id, "model": contract._nullable(contract._string)},
@@ -88,7 +90,8 @@ _CONFIG = contract._record({
 DECISIONS = ("unverified", "approved", "rejected")
 FIXED = ("part_id", "design_id", "role", "slot", "node", "socket", "mode")
 # Check bounds, judged on the SD demo (docs/parts/10-production.md).
-LIMITS = {"alignment": 0.7, "area_jump": 0.45, "dropped_share": 0.04, "specks": 0, "holes": 0, "painted_share": 0.5}
+LIMITS = {"area_jump": 0.45, "dropped_share": 0.04, "specks": 0, "holes": 0, "painted_share": 0.5,
+          "repainted_share": 1.0}
 
 
 def _folder(root, part_id):
@@ -160,15 +163,21 @@ def _reference(config, order):
     return reference
 
 
+def _redo(row):
+    """Missing, rejected, or failing a check with an error nobody approved anyway."""
+    return (row.get("selected") is None or row.get("decision") == "rejected"
+            or ((row.get("check") or {}).get("status") == "error" and row.get("decision") != "approved"))
+
+
 def _todo(production, track, order):
     rows = _track(production, track)["poses"]
     if production["config"]["mode"] == "held":
-        # One drawing for every pose: redraw it when it is missing or any pose rejected it.
+        # One drawing for every pose: redraw it when it is missing or any pose sends it back.
         reference = _reference(production["config"], order)
-        if rows.get(reference, {}).get("selected") is None or any(rows.get(p, {}).get("decision") == "rejected" for p in order):
+        if _redo(rows.get(reference, {})) or any(rows.get(p, {}).get("decision") == "rejected" for p in order):
             return [reference]
         return []
-    return [p for p in order if rows.get(p, {}).get("selected") is None or rows[p].get("decision") == "rejected"]
+    return [p for p in order if _redo(rows.get(p, {}))]
 
 
 def init(assembly, config):
@@ -251,8 +260,12 @@ def sheet(assembly, part, *, poses=None, track=None):
     if not wanted:
         raise contract.PartsContractError(f"{part}: every pose has a selected drawing that is not rejected")
     contract._members(wanted, order, "poses")
-    batch = "b" + contract.content_digest({"motion": index["motion"], "poses": wanted, "wearing": settings["wearing"],
-                                           "track": track or MAIN})[:12]
+    # A redo is a new batch: what it replaces, the worn parts as they are now and the prompt are in its ID.
+    batch = "b" + contract.content_digest({
+        "motion": index["motion"], "poses": wanted, "track": track or MAIN,
+        "wearing": [{"id": w, "digest": registry.get(w, {}).get("digest")} for w in settings["wearing"]],
+        "replaces": [rows["poses"].get(p, {}).get("selected") for p in wanted],
+        "prompt": settings["prompt"]})[:12]
     folder = _folder(root, part) / "batches" / batch
     look = config["sheet"]
     crop = ",".join(map(str, look["crop"])) if look["crop"] else None
@@ -262,8 +275,11 @@ def sheet(assembly, part, *, poses=None, track=None):
     prompt = None
     if settings["prompt"] is not None:
         prompt = folder / "prompt.txt"
-        prompt.write_text(settings["prompt"]["text"] + " " + made["prompt_hint"]
-                          + " Keep every figure exactly in its own cell: do not move, rearrange or re-space figures.")
+        # Not the sheet's own hint: that asks for the part alone with the body erased, while a
+        # production draws the dressed figure and cuts the part out of it (alignment needs the body).
+        prompt.write_text(settings["prompt"]["text"] + f" Keep this {made['size'][0]}x{made['size'][1]} image and its grid "
+                          "exactly, with the whole figure (head, body, limbs and feet) still drawn in every cell. "
+                          "Keep every figure exactly in its own cell: do not move, mirror, resize, rearrange or re-space figures.")
     pages = [{"guide": Path(p["guide"]).relative_to(root).as_posix(), "sheet": Path(p["sheet"]).relative_to(root).as_posix(),
               "art": (Path(p["sheet"]).parent / "drawn.png").relative_to(root).as_posix()} for p in made["pages"]]
     entry = {"id": batch, "motion": index["motion"], "poses": wanted, "pages": pages,
@@ -341,7 +357,8 @@ def _select(rows, poses, candidate, *, keep_approved=True):
     for pose in poses:
         row = rows["poses"].setdefault(pose, {"candidates": [], "selected": None, "decision": "unverified",
                                               "note": None, "reviewer": None, "check": None})
-        row["candidates"].append(candidate)
+        if candidate not in row["candidates"]:
+            row["candidates"].append(candidate)
         if not (keep_approved and row["decision"] == "approved"):
             row.update(selected=candidate, decision="unverified", note=None, reviewer=None, check=None)
 
@@ -395,7 +412,8 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
                 piece, info = sheets.cut_cell(drawn, under.crop(tuple(crop)), method=cut["method"],
                                               body_threshold=cut["body_threshold"], near_body=cut["near_body"],
                                               min_island=cut["min_island"], outline=cut["outline"],
-                                              fill_holes=cut["fill_holes"], close_body=cut["close_body"], colors=colors)
+                                              fill_holes=cut["fill_holes"], close_body=cut["close_body"], colors=colors,
+                                              keep_palette=cut["keep_palette"], prune=cut["prune"])
                 full = Image.new("RGBA", canvas)
                 full.alpha_composite(piece, tuple(crop[:2]))
                 if cut["region"] is not None:
@@ -605,13 +623,19 @@ def _pinholes(mask, size=12):
     return int(sum(c.sum() for c in parts_segments._components(sheets.enclosed(mask)) if c.sum() <= size))
 
 
-def _measure(root, config, settings, location):
+def _measure(root, config, settings, location, registry):
     """Metrics of one candidate, and its findings as (level, message)."""
     base = root / location
     record = workspace.decode_json((base / "candidate.json").read_bytes())
     image = np.asarray(Image.open(base / "part.png").convert("RGBA"))
     mask = image[..., 3] > 0
-    metrics = {"pixels": int(mask.sum()), "alignment": record["alignment"]}
+    metrics = {"pixels": int(mask.sum()), "alignment": record["alignment"], "coverage": None}
+    if record["alignment"] is not None and "drawn" in record["images"] and "under" in record["images"]:
+        crop = config["sheet"]["crop"]
+        drawn, under = (Image.open(base / f"{n}.png").convert("RGBA") for n in ("drawn", "under"))
+        if crop:
+            drawn, under = drawn.crop(tuple(crop)), under.crop(tuple(crop))
+        metrics["coverage"] = sheets.overlap(drawn, under)[1]
     findings = []
     if config["role"] == "body":
         metrics.update(painted_share=record.get("painted_share"), swapped=record.get("swapped", []))
@@ -628,14 +652,28 @@ def _measure(root, config, settings, location):
     if "drawn" in record["images"] and "under" in record["images"]:
         # What the drawing changed but the part left out: a cut too tight (a hood off the back).
         drawn = Image.open(base / "drawn.png").convert("RGBA")
-        changed = np.asarray(sheets.cover(drawn, Image.open(base / "under.png").convert("RGBA")))[..., 3] > 0
+        under = Image.open(base / "under.png").convert("RGBA")
+        changed = np.asarray(sheets.cover(drawn, under))[..., 3] > 0
+        if colors is not None and settings["cut"]["keep_palette"] is not None:
+            # Repainted body is left out on purpose; it only says how much the model strayed.
+            repainted = sheets.repainted(drawn, under, colors, settings["cut"]["keep_palette"])
+            metrics["repainted"] = int(repainted.sum())
+            changed &= ~repainted
         metrics["dropped"] = int((changed & ~mask).sum())
+    for ref in record.get("wearing") or ():
+        # Drawn over a worn part that has since been redrawn (the hat under capped hair).
+        if registry.get(ref["id"], {}).get("digest") != ref["digest"]:
+            findings.append(("error", f"drawn over {ref['id']} as it was before; redraw over the current one"))
     if metrics["pixels"] == 0:
         findings.append(("warning", "empty: nothing drawn for this pose (hidden, or lost in the cut)"))
-    if metrics["alignment"] is not None and metrics["alignment"] < LIMITS["alignment"]:
-        findings.append(("error", f"alignment {metrics['alignment']}: the drawn figure does not sit on the body; redraw"))
+    if sheets.misaligned(metrics["alignment"], metrics["coverage"]):
+        findings.append(("error", f"alignment {metrics['alignment']} (body coverage {metrics['coverage']}): "
+                                  "the drawn figure does not sit on the body; redraw"))
     if metrics.get("dropped", 0) > max(8, LIMITS["dropped_share"]*metrics["pixels"]):
         findings.append(("warning", f"{metrics['dropped']} drawn pixels left out by the cut; loosen it or mask"))
+    if metrics.get("repainted", 0) > LIMITS["repainted_share"]*max(metrics["pixels"], 1):
+        findings.append(("warning", f"the model repainted {metrics['repainted']} px of the body (left out of the part); "
+                                    "redraw if the part itself looks off"))
     if metrics["specks"] > LIMITS["specks"] and config["mode"] == "raster":  # a held face's eye glint is drawn on purpose
         findings.append(("warning", f"{metrics['specks']} specks under 4 px"))
     if metrics["holes"] > LIMITS["holes"]:
@@ -664,7 +702,7 @@ def check(assembly, part, *, track=None):
             if row is None or row["selected"] is None:
                 continue
             if row["selected"] not in measured:
-                measured[row["selected"]] = _measure(root, config, settings, row["selected"])
+                measured[row["selected"]] = _measure(root, config, settings, row["selected"], registry)
             metrics, findings = deepcopy(measured[row["selected"]])
             area[pose] = metrics["pixels"]
             row["check"] = {"metrics": metrics, "findings": findings}

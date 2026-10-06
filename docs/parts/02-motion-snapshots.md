@@ -153,7 +153,7 @@ candidate digest와 각 sample의 raster hash가 일치해야 한다. 이미지�
   --preview socket-track.png
 ```
 
-clip마다 그림이 다르면 같은 socket을 clip별 기준으로 나눠 선언한다. 한 clip에서 같은 socket을 두 번 추적하는 것은 거절한다. `mode: constant`는 지정 좌표를 그대로 기록한다. 결과의 각 sample은 `cost`, 2px 이상 떨어진 차선과의 차이인 `margin`, 탐색 경계에서 멈췄는지 나타내는 `at_edge`를 가진다. `max_cost`를 넘거나 경계에 닿은 sample은 `needs-review`다.
+clip마다 그림이 다르면 같은 socket을 clip별 기준으로 나눠 선언한다. 한 clip에서 같은 socket을 두 번 추적하는 것은 거절한다. `mode: constant`는 지정 좌표를 그대로 기록한다. `mode: relative`와 `to: head`는 기준 샘플에서 잰 그 부착점과의 간격을 모든 샘플에 유지한다. 팔이 앞을 가로지르는 통통한 몸처럼 몸통 영역 그림이 매번 가려지면 영역 추적은 팔다리로 끌려가는데, 측면 2등신의 몸통은 머리와 함께 움직이므로 이 방식이 안정적이다. `to` 부착점은 spec에서 먼저 추적해야 하고, 그 신뢰도를 그대로 이어받는다. 결과의 각 sample은 `cost`, 2px 이상 떨어진 차선과의 차이인 `margin`, 탐색 경계에서 멈췄는지 나타내는 `at_edge`를 가진다. `max_cost`를 넘거나 경계에 닿은 sample은 `needs-review`다.
 
 기본 결과는 좌표만 채우고 `unverified`로 남기므로 그대로는 freeze할 수 없다. `--preview` contact sheet에서 영역과 socket 위치를 확인한 뒤 `--accept`로 다시 실행하면 `needs-review`가 아닌 제안만 `verified`가 된다. 나머지와 추적하지 않은 socket은 직접 입력한다. 이 명령은 raster를 수정하지 않고 draft 파일도 덮어쓰지 않으며(`--out`에 새로 기록), 해부학적 위치를 추론하지 않는다. 가장 위 불투명 픽셀처럼 머리카락 한 가닥에 흔들리는 기준 대신, 저작한 영역 전체의 그림을 맞춘다.
 

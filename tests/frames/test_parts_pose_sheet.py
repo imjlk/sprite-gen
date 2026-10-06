@@ -4,6 +4,7 @@ import json
 import subprocess
 import sys
 
+import numpy as np
 import pytest
 from PIL import Image, ImageDraw
 
@@ -287,3 +288,37 @@ def test_covering_keeps_part_pixels_that_match_the_body_under_them():
     assert sum(cut.getpixel(p)[3] > 0 for p in band) < len(band)  # pixel subtraction loses band pixels
     assert all(kept.getpixel(p)[3] > 0 for p in band) and info["alignment"] is not None
     assert kept.getpixel((10, 15))[3] == 0  # the body below the hat stays out of the part
+
+
+def test_keep_palette_drops_a_repainted_body_and_prune_drops_hanging_strands():
+    body = Image.new("RGBA", (24, 24))
+    ImageDraw.Draw(body).rectangle((4, 4, 19, 19), fill=(230, 180, 150, 255), outline=(40, 20, 20, 255))
+    drawn = body.copy()
+    draw = ImageDraw.Draw(drawn)
+    draw.rectangle((4, 4, 19, 19), fill=(170, 110, 90, 255), outline=(40, 20, 20, 255))  # the face repainted darker
+    draw.rectangle((2, 2, 21, 8), fill=(150, 40, 30, 255))  # the hair asked for
+    draw.line((12, 9, 12, 16), fill=(60, 20, 10, 255))  # a strand left hanging
+    hair = np.array([[150, 40, 30], [60, 20, 10], [40, 20, 20]])
+    loose, _ = sheets.cut_cell(drawn, body, method="covering")
+    kept, _ = sheets.cut_cell(drawn, body, method="covering", colors=hair, keep_palette=24, prune=8)
+    assert loose.getpixel((10, 14))[3] > 0  # covering alone takes the repainted face
+    assert kept.getpixel((10, 14))[3] == 0 and kept.getpixel((10, 4))[3] > 0
+    assert all(kept.getpixel((12, y))[3] == 0 for y in range(10, 17))
+    arc = drawn.copy()
+    ImageDraw.Draw(arc).line((2, 0, 21, 0), fill=(40, 20, 20, 255))  # a worn hat's edge redrawn higher
+    ImageDraw.Draw(arc).line((8, 12, 11, 12), fill=(40, 20, 20, 255))  # a dark stroke on the face
+    kept, _ = sheets.cut_cell(arc, body, method="covering", colors=hair, keep_palette=24)
+    assert kept.getpixel((12, 0))[3] == 0
+
+
+def test_a_big_part_on_a_figure_that_sits_right_is_not_misaligned():
+    body = Image.new("RGBA", (40, 40))
+    ImageDraw.Draw(body).rectangle((15, 10, 24, 35), fill=(230, 180, 150, 255))
+    hair = body.copy()
+    ImageDraw.Draw(hair).rectangle((11, 6, 28, 16), fill=(150, 40, 30, 255))  # lots added, body kept
+    alone = Image.new("RGBA", (40, 40))
+    ImageDraw.Draw(alone).rectangle((11, 6, 28, 16), fill=(150, 40, 30, 255))  # the hair drawn without the body
+    big = sheets.overlap(hair, body)
+    assert big[0] < sheets.MIN_ALIGNMENT and not sheets.misaligned(*big)
+    assert sheets.misaligned(*sheets.overlap(alone, body))
+    assert sheets.misaligned(0.6) and sheets.misaligned(0.45, 0.99)

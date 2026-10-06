@@ -492,24 +492,107 @@ def cover(dressed, body, *, threshold=24, minimum=6, prune=2):
 METHODS = ("difference", "covering")
 
 
+def _nearest(rgb, colors):
+    return np.abs(rgb[:, None, :] - np.asarray(colors, dtype=int)[None]).max(-1).min(-1)
+
+
+def near_palette(part, colors, distance, *, against=None):
+    """Keep pixels within `distance` (max channel) of a palette color, and nearer to it than to
+    any of the colors `against` (what was under it): drop the body the model repainted."""
+    pixels = np.asarray(part).copy()
+    alpha = pixels[..., 3] > 0
+    if alpha.any():
+        rgb = pixels[alpha][:, :3].astype(int)
+        nearest = _nearest(rgb, colors)
+        keep = np.zeros(alpha.shape, dtype=bool)
+        keep[alpha] = (nearest <= distance) & ((nearest < _nearest(rgb, against)) if against is not None and len(against) else True)
+        pixels[alpha & ~keep] = 0
+    return Image.fromarray(pixels)
+
+
+def repainted(drawn, under, colors, distance):
+    """Changed pixels `near_palette` would drop: the body the model repainted, not the part."""
+    changed = np.asarray(cover(drawn, under))
+    kept = np.asarray(near_palette(Image.fromarray(changed), colors, distance, against=under_colors(under)))
+    return (changed[..., 3] > 0) & (kept[..., 3] == 0)
+
+
+def lone_outline(part, under, *, luma=60):
+    """Drop dark pixels off the figure with no lighter part pixel beside them: an outline with
+    nothing inside (the edge of a hat the model drew a little higher than the one worn) is not
+    the part. On the figure dark strokes stay (an eyebrow is all outline color)."""
+    pixels = np.asarray(part).copy()
+    alpha = pixels[..., 3] > 0
+    dark = alpha & (pixels[..., :3].astype(np.int32) @ np.array([299, 587, 114]) < luma*1000)
+    dark &= np.asarray(under)[..., 3] == 0
+    fill = np.pad(alpha & ~dark, 1)
+    beside = np.zeros_like(alpha)
+    for dy in (0, 1, 2):
+        for dx in (0, 1, 2):
+            beside |= fill[dy:dy+alpha.shape[0], dx:dx+alpha.shape[1]]
+    pixels[dark & ~beside] = 0
+    return Image.fromarray(pixels)
+
+
+def under_colors(under, *, luma=60):
+    """The colors of what was under the part, outline colors left out (part and body share them)."""
+    pixels = np.asarray(under)
+    rgb = pixels[pixels[..., 3] > 0][:, :3].astype(int)
+    rgb = rgb[rgb @ np.array([299, 587, 114]) >= luma*1000]
+    return np.unique(rgb, axis=0)
+
+
+def prune_spurs(part, rounds):
+    """Drop 1 px tails (at most one opaque 4-neighbour), `rounds` times: strands hanging off a cut."""
+    pixels = np.asarray(part).copy()
+    for _ in range(rounds):
+        alpha = pixels[..., 3] > 0
+        padded = np.pad(alpha, 1)
+        neighbours = padded[:-2, 1:-1].astype(int) + padded[2:, 1:-1] + padded[1:-1, :-2] + padded[1:-1, 2:]
+        tails = alpha & (neighbours <= 1)
+        if not tails.any():
+            break
+        pixels[tails] = 0
+    return Image.fromarray(pixels)
+
+
+def overlap(drawn, body):
+    """(IoU of the drawn figure and the body, share of the body the figure still covers)."""
+    drawn_alpha, body_alpha = np.asarray(drawn)[..., 3] > 0, np.asarray(body)[..., 3] > 0
+    both = float((drawn_alpha & body_alpha).sum())
+    return round(both / max(1, (drawn_alpha | body_alpha).sum()), 3), round(both / max(1, body_alpha.sum()), 3)
+
+
+def misaligned(alignment, coverage=None):
+    """The drawn figure does not sit on the body (rescaled, shifted or dropped by the model).
+
+    A part that adds a lot (big hair, a hood) lowers the IoU of a figure that sits right;
+    it still covers the body, so between the two limits the coverage decides.
+    """
+    if alignment is None:
+        return False
+    if alignment < LOOSE_ALIGNMENT:
+        return True
+    return alignment < MIN_ALIGNMENT and (coverage is None or coverage < MIN_COVERAGE)
+
+
 def cut_cell(drawn, body, *, method="difference", body_threshold=None, near_body=None, min_island=0, outline=False,
-             fill_holes=0, close_body=0, colors=None, cover_threshold=24):
+             fill_holes=0, close_body=0, colors=None, cover_threshold=24, keep_palette=None, prune=0):
     """One drawn cell to the part alone, on the cell's own crop of the canvas.
 
     `difference` removes what still matches the body (garments drawn over a dressed sheet);
     `covering` keeps everything the drawing changed, whole (hair, hats, loose hoods).
-    Returns the part and {alignment with the body, holes filled}.
+    Returns the part and {alignment with the body, coverage of the body, holes filled}.
     """
     contract._enum(*METHODS)(method, "method")
     if near_body is not None:
         drawn = within_body(drawn, body, near_body)
-    alignment = None
+    alignment = coverage = None
     part = drawn
     if body_threshold is not None or method == "covering":
         # A dressed cell redraws the body: its figure should cover the body's own pixels.
         # A model that rescaled or shifted the page shows up here before anything is cut.
-        drawn_alpha, body_alpha = np.asarray(drawn)[..., 3] > 0, np.asarray(body)[..., 3] > 0
-        alignment = round(float((drawn_alpha & body_alpha).sum() / max(1, (drawn_alpha | body_alpha).sum())), 3)
+        alignment, coverage = overlap(drawn, body)
     if method == "covering":
         part = cover(drawn, body, threshold=cover_threshold)
     elif body_threshold is not None:
@@ -518,6 +601,17 @@ def cut_cell(drawn, body, *, method="difference", body_threshold=None, near_body
             part = drop_islands(part, min_island, body=body)
         if outline:
             part = keep_outline(part, drawn)
+    if keep_palette is not None and colors is not None:
+        # An image model often repaints the body it was asked to keep (a darker face under new
+        # hair): such pixels changed, but they are far from every color of the part's design.
+        part = near_palette(part, colors, keep_palette, against=under_colors(body))
+        part = lone_outline(part, body)
+        if method == "covering":
+            mask = np.asarray(part)[..., 3] > 0
+            mask |= enclosed(mask) & (np.asarray(drawn)[..., 3] > 0)
+            part = keep_outline(Image.fromarray(np.where(mask[..., None], np.asarray(drawn), 0).astype(np.uint8)), drawn, luma=60)
+    if prune:
+        part = prune_spurs(part, prune)
     holes = 0
     if fill_holes:
         part, holes = pixel_grid.fill_small_holes(part, fill_holes)
@@ -526,7 +620,7 @@ def cut_cell(drawn, body, *, method="difference", body_threshold=None, near_body
         holes += closed
     if colors is not None:
         part = pixel_grid.snap(part, colors)
-    return part, {"alignment": alignment, "holes": holes}
+    return part, {"alignment": alignment, "coverage": coverage, "holes": holes}
 
 
 def slice_sheet(assembly, guide=None, art=None, out=None, *, part_id, slot, node, socket, piece="piece", design_id=None,
@@ -573,7 +667,7 @@ def slice_sheet(assembly, guide=None, art=None, out=None, *, part_id, slot, node
         reduced, info = cut_cell(reduced, body, method=method, body_threshold=body_threshold, near_body=near_body,
                                  min_island=min_island, outline=outline, fill_holes=fill_holes, close_body=close_body,
                                  colors=colors)
-        alignment, holes = info["alignment"], info["holes"]
+        alignment, coverage, holes = info["alignment"], info["coverage"], info["holes"]
         native = Image.new("RGBA", tuple(canvas))
         native.alpha_composite(reduced, tuple(crop[:2]))
         if region is not None:
@@ -592,7 +686,7 @@ def slice_sheet(assembly, guide=None, art=None, out=None, *, part_id, slot, node
         pixels = int(np.count_nonzero(np.asarray(native)[..., 3]))
         drawn_samples[entry["clip"], entry["sample"]] = (filename, data, pixels, list(location["position"]))
         report.append({"clip": entry["clip"], "sample": entry["sample"], "pixels": pixels, "file": filename,
-                       "holes_filled": holes, "alignment": alignment})
+                       "holes_filled": holes, "alignment": alignment, "coverage": coverage})
     # Without classes each drawn sample is its own drawing; with them members reuse their representative.
     owners = {key: key for key in drawn_samples}
     if groups is not None:
@@ -654,11 +748,13 @@ def slice_sheet(assembly, guide=None, art=None, out=None, *, part_id, slot, node
 
 
 MIN_ALIGNMENT = 0.7  # judged drawn pages: aligned cells 0.90-0.97, a page the model rescaled ~0.35
+LOOSE_ALIGNMENT = 0.5  # big hair on a figure that sits right: IoU 0.60-0.75, body coverage 0.87-0.95
+MIN_COVERAGE = 0.8  # the model drew the part alone or shifted the figure: coverage ~0.4
 
 
 def _misaligned(report):
     """Dressed cells whose figure does not sit on the body: redraw that page, do not trust the cut."""
-    return [f"{r['clip']}/{r['sample']}" for r in report if r["alignment"] is not None and r["alignment"] < MIN_ALIGNMENT]
+    return [f"{r['clip']}/{r['sample']}" for r in report if misaligned(r["alignment"], r.get("coverage"))]
 
 
 def add_sheet_arguments(parser: argparse.ArgumentParser):

@@ -1,0 +1,16 @@
+{
+ "id": "mina",
+ "prefix": "sd.mina",
+ "character": "The bald chibi girl mannequin",
+ "target_height": 84,
+ "colors": 28,
+ "body_prompt": "High-quality pixel-art game sprite of a cute slim chibi (super-deformed) girl base mannequin character for a paper-doll layering system, in the style of polished modern indie pixel art.\n\nPure side view (exact profile) facing right, standing in a relaxed neutral idle pose: both feet flat on the ground, arms hanging relaxed at the sides with slightly bent elbows. Chibi proportions: a big round head about 50% of the total height, a slender small body with narrow shoulders, thin short arms and legs, small hands and feet with readable fingers and toes.\n\nThe character is completely bald with a smooth round head, one ear visible, and NO eyes, NO eyebrows, NO mouth and NO hair (a blank face; features are separate layers). It wears only a plain light-gray sleeveless undershirt and plain dark charcoal shorts, barefoot. No accessories, no patterns, no text.\n\nShading: one soft light from the upper left. Every material has a 4-step ramp: a highlight, a base tone, a mid-shadow and a deep shadow, with hue-shifted shadows (skin shadows lean warm red-brown, cloth shadows lean cool blue-gray), subtle rim light on the back edge of the head, crisp clusters, no dithering noise. A crisp continuous 1-pixel dark outline around the silhouette, slightly lighter (colored) outline where limbs overlap the body.\n\nStrict pixel art: perfectly square pixels on one consistent grid, every art pixel an exact 8x8 block of screen pixels, the character about 84 art pixels tall, a palette of about 28 colors, no anti-aliasing, no gradients, no blur. Centered, full body with margin, on a transparent background, no shadow, no ground line.",
+ "designs": {
+  "hair": "hair.c",
+  "expression": "expression.c",
+  "upper": "upper.c",
+  "lower": "lower.c",
+  "footwear": "footwear.c",
+  "headwear": "headwear"
+ }
+}

@@ -39,6 +39,8 @@ def test_a_part_goes_from_sheet_to_an_approved_part_review(tmp_path):
     assembly = setup(tmp_path)
     made = production.sheet(assembly, "test.badge")
     assert made["poses"] == ["walk.01", "walk.02"] and made["prompt"]
+    prompt = (assembly.parent / made["prompt"]).read_text()
+    assert "Erase the body" not in prompt and "whole figure" in prompt  # drawn dressed, cut afterwards
     assert production.draw(assembly, "test.badge", dry_run=True)["pages"][0]["status"] == "planned"
     draw_batch(assembly, made)
     sliced = production.slice_batch(assembly, "test.badge")
@@ -75,7 +77,7 @@ def test_a_rejected_pose_is_the_only_one_drawn_again(tmp_path):
                                  note="badge too low")
     assert reviewed["status"] == "rejected" and reviewed["rejected"] == ["walk.02"]
     redo = production.sheet(assembly, "test.badge")
-    assert redo["poses"] == ["walk.02"]
+    assert redo["poses"] == ["walk.02"] and not (assembly.parent / redo["pages"][0]["art"]).exists()
     draw_batch(assembly, redo)
     production.slice_batch(assembly, "test.badge")
     state = json.loads((assembly.parent / "productions/test.badge/production.json").read_text())
@@ -83,6 +85,22 @@ def test_a_rejected_pose_is_the_only_one_drawn_again(tmp_path):
     assert state["tracks"]["main"]["poses"]["walk.01"]["decision"] == "approved"
     with pytest.raises(contract.PartsContractError, match="selection changed"):
         production.review(assembly, "test.badge", reviewer="tester", approve=["walk.02"])
+    production.build(assembly, "test.badge")
+    production.review(assembly, "test.badge", reviewer="tester", reject=["walk.02"], note="still too low")
+    again = production.sheet(assembly, "test.badge")  # the same pose again is a new batch, not the old drawing
+    assert again["poses"] == ["walk.02"] and again["batch"] != redo["batch"]
+    assert not (assembly.parent / again["pages"][0]["art"]).exists()
+
+
+def test_a_pose_failing_a_check_is_drawn_again_unless_someone_approved_it():
+    error = {"status": "error", "findings": ["alignment 0.4: the drawn figure does not sit on the body; redraw"]}
+    rows = {"walk.01": {"selected": "a", "decision": "unverified", "check": error},
+            "walk.02": {"selected": "b", "decision": "approved", "check": error},
+            "walk.03": {"selected": "c", "decision": "unverified", "check": {"status": "warning"}}}
+    raster = {"config": {"mode": "raster"}, "tracks": {"main": {"poses": rows}}}
+    assert production._todo(raster, None, list(rows)) == ["walk.01"]
+    held = {"config": {"mode": "held", "reference_pose": "walk.01"}, "tracks": {"main": {"poses": rows}}}
+    assert production._todo(held, None, list(rows)) == ["walk.01"]
 
 
 def test_an_explicit_mask_and_adopting_a_pack(tmp_path):
@@ -212,6 +230,21 @@ def test_a_held_part_with_a_covered_variant_is_drawn_once_per_track(tmp_path):
     pieces = {p["id"]: p for p in registry["test.hair"]["bindings"][0]["pieces"]}
     assert set(pieces) == {"hair", "capped"} and pieces["capped"]["cover_rule"]["show"] == "covered"
     assert all(p["mode"] == "held" for p in pieces.values())
+    Image.new("RGBA", (8, 4), (60, 90, 140, 255)).save(source / "piece.png")  # the hat redrawn
+    hat = json.loads(part_spec(tmp_path / "hat.json", assembly, source, slot="headwear", node="head", socket="head",
+                               identity="test.hat", pivot=(4, 4)).read_text())
+    hat["covers"] = ["headwear"]
+    (tmp_path / "hat.json").write_text(json.dumps(hat))
+    parts_import.import_pack(assembly, tmp_path / "hat.json", source)
+    checked = production.check(assembly, "test.hair", track="capped")
+    assert checked["summary"]["capped"]["error"] == 2 and "test.hat as it was before" in checked["findings"]["capped:walk.01"][0]
+    redo = production.sheet(assembly, "test.hair", track="capped")
+    assert redo["poses"] == ["walk.01"]
+    draw_batch(assembly, redo)
+    production.slice_batch(assembly, "test.hair", track="capped")
+    assert production.check(assembly, "test.hair", track="capped")["summary"]["capped"]["error"] == 0
+    production.build(assembly, "test.hair")
+
     production.review(assembly, "test.hair", reviewer="tester", approve=["all"])
     reviewed = production.review(assembly, "test.hair", reviewer="tester", approve=["all"], track="capped")
     assert reviewed["status"] == "approved" and reviewed["approved"] == 4

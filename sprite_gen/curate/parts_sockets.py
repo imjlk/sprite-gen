@@ -23,14 +23,14 @@ from sprite_gen.spec.runio import atomic_write_text
 
 TRACK_POLICY = "parts.socket-template-track.v1"
 _TRACK = contract._record({
-    "socket": contract._id, "mode": contract._enum("region", "constant"),
+    "socket": contract._id, "mode": contract._enum("region", "constant", "relative"), "to": contract._nullable(contract._id),
     "reference": contract._record({"clip": contract._id, "sample": contract._id, "position": contract._point}),
     "bounds": contract._nullable(contract._rectangle),
     "clips": contract._nullable(contract._list(contract._id, nonempty=True, unique=True)),
     "radius": contract._integer, "alpha_weight": contract._integer,
     "min_alpha": contract._integer, "rgb_threshold": contract._integer,
     "max_cost": contract._nullable(contract._integer), "visible": contract._boolean,
-}, {"mode": "region", "bounds": None, "clips": None, "radius": 3, "alpha_weight": 3,
+}, {"mode": "region", "to": None, "bounds": None, "clips": None, "radius": 3, "alpha_weight": 3,
     "min_alpha": 128, "rgb_threshold": 24, "max_cost": None, "visible": True})
 _SPEC = contract._record({"kind": contract._enum("parts-socket-track"), "schema_version": contract._positive,
                           "tracks": contract._list(_TRACK, nonempty=True)})
@@ -68,6 +68,8 @@ def _load_spec(path):
     for n, track in enumerate(spec["tracks"]):
         if track["mode"] == "region" and track["bounds"] is None:
             raise contract.PartsContractError(f"track.tracks[{n}]: region mode requires bounds")
+        if (track["mode"] == "relative") != (track["to"] is not None):
+            raise contract.PartsContractError(f"track.tracks[{n}]: relative mode takes `to`, the socket it keeps its distance from")
         if not 0 <= track["radius"] <= 16 or track["alpha_weight"] < 0:
             raise contract.PartsContractError(f"track.tracks[{n}]: radius must be 0..16 and alpha_weight nonnegative")
     return spec
@@ -122,10 +124,22 @@ def track_sockets(assembly, candidate, annotations, spec, out, *, accept=False, 
             template = image(ref["clip"], sample).crop((x+x0, y+y0, x+x1, y+y1))
             if template.getchannel("A").point(lambda a: 255 if a >= track["min_alpha"] else 0).getbbox() is None:
                 raise contract.PartsContractError(f"track {track['socket']}: reference region is transparent")
+        if track["mode"] == "relative":
+            # A part of the body that moves with another socket (a torso under a head that bobs):
+            # the reference distance, kept in every sample. Tracks run in order, so `to` comes first.
+            anchor = draft["clips"][ref["clip"]][ref["sample"]]["sockets"].get(track["to"])
+            if anchor is None:
+                raise contract.PartsContractError(f"track {track['socket']}: socket {track['to']} is not annotated")
+            distance = [a - b for a, b in zip(ref["position"], anchor["position"])]
         for clip_id in targets:
             seed = ref["position"]
             for sample in clips[clip_id]["samples"]:
-                if template is None:
+                if track["mode"] == "relative":
+                    image(clip_id, sample)
+                    other = draft["clips"][clip_id][sample["id"]]["sockets"][track["to"]]
+                    found = {"position": [a + d for a, d in zip(other["position"], distance)], "cost": 0, "margin": None,
+                             "at_edge": other["confidence"] != "verified"}
+                elif template is None:
                     image(clip_id, sample)
                     found = {"position": list(ref["position"]), "cost": 0, "margin": None, "at_edge": False}
                 else:

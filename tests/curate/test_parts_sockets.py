@@ -131,3 +131,25 @@ def test_cli_reports_json(tmp_path):
         capture_output=True, text=True)
     payload = json.loads(completed.stdout)
     assert completed.returncode == 0 and payload["ok"] and payload["tracked"] > 0
+
+
+
+def test_relative_track_keeps_its_reference_distance_from_another_socket(tmp_path):
+    root, assembly, imported = setup(tmp_path)
+    spec = json.loads(track_spec(tmp_path / "t.json", assembly).read_text())
+    for track in spec["tracks"]:
+        if track["socket"] == "back":
+            track.update(mode="relative", to="head", reference={"clip": "walk.right", "sample": "sample.0", "position": [64, 70]})
+    (tmp_path / "t.json").write_text(json.dumps(spec))
+    result = parts_sockets.track_sockets(assembly, imported["candidate"], root / imported["annotation_template"],
+                                         tmp_path / "t.json", tmp_path / "ann.json", accept=True)
+    torso = [row["position"] for row in result["results"] if row["socket"] == "back"]
+    assert torso == [[64+dx, 70+dy] for dx, dy in OFFSETS]
+    spec["tracks"][-1].pop("to", None)
+    for track in spec["tracks"]:
+        if track["socket"] == "back":
+            track.pop("to")
+    (tmp_path / "t.json").write_text(json.dumps(spec))
+    with pytest.raises(contract.PartsContractError, match="relative mode takes"):
+        parts_sockets.track_sockets(assembly, imported["candidate"], root / imported["annotation_template"],
+                                    tmp_path / "t.json", tmp_path / "ann.json")
