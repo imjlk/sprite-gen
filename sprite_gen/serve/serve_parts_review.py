@@ -39,37 +39,46 @@ class ReviewDesk:
     def productions(self):
         return production.status(self.assembly)
 
+    @staticmethod
+    def _split(name):
+        part, _, track = name.partition("@")
+        return part, track or None
+
     def part(self, name):
+        part, track = self._split(name)
         root, index, registry, _ = self._state()
-        state = production._load(root, name)
+        state = production._load(root, part)
+        rows = production._track(state, track)["poses"]
         motion = registry[index["motion"]["id"]]
         order, first = production._poses(motion, production._states(state, index))
-        rows = []
+        poses = []
         for pose in order:
-            row = state["poses"].get(pose) or {}
-            rows.append({"pose": pose, "clip": first[pose][0], "selected": row.get("selected"),
-                         "candidates": len(row.get("candidates", [])), "decision": row.get("decision"),
-                         "note": row.get("note"), "reviewer": row.get("reviewer"), "check": row.get("check")})
-        built = state["built"]
-        current = built is not None and registry.get(name, {}).get("digest") == built["part"]["digest"]
-        return {"part": name, "config": state["config"], "poses": rows, "built": built["part"] if built else None,
-                "built_current": current, "batches": state["batches"][-3:]}
+            row = rows.get(pose) or {}
+            poses.append({"pose": pose, "clip": first[pose][0], "selected": row.get("selected"),
+                          "candidates": len(row.get("candidates", [])), "decision": row.get("decision"),
+                          "note": row.get("note"), "reviewer": row.get("reviewer"), "check": row.get("check")})
+        return {"part": name, "config": state["config"], "track": track or production.MAIN, "poses": poses,
+                "built": state["built"]["part"] if state["built"] else None,
+                "built_current": production._current(state, registry, order),
+                "batches": production._track(state, track)["batches"][-3:]}
 
     def render(self, name, pose, kind):
         """PNG of one pose: the part on the body alone (built), or the drawn cell / cut on what it was drawn over."""
+        part, track = self._split(name)
         root, index, registry, _ = self._state()
-        state = production._load(root, name)
-        row = state["poses"].get(pose)
+        state = production._load(root, part)
+        row = production._track(state, track)["poses"].get(pose)
         if row is None or row.get("selected") is None:
             raise contract.PartsContractError(f"{pose} has no drawing yet")
         base = root / row["selected"]
         built = state["built"]
         box = None
-        if built is not None and registry.get(name, {}).get("digest") == built["part"]["digest"]:
+        if built is not None and registry.get(part, {}).get("digest") == built["part"]["digest"]:
             digest = built["part"]["digest"]
             with self.lock:
                 if (digest, pose) not in self._renders:
-                    frames, _ = production._render_alone(root, index, registry, built["part"],
+                    body = state["config"]["role"] == "body"
+                    frames, _ = production._render_alone(root, index, registry, None if body else built["part"],
                                                          production._states(state, index))
                     for other, image in frames.items():
                         self._renders[(digest, other)] = image
@@ -78,19 +87,12 @@ class ReviewDesk:
                     self._renders[(digest, "box")] = (min(b[0] for b in boxes)-2, min(b[1] for b in boxes)-2,
                                                       max(b[2] for b in boxes)+2, max(b[3] for b in boxes)+2) if boxes else None
                 box = self._renders[(digest, "box")]
-        if kind == "body" and box is not None:
+        if kind == "body" and box is not None and track is None:
             image = self._renders[(built["part"]["digest"], pose)]
         elif kind == "drawn" and (base / "drawn.png").exists():
             image = Image.open(base / "drawn.png").convert("RGBA")
         else:
-            # The cut on what it was drawn over (the body, or the body wearing other parts).
-            part = Image.open(base / "part.png").convert("RGBA")
-            under = base / "under.png"
-            image = Image.open(under).convert("RGBA") if under.exists() else Image.new("RGBA", part.size)
-            if image.size == part.size:
-                image.alpha_composite(part)
-            else:
-                image = part
+            image = production.drawn_over(root, row["selected"])
         if box is not None and image.size == self._renders[(built["part"]["digest"], pose)].size:
             image = image.crop(box)
         scale = 4
@@ -100,23 +102,24 @@ class ReviewDesk:
         return out.getvalue()
 
     def act(self, name, action, body):
+        part, track = self._split(name)
         with self.lock:
             self._renders.clear()
             if action == "review":
-                return production.review(self.assembly, name, reviewer=body.get("reviewer"),
+                return production.review(self.assembly, part, reviewer=body.get("reviewer"), track=track,
                                          approve=body.get("approve", []), reject=body.get("reject", []),
                                          note=body.get("note") or None)
             if action == "sheet":
-                return production.sheet(self.assembly, name, poses=body.get("poses") or None)
+                return production.sheet(self.assembly, part, poses=body.get("poses") or None, track=track)
             if action == "draw":
-                return production.draw(self.assembly, name, provider=body.get("provider"),
+                return production.draw(self.assembly, part, provider=body.get("provider"), track=track,
                                        model=body.get("model"), dry_run=bool(body.get("dry_run")))
             if action == "slice":
-                return production.slice_batch(self.assembly, name)
+                return production.slice_batch(self.assembly, part, track=track)
             if action == "check":
-                return production.check(self.assembly, name)
+                return production.check(self.assembly, part, track=track)
             if action == "build":
-                return production.build(self.assembly, name)
+                return production.build(self.assembly, part)
         raise contract.PartsContractError(f"unknown action {action}")
 
 

@@ -24,14 +24,23 @@ sprite-gen parts-part-status --assembly lib/assembly.json
 | 항목 | 뜻 |
 |---|---|
 | `part_id`, `design_id`, `slot`, `node`, `socket` | 만들 pack과 그 piece가 놓일 slot·node·부착점 |
-| `mode` | `raster`(포즈마다 그림) 또는 `held`(한 그림) |
+| `role`, `mode` | `part` 또는 `body`. `raster`(포즈마다 그림) 또는 `held`(기준 포즈 한 그림) |
 | `sheet` | 시트 crop·배율·페이지 크기·비율 |
 | `cut` | 자르는 방식(`difference`/`covering`)과 파라미터(몸 차이 임계값, 몸에서 허용 거리, 잔조각, 외곽선, 구멍 메우기, 영역, 팔레트) |
 | `wearing` | 이 파츠를 그릴 때 이미 입혀 둘 파츠 ID(부츠는 바지 위에서) |
 | `pieces`, `segments`, `by_component` | 몸 조각 라벨로 나눌 조각(몸통·앞소매·뒷소매), 덩어리 단위 배정 |
+| `cover_rule`, `covers`, `variants`, `follow`, `trail`, `body` | 아래 "한 장짜리 파츠, 변형, 몸" 참고 |
 | `prompt`, `draw` | 이미지 공급자에 줄 지시문과 참조 그림, 공급자와 모델(`parts-part-draw`와 검수 데스크가 쓴다) |
 
 `parts-part-config`는 앞으로 그릴 그림에 쓸 설정(지시문, 시트, 자르기, `wearing`, 조각)을 바꾼다. 이미 만든 후보는 만들 때의 설정을 유지하고, 바뀐 설정은 `history`에 남는다. ID·slot·node·부착점·mode는 그림이 생긴 뒤에는 바꿀 수 없다.
+
+## 한 장짜리 파츠, 변형, 몸
+
+**held 파츠**(헤어·표정·모자·가방)는 `mode: held`다. `reference_pose`(기본: 첫 포즈) 하나에만 그리고, 그 그림을 모든 포즈의 부착점에 건다. 시트는 기준 포즈 한 칸뿐이다. 어느 포즈에서든 반려하면 그 한 장을 다시 그린다. `follow: {socket}`는 다른 부착점이 기준 포즈에서 움직인 만큼 그림을 옮긴다(root에 건 가방이 몸통을 따라감). `trail: {socket, gain, max_px}`는 한 박자 늦게 따라간다. 헤어에는 쓰지 않는다. 1px 지연이 두피 위에서 덜컹거림으로 보였다.
+
+**변형**(`variants`)은 같은 pack 안에서 가림 규칙이 다른 조각이다. 예를 들어 헤어의 본 그림은 `cover_rule: {tag: headwear, show: uncovered}`, 모자용 변형은 `show: covered`다. 변형은 자기 `wearing`(모자)을 입힌 몸 위에 그리므로, 모델은 모자 아래 보이는 머리만 그리고 자를 때도 모자를 뺀다. 모든 명령은 `--variant ID`로 그 트랙을 다루고, 빌드는 본 조각과 변형 조각을 한 pack에 넣는다. 모자 pack은 `covers: [headwear]`를 설정한다.
+
+**몸 production**(`role: body`)은 포즈별 라벨 지도를 그린다. `body.colors`(조각 node마다 색과 `provides`), `near_lighter`(명암으로 앞뒤를 바꿀 쌍)를 설정한다. 칠한 칸을 자르면 몸 픽셀마다 가장 가까운 라벨을 받은 후보가 된다. 검사는 칠한 비율과 앞뒤 교체를 경고한다. 빌드는 몸 raster를 조각으로 잘라 segmented body로 import하고 `segments.json`을 남긴다. 의상 production의 `segments`가 이 파일을 가리킨다. 이미 칠한 라벨은 `parts-part-adopt --labels DIR`로 들여온다. 몸 검수는 파츠 없이 몸만 렌더한다.
 
 ## 후보: 그린 그림, 영역, 결과를 함께 보존
 

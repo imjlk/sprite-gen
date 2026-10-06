@@ -1056,6 +1056,74 @@ def stage_productions(base):
     return report
 
 
+def stage_productions_rest(base):
+    """The body (labels), held parts (hair with capped variants, faces, hat, backpack) as productions."""
+    from sprite_gen.frames import parts_production as production
+    assembly = base / "library/assembly.json"
+    root = assembly.parent
+    report = {}
+    draw = {"provider": "codex", "model": "gpt-5.6-sol"}
+    body = {"kind": "parts-production-config", "schema_version": 1, "part_id": "sd.avatar.body", "design_id": "sd.avatar.body",
+            "role": "body", "sheet": {"crop": [24, 20, 104, 116], "scale": 4, "page_size": 12, "aspect": "1:1"},
+            "cut": {"tolerance": 80},
+            "body": {"colors": SEGMENTS, "near_lighter": [["arm_back", "arm_front"], ["leg_back", "leg_front"]], "tolerance": 60},
+            "prompt": {"text": LABEL_PROMPT}, "draw": draw}
+    file = write(base / "production-configs" / "body.json", body)
+    if not (root / "productions/sd.avatar.body/production.json").exists():
+        production.init(assembly, file)
+        production.adopt(assembly, "sd.avatar.body", labels=base / "labels")
+    report["body"] = production.check(assembly, "sd.avatar.body")["summary"]
+    built = production.build(assembly, "sd.avatar.body")
+    report["segments"] = built["segments"]
+    shutil.copytree(base / "design", root / "inputs/design-held", dirs_exist_ok=True)
+    held = {
+        "hair.a": ("hair", "head", "covering"), "hair.b": ("hair", "head", "covering"), "hair.c": ("hair", "head", "covering"),
+        "expression.a": ("expression", "head", "difference"), "expression.b": ("expression", "head", "difference"),
+        "expression.c": ("expression", "head", "difference"), "headwear": ("headwear", "head", "covering"),
+        "back_accessory": ("back_accessory", "root", "difference")}
+    template = (HQ / "design_parts.py").read_text().split('TEMPLATE = """', 1)[1].split('"""', 1)[0]
+    designs = eval((HQ / "design_parts.py").read_text().split("PARTS = ", 1)[1].split("\n}\n", 1)[0] + "\n}")
+    for name, (slot, socket, method) in held.items():
+        part_id = rebuild.PART_ID[name]
+        desc = NEW[name][1] if name in NEW else designs[name]
+        config = {"kind": "parts-production-config", "schema_version": 1, "part_id": part_id, "design_id": part_id,
+                  "slot": slot, "node": SLOTS[slot][2][0], "socket": socket, "mode": "held", "reference_pose": "idle.01",
+                  "sheet": {"crop": [16, 0, 112, 96] if slot != "back_accessory" else [16, 32, 112, 128], "scale": 4,
+                            "page_size": None, "aspect": "1:1"},
+                  "cut": {"method": method, "body_threshold": rebuild.PARTS[name][5], "region": rebuild.PARTS[name][4],
+                          "palette": f"inputs/design-held/{name}.palette.json", "near_body": None, "close_body": 0},
+                  "prompt": {"text": template.format(desc=desc)}, "draw": draw}
+        if slot == "hair":
+            config["cover_rule"] = {"tag": "headwear", "show": "uncovered"}
+            config["variants"] = [{"id": "capped", "cover_rule": {"tag": "headwear", "show": "covered"},
+                                   "wearing": [rebuild.PART_ID["headwear"]],
+                                   "prompt": {"text": CAPPED_PROMPT}}]
+        if slot == "headwear":
+            config["covers"] = ["headwear"]
+        if slot == "back_accessory":
+            config.update(follow={"socket": "torso"}, trail={"socket": "torso", "gain": "1/2", "max_px": 1})
+        file = write(base / "production-configs" / f"{name}.json", config)
+        index, registry = workspace.read_workspace(assembly)
+        if not (root / "productions" / part_id / "production.json").exists():
+            production.init(assembly, file)
+            pack = root / index["documents"][part_id]
+            production.adopt(assembly, part_id, pack, piece=slot)
+            if slot == "hair":
+                production.adopt(assembly, part_id, pack, piece="capped", track="capped")
+        report[name] = production.check(assembly, part_id)["summary"]
+    # Garments cut by the body production's own segments.
+    for name in [*GARMENTS, *(n for n in NEW if rebuild.PARTS[n][-1] == "raster")]:
+        config = json.loads((base / "production-configs" / f"{name}.json").read_text())
+        config["segments"] = built["segments"]
+        file = write(base / "production-configs" / f"{name}.json", config)
+        production.configure(assembly, config["part_id"], file)
+    for name in held:
+        production.build(assembly, rebuild.PART_ID[name])
+    for name in [*GARMENTS, *(n for n in NEW if rebuild.PARTS[n][-1] == "raster")]:
+        production.build(assembly, rebuild.PART_ID[name])
+    return report
+
+
 def stage_appearance(base, selection):
     assembly = base / "library/assembly.json"
     index, registry = workspace.read_workspace(assembly)
@@ -1073,7 +1141,7 @@ if __name__ == "__main__":
     parser.add_argument("stage", choices=("library", "labels", "label-gen", "labels-fix", "segments", "garments", "capped-gen",
                                           "capped-extract", "hair-extract", "hat-extract", "held", "appearance", "redraw", "new-designs", "new-extract",
                                           "new-sheets", "new-draw", "new-slice", "walk22", "added-sheets", "added-draw",
-                                          "added-slice", "added-redraw", "showcase", "productions",
+                                          "added-slice", "added-redraw", "showcase", "productions", "productions-rest",
                                           "coverage", "export"))
     parser.add_argument("--only", nargs="*")
     parser.add_argument("--select", type=Path)
@@ -1097,6 +1165,8 @@ if __name__ == "__main__":
         result = stage_capped_extract(args.base)
     elif stage == "hat-extract":
         result = stage_hat_extract(args.base)
+    elif stage == "productions-rest":
+        result = stage_productions_rest(args.base)
     elif stage == "productions":
         result = stage_productions(args.base)
     elif stage == "showcase":

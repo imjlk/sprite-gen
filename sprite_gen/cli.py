@@ -532,7 +532,7 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
     ),
     "parts-part-check": (
         "Check each selected drawing per pose: alignment, cut loss, specks, holes, palette, jumps between poses.",
-        parts_production.add_part_arguments,
+        parts_production.add_check_arguments,
         parts_production.run_check,
     ),
     "parts-part-build": (
