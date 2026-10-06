@@ -27,20 +27,20 @@
 | sd.wardrobe.lower.a.waist | waist | 6 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
 | sd.wardrobe.lower.a.leg_front | leg_front | 11 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
 | sd.wardrobe.lower.b.leg_back | leg_back | 3 | raster | 12/12 (5) | 11/11 (11) | 15/15 (15) |
-| sd.wardrobe.lower.b.waist | waist | 6 | raster | 12/12 (5) | 11/11 (11) | 15/15 (15) |
+| sd.wardrobe.lower.b.waist | waist | 6 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
 | sd.wardrobe.lower.b.leg_front | leg_front | 11 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
 | sd.wardrobe.lower.c.leg_back | leg_back | 3 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
 | sd.wardrobe.lower.c.waist | waist | 6 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
 | sd.wardrobe.lower.c.leg_front | leg_front | 11 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
-| sd.wardrobe.footwear.a.shoe_back | foot_back | 4 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
-| sd.wardrobe.footwear.a.shoe_front | foot_front | 12 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
-| sd.wardrobe.footwear.b.shoe_back | foot_back | 4 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
-| sd.wardrobe.footwear.b.shoe_front | foot_front | 12 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
-| sd.wardrobe.footwear.c.shoe_back | foot_back | 4 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
-| sd.wardrobe.footwear.c.shoe_front | foot_front | 12 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
+| sd.wardrobe.footwear.a.shoe_back | foot_back | 4 | raster | 12/12 (1) | 11/11 (11) | 15/15 (15) |
+| sd.wardrobe.footwear.a.shoe_front | foot_front | 12 | raster | 12/12 (3) | 11/11 (11) | 15/15 (15) |
+| sd.wardrobe.footwear.b.shoe_back | foot_back | 4 | raster | 12/12 (3) | 11/11 (11) | 15/15 (15) |
+| sd.wardrobe.footwear.b.shoe_front | foot_front | 12 | raster | 12/12 (5) | 11/11 (10) | 15/15 (14) |
+| sd.wardrobe.footwear.c.shoe_back | foot_back | 4 | raster | 12/12 (1) | 11/11 (11) | 15/15 (15) |
+| sd.wardrobe.footwear.c.shoe_front | foot_front | 12 | raster | 12/12 (6) | 11/11 (10) | 15/15 (15) |
 | sd.equipment.headwear.headwear | headwear | 10 | held | 12/12 (1) | 11/11 (1) | 15/15 (1) |
-| sd.equipment.gloves.glove_back | hand_back | 2 | raster | 12/12 (5) | 11/11 (11) | 15/15 (15) |
-| sd.equipment.gloves.glove_front | hand_front | 14 | raster | 12/12 (6) | 11/11 (11) | 15/15 (15) |
+| sd.equipment.gloves.glove_back | hand_back | 2 | raster | 12/12 (4) | 11/11 (11) | 15/15 (13) |
+| sd.equipment.gloves.glove_front | hand_front | 14 | raster | 12/12 (5) | 11/11 (11) | 15/15 (15) |
 | sd.equipment.back_accessory.back_accessory | back_accessory | 0 | held | 12/12 (1) | 11/11 (1) | 15/15 (1) |
 
 Cells: covered/samples (distinct drawings); ✗ marks a gap. 32 poses, 0 samples without a pose_id.

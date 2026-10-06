@@ -62,6 +62,7 @@ SPLITS = {
     "footwear": [("shoe_back", "foot_back", ["*"]), ("shoe_front", "foot_front", ["leg_front", "arm_front"])],
     "gloves": [("glove_back", "hand_back", ["*"]), ("glove_front", "hand_front", ["arm_front", "leg_front"])],
 }
+WHOLE = {"gloves", "footwear"}  # separate objects: each stroke goes whole to one piece
 GARMENTS = ["upper.a", "upper.b", "lower.a", "lower.b", "footwear.a", "footwear.b", "gloves"]
 LABEL_PROMPT = """Edit image 1. Image 1 is a pixel-art pose sheet: copies of one bald chibi character in pure side view facing right, in different idle, walking and running poses, each in its own grid cell on a flat pure magenta #FF00FF background.
 
@@ -229,25 +230,41 @@ def stage_garments(base, only=None):
                 pose = pose_of[clip_id, sample_id]
                 if pose not in pose_map:
                     pose_map[pose] = {k: placement[k] for k in ("image", "format", "pivot", "target_socket", "visible")}
+        target = base / "garments" / name / "src"
+        shutil.copytree(source, target, dirs_exist_ok=True)
+        source = target
+        if slot in ("upper", "lower"):
+            # HQ idle garments were warped, not sliced, and kept pinholes where skin shows through.
+            from sprite_gen.compose import compose_parts
+            from sprite_gen.frames import pixel_grid
+            load = compose_parts.AssetLoader(assembly.parent, index)
+            first = {s["pose_id"]: s for c in motion["clips"] for s in reversed(c["samples"])}
+            for pose, placement in pose_map.items():
+                drawing = Image.open(source / placement["image"]["file"]).convert("RGBA")
+                drawing, holes = pixel_grid.fill_small_holes(drawing, 6)
+                drawing, covered = pixel_grid.close_over(drawing, load(motion, first[pose]["image"]), neighbours=5)
+                if holes or covered:
+                    file = f"closed/{pose}.png"
+                    (source / file).parent.mkdir(parents=True, exist_ok=True)
+                    drawing.save(source / file)
+                    pose_map[pose] = {**placement, "image": {"file": file, "sha256": assets.sha256((source / file).read_bytes())}}
         redraw = base / "redraw" / name
         if redraw.exists():
             # Poses that failed review were drawn again; their drawings replace the HQ ones.
-            target = base / "garments" / name / "src"
-            shutil.copytree(source, target, dirs_exist_ok=True)
             for pose in json.loads((redraw / "redraw.json").read_text())["poses"]:
                 file = redraw / f"{pose}.png"
-                (target / "redraw").mkdir(exist_ok=True)
-                shutil.copy2(file, target / "redraw" / file.name)
+                (source / "redraw").mkdir(exist_ok=True)
+                shutil.copy2(file, source / "redraw" / file.name)
                 pose_map[pose] = {**pose_map[pose], "image": {"file": f"redraw/{file.name}",
                                   "sha256": assets.sha256(file.read_bytes())}, "visible": True}
-            source = target
         spec = {"kind": "parts-pack-import", "schema_version": 1, "id": rebuild.PART_ID[name], "design_id": rebuild.PART_ID[name],
                 "role": "part", "style": rig["style"], "rig": index["rig"], "motion": index["motion"], "view": rig["view"],
                 "binding_id": rebuild.PART_ID[name] + ".binding", "occupies": [slot],
                 "pieces": [{"id": slot, "slot": slot, "node": SLOTS[slot][2][0], "mode": "raster", "pose_map": pose_map}]}
         write(base / "garments" / name / "import.json", spec)
         split = parts_segments.split_piece(base / "garments" / name / "import.json", base / "body/segments.json",
-                                           base / "split" / name, piece=slot, into=SPLITS[slot], source_root=source)
+                                           base / "split" / name, piece=slot, into=SPLITS[slot], source_root=source,
+                                           by_component=slot in WHOLE)
         parts_import.import_pack(assembly, Path(split["spec"]), Path(split["source_root"]))
         report[name] = {"poses": len(pose_map), "pieces": split["pieces"]}
     write(base / "garments-evidence.json", report)
@@ -276,7 +293,9 @@ def stage_held(base, capped=()):
             for clip in motion["clips"]:
                 socket = "head" if slot != "back_accessory" else "torso"
                 positions = [s["sockets"][socket]["position"] for s in clip["samples"]]
-                drag = parts_rebind.lag_offsets(positions, Fraction(1, 2), 1) if slot in {"hair", "back_accessory"} else None
+                # Hair stays on the head every frame: a 1 px follow-through lag read as the hair rattling
+                # on the scalp (and under a hat that does not lag). Only the backpack trails.
+                drag = parts_rebind.lag_offsets(positions, Fraction(1, 2), 1) if slot == "back_accessory" else None
                 for n, sample in enumerate(clip["samples"]):
                     if slot == "back_accessory":
                         # Hung on root, following the torso's move from its place on the still.
@@ -341,6 +360,119 @@ def stage_capped_gen(base):
         done = subprocess.run(cmd, capture_output=True, text=True)
         results.append({"hair": name, "ok": done.returncode == 0, "err": done.stderr[-300:]})
     return results
+
+
+def _outside_holes(mask):
+    """Transparent pixels enclosed by the mask (not reachable from the canvas border)."""
+    from collections import deque
+    height, width = mask.shape
+    free, seen = ~mask, np.zeros(mask.shape, dtype=bool)
+    queue = deque((y, x) for y in range(height) for x in range(width)
+                  if (y in (0, height-1) or x in (0, width-1)) and free[y, x])
+    for y, x in queue:
+        seen[y, x] = True
+    while queue:
+        y, x = queue.popleft()
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            ny, nx = y+dy, x+dx
+            if 0 <= ny < height and 0 <= nx < width and free[ny, nx] and not seen[ny, nx]:
+                seen[ny, nx] = True
+                queue.append((ny, nx))
+    return free & ~seen
+
+
+def extract_covering(raw, body, region, *, threshold=24, prune=2):
+    """A part that covers the body (hair): everything the design changed, taken whole.
+
+    Subtracting the body pixel by pixel (with 1 px slack for redraw drift) also removed hair
+    pixels that happen to match the skull's outline or shading nearby, so the scalp and its
+    highlight showed through. Here the silhouette is what differs from the body, its enclosed
+    gaps are filled with the design's own pixels, and only rim pixels identical to the body
+    under them (skin under a fringe) are trimmed.
+    """
+    pitch = rebuild.SCALE * raw.width / (rebuild.CANVAS*rebuild.SCALE)
+    dressed = sheets.reduce_cell(raw, pitch, [255, 0, 255], 80, size=(rebuild.CANVAS, rebuild.CANVAS))
+    d, b = np.asarray(dressed).astype(int), np.asarray(body).astype(int)
+    changed = (np.abs(d[..., :3]-b[..., :3]).max(-1) > threshold) | ((d[..., 3] > 0) != (b[..., 3] > 0))
+    mask = changed & (d[..., 3] > 0)
+    zone = np.zeros_like(mask)
+    zone[region[1]:region[3], region[0]:region[2]] = True
+    mask &= zone
+    part = sheets.drop_islands(Image.fromarray(np.where(mask[..., None], d, 0).astype(np.uint8)), 6, dark_share=1.01)
+    mask = np.asarray(part)[..., 3] > 0
+    mask |= _outside_holes(mask) & (d[..., 3] > 0) & zone
+    part = sheets.keep_outline(Image.fromarray(np.where(mask[..., None], d, 0).astype(np.uint8)), dressed, luma=60)
+    mask = np.asarray(part)[..., 3] > 0
+    same = (np.abs(d[..., :4]-b[..., :4]).max(-1) == 0)
+    for _ in range(prune):
+        edge = mask & ~np.pad(mask, 1)[2:, 1:-1] | mask & ~np.pad(mask, 1)[:-2, 1:-1] \
+            | mask & ~np.pad(mask, 1)[1:-1, 2:] | mask & ~np.pad(mask, 1)[1:-1, :-2]
+        mask &= ~(edge & same)
+    return Image.fromarray(np.where(mask[..., None], d, 0).astype(np.uint8))
+
+
+def stage_hair_extract(base):
+    """Hair designs and their capped drawings re-extracted as covering parts, in their own palettes."""
+    design = base / "design"
+    plain = Image.open(design / "base.canvas.png").convert("RGBA")
+    hatted = Image.open(design / "base.hat.canvas.png").convert("RGBA")
+    hat = np.asarray(Image.open(design / "headwear.native.png").convert("RGBA"))[..., 3] > 0
+    report = {}
+    for name in ("hair.a", "hair.b", "hair.c"):
+        region = rebuild.PARTS[name][4]
+        colors = np.array(json.loads((design / f"{name}.palette.json").read_text())["colors"])
+        for suffix, body in (("", plain), (".capped", hatted)):
+            raw = design / f"{name}{suffix}.raw.png"
+            if not raw.exists():
+                continue
+            part = np.asarray(extract_covering(Image.open(raw).convert("RGBA"), body, region)).copy()
+            if suffix:
+                part[hat] = 0  # under the hat nothing shows; the hat draws over the hair anyway
+            art = rebuild.native.snap(Image.fromarray(part), colors)
+            target = design / f"{name}{suffix}.native.png"
+            if target.exists() and not (design / f"{name}{suffix}.subtracted.png").exists():
+                shutil.copy2(target, design / f"{name}{suffix}.subtracted.png")
+            art.save(target)
+            report[name + suffix] = int((np.asarray(art)[..., 3] > 0).sum())
+    return report
+
+
+def _prune_spurs(pixels, rounds=3):
+    """Drop 1 px tails (at most one opaque 4-neighbour), a few rounds: strands left under a brim."""
+    pixels = pixels.copy()
+    for _ in range(rounds):
+        alpha = pixels[..., 3] > 0
+        padded = np.pad(alpha, 1)
+        neighbours = padded[:-2, 1:-1].astype(int) + padded[2:, 1:-1] + padded[1:-1, :-2] + padded[1:-1, 2:]
+        pixels[alpha & (neighbours <= 1)] = 0
+    return pixels
+
+
+def stage_hat_extract(base):
+    """The hat as a covering part over the hair it was drawn on, cut at its brim.
+
+    The design was drawn over the bob, so what differs from that base is the hat plus a few
+    redrawn strands under the brim: in each column everything below the brim's light edge
+    and its outline row is hair, and 1 px tails left after that are pruned.
+    """
+    design = base / "design"
+    body = Image.open(design / "base.hair.b.canvas.png").convert("RGBA")
+    part = np.asarray(extract_covering(Image.open(design / "headwear.raw.png").convert("RGBA"), body,
+                                       rebuild.PARTS["headwear"][4])).copy()
+    luma = part[..., :3] @ np.array([0.299, 0.587, 0.114])
+    for x in range(part.shape[1]):
+        light = np.where((part[:, x, 3] > 0) & (luma[:, x] > 110))[0]
+        if light.size:
+            part[light.max()+2:, x] = 0
+        else:
+            part[:, x] = 0
+    part = _prune_spurs(part)
+    colors = np.array(json.loads((design / "headwear.palette.json").read_text())["colors"])
+    art = rebuild.native.snap(Image.fromarray(part), colors)
+    if not (design / "headwear.subtracted.png").exists():
+        shutil.copy2(design / "headwear.native.png", design / "headwear.subtracted.png")
+    art.save(design / "headwear.native.png")
+    return {"headwear": int((np.asarray(art)[..., 3] > 0).sum())}
 
 
 def stage_capped_extract(base, threshold=40):
@@ -535,7 +667,7 @@ def stage_new_slice(base, only=None):
             min_island=6 if feet else 12, outline=True, near_body=2, region=region, tolerance=80, palette=palette,
             fill_holes=6, close_body=5, by_pose=True)
         split = parts_segments.split_piece(Path(sliced["spec"]), base / "body/segments.json", base / "split" / name,
-                                           piece=slot, into=SPLITS[slot])
+                                           piece=slot, into=SPLITS[slot], by_component=slot in WHOLE)
         parts_import.import_pack(assembly, Path(split["spec"]), Path(split["source_root"]))
         report[name] = {"poses": sliced["poses"], "empty": sliced["empty"], "pieces": split["pieces"]}
     write(base / "new-evidence.json", report)
@@ -627,7 +759,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", required=True, type=Path)
     parser.add_argument("stage", choices=("library", "labels", "label-gen", "labels-fix", "segments", "garments", "capped-gen",
-                                          "capped-extract", "held", "appearance", "redraw", "new-designs", "new-extract",
+                                          "capped-extract", "hair-extract", "hat-extract", "held", "appearance", "redraw", "new-designs", "new-extract",
                                           "new-sheets", "new-draw", "new-slice",
                                           "coverage", "export"))
     parser.add_argument("--only", nargs="*")
@@ -650,6 +782,10 @@ if __name__ == "__main__":
         result = stage_capped_gen(args.base)
     elif stage == "capped-extract":
         result = stage_capped_extract(args.base)
+    elif stage == "hat-extract":
+        result = stage_hat_extract(args.base)
+    elif stage == "hair-extract":
+        result = stage_hair_extract(args.base)
     elif stage == "redraw":
         result = stage_redraw(args.base)
     elif stage in ("new-designs", "new-extract", "new-sheets"):

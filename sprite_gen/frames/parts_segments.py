@@ -30,6 +30,7 @@ from sprite_gen.spec import parts_assets as assets, parts_contract as contract, 
 from sprite_gen.spec.runio import atomic_write_text
 
 SEGMENT_POLICY = "parts.body-segments.v1"
+COMPONENT_MAJORITY = 0.75  # share of the covered body a piece needs to take a whole stroke
 _NEIGHBOURS = ((-1, 0), (0, -1), (0, 1), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1))
 
 
@@ -258,8 +259,36 @@ def _into(value):
     return piece, node, names
 
 
-def split_piece(spec, segments, out, *, piece, into, source_root=None, part_id=None):
-    """Split one raster piece of an import spec into pieces by the body segment under each pixel."""
+def _components(mask):
+    """8-connected components of a boolean mask, as boolean masks."""
+    from collections import deque
+    seen = np.zeros(mask.shape, dtype=bool)
+    height, width = mask.shape
+    for y, x in zip(*np.nonzero(mask)):
+        if seen[y, x]:
+            continue
+        found, queue = [], deque([(y, x)])
+        seen[y, x] = True
+        while queue:
+            cy, cx = queue.popleft()
+            found.append((cy, cx))
+            for dy, dx in _NEIGHBOURS:
+                ny, nx = cy+dy, cx+dx
+                if 0 <= ny < height and 0 <= nx < width and mask[ny, nx] and not seen[ny, nx]:
+                    seen[ny, nx] = True
+                    queue.append((ny, nx))
+        component = np.zeros(mask.shape, dtype=bool)
+        component[tuple(np.array(found).T)] = True
+        yield component
+
+
+def split_piece(spec, segments, out, *, piece, into, source_root=None, part_id=None, by_component=False):
+    """Split one raster piece of an import spec into pieces by the body segment under each pixel.
+
+    `by_component` assigns each connected stroke whole, to the piece owning at least 3/4 of the
+    body it covers: for separate objects such as gloves and shoes, whose rim overlaps another
+    body piece. A stroke with no clear owner (two boots touching) is cut pixel by pixel.
+    """
     spec_path = Path(spec).absolute()
     request = workspace.decode_json(assets.read_file(spec_path.parent, spec_path.name, limit=workspace.MAX_JSON_BYTES))
     source = Path(source_root).absolute() if source_root is not None else spec_path.parent
@@ -304,18 +333,34 @@ def split_piece(spec, segments, out, *, piece, into, source_root=None, part_id=N
             raise contract.PartsContractError(f"{where}: only full-canvas drawings can be split by the body under them")
         pixels = np.asarray(Image.open(source / placement["image"]["file"]).convert("RGBA"))
         ink = pixels[..., 3] > 0
-        labels = nearest_fill(labels_for(clip_id, sample_id), ink)
+        under = labels_for(clip_id, sample_id)
+        labels = nearest_fill(under, ink)
         taken = [order.index(s) for s in assignment]
         stray = ink & (labels >= 0) & ~np.isin(labels, taken)
         if rest is None and stray.any():
             missed = sorted({order[v] for v in np.unique(labels[stray])})
             raise contract.PartsContractError(f"{where}: pixels fall on segments no piece takes: {missed} (add one, or *)")
-        result = {}
-        for name in nodes:
-            mask = np.isin(labels, [order.index(s) for s, owner in assignment.items() if owner == name])
+        names = list(nodes)
+        owner = np.full(ink.shape, -1, dtype=np.int16)
+        for number, name in enumerate(names):
+            mask = np.isin(labels, [order.index(s) for s, owner_name in assignment.items() if owner_name == name])
             if name == rest:
                 mask |= stray
-            part = np.where(mask[..., None], pixels, 0).astype(np.uint8)
+            owner[mask & ink] = number
+        if by_component:
+            # A glove or a shoe is one drawn object: the piece owning most of a connected
+            # stroke takes all of it, so its rim over another body piece is not cut away.
+            # Only the body it covers votes: a boot follows the foot it is on, not the leg
+            # its outline happens to be nearest to. Two objects drawn touching (both boots in a
+            # crossing step) have no clear owner and keep the pixel-by-pixel cut.
+            for component in _components(ink):
+                voters = component & (under >= 0) if (component & (under >= 0)).any() else component
+                votes = np.bincount(owner[voters][owner[voters] >= 0], minlength=len(names))
+                if votes.any() and votes.max() >= COMPONENT_MAJORITY * votes.sum():
+                    owner[component] = int(votes.argmax())
+        result = {}
+        for number, name in enumerate(names):
+            part = np.where((owner == number)[..., None], pixels, 0).astype(np.uint8)
             data = assets.png_bytes(Image.fromarray(part, "RGBA"))
             file = f"{name}/{where}.png"
             (out / file).parent.mkdir(parents=True, exist_ok=True)
@@ -402,6 +447,8 @@ def add_split_arguments(parser: argparse.ArgumentParser):
                         help="PIECE:NODE=SEGMENT[,SEGMENT] a new piece on NODE takes pixels over those body segments; * takes the rest")
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--part-id", help="rename the part in the written spec")
+    parser.add_argument("--by-component", action="store_true",
+                        help="give each connected stroke whole to the piece owning most of it (gloves, shoes)")
 
 
 def run_segment(**kwargs):

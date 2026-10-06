@@ -111,3 +111,61 @@ def test_split_piece_follows_the_body_segment_under_each_pixel(tmp_path):
     assert sleeve[100].any() and not sleeve[40].any()
     imported = parts_import.import_pack(assembly, Path(result["spec"]), Path(result["source_root"]))
     assert imported["role"] == "part"
+
+
+def test_split_by_component_keeps_one_stroke_in_one_piece(tmp_path):
+    assembly, _ = posed_workspace(tmp_path)
+    labels = tmp_path / "labels"
+    for pose in ("walk.01", "walk.02"):
+        paint(labels, pose, [((48, 36), (255, 0, 0)), ((48, 124), (0, 0, 250))])
+    body = parts_segments.segment_body(assembly, tmp_path / "body", colors=colors(tmp_path), labels=labels, body_id="b")
+    index, registry = workspace.read_workspace(assembly)
+    motion = registry[index["motion"]["id"]]
+    rig = registry[index["rig"]["id"]]
+    garment = tmp_path / "garment"
+    garment.mkdir()
+    shoe = Image.new("RGBA", (128, 128))
+    shoe.paste((200, 40, 40, 255), (40, 74, 50, 104))  # 4/5 over the leg, its top over the root piece
+    shoe.save(garment / "shoe.png")
+    ref = {"file": "shoe.png", "sha256": assets.sha256((garment / "shoe.png").read_bytes())}
+    spec = {"kind": "parts-pack-import", "schema_version": 1, "id": "test.shoe", "design_id": "shoe",
+            "role": "part", "style": rig["style"], "rig": index["rig"], "motion": index["motion"], "view": rig["view"],
+            "binding_id": "shoe.binding", "occupies": ["footwear"], "pieces": [{"id": "shoe", "slot": "footwear",
+            "node": "foot_l", "mode": "raster", "sample_map": {"walk.right": {s["id"]: {
+                "image": ref, "format": "full-canvas", "pivot": [64, 64], "target_socket": "foot_l"}
+                for s in motion["clips"][0]["samples"]}}}]}
+    (garment / "import.json").write_bytes(workspace.json_bytes(spec))
+    into = [("upper", "foot_r", ["root"]), ("lower", "foot_l", ["leg_r"])]
+    pixel = parts_segments.split_piece(garment / "import.json", body["segments"], tmp_path / "p", piece="shoe", into=into)
+    whole = parts_segments.split_piece(garment / "import.json", body["segments"], tmp_path / "c", piece="shoe", into=into,
+                                       by_component=True)
+    assert pixel["pieces"]["upper"]["pixels"] > 0 and pixel["pieces"]["lower"]["pixels"] > 0
+    assert whole["pieces"]["upper"]["pixels"] == 0 and whole["pieces"]["lower"]["pixels"] == 10 * 30 * 3
+
+
+def test_split_by_component_keeps_pixel_cut_for_strokes_without_a_clear_owner(tmp_path):
+    assembly, _ = posed_workspace(tmp_path)
+    labels = tmp_path / "labels"
+    for pose in ("walk.01", "walk.02"):
+        paint(labels, pose, [((48, 36), (255, 0, 0)), ((48, 124), (0, 0, 250))])
+    body = parts_segments.segment_body(assembly, tmp_path / "body", colors=colors(tmp_path), labels=labels, body_id="b")
+    index, registry = workspace.read_workspace(assembly)
+    motion = registry[index["motion"]["id"]]
+    rig = registry[index["rig"]["id"]]
+    garment = tmp_path / "garment"
+    garment.mkdir()
+    pair = Image.new("RGBA", (128, 128))
+    pair.paste((200, 40, 40, 255), (40, 60, 50, 100))  # one stroke over both pieces, half each
+    pair.save(garment / "pair.png")
+    ref = {"file": "pair.png", "sha256": assets.sha256((garment / "pair.png").read_bytes())}
+    spec = {"kind": "parts-pack-import", "schema_version": 1, "id": "test.pair", "design_id": "pair",
+            "role": "part", "style": rig["style"], "rig": index["rig"], "motion": index["motion"], "view": rig["view"],
+            "binding_id": "pair.binding", "occupies": ["footwear"], "pieces": [{"id": "pair", "slot": "footwear",
+            "node": "foot_l", "mode": "raster", "sample_map": {"walk.right": {s["id"]: {
+                "image": ref, "format": "full-canvas", "pivot": [64, 64], "target_socket": "foot_l"}
+                for s in motion["clips"][0]["samples"]}}}]}
+    (garment / "import.json").write_bytes(workspace.json_bytes(spec))
+    into = [("upper", "foot_r", ["root"]), ("lower", "foot_l", ["leg_r"])]
+    whole = parts_segments.split_piece(garment / "import.json", body["segments"], tmp_path / "c", piece="pair", into=into,
+                                       by_component=True)
+    assert whole["pieces"]["upper"]["pixels"] > 0 and whole["pieces"]["lower"]["pixels"] > 0

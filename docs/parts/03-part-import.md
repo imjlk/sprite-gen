@@ -184,7 +184,7 @@ Body를 등록하면 assembly의 명시적 `body` reference 목록에 추가한�
   --into sleeve_front:arm_r=arm_r --out authored-parts/jacket-split
 ```
 
-`--into PIECE:NODE=SEGMENT[,SEGMENT]`의 새 piece는 원래 piece의 slot·mode·cover rule을 물려받고 NODE에 놓인다(slot이 허용한 node여야 한다). `*`는 나머지 조각을 받는다. 어느 piece에도 배정되지 않은 조각에 픽셀이 있으면 거절한다. `full-canvas` 그림만 나눌 수 있고, `pose_map` piece는 포즈를 자른 sample의 라벨을 쓴다. spec의 다른 파일(다른 piece, mask, palette region)은 `--out` 아래로 함께 복사한다. 조각의 앞뒤는 [그리기 순서표](04-composition.md#draw-table-and-cover-rules)가 정한다.
+`--into PIECE:NODE=SEGMENT[,SEGMENT]`의 새 piece는 원래 piece의 slot·mode·cover rule을 물려받고 NODE에 놓인다(slot이 허용한 node여야 한다). `*`는 나머지 조각을 받는다. 어느 piece에도 배정되지 않은 조각에 픽셀이 있으면 거절한다. 장갑·신발처럼 따로 떨어진 물건은 `--by-component`를 준다. 연결된 획 하나를 가장 많이 덮은 조각이 통째로 가져가므로, 앞장갑 가장자리가 몸통 위에 걸쳐 있어도 뒷장갑 조각으로 잘려 나가지 않는다. `full-canvas` 그림만 나눌 수 있고, `pose_map` piece는 포즈를 자른 sample의 라벨을 쓴다. spec의 다른 파일(다른 piece, mask, palette region)은 `--out` 아래로 함께 복사한다. 조각의 앞뒤는 [그리기 순서표](04-composition.md#draw-table-and-cover-rules)가 정한다.
 
 ## 모션을 바꾼 뒤 body와 고정 파츠 옮기기
 

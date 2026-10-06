@@ -193,7 +193,7 @@ clip마다 그림이 다르면 같은 socket을 clip별 기준으로 나눠 선�
   --assembly assets/my-parts/assembly.json --spec compose.json --out assets/compose-v2
 ```
 
-`keep`을 생략하면 기존 클립을 모두 남긴다. 남긴 클립은 sample 순서와 tick을 그대로 복사한다. 새 sample은 포즈의 raster와 모든 socket을 `offset`만큼 정수 이동하고, `pose_id`를 유지한다. 이동으로 불투명 픽셀이나 보이는 socket이 canvas 밖으로 나가면 거절한다. 클립 ID와 state는 각각 하나여야 한다. 중간 산출물(프레임, `motion-import.json`, 채운 `annotations.json`)은 `--out`에 남고, `--no-freeze`는 candidate까지만 만든다.
+`keep`을 생략하면 기존 클립을 모두 남긴다. 남긴 클립은 sample 순서와 tick을 그대로 복사한다. 새 sample은 포즈의 raster와 모든 socket을 `offset`만큼 정수 이동하고, `pose_id`를 유지한다. 이동으로 불투명 픽셀이나 보이는 socket이 canvas 밖으로 나가면 거절한다. `offset`은 착지 때 몸이 내려앉는 것 같은 포즈 안의 변주다. 점프 높이처럼 캐릭터 전체의 이동은 클립이 아니라 게임 런타임이 스프라이트 위치로 준다. 클립 ID와 state는 각각 하나여야 한다. 중간 산출물(프레임, `motion-import.json`, 채운 `annotations.json`)은 `--out`에 남고, `--no-freeze`는 candidate까지만 만든다.
 
 새 motion을 freeze하면 이전 motion에 묶인 파츠는 [일반 revision 규칙](#revision과-실패-복구)대로 분리된다. 포즈별로 그린 파츠는 `parts-rebind`가 새 클립의 같은 포즈에 그대로 옮기므로 그림을 새로 만들지 않는다. 반전(mirror)은 sample 단위가 아니라 appearance 단위다.
 
