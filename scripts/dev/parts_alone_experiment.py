@@ -418,12 +418,323 @@ def stage_compare(base):
     return {"out": str(out)}
 
 
+# --- foot rig: where each shoe should be, from the base pose's shoe and each pose's foot ----------------
+BASE_POSE = "idle.01"
+SIZE_TOLERANCE = (0.8, 1.2)  # a shoe's area against the base pose's shoe
+MIN_SHOE = 10  # px: smaller pieces are crumbs, not a shoe
+BAND = (1, 6)  # px around a shoe where its own leg is read
+
+
+def _components(mask, minimum=MIN_SHOE):
+    from sprite_gen.frames.parts_segments import _components as components
+    return sorted((c for c in components(mask) if c.sum() >= minimum), key=lambda c: -int(c.sum()))
+
+
+def _from_hip(body):
+    """Path length from the hip along the body: the leg's own way down, however it bends."""
+    rows = np.where(body.any(axis=1))[0]
+    hip_row = rows.min() + int(0.55*(rows.max() - rows.min()))  # below the waist of a 2-head body
+    lower = body & (np.arange(body.shape[0])[:, None] >= hip_row)
+    return _geodesic(lower, lower & (np.arange(body.shape[0])[:, None] == hip_row))
+
+
+def foot_frame(shoe, body, others, from_hip=None):
+    """The ankle (where the leg enters the shoe) and the shin's angle, read off the body around a shoe.
+
+    The leg is the piece of body around the shoe nearest the hip along the body; bare toes
+    sticking out of a small shoe are a piece too, farther along."""
+    band = body & _grow(shoe, BAND[1]) & ~_grow(shoe, BAND[0]) & ~others
+    legs = _components(band, 3)
+    if not legs:
+        return None
+    if from_hip is not None:
+        reach = [float(from_hip[c & (from_hip >= 0)].mean()) if (c & (from_hip >= 0)).any() else 1e9 for c in legs]
+        leg = legs[int(np.argmin(reach))]
+    else:
+        leg = legs[0]
+    ankle = shoe & _grow(leg, BAND[0] + 1)
+    if not ankle.any():
+        return None
+    ay, ax = (float(v.mean()) for v in np.nonzero(ankle))
+    ly, lx = (float(v.mean()) for v in np.nonzero(leg))
+    return {"ankle": [ax, ay], "angle": float(np.degrees(np.arctan2(ay - ly, ax - lx)))}  # knee side -> ankle
+
+
+def _turned(base_shoe, base_frame, turn, at, scale=1.0):
+    """The base shoe turned by `turn` degrees and scaled about its ankle, the ankle moved to `at`."""
+    image = Image.fromarray((base_shoe*255).astype(np.uint8), "L")
+    ax, ay = base_frame["ankle"]
+    phi = np.radians(turn)
+    c, s = np.cos(phi)/scale, np.sin(phi)/scale
+    # output (x, y) -> input: inverse rotation and scale about the new ankle, back onto the base ankle
+    a, b, d, e = c, s, -s, c
+    matrix = (a, b, ax - a*at[0] - b*at[1], d, e, ay - d*at[0] - e*at[1])
+    return np.asarray(image.transform(image.size, Image.Transform.AFFINE, matrix, resample=Image.Resampling.NEAREST)) > 0
+
+
+SCALES = tuple(round(0.9 + 0.05*i, 2) for i in range(11))  # 0.90 ... 1.40 of the base shoe
+FOOT_COVER = 0.92
+
+
+def _foot(body, near, frame, turn, base_frame):
+    """The bare foot a shoe must cover: body pixels near it, past the ankle along the shin."""
+    shin = np.radians(base_frame["angle"] + turn)
+    ys, xs = np.mgrid[0:body.shape[0], 0:body.shape[1]]
+    beyond = (xs - frame["ankle"][0])*np.cos(shin) + (ys - frame["ankle"][1])*np.sin(shin) > 0
+    return body & near & beyond
+
+
+def _scaled(base_shoe, base_frame, turn, at, foot):
+    """The smallest scale of the base shoe that covers this pose's bare foot (feet differ by pose)."""
+    best = None
+    for scale in SCALES:
+        mask = _turned(base_shoe, base_frame, turn, at, scale)
+        cover = (mask & foot).sum() / max(1, foot.sum())
+        if cover >= FOOT_COVER:
+            return mask, scale, round(float(cover), 2)
+        if best is None or cover > best[2]:
+            best = (mask, scale, round(float(cover), 2))
+    return best
+
+
+def _expected(base_shoe, base_frame, shoe, frame, reach=2):
+    """The base pose's shoe, at its own size, turned and hung on this ankle to lie along the drawn shoe.
+
+    The drawing gives the angle (the model places and turns shoes well); the base pose gives the
+    size. Returns (mask, turn in degrees)."""
+    best = None
+    for turn in range(-180, 180, 5):
+        for dy in range(-reach, reach+1):
+            for dx in range(-reach, reach+1):
+                at = (frame["ankle"][0] + dx, frame["ankle"][1] + dy)
+                mask = _turned(base_shoe, base_frame, turn, at)
+                score = (mask & shoe).sum() / max(1, (mask | shoe).sum())
+                if best is None or score > best[0]:
+                    best = (score, mask, turn)
+    return best[1], best[2]
+
+
+def _placed(base_shoe, scale, turn, center, base_center):
+    """The base shoe scaled and turned about its middle, its middle moved to `center`."""
+    image = Image.fromarray((base_shoe*255).astype(np.uint8), "L")
+    phi = np.radians(turn)
+    c, s = np.cos(phi)/scale, np.sin(phi)/scale
+    a, b, d, e = c, s, -s, c
+    bx, by = base_center
+    matrix = (a, b, bx - a*center[0] - b*center[1], d, e, by - d*center[0] - e*center[1])
+    return np.asarray(image.transform(image.size, Image.Transform.AFFINE, matrix, resample=Image.Resampling.NEAREST)) > 0
+
+
+def _middle(mask):
+    ys, xs = np.nonzero(mask)
+    return float(xs.mean()), float(ys.mean())
+
+
+def expected_shoe(base_shoe, scale, drawn, reach=3):
+    """The base pose's shoe at this foot's scale, turned and placed to lie along the drawn shoe."""
+    base_center, (cx, cy) = _middle(base_shoe), _middle(drawn)
+    best = None
+    for turn in range(-180, 180, 5):
+        for dy in range(-reach, reach+1):
+            for dx in range(-reach, reach+1):
+                mask = _placed(base_shoe, scale, turn, (cx+dx, cy+dy), base_center)
+                score = (mask & drawn).sum() / max(1, (mask | drawn).sum())
+                if best is None or score > best[0]:
+                    best = (score, mask, turn)
+    return best[1], best[2]
+
+
+def stage_rig(base):
+    """Per pose, per foot: how big that foot is against the base pose's (the body's feet differ by pose,
+    the video draws running feet bigger), the base shoe at that scale laid along the first drawing,
+    and the current drawing's size against it."""
+    root, assembly, out = _paths(base)
+    character = character_recipe.config(base)
+    part = _experiment_part(character["prefix"], "b")
+    rows = production._load(root, part)["tracks"]["main"]["poses"]
+    def mask_of(location, image="part"):
+        return np.asarray(Image.open(root / location / f"{image}.png"))[..., 3] > 0
+    body = {pose: dict(np.load(out / "regions" / f"{pose}.npz"))["body"] for pose in rows}
+    base_mask = mask_of(rows[BASE_POSE]["candidates"][0], "drawn")  # the model's own placement, before any fit
+    base_shoe = _components(base_mask)[0]
+    # The base foot: the median over the base clip's poses (one pose's first drawing is noisy by ~10 %).
+    base_clip = BASE_POSE.split(".")[0]
+    feet = []
+    for pose, row in rows.items():
+        if pose.startswith(base_clip + "."):
+            shoes = _components(mask_of(row["candidates"][0], "drawn"))
+            feet += [int((s & body[pose]).sum()) for s in shoes if s.sum() <= 1.6*base_shoe.sum()]
+    base_foot = int(np.median(feet)) if feet else int((base_shoe & body[BASE_POSE]).sum())
+    rig, expected = {"base": {"pose": BASE_POSE, "area": int(base_shoe.sum()), "foot": base_foot}, "poses": {}}, {}
+    for pose, row in rows.items():
+        located, current_mask = mask_of(row["candidates"][0], "drawn"), mask_of(row["selected"])
+        entries, want = [], np.zeros_like(located)
+        for guide in _components(located):
+            pair = bool(guide.sum() > 1.6*base_shoe.sum())  # two shoes drawn touching
+            current = _components(current_mask & _grow(guide, 3))
+            current = current[0] if current else np.zeros_like(located)
+            entry = {"pair": pair}
+            if pair:
+                want |= guide
+                ratio = current.sum() / max(1, guide.sum())
+            else:
+                foot = int((guide & body[pose]).sum())  # the bare foot the first drawing had to cover
+                scale = float(np.clip(np.sqrt(foot / max(1, base_foot)), 0.85, 1.4))
+                expect, turn = expected_shoe(base_shoe, scale, guide)
+                want |= expect
+                ratio = current.sum() / max(1, expect.sum())
+                entry.update(foot=foot, scale=round(scale, 2), turn=turn,
+                             iou=round(float((current & expect).sum() / max(1, (current | expect).sum())), 2))
+            entry.update(area=int(current.sum()), ratio=round(float(ratio), 2),
+                         size_ok=bool(SIZE_TOLERANCE[0] <= ratio <= SIZE_TOLERANCE[1]))
+            entries.append(entry)
+        rig["poses"][pose] = entries
+        expected[pose] = want
+    np.savez_compressed(out / "expected.npz", **expected)
+    (out / "rig.json").write_text(json.dumps(rig, indent=1))
+    off = {p: [e["ratio"] for e in v if not e["size_ok"]] for p, v in rig["poses"].items() if any(not e["size_ok"] for e in v)}
+    return {"base": rig["base"], "off_size": off}
+
+
+GUIDE = (0, 220, 255)
+REDO_PROMPT = (
+    "Image 1 is a pixel-art pose sheet: each grid cell shows one chibi character's lower legs and bare feet in a "
+    "different walking or running pose, pure side view facing right, on a flat pure magenta #FF00FF background. A thin "
+    "cyan outline in each cell marks exactly where each shoe goes and how big it is. Image 2 shows the exact shoes: "
+    "{desc}.\n\n"
+    "In every cell draw ONLY the pair of shoes: each shoe fills its cyan outline exactly - same size, same angle, toe "
+    "where the outline's toe is, opening where the leg enters. Draw both shoes whole, even where the other leg passes in "
+    "front (the legs are layered over them later). Draw nothing else: no legs, no "
+    "shorts, no skin, no body outline, no cyan line, no specks - every other pixel, up to the cell edges, is flat "
+    "#FF00FF. ")
+
+
+def stage_redo(base, step="all", round_=1):
+    """Send back the poses whose shoes miss the base size, then redraw only them on a sheet that shows
+    where each shoe goes (the rig's expected shoe, outlined), and place the result against it."""
+    character = character_recipe.config(base)
+    root, assembly, out = _paths(base)
+    rig = json.loads((out / "rig.json").read_text())
+    expected = dict(np.load(out / "expected.npz"))
+    part = _experiment_part(character["prefix"], "b")
+    failing = [p for p, v in rig["poses"].items() if any(not e["size_ok"] for e in v)]
+    folder = out / ("b-redo" if round_ == 1 else f"b-redo-{round_}")
+    folder.mkdir(exist_ok=True)
+    if step in ("all", "sheet"):
+        note = {p: ", ".join(f"{e['ratio']}x" for e in v if not e["size_ok"]) for p, v in rig["poses"].items() if p in failing}
+        production.review(assembly, part, reviewer="claude (rig check)", reject=failing,
+                          note="shoe size off the base pose (" + "; ".join(f"{p} {r}" for p, r in note.items()) + "); redraw at the base size")
+        _, index, registry, motion, poses = _poses(assembly)
+        load = compose_parts.AssetLoader(root, index)
+        by_pose = {pose: sample for pose, _, sample in poses}
+        cells = []
+        for pose in failing:
+            body = np.asarray(load(motion, by_pose[pose]["image"]).convert("RGBA")).copy()
+            want = expected[pose]
+            edge = want & ~np.all([np.roll(want, k, a) for k in (1, -1) for a in (0, 1)], axis=0)
+            body[edge] = (*GUIDE, 255)
+            cells.append(Image.fromarray(body))
+        pages = []
+        for start in range(0, len(cells), PER_PAGE):
+            page = folder / f"page-{start//PER_PAGE + 1}"
+            page.mkdir(exist_ok=True)
+            sheet, origins = _page(cells[start:start+PER_PAGE])
+            sheet.save(page / "sheet.png")
+            style = avatar._garment_prompts()[2].format(px=SCALE)
+            (page / "prompt.txt").write_text(REDO_PROMPT.format(desc=avatar.NEW[SHOE][1]) + COMMON.format(style=style, w=sheet.width, h=sheet.height))
+            pages.append({"folder": str(page), "poses": failing[start:start+PER_PAGE], "origins": origins})
+        (folder / "plan.json").write_text(json.dumps({"pages": pages, "design": str(root / f"inputs/design/{SHOE}.zoom.png")}, indent=1))
+    plan = json.loads((folder / "plan.json").read_text())
+    if step in ("all", "draw"):
+        procs = [(Path(p["folder"]), subprocess.Popen(
+            [".venv/bin/sprite-gen", "gen", "--provider", "codex", "--model", "gpt-5.6-sol", "--prompt-file",
+             str(Path(p["folder"]) / "prompt.txt"), "--out", str(Path(p["folder"]) / "drawn.png"), "--ref",
+             str(Path(p["folder"]) / "sheet.png"), "--ref", plan["design"]], stdout=subprocess.PIPE, stderr=subprocess.PIPE))
+                 for p in plan["pages"] if not (Path(p["folder"]) / "drawn.png").exists()]
+        for page, proc in procs:
+            _, err = proc.communicate()
+            if proc.returncode:
+                raise SystemExit(f"{page}: {err.decode()[-300:]}")
+    if step in ("all", "slice"):
+        return _slice_redo(base, plan, expected)
+    return {"failing": failing}
+
+
+def _slice_redo(base, plan, expected):
+    character = character_recipe.config(base)
+    root, assembly, out = _paths(base)
+    _, index, registry, motion, poses = _poses(assembly)
+    by_pose = {pose: (clip, sample) for pose, clip, sample in poses}
+    load = compose_parts.AssetLoader(root, index)
+    palette = pixel_grid.read_palette(root / f"inputs/design/{SHOE}.palette.json")
+    canvas = (registry[index["rig"]["id"]]["canvas"]["width"], registry[index["rig"]["id"]]["canvas"]["height"])
+    width, height = CROP[2]-CROP[0], CROP[3]-CROP[1]
+    part = _experiment_part(character["prefix"], "b")
+    state = production._load(root, part)
+    rows = production._track(state, None)
+    report = {}
+    for page in plan["pages"]:
+        folder = Path(page["folder"])
+        drawn = Image.open(folder / "drawn.png").convert("RGBA")
+        ratio = drawn.width / Image.open(folder / "sheet.png").width
+        for pose, (x, y) in zip(page["poses"], page["origins"]):
+            box = tuple(int(round(v*ratio)) for v in (x, y, x + width*SCALE, y + height*SCALE))
+            native = sheets.reduce_cell(drawn.crop(box), SCALE*ratio, KEY, 80, size=(width, height))
+            full = Image.new("RGBA", canvas)
+            full.alpha_composite(native, CROP[:2])
+            full = pixel_grid.snap(full, palette)
+            regions = dict(np.load(out / "regions" / f"{pose}.npz"))
+            placed, metrics = fit_expected(full, regions, expected[pose])
+            clip, sample = by_pose[pose]
+            body = load(motion, sample["image"]).convert("RGBA")
+            socket = sample["sockets"][state["config"]["socket"]]
+            record = {"kind": "parts-production-candidate", "schema_version": 1, "policy": production.POLICY, "part": part,
+                      "track": production.MAIN, "pose_id": pose, "clip": clip, "sample": sample["id"],
+                      "motion": index["motion"], "body_sha256": sample["image"]["sha256"], "under_sha256": None, "wearing": [],
+                      "method": {"generate": "alone-b-rig-guide", "fit": metrics["offset"], "batch": None},
+                      "source": {"art_sha256": assets.sha256((folder / "drawn.png").read_bytes()), "origin": [x, y]},
+                      "placement": {"format": "full-canvas", "pivot": list(socket["position"]),
+                                    "target_socket": state["config"]["socket"], "offset": [0, 0]},
+                      "alignment": None, "holes_filled": 0, "pixels": metrics["pixels"]}
+            mask = Image.fromarray(((np.asarray(placed)[..., 3] > 0)*255).astype(np.uint8), "L")
+            record, location = production._publish_candidate(root, part, record, {"drawn": full, "under": body, "mask": mask, "part": placed})
+            production._select(rows, [pose], location, keep_approved=False)
+            report[pose] = metrics
+    production._save(root, state)
+    production.build(assembly, part, allow_incomplete=True)
+    (out / "redo-fit.json").write_text(json.dumps(report, indent=1))
+    return report
+
+
+def fit_expected(part, regions, want, reach=3):
+    """Place the redrawn shoes on the rig's expected shoes; a pixel sunk into the ground still costs."""
+    alpha = np.asarray(part)[..., 3] > 0
+    outside = ~_grow(regions["body"], 1)
+    loose = ~_grow(want, 1)
+    best = None
+    for dy in range(-reach, reach+1):
+        for dx in range(-reach, reach+1):
+            moved = np.roll(np.roll(alpha, dy, 0), dx, 1)
+            score = (moved & want).sum() - 0.5*(moved & loose).sum() - (moved & outside & loose).sum()
+            key = (score, -(abs(dx)+abs(dy)))
+            if best is None or key > best[0]:
+                best = (key, dx, dy)
+    _, dx, dy = best
+    moved = np.roll(np.roll(np.asarray(part), dy, 0), dx, 1)
+    shown = moved[..., 3] > 0
+    return Image.fromarray(moved), {"offset": [dx, dy], "iou": round(float((shown & want).sum() / max(1, (shown | want).sum())), 3),
+                                    "pixels": int(shown.sum())}
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--base", required=True, type=Path)
-    parser.add_argument("stage", choices=("prep", "draw", "slice", "compare"))
+    parser.add_argument("stage", choices=("prep", "draw", "slice", "compare", "rig", "redo"))
+    parser.add_argument("--step", default="all", choices=("all", "sheet", "draw", "slice"))
+    parser.add_argument("--round", type=int, default=1)
     parser.add_argument("--only", nargs="*")
     args = parser.parse_args()
     result = {"prep": lambda: stage_prep(args.base), "draw": lambda: stage_draw(args.base, args.only),
-              "slice": lambda: stage_slice(args.base), "compare": lambda: stage_compare(args.base)}[args.stage]()
+              "slice": lambda: stage_slice(args.base), "compare": lambda: stage_compare(args.base),
+              "rig": lambda: stage_rig(args.base), "redo": lambda: stage_redo(args.base, args.step, args.round)}[args.stage]()
     print(json.dumps(result, ensure_ascii=False, indent=1, default=str))
