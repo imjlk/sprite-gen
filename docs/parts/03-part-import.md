@@ -143,7 +143,7 @@ Body를 등록하면 assembly의 명시적 `body` reference 목록에 추가한�
 
 ### 포즈 단위 시트
 
-`parts-pose-sheet --by-pose`는 포즈 ID마다 칸 하나만 만든다(첫 sample). `parts-pose-slice --by-pose`는 잘라낸 그림을 `pose_map`으로 기록하므로, 같은 포즈의 다른 sample과 나중에 그 포즈를 재사용하는 클립이 자동으로 같은 그림을 쓴다. 모든 sample에 `pose_id`가 있어야 하며 `--classes`와 함께 쓰지 않는다.
+`parts-pose-sheet --by-pose`는 포즈 ID마다 칸 하나만 만든다(첫 sample). `parts-pose-slice --by-pose`는 잘라낸 그림을 `pose_map`으로 기록하므로, 같은 포즈의 다른 sample과 나중에 그 포즈를 재사용하는 클립이 자동으로 같은 그림을 쓴다. 모든 sample에 `pose_id`가 있어야 하며 `--classes`와 함께 쓰지 않는다. `--poses A,B`는 그 포즈만 시트에 올린다. 모션에 새로 추가한 포즈나 검수에서 떨어진 포즈만 그리고, 잘라 낸 `pose_map`을 기존 것에 합친다.
 
 ## 몸을 조각으로 나누고 옷을 조각으로 나누기
 

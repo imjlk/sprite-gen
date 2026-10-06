@@ -156,7 +156,7 @@ def _one_per_pose(samples):
 
 
 def build_sheet(assembly, out, *, clips=None, scale=4, crop=None, key="#ff00ff", gutter=8, columns=None, part="part",
-                classes=None, page_size=None, aspect=None, by_pose=False):
+                classes=None, page_size=None, aspect=None, by_pose=False, poses=None):
     root, index, registry, _ = parts_motion._active(assembly)
     motion = registry[index["motion"]["id"]]
     if motion["freeze"] is None:
@@ -168,6 +168,14 @@ def build_sheet(assembly, out, *, clips=None, scale=4, crop=None, key="#ff00ff",
         raise contract.PartsContractError("--by-pose and --classes are two ways to share drawings; choose one")
     if by_pose:
         samples = _one_per_pose(samples)
+    if poses is not None:
+        # Only these poses are drawn: new poses added to a motion, or poses that failed review.
+        if not by_pose:
+            raise contract.PartsContractError("--poses selects cells by pose; use it with --by-pose")
+        unknown = set(poses) - {sample["pose_id"] for _, sample in samples}
+        if unknown:
+            raise contract.PartsContractError(f"unknown poses in the chosen clips: {sorted(unknown)}")
+        samples = [(clip_id, sample) for clip_id, sample in samples if sample["pose_id"] in set(poses)]
     if classes is not None:
         # Only each group's representative is drawn; members reuse it when sliced.
         wanted = {(g["representative"]["clip"], g["representative"]["sample"])
@@ -537,6 +545,8 @@ def add_sheet_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--page-size", type=int, help="at most this many cells per sheet; pages go to page-N/ folders")
     parser.add_argument("--aspect", help="pad each sheet to this W:H ratio (an image model's output, e.g. 1:1 or 3:2)")
     parser.add_argument("--by-pose", action="store_true", help="one cell per pose_id instead of one per sample")
+    parser.add_argument("--poses", type=lambda v: [p for p in v.split(",") if p],
+                        help="with --by-pose: comma-separated pose IDs to draw (new or failed poses only)")
 
 
 def add_slice_arguments(parser: argparse.ArgumentParser):

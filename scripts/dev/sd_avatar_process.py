@@ -15,6 +15,7 @@ Visual approval stays a human review; nothing here approves art.
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 import json
 from fractions import Fraction
 from pathlib import Path
@@ -160,7 +161,7 @@ def stage_label_gen(base, only=None):
     return results
 
 
-def stage_labels_fix(base):
+def stage_labels_fix(base, sheet="labels"):
     """Read the painted pages per pose and swap near/far limb labels the model mixed up.
 
     The video shades a far limb darker than the near one. The model painted legs right but
@@ -172,8 +173,9 @@ def stage_labels_fix(base):
     clips = {c["id"]: c for c in motion["clips"]}
     load = compose_parts.AssetLoader(assembly.parent, index)
     rgb = {n: tuple(int(v["color"][i:i+2], 16) for i in (1, 3, 5)) for n, v in SEGMENTS.items()}
-    pages = [(g, base / "drawn" / f"labels.p{g.parent.name.split('-')[1]}.png")
-             for g in sorted((base / "sheets/labels").glob("page-*/pose-sheet.json"))]
+    guides = sorted((base / "sheets" / sheet).glob("page-*/pose-sheet.json")) or [base / "sheets" / sheet / "pose-sheet.json"]
+    pages = [(g, base / "drawn" / f"{sheet}.p{g.parent.name.split('-')[1] if g.parent.name.startswith('page-') else 1}.png")
+             for g in guides]
     out = base / "labels"
     out.mkdir(parents=True, exist_ok=True)
     report = {}
@@ -192,7 +194,8 @@ def stage_labels_fix(base):
                 swapped.append(far.split("_")[0])
         Image.fromarray(paint).save(out / f"{sample['pose_id']}.png")
         report[sample["pose_id"]] = swapped
-    write(base / "labels-fix.json", report)
+    previous = json.loads((base / "labels-fix.json").read_text()) if (base / "labels-fix.json").exists() else {}
+    write(base / "labels-fix.json", previous | report)
     return {"poses": len(report), "swapped": {k: v for k, v in report.items() if v}}
 
 
@@ -219,7 +222,10 @@ def stage_garments(base, only=None):
     """HQ garments drawn on every sample -> one drawing per pose -> pieces by body piece -> import."""
     assembly = base / "library/assembly.json"
     index, registry, motion, rig = _motion(assembly)
-    pose_of = {(c["id"], s["id"]): s["pose_id"] for c in motion["clips"] for s in c["samples"]}
+    by_hash = {s["image"]["sha256"]: s["pose_id"] for c in motion["clips"] for s in c["samples"]}
+    hq_index, hq_registry = workspace.read_workspace(HQ / "library/assembly.json")
+    hq_motion = hq_registry[hq_index["motion"]["id"]]
+    pose_of = {(c["id"], s["id"]): by_hash[s["image"]["sha256"]] for c in hq_motion["clips"] for s in c["samples"]}
     report = {}
     for name in GARMENTS:
         if only and name not in only:
@@ -251,13 +257,19 @@ def stage_garments(base, only=None):
                     (source / file).parent.mkdir(parents=True, exist_ok=True)
                     drawing.save(source / file)
                     pose_map[pose] = {**placement, "image": {"file": file, "sha256": assets.sha256((source / file).read_bytes())}}
+        pose_map.update(_added_poses(base, name, source))
         redraw = base / "redraw" / name
         if redraw.exists():
             # Poses that failed review were drawn again; their drawings replace the HQ ones.
-            for pose in json.loads((redraw / "redraw.json").read_text())["poses"]:
-                file = redraw / f"{pose}.png"
+            for pose, folder in _redrawn(redraw).items():
+                file = folder / f"{pose}.png"
                 (source / "redraw").mkdir(exist_ok=True)
                 shutil.copy2(file, source / "redraw" / file.name)
+                if pose not in pose_map:
+                    # A pose added after the HQ drawings: hang the redrawn canvas on that pose's socket.
+                    template = next(iter(pose_map.values()))
+                    sample = next(s for c in motion["clips"] for s in c["samples"] if s["pose_id"] == pose)
+                    pose_map[pose] = {**template, "pivot": list(sample["sockets"][template["target_socket"]]["position"])}
                 pose_map[pose] = {**pose_map[pose], "image": {"file": f"redraw/{file.name}",
                                   "sha256": assets.sha256(file.read_bytes())}, "visible": True}
         spec = {"kind": "parts-pack-import", "schema_version": 1, "id": rebuild.PART_ID[name], "design_id": rebuild.PART_ID[name],
@@ -665,14 +677,25 @@ def stage_new_slice(base, only=None):
         pages = [(g, base / "drawn" / f"{name}{'.feet' if feet else ''}.p{g.parent.name.split('-')[1]}.png")
                  for g in sorted(folder.glob("page-*/pose-sheet.json"))]
         palette = base / "design" / f"{name}.palette.json"
-        sliced = sheets.slice_sheet(assembly, None, None, base / "sliced" / name, pages=pages, part_id=rebuild.PART_ID[name],
-            slot=slot, node=SLOTS[slot][2][0], socket=socket, piece=slot, body_threshold=threshold,
-            min_island=6 if feet else 12, outline=True, near_body=NEAR_BODY.get(name, 2), region=region, tolerance=80, palette=palette,
-            fill_holes=6, close_body=5, by_pose=True)
+        stale = json.loads(pages[0][0].read_text())["motion"] != json.loads(assembly.read_text())["motion"]
+        if stale and (base / "sliced" / name / "import.json").exists():
+            # The motion gained poses since these pages were drawn: their drawings are kept by pose ID.
+            sliced = {"spec": str(base / "sliced" / name / "import.json"), "source_root": str(base / "sliced" / name),
+                      "poses": None, "empty": []}
+        else:
+            sliced = sheets.slice_sheet(assembly, None, None, base / "sliced" / name, pages=pages, part_id=rebuild.PART_ID[name],
+                slot=slot, node=SLOTS[slot][2][0], socket=socket, piece=slot, body_threshold=threshold,
+                min_island=6 if feet else 12, outline=True, near_body=NEAR_BODY.get(name, 2), region=region, tolerance=80,
+                palette=palette, fill_holes=6, close_body=5, by_pose=True)
+        spec = json.loads(Path(sliced["spec"]).read_text())
+        spec["motion"] = json.loads(assembly.read_text())["motion"]
+        added = _added_poses(base, name, Path(sliced["source_root"]))
+        spec["pieces"][0]["pose_map"].update(added)
+        Path(sliced["spec"]).write_text(json.dumps(spec))
         split = parts_segments.split_piece(Path(sliced["spec"]), base / "body/segments.json", base / "split" / name,
                                            piece=slot, into=SPLITS[slot], by_component=slot in WHOLE)
         parts_import.import_pack(assembly, Path(split["spec"]), Path(split["source_root"]))
-        report[name] = {"poses": sliced["poses"], "empty": sliced["empty"], "pieces": split["pieces"]}
+        report[name] = {"poses": len(spec["pieces"][0]["pose_map"]), "empty": sliced["empty"], "pieces": split["pieces"]}
     write(base / "new-evidence.json", report)
     return report
 
@@ -683,29 +706,29 @@ Put exactly these boots on both bare feet in every cell, following each foot's a
 
 
 def stage_redraw(base, name="footwear.b", wearing=("lower.b",), poses=("run.02", "run.03", "run.04", "run.08", "run.09",
-                                                                         "run.10", "run.11")):
+                                                                         "run.10", "run.11"), batch="run"):
     """Redraw one part on the poses that failed review, over the parts it is worn with.
 
     The sheet shows the body already wearing `wearing`, so the model cannot paint the
     shin as a boot shaft; the drawing is cut against that same dressed body.
     """
-    from sprite_gen.compose.parts_runtime import PartsPlayer
+    from sprite_gen.compose import compose_parts
     from sprite_gen.frames import pixel_grid
     assembly = base / "library/assembly.json"
     index, registry, motion, _ = _motion(assembly)
-    player = PartsPlayer.from_workspace(assembly)
-    slots = {rebuild.PARTS[w][0]: contract.reference(registry[rebuild.PART_ID[w]]) for w in wearing}
-    player.set_selection({slot["id"]: slots.get(slot["id"]) for slot in registry[index["catalog"]["id"]]["slots"]})
+    load = compose_parts.AssetLoader(assembly.parent, index)
     crop, scale, key = [32, 80, 96, 116], 8, (255, 0, 255)
+    worn = [(w, json.loads((base / "split" / w / "import.json").read_text())) for w in wearing]
     under = {}
     for clip in motion["clips"]:
-        player.set_state(clip["state"])
-        start = Fraction(0)
         for sample in clip["samples"]:
             if sample["pose_id"] in poses and sample["pose_id"] not in under:
-                player.seek(start / clip["timebase"])
-                under[sample["pose_id"]] = (player.frame()[0], sample)
-            start += sample["duration_ticks"]
+                dressed = load(motion, sample["image"]).convert("RGBA")
+                for w, spec in worn:
+                    for piece in spec["pieces"]:
+                        placement = piece["pose_map"][sample["pose_id"]]
+                        dressed.alpha_composite(Image.open(base / "split" / w / placement["image"]["file"]).convert("RGBA"))
+                under[sample["pose_id"]] = (dressed, sample)
     cw, ch = (crop[2]-crop[0])*scale, (crop[3]-crop[1])*scale
     columns, gutter = 3, 16
     rows = (len(poses)+columns-1)//columns
@@ -717,12 +740,12 @@ def stage_redraw(base, name="footwear.b", wearing=("lower.b",), poses=("run.02",
         x, y = gutter + n % columns*(cw+gutter), gutter + n//columns*(ch+gutter)
         sheet.alpha_composite(under[pose][0].crop(crop).resize((cw, ch), Image.Resampling.NEAREST), (x, y))
         origins[pose] = (x, y)
-    folder = base / "redraw" / name
+    folder = base / "redraw" / name / batch
     folder.mkdir(parents=True, exist_ok=True)
     sheet.save(folder / "sheet.png")
     desc = {"footwear.b": "tan-brown leather ankle boots with laces and dark soles"}[name]
     result = _codex(REDRAW_SHOE.format(desc=desc) + _garment_prompts()[2].format(px=8), folder / "drawn.png",
-                    [folder / "sheet.png", base / "design" / f"{name}.zoom.png"], base / "prompts" / f"redraw.{name}.txt")
+                    [folder / "sheet.png", base / "design" / f"{name}.zoom.png"], base / "prompts" / f"redraw.{name}.{batch}.txt")
     if not result["ok"]:
         return result
     drawn = Image.open(folder / "drawn.png").convert("RGBA")
@@ -747,6 +770,240 @@ def stage_redraw(base, name="footwear.b", wearing=("lower.b",), poses=("run.02",
     return report
 
 
+def _redrawn(folder):
+    """pose -> batch folder holding its redrawn drawing (later batches win)."""
+    found = {}
+    for record in sorted(folder.glob("*/redraw.json")):
+        for pose in json.loads(record.read_text())["poses"]:
+            found[pose] = record.parent
+    return found
+
+
+def _added_poses(base, name, target):
+    """Drawings of poses added after the first slicing (sliced-<batch>/<name>), copied under `target`."""
+    added = {}
+    for spec_file in sorted(base.glob(f"sliced-*/{name}/import.json")):
+        batch = spec_file.parent.parent.name
+        for pose, placement in json.loads(spec_file.read_text())["pieces"][0]["pose_map"].items():
+            file = f"{batch}/{placement['image']['file']}"
+            (target / file).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(spec_file.parent / placement["image"]["file"], target / file)
+            added[pose] = {**placement, "image": {**placement["image"], "file": file}}
+    return added
+
+
+def stage_walk22(base):
+    """Walk from all 22 drawn frames (24 fps): the even frames keep their pose IDs and drawings.
+
+    The loop is projected again without the every-2 stride. Sockets of known rasters are copied,
+    the new frames' head and torso are matched from their neighbouring frame, and the new poses
+    are named after the frame before them (walk.03h sits between walk.03 and walk.04).
+    """
+    from sprite_gen.curate import parts_sockets
+    from sprite_gen.frames import parts_loop_native as native
+    assembly = base / "library/assembly.json"
+    index, registry, motion, rig = _motion(assembly)
+    out = base / "native22"
+    if out.exists():
+        shutil.rmtree(out)
+    for state in ("idle", "run"):
+        shutil.copytree(HQ / "native" / state, out / state)
+    built = native.build(assembly, out / "walk-build", [("walk", HQ / "video/side-walk/loop")],
+        body_height=json.loads((base / "design/stage-native.json").read_text())["native_height"], baseline=rebuild.BASELINE,
+        palette=base / "design/base.palette.json", motion_id=motion["id"], resample="lattice", outline="darkest")
+    shutil.move(out / "walk-build" / "walk", out / "walk")
+    walk = json.loads(Path(built["spec"]).read_text())["clips"][0]
+    hq = json.loads((HQ / "native/motion-import.json").read_text())
+    spec = {**hq, "id": motion["id"], "rig": index["rig"],
+            "clips": [c for c in hq["clips"] if c["state"] != "walk"] + [walk]}
+    spec["clips"].sort(key=lambda c: ["idle", "walk", "run"].index(c["state"]))
+    write(base / "motion-import.walk22.json", spec)
+    imported = parts_motion.import_motion(assembly, base / "motion-import.walk22.json", out, strict_motion=True)
+    known = {s["image"]["sha256"]: s for c in motion["clips"] for s in c["samples"]}
+    draft = json.loads((assembly.parent / imported["annotation_template"]).read_text())
+    candidate = workspace.decode_json((assembly.parent / imported["candidate"]).read_bytes())
+    folder = (assembly.parent / imported["candidate"]).parent
+    names, kept, matched = [], 0, []
+    for clip in candidate["motion"]["clips"]:
+        rows = draft["clips"][clip["id"]]
+        previous = None
+        for number, sample in enumerate(clip["samples"]):
+            row = rows[sample["id"]]
+            if row["image_sha256"] in known:
+                old = known[row["image_sha256"]]
+                row["sockets"], row["pose_id"] = deepcopy(old["sockets"]), old["pose_id"]
+                kept += 1
+            else:
+                # Match head and torso from the frame before, on the new raster.
+                source, origin = previous
+                frame = Image.open(folder / sample["image"]["file"]).convert("RGBA")
+                sockets = deepcopy(origin["sockets"])
+                for name, bounds in (("head", rebuild.HEAD_BOUNDS), ("torso", [-7, -8, 7, 8])):
+                    x, y = origin["sockets"][name]["position"]
+                    template = source.crop((x+bounds[0], y+bounds[1], x+bounds[2], y+bounds[3]))
+                    found = parts_sockets.match(template, frame, [x, y], {"bounds": bounds, "radius": 4, "alpha_weight": 3,
+                                                                          "min_alpha": 128, "rgb_threshold": 24})
+                    sockets[name]["position"] = found["position"]
+                    matched.append({"sample": sample["id"], "socket": name, "cost": found["cost"], "margin": found["margin"]})
+                row["sockets"] = sockets
+                row["pose_id"] = f"{origin['pose_id']}h"
+                names.append(row["pose_id"])
+            previous = (Image.open(folder / sample["image"]["file"]).convert("RGBA"), row)
+    write(base / "annotations.walk22.json", draft)
+    frozen = parts_motion.freeze_motion(assembly, imported["candidate"], base / "annotations.walk22.json")
+    return {"motion": frozen["motion"], "kept_poses": kept, "new_poses": names, "matched": matched,
+            "invalidated": len(frozen["invalidated"]), "quality": imported["motion_quality"]}
+
+
+def stage_new_pose_sheets(base, batch, poses):
+    """Sheets of only the poses added to the motion: labels, clothing and feet."""
+    assembly = base / "library/assembly.json"
+    made = {}
+    for kind, kwargs in (("labels", {"crop": "24,20,104,116", "scale": 4, "page_size": 12, "aspect": "1:1"}),
+                         ("clothing", {"crop": CLOTHING_CROP, "scale": 4, "page_size": 12, "aspect": "1:1"}),
+                         ("feet", {"crop": FEET_CROP, "scale": 8, "page_size": 12, "columns": 3, "aspect": "3:2"})):
+        made[kind] = sheets.build_sheet(assembly, base / "sheets" / f"{kind}-{batch}", by_pose=True, poses=poses,
+                                        part=kind, **kwargs)["cells"]
+    return made
+
+
+def stage_new_pose_draw(base, batch):
+    """Labels and every per-pose garment drawn on the added poses (boots b are redrawn over the pants)."""
+    garment, shoe, style = _garment_prompts()
+    hq_garments = (HQ / "generate_garments.py").read_text()
+    hq_body = eval(hq_garments.split("BODY = ", 1)[1].split("\n}\n", 1)[0] + "\n}")
+    hq_shoes = eval(hq_garments.split("SHOES = ", 1)[1].split("}\n", 1)[0] + "}")
+    jobs = [(LABEL_PROMPT, base / "drawn" / f"labels-{batch}.p1.png", [base / f"sheets/labels-{batch}/pose-sheet.png"],
+             base / "prompts" / f"labels-{batch}.txt")]
+    clothing = base / f"sheets/clothing-{batch}/pose-sheet.png"
+    feet = base / f"sheets/feet-{batch}/pose-sheet.png"
+    for name, (desc, where) in hq_body.items():
+        jobs.append((garment.format(garment=desc, where=where) + style.format(px=4) + KEEP_LAYOUT,
+                     base / "drawn" / f"{name}.{batch}.p1.png", [clothing, base / "design" / f"{name}.raw.png"],
+                     base / "prompts" / f"{name}.{batch}.txt"))
+    for name, (slot, desc) in NEW.items():
+        if rebuild.PARTS[name][-1] != "raster":
+            continue
+        if slot == "footwear":
+            jobs.append((shoe.format(desc=desc) + style.format(px=8) + KEEP_LAYOUT, base / "drawn" / f"{name}.feet.{batch}.p1.png",
+                         [feet, base / "design" / f"{name}.zoom.png"], base / "prompts" / f"{name}.feet.{batch}.txt"))
+        else:
+            jobs.append((garment.format(garment=desc, where=GARMENT_WORDS[name]) + style.format(px=4) + KEEP_LAYOUT,
+                         base / "drawn" / f"{name}.{batch}.p1.png", [clothing, base / "design" / f"{name}.raw.png"],
+                         base / "prompts" / f"{name}.{batch}.txt"))
+    jobs.append((shoe.format(desc=hq_shoes["footwear.a"]) + style.format(px=8) + KEEP_LAYOUT,
+                 base / "drawn" / f"footwear.a.feet.{batch}.p1.png", [feet, base / "design/footwear.a.zoom.png"],
+                 base / "prompts" / f"footwear.a.feet.{batch}.txt"))
+    return _parallel(jobs)
+
+
+def stage_new_pose_slice(base, batch):
+    """Slice every per-pose garment's added-pose page into sliced-<batch>/<name> (merged at import)."""
+    assembly = base / "library/assembly.json"
+    report = {}
+    names = ["upper.a", "upper.b", "lower.a", "lower.b", "gloves", "footwear.a", *[n for n in NEW if rebuild.PARTS[n][-1] == "raster"]]
+    for name in names:
+        slot, _, socket, _, region, threshold, _ = rebuild.PARTS[name]
+        feet = slot == "footwear"
+        guide = base / "sheets" / f"{'feet' if feet else 'clothing'}-{batch}" / "pose-sheet.json"
+        art = base / "drawn" / f"{name}{'.feet' if feet else ''}.{batch}.p1.png"
+        palette = base / "design" / (f"{name}.palette5.json" if feet and (base / "design" / f"{name}.palette5.json").exists()
+                                     else f"{name}.palette.json")
+        sliced = sheets.slice_sheet(assembly, guide, art, base / f"sliced-{batch}" / name, part_id=rebuild.PART_ID[name],
+            slot=slot, node=SLOTS[slot][2][0], socket=socket, piece=slot, body_threshold=threshold,
+            min_island=6 if feet else 12, outline=True, near_body=NEAR_BODY.get(name, 2), region=region, tolerance=80,
+            palette=palette, fill_holes=6, close_body=5, by_pose=True)
+        report[name] = {"poses": sliced["poses"], "empty": sliced["empty"], "misaligned": sliced["misaligned"]}
+    return report
+
+
+LOOKS = [("a", "a", "b", "b", "b", 1, 1, 1), ("c", "c", "c", "c", "c", 0, 0, 0), ("b", "b", "a", "a", "a", 0, 0, 0),
+         ("c", "a", "b", "c", "b", 1, 0, 1), ("a", "c", "c", "b", "b", 0, 1, 0), ("b", "a", "c", "a", "c", 1, 0, 0),
+         ("a", "b", "a", "c", "c", 0, 0, 1), ("c", "b", "b", "a", "a", 1, 1, 0)]
+
+
+def stage_showcase(base, out=Path("docs/parts/assets"), tag="20261006"):
+    """Wardrobe grid and GIFs, a live outfit swap on the shared clock, head close-ups and the walk strip."""
+    from PIL import ImageDraw
+    from sprite_gen.compose.parts_runtime import PartsPlayer
+    assembly = base / "library/assembly.json"
+    index, registry = workspace.read_workspace(assembly)
+    motion = registry[index["motion"]["id"]]
+
+    def selection(hair, face, upper, lower, shoes, hat=0, gloves=0, pack=0):
+        names = {"hair": f"hair.{hair}", "expression": f"expression.{face}", "upper": f"upper.{upper}",
+                 "lower": f"lower.{lower}", "footwear": f"footwear.{shoes}", "headwear": "headwear" if hat else None,
+                 "gloves": "gloves" if gloves else None, "back_accessory": "back_accessory" if pack else None}
+        return {slot: contract.reference(registry[rebuild.PART_ID[name]]) if name else None for slot, name in names.items()}
+
+    def frames(chosen, state):
+        player = PartsPlayer.from_workspace(assembly)
+        player.set_selection(chosen)
+        player.set_state(state)
+        clip = next(c for c in player.plan["clips"] if c["state"] == state)
+        result, start = [], Fraction(0)
+        for sample in clip["samples"]:
+            player.seek(start / clip["timebase"])
+            result.append((player.frame()[0], sample["duration_ticks"]*1000//clip["timebase"]))
+            start += sample["duration_ticks"]
+        return result
+
+    def on_grey(image, size):
+        return Image.alpha_composite(Image.new("RGBA", size, (236, 236, 236, 255)), image.resize(size, Image.Resampling.NEAREST))
+
+    looks = [selection(*look) for look in LOOKS]
+    for state in ("walk", "run"):
+        columns = [frames(look, state) for look in looks]
+        cw, ch = 192, 232
+        grid = []
+        for n in range(len(columns[0])):
+            sheet = Image.new("RGBA", (cw*4, ch*2), (236, 236, 236, 255))
+            for i, column in enumerate(columns):
+                sheet.alpha_composite(on_grey(column[n][0].crop((16, 8, 112, 124)), (cw, ch)), (i % 4*cw, i//4*ch))
+            grid.append(sheet)
+        grid[0].save(out / f"sd-explorer-avatar-wardrobe-{state}-{tag}.gif", save_all=True, append_images=grid[1:],
+                     duration=[d for _, d in columns[0]], loop=0)
+        if state == "run":
+            grid[2].save(out / f"sd-explorer-avatar-wardrobe-{tag}.png")
+    walk = next(c for c in motion["clips"] if c["state"] == "walk")
+    period = sum(s["duration_ticks"] for s in walk["samples"]) / walk["timebase"]
+    player = PartsPlayer.from_workspace(assembly)
+    player.set_state("walk")
+    swap, step = [], Fraction(1, 24)
+    for n in range(int(len(looks)*period/step)):
+        player.set_selection(looks[int(n*step/period) % len(looks)])
+        player.seek(n*step)
+        swap.append(on_grey(player.frame()[0].crop((16, 8, 112, 124)), (384, 464)))
+    swap[0].save(out / f"sd-explorer-avatar-swap-walk-{tag}.gif", save_all=True, append_images=swap[1:], duration=42, loop=0)
+    for state in ("idle", "walk", "run"):
+        shown = frames(looks[1], state)
+        images = [on_grey(f.crop((16, 8, 112, 124)), (384, 464)) for f, _ in shown]
+        images[0].save(out / f"sd-explorer-avatar-{state}-{tag}.gif", save_all=True, append_images=images[1:],
+                       duration=[d for _, d in shown], loop=0)
+    for state in ("walk", "run"):
+        heads = [frames(selection(h, "a", "a", "a", "a"), state) for h in "abc"] + [frames(selection("a", "a", "a", "a", "a", 1), state)]
+        images = []
+        for n in range(len(heads[0])):
+            sheet = Image.new("RGBA", (1280, 300), (236, 236, 236, 255))
+            for i, column in enumerate(heads):
+                sheet.alpha_composite(on_grey(column[n][0].crop((24, 8, 88, 68)), (320, 300)), (i*320, 0))
+            images.append(sheet)
+        images[0].save(out / f"sd-explorer-avatar-heads-{state}-{tag}.gif", save_all=True, append_images=images[1:],
+                       duration=[d for _, d in heads[0]], loop=0)
+    shown = frames(looks[1], "walk")
+    cw, ch = 216, 360
+    strip = Image.new("RGBA", (cw*len(shown), ch+40), (236, 236, 236, 255))
+    draw = ImageDraw.Draw(strip)
+    top = walk["samples"][0]["sockets"]["head"]["position"][1]
+    for n, ((image, _), sample) in enumerate(zip(shown, walk["samples"])):
+        strip.alpha_composite(on_grey(image.crop((28, 4, 100, 124)), (cw, ch)), (n*cw, 0))
+        y = sample["sockets"]["head"]["position"][1]
+        draw.line([(n*cw, (y-4)*3), (n*cw+cw, (y-4)*3)], fill=(220, 40, 40, 255), width=2)
+        draw.text((n*cw+6, ch+6), f"{sample['pose_id']}  head {y-top:+d}px", fill=(0, 0, 0, 255))
+    strip.save(out / f"sd-explorer-avatar-walk-strip-{tag}.png")
+    return {"looks": len(looks), "walk_samples": len(walk["samples"])}
+
+
 def stage_appearance(base, selection):
     assembly = base / "library/assembly.json"
     index, registry = workspace.read_workspace(assembly)
@@ -763,7 +1020,8 @@ if __name__ == "__main__":
     parser.add_argument("--base", required=True, type=Path)
     parser.add_argument("stage", choices=("library", "labels", "label-gen", "labels-fix", "segments", "garments", "capped-gen",
                                           "capped-extract", "hair-extract", "hat-extract", "held", "appearance", "redraw", "new-designs", "new-extract",
-                                          "new-sheets", "new-draw", "new-slice",
+                                          "new-sheets", "new-draw", "new-slice", "walk22", "added-sheets", "added-draw",
+                                          "added-slice", "added-redraw", "showcase",
                                           "coverage", "export"))
     parser.add_argument("--only", nargs="*")
     parser.add_argument("--select", type=Path)
@@ -787,6 +1045,17 @@ if __name__ == "__main__":
         result = stage_capped_extract(args.base)
     elif stage == "hat-extract":
         result = stage_hat_extract(args.base)
+    elif stage == "showcase":
+        result = stage_showcase(args.base)
+    elif stage == "walk22":
+        result = stage_walk22(args.base)
+        write(args.base / "walk22.json", result)
+    elif stage in ("added-sheets", "added-draw", "added-slice", "added-redraw"):
+        added = json.loads((args.base / "walk22.json").read_text())["new_poses"]
+        result = {"added-sheets": lambda: stage_new_pose_sheets(args.base, "walk22", added),
+                  "added-draw": lambda: stage_new_pose_draw(args.base, "walk22"),
+                  "added-slice": lambda: stage_new_pose_slice(args.base, "walk22"),
+                  "added-redraw": lambda: stage_redraw(args.base, poses=tuple(added), batch="walk22")}[stage]()
     elif stage == "hair-extract":
         result = stage_hair_extract(args.base)
     elif stage == "redraw":

@@ -235,3 +235,15 @@ def test_dressed_slice_reports_cells_that_do_not_sit_on_the_body(tmp_path):
     moved = sheets.slice_sheet(assembly, tmp_path / "sheet/pose-sheet.json", tmp_path / "shifted.png", tmp_path / "b",
                                part_id="test.badge", slot="hair", node="hair_front", socket="head", body_threshold=8)
     assert len(moved["misaligned"]) == 3
+
+
+def test_poses_limit_a_sheet_to_the_poses_still_to_draw(tmp_path):
+    from parts_helpers import posed_workspace
+    assembly, _ = posed_workspace(tmp_path)
+    result = sheets.build_sheet(assembly, tmp_path / "sheet", scale=2, by_pose=True, poses=["walk.02"])
+    guide = json.loads((tmp_path / "sheet/pose-sheet.json").read_text())
+    assert result["cells"] == 1 and guide["cells"][0]["sample"] == "sample.1"
+    with pytest.raises(contract.PartsContractError, match="unknown poses"):
+        sheets.build_sheet(assembly, tmp_path / "x", by_pose=True, poses=["run.01"])
+    with pytest.raises(contract.PartsContractError, match="--by-pose"):
+        sheets.build_sheet(assembly, tmp_path / "y", poses=["walk.02"])
