@@ -3,18 +3,21 @@
 
 A body type is a set of proportions. Its standing skeleton is drawn as a guide and the image model
 draws the base mannequin on it; few-frame cycles (idle, walk, run) are posed from the same numbers
-and drawn the same way. Parts take their anchors (sole, toe direction, ankle) straight from the
-skeleton: a design is drawn once by the model, then placed on every frame's feet - no detection,
-no per-frame redraw. What shows is the runtime's layer order: the body is cut into pieces by bone.
+and drawn the same way. Every part slot (hair, top, bottoms, shoes) goes the body's way: a design is
+drawn once by the model alone on the base, cut by the bones its slot follows and posed on every frame
+with the body's own joint turns - no detection, no per-frame redraw. What shows is the runtime's layer
+order: the body and each part are cut into pieces by bone, each piece at its body node.
 
     base      the standing skeleton -> guide -> the base mannequin (base.png, palette, body.json)
     calibrate the template's foot (heel, toe, sole) measured on the base drawing; cycles re-posed
-    frames    a cycle (idle 3, walk 6, run 6) -> guide sheet -> drawn frames
-    puppet    the base cut along its skeleton, posed per frame, mended by the model (feet exact)
-    shoes     a shoe design (one model call) placed heel->toe on every frame of a cycle
+    frames    a cycle (idle 3, walk 6, run 6) -> guide sheet -> drawn frames (the stick route, optional)
+    puppet    the base cut along its skeleton, posed per frame (joints closed), mended by the model
+    part      a slot's design (hair, upper, lower, footwear): drawn once alone on the base by the model,
+              registered, cut by the slot's bones and posed on every frame exactly as the body is
+    dress     every frame in every look, one sheet
     library   the cycles as a frozen motion with the skeleton's sockets
     segments  the body cut into far arm/leg, root, near leg/arm by bone, as the body pack
-    packs     each shoe design as a part (far and near piece)
+    packs     each part design as a pack, one piece per body node of its slot
     play      every look through the runtime, one GIF per state
 """
 from __future__ import annotations
@@ -47,9 +50,29 @@ BODIES = {
         "heel": [-3, 3], "toe": [8, 3],  # from the ankle, standing
         "upper_arm": 10, "forearm": 9, "width": {"thigh": 5, "shin": 4, "arm": 3},
     },
+    # Four heads tall: the head a quarter of the height (half the share of a Maple-style chibi head).
+    # Stands with the feet a stride apart, so a pair of shoes drawn on the base splits one per foot.
+    "slim4": {
+        "prompt": "a cute young girl base mannequin with gently stylized proportions: a round head about one quarter "
+                  "of the total height (four heads tall - NOT a big chibi head), a slender body with narrow shoulders, "
+                  "slim arms and legs, small hands and feet",
+        "ground": 116, "head": {"center": [64, 32], "radius": 12, "ear": [-2, 1]}, "neck": [64, 45], "shoulder": [64, 48],
+        "hip": [64, 75], "torso": {"top": 11, "bottom": 12}, "thigh": 20, "shin": 18,
+        "heel": [-3, 3], "toe": [9, 3], "upper_arm": 13, "forearm": 12, "width": {"thigh": 6, "shin": 5, "arm": 4},
+        "stand": {"near": (16, 4, -12), "far": (-16, 4, 20), "arms": {"near": (22, 15), "far": (-32, 10)}},
+    },
 }
 # Standing for the base: both feet and both hands in sight.
 STAND = {"near": (10, 4, 0), "far": (-10, 4, 0), "arms": {"near": (22, 15), "far": (-32, 10)}}
+
+
+def _stand(body):
+    return body.get("stand", STAND)
+
+
+def stand_pose(body):
+    s = _stand(body)
+    return skeleton(body, tuple(s["near"]), tuple(s["far"]), {k: tuple(v) for k, v in s["arms"].items()})
 # Few-frame cycles, near leg: thigh swing from vertical (deg, forward +), knee bend, foot pitch (toe up +).
 # The far leg runs half a cycle later; arms swing against their legs. `lift` raises the hip (flight, breath).
 CYCLES = {
@@ -59,10 +82,6 @@ CYCLES = {
              "arm_swing": 0.7, "elbow": 12, "lift": [0]*6, "verb": "walking", "ms": 130},
     "run": {"legs": [(30, 14, 6), (0, 26, 0), (-28, 30, -30), (-6, 95, -20), (30, 80, -6), (40, 24, 6)],
             "arm_swing": 1.0, "elbow": 70, "lift": [0, 0, 0, 3, 0, 3], "verb": "running", "ms": 90},
-}
-DESIGNS = {
-    "sneakers": "red canvas high-top sneakers with white rubber soles, white toe caps and white laces on both feet",
-    "boots": "tan-brown leather ankle boots with laces and dark soles",
 }
 
 
@@ -266,7 +285,7 @@ def _out(base_dir):
 def stage_base(base_dir, body_name):
     body = BODIES[body_name]
     out = _out(base_dir)
-    pose = skeleton(body, STAND["near"], STAND["far"], STAND["arms"])
+    pose = stand_pose(body)
     guide = draw_guide(body, pose)
     sheet, origins = _sheet([guide], 8, 1, gutter=0)
     sheet.save(out / "base-guide.png")
@@ -276,7 +295,7 @@ def stage_base(base_dir, body_name):
     colors = [list(map(int, c)) for c in palette.tolist()]
     base.save(out / "base.png")
     (out / "base.palette.json").write_text(json.dumps({"colors": colors}))
-    (out / "body.json").write_text(json.dumps({"type": body_name, "body": body, "stand": STAND, "pose": pose}, indent=1))
+    (out / "body.json").write_text(json.dumps({"type": body_name, "body": body, "stand": _stand(body), "pose": pose}, indent=1))
     return {"base": str(out / "base.png"), "follows": follows(base, body, pose)}
 
 
@@ -317,7 +336,7 @@ def stage_calibrate(base_dir):
     out = _out(base_dir)
     info = json.loads((out / "body.json").read_text())
     body = info.get("template", info["body"])  # always from the numbers the base was drawn on
-    stand = skeleton(body, STAND["near"], STAND["far"], STAND["arms"])
+    stand = stand_pose(body)
     base = np.asarray(Image.open(out / "base.png").convert("RGBA"))
     L = stand["legs"]["near"]
     ys, xs = np.nonzero(_foot_mask(_owners(base, body, stand), stand, "near"))
@@ -325,9 +344,9 @@ def stage_calibrate(base_dir):
     sole = float(local[:, 1].max())
     calibrated = dict(body, heel=[round(float(local[:, 0].min()), 2), round(sole, 2)],
                       toe=[round(float(local[:, 0].max()), 2), round(sole, 2)])
-    probe = skeleton(calibrated, STAND["near"], STAND["far"], STAND["arms"])
+    probe = stand_pose(calibrated)
     calibrated["ground"] = int(round(body["ground"] - (probe["hip"][1] - stand["hip"][1])))
-    pose = skeleton(calibrated, STAND["near"], STAND["far"], STAND["arms"])
+    pose = stand_pose(calibrated)
     (out / "body.json").write_text(json.dumps(dict(info, body=calibrated, pose=pose, template=body), indent=1))
     for cycle_name, cycle in CYCLES.items():
         path = out / cycle_name / "skeleton.json"
@@ -397,10 +416,8 @@ def _seg_distance(px, py, a, b):
     return np.hypot(px - (a[0] + t*d[0]), py - (a[1] + t*d[1]))
 
 
-def _owners(rgba, body, stand):
-    """Each pixel's bone name ("" where empty): the upper body (head, torso, shorts) above the hip line,
-    else the nearest bone - the near limbs where they cover the far ones."""
-    alpha = rgba[..., 3] > 0
+def _reach(body, stand):
+    """Bone name -> how far each pixel is outside that bone's limb (negative inside)."""
     ys, xs = np.mgrid[0:CANVAS, 0:CANVAS]
     bones = _bones(stand)
     dist = {name: _seg_distance(xs, ys, a, b) for name, (a, b, _) in bones.items()}
@@ -408,102 +425,73 @@ def _owners(rgba, body, stand):
         L = stand["legs"][side]
         dist[f"{side}_foot"] = np.minimum(dist[f"{side}_foot"], np.minimum(_seg_distance(xs, ys, L["ankle"], L["heel"]),
                                                                            _seg_distance(xs, ys, L["heel"], L["toe"])))
+        A = stand["arms"][side]  # the hand past the wrist goes with the forearm, not left on the torso
+        elbow, wrist = np.array(A["elbow"], float), np.array(A["wrist"], float)
+        hand = wrist + (wrist - elbow) / max(np.hypot(*(wrist - elbow)), 1e-6)*body["width"]["arm"]
+        dist[f"{side}_forearm"] = _seg_distance(xs, ys, elbow, hand)
     widths = {"thigh": body["width"]["thigh"], "shin": body["width"]["shin"], "foot": 4,
               "upper_arm": body["width"]["arm"], "forearm": body["width"]["arm"] + 1}
+    return {n: d - widths[n.split("_", 1)[1]]/2 for n, d in dist.items()}
+
+
+def _owners(rgba, body, stand, bones=None, whole=False, torso_only=False):
+    """Each pixel's bone name ("" where empty) among `bones` (default every bone and "upper"): the upper
+    body (head, torso, shorts) above the hip line, else the nearest bone - the near limbs where they cover
+    the far ones. `whole`: each connected stroke goes to the bone most of its pixels would (a shoe is not
+    split between the feet). `torso_only`: the upper body claims only the head and the skeleton's torso
+    (a part's wide sleeve rim beside it goes with the arm)."""
+    rgba = np.asarray(rgba)
+    alpha = rgba[..., 3] > 0
+    names = list(bones) if bones else list(_bones(stand)) + ["upper"]
+    reach = {n: r for n, r in _reach(body, stand).items() if n in names}
     owner = np.full(alpha.shape, "", dtype=object)
+    if not reach:
+        owner[alpha] = "upper"
+        return owner
+    ys, xs = np.mgrid[0:CANVAS, 0:CANVAS]
     cx, cy = stand["head"]["center"]
     head = np.hypot(xs - cx, ys - cy) <= stand["head"]["radius"] + 2
-    near_limbs = [n for n in bones if n.startswith("near")]
-    far_limbs = [n for n in bones if n.startswith("far")]
-    for y, x in zip(*np.nonzero(alpha)):
-        reach = {n: dist[n][y, x] - widths[n.split("_", 1)[1]]/2 for n in bones}
-        near_best = min(near_limbs, key=reach.get)
-        far_best = min(far_limbs, key=reach.get)
-        if reach[near_best] <= 1.5:
-            owner[y, x] = near_best
-        elif head[y, x] or y < stand["hip"][1] + 4 and reach[far_best] > 1.0:
-            owner[y, x] = "upper"
-        else:
-            owner[y, x] = far_best if reach[far_best] <= reach[near_best] + 2 else near_best
+    best = {}
+    for side in ("near", "far"):
+        limbs = [n for n in reach if n.startswith(side)]
+        if limbs:
+            stack = np.stack([reach[n] for n in limbs])
+            best[side] = (np.array(limbs, dtype=object)[stack.argmin(0)], stack.min(0))
+    inf = np.full(alpha.shape, np.inf)
+    near_r = best["near"][1] if "near" in best else inf
+    far_r = best["far"][1] if "far" in best else inf
+    take_near = near_r <= 1.5
+    take_upper = ~take_near & (head | (ys < stand["hip"][1] + 4) & (far_r > 1.0)) if "upper" in names \
+        else np.zeros_like(alpha)
+    if torso_only:
+        take_upper &= head | _torso_mask(body, stand, grow=3)
+    rest = ~take_near & ~take_upper
+    if "near" in best:
+        owner[take_near] = best["near"][0][take_near]
+    owner[take_upper] = "upper"
+    far_first = (far_r <= near_r + 2) & ("far" in best)
+    if "far" in best:
+        owner[rest & far_first] = best["far"][0][rest & far_first]
+    if "near" in best:
+        owner[rest & ~far_first] = best["near"][0][rest & ~far_first]
+    owner[~alpha] = ""
+    if whole:
+        for c in _components(alpha):
+            names_in, counts = np.unique(owner[c].astype(str), return_counts=True)
+            owner[c] = names_in[counts.argmax()]
     return owner
 
 
-def cut_puppet(base, body, stand):
-    """The base cut into rigid pieces, one per bone plus the upper body."""
+def cut_puppet(base, body, stand, bones=None, whole=False):
+    """An image cut into rigid pieces, one per bone plus the upper body (or only `bones`, as a part)."""
     rgba = np.asarray(base)
-    owner = _owners(rgba, body, stand)
+    owner = _owners(rgba, body, stand, bones, whole, torso_only=bones is not None and len(bones) > 1)
     pieces = {}
-    for name in list(_bones(stand)) + ["upper"]:
+    for name in bones or list(_bones(stand)) + ["upper"]:
         mask = owner == name
-        pieces[name] = np.where(mask[..., None], rgba, 0).astype(np.uint8)
+        if mask.any():
+            pieces[name] = np.where(mask[..., None], rgba, 0).astype(np.uint8)
     return pieces
-
-
-def _rigid(pixels, a, b, a2, b2):
-    """Pixels turned about `a` so a->b points along a2->b2, then moved to a2 (no stretching)."""
-    a, b, a2, b2 = (np.array(v, float) for v in (a, b, a2, b2))
-    phi = np.arctan2(*(b2 - a2)[::-1]) - np.arctan2(*(b - a)[::-1])
-    inv = np.array([[np.cos(-phi), -np.sin(-phi)], [np.sin(-phi), np.cos(-phi)]])
-    oy, ox = np.mgrid[0:CANVAS, 0:CANVAS]
-    pts = np.stack([ox - a2[0], oy - a2[1]], -1).reshape(-1, 2) @ inv.T + a
-    sx, sy = np.round(pts[:, 0]).astype(int), np.round(pts[:, 1]).astype(int)
-    ok = (sx >= 0) & (sy >= 0) & (sx < CANVAS) & (sy < CANVAS)
-    out = np.zeros((CANVAS*CANVAS, 4), dtype=np.uint8)
-    out[ok] = pixels[sy[ok], sx[ok]]
-    return out.reshape(CANVAS, CANVAS, 4)
-
-
-def pose_puppet(pieces, stand, pose):
-    """The pieces moved onto a pose, back to front."""
-    bones, target = _bones(stand), _bones(pose)
-    layers = [(bones[n][2], _rigid(pieces[n], bones[n][0], bones[n][1], target[n][0], target[n][1])) for n in bones]
-    upper = np.roll(pieces["upper"], int(round(pose["shift"])), 0)
-    layers.append((1.5, upper))
-    canvas = np.zeros((CANVAS, CANVAS, 4), dtype=np.uint8)
-    for _, layer in sorted(layers, key=lambda l: l[0]):
-        canvas = np.where(layer[..., 3:4] > 0, layer, canvas)
-    return Image.fromarray(canvas)
-
-
-def stage_puppet(base_dir, cycle_name):
-    """Frames from the cut base posed bone by bone, then mended by the model: feet are where the skeleton
-    says, by construction."""
-    out = _out(base_dir)
-    info = json.loads((out / "body.json").read_text())
-    body, stand = info["body"], info["pose"]
-    base = Image.open(out / "base.png").convert("RGBA")
-    palette = pixel_grid.read_palette(out / "base.palette.json")
-    folder = out / cycle_name
-    poses = json.loads((folder / "skeleton.json").read_text())["poses"]
-    pieces = cut_puppet(base, body, stand)
-    work = folder / "puppet"
-    work.mkdir(exist_ok=True)
-    roughs = [pose_puppet(pieces, stand, p) for p in poses]
-    for t, r in enumerate(roughs):
-        r.save(work / f"rough-{t}.png")
-    sheet, origins = _sheet(roughs, 4, 3)
-    sheet.save(work / "sheet.png")
-    drawn = _draw(PUPPET_PROMPT.format(verb=CYCLES[cycle_name]["verb"], style=STYLE.format(px=4), w=sheet.width,
-                                       h=sheet.height), work, work / "sheet.png", [out / "base.png"], "mended")
-    report = []
-    for t, (o, rough) in enumerate(zip(origins, roughs)):
-        box = rough.getbbox()
-        mended, _ = _clean_native(drawn, work / "sheet.png", o, 4, palette=palette, expect=(box[2]-box[0], box[3]-box[1]))
-        mended, shift = _onto_guide(mended, rough)
-        mended.save(work / f"mended-{t}.png")
-        mended.save(folder / f"frame-{t}.png")  # until the feet stage puts the skeleton's feet on it
-        report.append({"frame": t, "shift": list(shift)})
-    return report
-
-
-# --- shoes: designed once by the model, then placed on every foot by the skeleton -------------------------
-BASE_SHOE_PROMPT = (
-    "Image 1 is a pixel-art close-up of one chibi character's lower legs and bare feet, mid-stride, pure side view facing "
-    "right, on a flat pure magenta #FF00FF background. Draw ONLY the two shoes those feet wear, one on each foot: "
-    "{desc}. Each shoe exactly where its foot is, at its angle, the sole on the sole, covering every bit of bare foot, "
-    "and only a little bigger than the foot: "
-    "the shoe's top ends just above the ankle bone, never up the shin. Draw nothing else: no legs, no shorts, no skin, "
-    "no body outline - every other pixel is flat #FF00FF. {style} Keep the image size.")
 
 
 def _scale2x(rgba):
@@ -519,113 +507,138 @@ def _scale2x(rgba):
     return out[..., None].view(np.uint8).reshape(out.shape[0], out.shape[1], 4)
 
 
-def _place(image, src_heel, src_toe, dst_heel, dst_toe):
-    """A drawing moved so its heel->toe lies on another heel->toe (turned and scaled, RotSprite style:
-    sampled from an 8x Scale2x copy, so turned outlines stay one clean pixel)."""
-    up = np.asarray(image.convert("RGBA"))
+def _upsampled(pixels):
+    up = np.ascontiguousarray(pixels)
     for _ in range(3):
         up = _scale2x(up)
-    a, b = np.array(src_heel, float), np.array(src_toe, float)
-    c, d = np.array(dst_heel, float), np.array(dst_toe, float)
-    vs, vd = b - a, d - c
-    scale = np.linalg.norm(vd) / max(np.linalg.norm(vs), 1e-6)
-    phi = np.arctan2(vd[1], vd[0]) - np.arctan2(vs[1], vs[0])
-    inv = np.linalg.inv(np.array([[np.cos(phi), -np.sin(phi)], [np.sin(phi), np.cos(phi)]])*scale)
+    return up
+
+
+def _warp(up, phi, a, a2):
+    """A piece turned by `phi` about its point `a` and moved so `a` lands on `a2` - RotSprite style,
+    sampled from its 8x Scale2x copy `up`, so turned outlines stay one clean pixel."""
+    c, s = np.cos(-phi), np.sin(-phi)
     oy, ox = np.mgrid[0:CANVAS, 0:CANVAS]
-    pts = (np.stack([ox - c[0], oy - c[1]], -1).reshape(-1, 2) @ inv.T + a + 0.5)*8
-    sx, sy = np.floor(pts[:, 0]).astype(int), np.floor(pts[:, 1]).astype(int)
+    dx, dy = ox + 0.5 - a2[0], oy + 0.5 - a2[1]
+    sx = np.floor((c*dx - s*dy + a[0])*8).astype(int)
+    sy = np.floor((s*dx + c*dy + a[1])*8).astype(int)
     ok = (sx >= 0) & (sy >= 0) & (sx < up.shape[1]) & (sy < up.shape[0])
-    out = np.zeros((CANVAS*CANVAS, 4), dtype=np.uint8)
+    out = np.zeros((CANVAS, CANVAS, 4), dtype=np.uint8)
     out[ok] = up[sy[ok], sx[ok]]
-    return out.reshape(CANVAS, CANVAS, 4)
+    return out
+
+
+def _angle(a, b):
+    return float(np.arctan2(b[1] - a[1], b[0] - a[0]))
+
+
+def _motion(stand, pose):
+    """Bone -> (turn, source pivot, target pivot): the upper body moves by whole pixels, every limb turns
+    about its joint."""
+    src, dst = _bones(stand), _bones(pose)
+    shift = [0.0, float(round(pose["hip"][1] - stand["hip"][1]))]
+    moves = {"upper": (0.0, np.array(stand["hip"], float), np.array(stand["hip"], float) + shift)}
+    for n in src:
+        moves[n] = (_angle(*dst[n][:2]) - _angle(*src[n][:2]), np.array(src[n][0], float), np.array(dst[n][0], float))
+    return moves
+
+
+# Parent -> child joints: where a bent limb opens a wedge, the child's end near the joint is swept through the
+# angles between the two, under both, so the outline closes around the joint instead of leaving a gap.
+JOINTS = [(p.format(s=s), c.format(s=s), w) for s in ("far", "near") for p, c, w in (
+    ("upper", "{s}_thigh", "thigh"), ("{s}_thigh", "{s}_shin", "shin"), ("{s}_shin", "{s}_foot", "shin"),
+    ("{s}_upper_arm", "{s}_forearm", "arm"))]  # the shoulder sits inside the torso: a sweep there only fans out behind
+
+
+def pose_pieces(pieces, body, stand, pose, ground=None):
+    """Pieces cut on the standing pose moved onto another pose, back to front, the joints closed. Returns
+    the picture and which bone each pixel came from. With `ground`, a foot piece is kept out of the ground."""
+    bones, moves = _bones(stand), _motion(stand, pose)
+    depth = {n: v[2] for n, v in bones.items()} | {"upper": 1.5}
+    ups = {n: _upsampled(p) for n, p in pieces.items()}
+    canvas = np.zeros((CANVAS, CANVAS, 4), dtype=np.uint8)
+    owner = np.full((CANVAS, CANVAS), "", dtype=object)
+    lifts = {}
+    for n in sorted(pieces, key=depth.get):
+        phi, a, a2 = moves[n]
+        layer = _warp(ups[n], phi, a, a2)
+        if ground is not None and n.endswith("_foot"):
+            rows = np.nonzero(layer[..., 3].any(1))[0]
+            lifts[n] = max(int(rows.max()) - ground, 0) if len(rows) else 0
+            layer = np.roll(layer, -lifts[n], 0)
+        put = layer[..., 3] > 0
+        canvas[put], owner[put] = layer[put], n
+    ys, xs = np.mgrid[0:CANVAS, 0:CANVAS]
+    for parent, child, width in JOINTS:
+        if child not in pieces or (parent not in pieces and parent != "upper"):
+            continue
+        phi_p, phi_c = moves[parent][0], moves[child][0]
+        if abs(phi_c - phi_p) < np.radians(4):
+            continue
+        joint = moves[child][1]
+        near_joint = np.hypot(xs + 0.5 - joint[0], ys + 0.5 - joint[1]) <= body["width"][width]/2 + 2
+        end = np.where(near_joint[..., None], pieces[child], 0).astype(np.uint8)
+        if not end[..., 3].any():
+            continue
+        up = _upsampled(end)
+        steps = int(np.ceil(abs(phi_c - phi_p) / np.radians(8)))
+        for phi in np.linspace(phi_p, phi_c, steps + 2)[1:-1]:
+            layer = np.roll(_warp(up, phi, joint, moves[child][2]), -lifts.get(child, 0), 0)
+            put = (layer[..., 3] > 0) & (canvas[..., 3] == 0)
+            canvas[put], owner[put] = layer[put], child
+    return canvas, owner
+
+
+def pose_puppet(pieces, body, stand, pose):
+    return Image.fromarray(pose_pieces(pieces, body, stand, pose)[0])
+
+
+def _keep_head(mended, rough, pose):
+    """The head is never bent, so it stays the base's own pixels: the model redraws it a pixel or two off,
+    and a held part drawn on the base (hair, hat) then shows a bald ring."""
+    zone = np.mgrid[0:CANVAS, 0:CANVAS][0] <= pose["neck"][1]  # rows above the neck (the drawn head outgrows its circle)
+    out = np.asarray(mended).copy()
+    out[zone] = np.asarray(rough)[zone]
+    return Image.fromarray(out)
+
+
+def stage_puppet(base_dir, cycle_name):
+    """Frames from the cut base posed bone by bone, then mended by the model: feet are where the skeleton
+    says, by construction."""
+    out = _out(base_dir)
+    info = json.loads((out / "body.json").read_text())
+    body, stand = info["body"], info["pose"]
+    base = Image.open(out / "base.png").convert("RGBA")
+    palette = pixel_grid.read_palette(out / "base.palette.json")
+    folder = out / cycle_name
+    folder.mkdir(exist_ok=True)
+    poses = cycle_poses(body, CYCLES[cycle_name])
+    (folder / "skeleton.json").write_text(json.dumps({"cycle": cycle_name, "poses": poses}, indent=1))
+    pieces = cut_puppet(base, body, stand)
+    work = folder / "puppet"
+    work.mkdir(exist_ok=True)
+    roughs = [pose_puppet(pieces, body, stand, p) for p in poses]
+    for t, r in enumerate(roughs):
+        r.save(work / f"rough-{t}.png")
+    sheet, origins = _sheet(roughs, 4, 3)
+    sheet.save(work / "sheet.png")
+    drawn = _draw(PUPPET_PROMPT.format(verb=CYCLES[cycle_name]["verb"], style=STYLE.format(px=4), w=sheet.width,
+                                       h=sheet.height), work, work / "sheet.png", [out / "base.png"], "mended")
+    report = []
+    for t, (o, rough) in enumerate(zip(origins, roughs)):
+        box = rough.getbbox()
+        mended, _ = _clean_native(drawn, work / "sheet.png", o, 4, palette=palette, expect=(box[2]-box[0], box[3]-box[1]))
+        mended, shift = _onto_guide(mended, rough)
+        mended = _keep_head(mended, rough, poses[t])
+        mended.save(work / f"mended-{t}.png")
+        mended.save(folder / f"frame-{t}.png")
+        report.append({"frame": t, "shift": list(shift), "follows": follows(mended, body, poses[t])})
+    return report
 
 
 def _components(mask, minimum=1):
     from sprite_gen.frames.parts_segments import _components as components
     return sorted((c for c in components(mask) if c.sum() >= minimum), key=lambda c: -int(c.sum()))
-
-
-def _shoe_pose(out):
-    """The frame the shoe is designed on: feet well apart (no overlap to split), the near foot nearest flat."""
-    stand = json.loads((out / "body.json").read_text())["pose"]["legs"]["near"]
-    def angle(L):
-        return np.degrees(np.arctan2(L["toe"][1] - L["heel"][1], L["toe"][0] - L["heel"][0]))
-    best = None
-    for cycle_name in CYCLES:
-        path = out / cycle_name / "skeleton.json"
-        if not path.exists():
-            continue
-        for t, pose in enumerate(json.loads(path.read_text())["poses"]):
-            near, far = pose["legs"]["near"], pose["legs"]["far"]
-            apart = min(np.hypot(*(np.array(near[a]) - far[b])) for a in ("ankle", "heel", "toe") for b in ("ankle", "heel", "toe"))
-            if apart < 12:
-                continue
-            score = abs(angle(near) - angle(stand))
-            if best is None or score < best[0]:
-                best = (score, cycle_name, t, pose)
-    return best[1:]
-
-
-def design_shoe(out, design):
-    """The one model call per design: the shoes drawn on a frame whose feet stand apart (standing feet
-    overlap, and a pair drawn on them can't be split), reduced, and the near foot's shoe kept with that
-    foot's heel and toe."""
-    info = json.loads((out / "body.json").read_text())
-    shoe_dir = out / "shoes" / design
-    if (shoe_dir / "base-shoe.png").exists():
-        return shoe_dir
-    shoe_dir.mkdir(parents=True, exist_ok=True)
-    cycle_name, t, pose = _shoe_pose(out)
-    frame = Image.open(out / cycle_name / f"frame-{t}.png").convert("RGBA")
-    feet = [np.array(pose["legs"][s][k]) for s in ("near", "far") for k in ("ankle", "heel", "toe")]
-    x0, x1 = min(p[0] for p in feet) - 10, max(p[0] for p in feet) + 10
-    y0 = min(p[1] for p in feet) - 12
-    crop = tuple(int(v) for v in (x0, y0, x1, max(y0 + 24, info["body"]["ground"] + 4)))
-    sheet, origins = _sheet([frame], 8, 1, crop=crop, gutter=0)
-    sheet.save(shoe_dir / "base-sheet.png")
-    drawn = _draw(BASE_SHOE_PROMPT.format(desc=DESIGNS[design], style=STYLE.format(px=8)), shoe_dir,
-                  shoe_dir / "base-sheet.png", [], "base-drawn")
-    pair, palette = _clean_native(drawn, shoe_dir / "base-sheet.png", origins[0], 8, crop=crop, colors=16)
-    pair = np.asarray(pair)
-    L = pose["legs"]["near"]
-    ys, xs = np.mgrid[0:CANVAS, 0:CANVAS]
-    on_foot = _seg_distance(xs, ys, L["heel"], L["toe"]) <= 3
-    near = max(_components(pair[..., 3] > 0, 6), key=lambda c: (c & on_foot).sum())
-    Image.fromarray(np.where(near[..., None], pair, 0).astype(np.uint8)).save(shoe_dir / "base-shoe.png")
-    (shoe_dir / "base-shoe.json").write_text(json.dumps({"cycle": cycle_name, "frame": t, "heel": L["heel"], "toe": L["toe"],
-                                                         "palette": palette.tolist()}))
-    return shoe_dir
-
-
-def _planted(L, ground, tilt=15):
-    """A foot's heel and toe for its shoe: a foot touching the ground at a slight angle stands flat on it
-    (heel and toe on the ground line, same length); a heel strike or toe-off keeps its angle."""
-    heel, toe = np.array(L["heel"], float), np.array(L["toe"], float)
-    v = toe - heel
-    if max(heel[1], toe[1]) < ground - 1 or abs(np.degrees(np.arctan2(v[1], abs(v[0])))) > tilt:
-        return heel.tolist(), toe.tolist()
-    length = np.hypot(*v)
-    pivot = heel if heel[1] >= toe[1] else toe  # the end that touches
-    heel = np.array([pivot[0] if pivot is heel else pivot[0] - np.sign(v[0])*length, ground])
-    return heel.tolist(), [heel[0] + np.sign(v[0])*length, ground]
-
-
-def _grounded(placed, ground):
-    """A placed foot or shoe lifted out of the ground: a turned heel's corner may dip below it."""
-    rows = np.nonzero((placed[..., 3] > 0).any(1))[0]
-    sink = int(rows.max()) - ground if len(rows) else 0
-    return np.roll(placed, -sink, 0) if sink > 0 else placed
-
-
-def _sole(image, heel, toe):
-    """A drawing's own sole: its heel->toe line moved along the foot's normal onto its lowest pixels, so
-    a placed foot or shoe stands on the skeleton's sole line (the drawn sole is rarely the template's)."""
-    heel, toe = np.array(heel, float), np.array(toe, float)
-    u = (toe - heel) / max(np.hypot(*(toe - heel)), 1e-6)
-    n = np.array([-u[1], u[0]])  # down, for a foot pointing right
-    ys, xs = np.nonzero(np.asarray(image)[..., 3] > 0)
-    depth = float(((np.stack([xs, ys], 1) + 0.5 - heel) @ n).max()) - 0.5
-    return (heel + depth*n).tolist(), (toe + depth*n).tolist()
 
 
 def _foot_mask(owner, pose, side):
@@ -639,54 +652,342 @@ def _foot_mask(owner, pose, side):
     return np.isin(owner, [f"{side}_shin", f"{side}_foot"]) & past
 
 
-def _far_shade(out):
-    """How much darker the far limbs are drawn: far shin over near shin brightness on the base."""
-    info = json.loads((out / "body.json").read_text())
-    base = np.asarray(Image.open(out / "base.png").convert("RGBA"))
-    owner = _owners(base, info["body"], info["pose"])
-    luma = base[..., :3].astype(float) @ np.array([0.299, 0.587, 0.114])
-    return float(luma[owner == "far_shin"].mean() / luma[owner == "near_shin"].mean())
+# --- parts: a design drawn once on the base, cut by the skeleton's bones, posed exactly as the body is ------
+# A slot says which bones its design follows, which part of the upper body is its own (`zone`), and which
+# body node each piece is drawn at - so the runtime's layer order puts sleeves with arms and shoes with feet.
+# Every slot runs the same steps: design (one model call, the part alone on the base) -> register -> cut by
+# bone -> pose every frame. Nothing per slot is code.
+LIMBS_ARM = ["near_upper_arm", "near_forearm", "far_upper_arm", "far_forearm"]
+LIMBS_LEG = ["near_thigh", "near_shin", "far_thigh", "far_shin"]
+SLOTS = {
+    "hair": {
+        "bones": ["upper"], "zone": "head", "core": ["upper"], "core_zone": "crown", "rim": 3, "nodes": {"upper": "hair"}, "margin": 12,
+        "view": "the head and shoulders", "what": "the hair",
+        "fit": "The hair sits on its bald head as the hairstyle does: it hugs the skull outline exactly - no gap of bald "
+               "scalp between the hair and the head's outline - and leaves the face (the right side of the head) open "
+               "below the bangs; it may cover the ear.",
+        "designs": {"bob": "a chin-length chestnut-brown bob with straight-cut bangs, a 4-step warm brown ramp",
+                    "ponytail": "glossy black hair with side-swept bangs, pulled back into a high ponytail that hangs "
+                                "behind the head down to the nape"}},
+    "upper": {
+        "bones": ["upper"] + LIMBS_ARM, "zone": "chest", "core": ["upper"], "nodes": {"upper": "torso", "near": "arm_front", "far": "arm_back"},
+        "margin": 6, "fill": True, "view": "the upper body", "what": "the top",
+        "fit": "The top covers the whole torso from the neck down to just over the hips, hiding the undershirt "
+               "completely, and its sleeves lie along the arms as the design has them (the near sleeve in front of "
+               "the torso, the far sleeve behind it). The hands stay bare: leave them out.",
+        "designs": {"tee": "a short-sleeved navy-blue crew-neck t-shirt",
+                    "sweater": "a long-sleeved cream knit sweater with red horizontal stripes, sleeves to the wrists"}},
+    "lower": {
+        "bones": ["upper"] + LIMBS_LEG, "zone": "hips", "core": ["upper", "near_thigh", "far_thigh"], "nodes": {"upper": "waist", "near": "leg_front", "far": "leg_back"},
+        "margin": 6, "fill": True, "view": "the lower body", "what": "the bottoms",
+        "fit": "The bottoms start at the waist, covering the charcoal shorts completely, and follow each leg as the design "
+               "has them (the near leg in front, the far leg behind). The feet stay bare: leave them out.",
+        "designs": {"jeans": "long slightly loose blue denim jeans down to the ankles",
+                    "shorts": "khaki cargo shorts down to mid-thigh with a brown belt"}},
+    "footwear": {
+        "bones": ["near_foot", "far_foot"], "core": ["near_foot", "far_foot"], "whole": True, "nodes": {"near": "foot_front", "far": "foot_back"},
+        "replaces": True, "margin": 5, "view": "the lower legs and bare feet", "what": "the two shoes",
+        "fit": "One shoe on each foot, exactly where its foot is, at its angle, the sole on the sole, covering every bit "
+               "of bare foot and only a little bigger than the foot; the shoe's top ends just above the ankle bone, "
+               "never up the shin.",
+        "designs": {"sneakers": "red canvas high-top sneakers with white rubber soles, white toe caps and white laces",
+                    "boots": "tan-brown leather ankle boots with laces and dark soles"}},
+}
+PART_PROMPT = (
+    "Image 1 is a pixel-art close-up of {view} of one character in pure side view facing right, on a flat pure magenta "
+    "#FF00FF background. Draw ONLY {what} this character wears: {desc}. Draw it exactly where it sits on the body in "
+    "image 1, at the same size and grid, as if the body were invisible. {fit} Whatever is on the far side, behind the "
+    "body, is a little darker. Draw nothing else: no skin, no face, no head, no hands, no body outline, nothing of the "
+    "character's undershirt, shorts or bare feet - every other pixel is flat #FF00FF. {style} Keep the image size.")
+REDO_NOTE = (" A first try drew it {why}. The thin cyan line in image 1 outlines the body area {what} must cover: fill "
+             "everything inside it (the item may reach past it where the design does) at full body size, and do not "
+             "draw the cyan line.")
+CYAN = (0, 255, 255)
 
 
-def _shaded(pixels, factor):
-    out = np.asarray(pixels).copy()
-    out[..., :3] = np.clip(out[..., :3]*factor, 0, 255).astype(np.uint8)
+def _slot_node(slot, bone):
+    return slot["nodes"]["upper" if bone == "upper" else bone.split("_", 1)[0]]
+
+
+def _zone(slot, stand):
+    """Rows of the upper body that belong to a slot."""
+    ys = np.mgrid[0:CANVAS, 0:CANVAS][0]
+    neck, hip = stand["neck"][1], stand["hip"][1]
+    return {"head": ys <= neck, "crown": ys <= stand["head"]["center"][1], "chest": (ys >= neck - 1) & (ys <= hip + 2), "hips": ys >= hip - 5}.get(
+        slot.get("zone"), np.zeros((CANVAS, CANVAS), bool))
+
+
+def _target(slot, base_owner, stand):
+    """The base pixels a slot's design is drawn over."""
+    limbs = [b for b in slot["bones"] if b != "upper"]
+    target = np.isin(base_owner.astype(str), limbs)
+    if "upper" in slot["bones"]:
+        target |= (base_owner == "upper") & _zone(slot, stand)
+    return target
+
+
+def _dilate(mask, n=1):
+    for _ in range(n):
+        m = mask.copy()
+        m[1:] |= mask[:-1]; m[:-1] |= mask[1:]; m[:, 1:] |= mask[:, :-1]; m[:, :-1] |= mask[:, 1:]
+        mask = m
+    return mask
+
+
+def _register(part, target, body_alpha, reach=4):
+    """A drawn part moved by whole pixels onto the base: most of its target covered, least of the rest of the
+    body (the model shifts its output a few pixels)."""
+    alpha = np.asarray(part)[..., 3] > 0
+    other = body_alpha & ~_dilate(target, 1)
+    def score(d):
+        a = np.roll(np.roll(alpha, d[1], 0), d[0], 1)
+        return int((a & target).sum()) - 0.5*int((a & other).sum()), -abs(d[0]) - abs(d[1])
+    best = max(((dx, dy) for dy in range(-reach, reach + 1) for dx in range(-reach, reach + 1)), key=score)
+    return np.roll(np.roll(np.asarray(part), best[1], 0), best[0], 1), best
+
+
+def _fill_rows(piece, slot, body, stand, base):
+    """The torso piece of a garment closed row by row inside the slot's zone: the near sleeve covered part
+    of it on the base, and when the arm swings away the body would show through. Each gap takes the nearest
+    design pixel of its row (stripes stay level)."""
+    out = piece.copy()
+    alpha = piece[..., 3] > 0
+    zone = _zone(slot, stand)
+    under = np.isin(_owners(base, body, stand).astype(str), ["upper", "near_upper_arm", "near_forearm"])
+    torso = _torso_mask(body, stand) & under  # never past the drawn torso, nor where the far arm was
+    for y in np.nonzero((alpha & zone).any(1))[0]:
+        xs = np.nonzero(alpha[y])[0]
+        for x in range(CANVAS):
+            if not alpha[y, x] and (xs.min() < x < xs.max() or torso[y, x]):
+                out[y, x] = piece[y, xs[np.abs(xs - x).argmin()]]
     return out
 
 
-def stage_shoes(base_dir, cycle_name, design):
-    """Every frame's two shoes, no model: the designed shoe moved heel->toe onto each foot of the
-    skeleton (the far one shaded as the far limbs are). Which parts show is the runtime's layer order
-    (far leg < far shoe < body < near leg < near shoe), not a mask baked in here."""
-    from sprite_gen.frames import pixel_grid as grid
+def _torso_mask(body, stand, grow=2):
+    """The skeleton's torso shape (the guide's), a little grown: the body there is torso even where an arm
+    hid it on the base."""
+    image = Image.new("L", (CANVAS, CANVAS))
+    top, bottom = body["torso"]["top"] + grow*2, body["torso"]["bottom"] + grow*2
+    (sx, sy), (hx, hy) = stand["shoulder"], stand["hip"]
+    ImageDraw.Draw(image).polygon([(sx - top/2, sy - 3), (sx + top/2, sy - 3), (hx + bottom/2, hy + 2),
+                                   (hx - bottom/2, hy + 2)], fill=255)
+    return np.asarray(image) > 0
+
+
+def _far_from_near(pieces, base, body, stand):
+    """A far limb piece the base mostly hid (a sleeve behind the torso) rebuilt from its near twin: turned
+    from the near bone onto the far one and shaded as the body's far limbs are."""
+    bones = _bones(stand)
+    rgba = np.asarray(base)
+    owner = _owners(rgba, body, stand)
+    luma = rgba[..., :3].astype(float) @ np.array([0.299, 0.587, 0.114])
+    near_px, far_px = np.isin(owner.astype(str), ["near_thigh", "near_shin"]), np.isin(owner.astype(str), ["far_thigh", "far_shin"])
+    shade = float(luma[far_px].mean() / luma[near_px].mean()) if near_px.any() and far_px.any() else 0.8
+    rebuilt = []
+    for near in [n for n in pieces if n.startswith("near_")]:
+        far = "far_" + near[len("near_"):]
+        count = lambda n: int((pieces[n][..., 3] > 0).sum()) if n in pieces else 0  # noqa: E731
+        if count(near) < 20 or count(far) >= 0.6*count(near):
+            continue
+        (a, b, _), (a2, b2, _) = bones[near], bones[far]
+        moved = _warp(_upsampled(pieces[near]), _angle(a2, b2) - _angle(a, b), np.array(a, float), np.array(a2, float))
+        moved[..., :3] = np.clip(moved[..., :3]*shade, 0, 255).astype(np.uint8)
+        pieces[far] = moved
+        rebuilt.append(far)
+    return rebuilt
+
+
+def _rim(part, base, core, n):
+    """A head-covering part grown up to `n` pixels over the bare head next to it: models draw held hair a
+    pixel or two inside the skull, and a bald ring shows. New pixels on the head's outline take the part's
+    darkest color."""
+    part = part.copy()
+    alpha = part[..., 3] > 0
+    drawn = alpha.copy()
+    body = np.asarray(base)[..., 3] > 0
+    for _ in range(n):
+        grow = _dilate(alpha, 1) & core & body & ~alpha
+        for y, x in zip(*np.nonzero(grow)):
+            for dy, dx in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+                if 0 <= y + dy < CANVAS and 0 <= x + dx < CANVAS and alpha[y + dy, x + dx]:
+                    part[y, x] = part[y + dy, x + dx]
+                    break
+        alpha |= grow
+    colors = part[alpha][:, :3].astype(int)
+    dark = colors[(colors @ np.array([299, 587, 114])).argmin()]
+    outline = body & _dilate(~body, 1) & alpha & ~drawn  # grown over the head's own outline
+    part[outline, :3] = dark
+    return part
+
+
+def design_part(out, slot_name, design):
+    """The one model call per design: the part alone, drawn over a close-up of the base, reduced to native
+    pixels with its own palette and registered onto the base."""
+    slot = SLOTS[slot_name]
+    info = json.loads((out / "body.json").read_text())
+    body, stand = info["body"], info["pose"]
+    folder = out / "parts" / slot_name / design
+    folder.mkdir(parents=True, exist_ok=True)
+    base = Image.open(out / "base.png").convert("RGBA")
+    base_owner = _owners(base, body, stand)
+    target = _target(slot, base_owner, stand)
+    ys, xs = np.nonzero(target)
+    m = slot["margin"]
+    crop = (max(int(xs.min()) - m, 0), max(int(ys.min()) - m, 0), min(int(xs.max()) + m + 1, CANVAS),
+            min(int(ys.max()) + m + 1, CANVAS))
+    scale = int(np.clip(768 // max(crop[2] - crop[0], crop[3] - crop[1]), 4, 16))
+    core = _target(dict(slot, bones=slot["core"], zone=slot.get("core_zone", slot.get("zone"))), base_owner, stand)
+    prompt = PART_PROMPT.format(view=slot["view"], what=slot["what"], desc=slot["designs"][design], fit=slot["fit"],
+                                style=STYLE.format(px=scale))
+    rounds = []
+    for k in range(3):  # a first drawing, then up to two redraws over the outlined core
+        name = "sheet" if k == 0 else f"sheet-{k + 1}"
+        if k == 0:
+            image = base
+        else:
+            edge = _dilate(core, 1) & ~core
+            guide = np.asarray(base).copy()
+            guide[edge] = (*CYAN, 255)
+            image = Image.fromarray(guide)
+            prompt += REDO_NOTE.format(why=rounds[-1]["why"], what=slot["what"])
+        sheet, origins = _sheet([image], scale, 1, crop=crop, gutter=0)
+        sheet.save(folder / f"{name}.png")
+        drawn = _draw(prompt, folder, folder / f"{name}.png", [], "drawn" if k == 0 else f"drawn-{k + 1}")
+        part, palette = _clean_native(drawn, folder / f"{name}.png", origins[0], scale, crop=crop, colors=16)
+        part = np.asarray(part).copy()
+        for c in _components(part[..., 3] > 0):
+            if c.sum() < 4:  # specks
+                part[c] = 0
+        part, shift = _register(part, target, np.asarray(base)[..., 3] > 0)
+        covered = float(((part[..., 3] > 0) & core).sum() / max(core.sum(), 1))
+        why = "too small, away from the body" if covered < 0.8 else ""
+        rounds.append({"round": k + 1, "core": round(covered, 2), "why": why})
+        if not why:
+            break
+    if slot.get("rim"):
+        part = _rim(part, base, core, slot["rim"])
+    pieces = cut_puppet(part, body, stand, slot["bones"], slot.get("whole", False))
+    if slot.get("fill") and "upper" in pieces:
+        pieces["upper"] = _fill_rows(pieces["upper"], slot, body, stand, base)
+    rebuilt = _far_from_near(pieces, base, body, stand)
+    alpha = part[..., 3] > 0
+    body_alpha = np.asarray(base)[..., 3] > 0
+    report = {"slot": slot_name, "design": design, "shift": list(shift), "rounds": rounds, "far_from_near": rebuilt,
+              "covers": round(float((alpha & target).sum() / max(target.sum(), 1)), 2),
+              "off_body": round(float((alpha & ~_dilate(body_alpha, 3)).sum() / max(alpha.sum(), 1)), 2),
+              "pieces": {n: int((p[..., 3] > 0).sum()) for n, p in pieces.items()}}
+    if slot.get("whole"):  # a shoe against its bare foot
+        report["length"] = {n: round(float(np.ptp(np.nonzero(p[..., 3].any(0))[0]) + 1) /
+                                     max(float(np.ptp(np.nonzero((base_owner == n).any(0))[0]) + 1), 1), 2)
+                            for n, p in pieces.items()}
+    Image.fromarray(part).save(folder / "design.png")
+    for n, p in pieces.items():
+        Image.fromarray(p).save(folder / f"piece-{n}.png")
+    (folder / "design.json").write_text(json.dumps(dict(report, palette=palette.tolist()), indent=1))
+    return report
+
+
+def _fit(canvas, owner, frame, body, stand, pose, reach=2):
+    """Each posed bone piece moved by up to `reach` whole pixels onto that bone in the frame as drawn: the
+    model's mended body sits a pixel or two off the skeleton, and a garment that follows only the skeleton
+    leaves skin showing at its edges."""
+    drawn = _owners(frame, body, pose)
+    figure = frame[..., 3] > 0
+    depth = {n: v[2] for n, v in _bones(stand).items()} | {"upper": 1.5}
+    out = np.zeros_like(canvas)
+    out_owner = np.full(owner.shape, "", dtype=object)
+    for bone in sorted(set(owner[owner != ""].tolist()), key=depth.get):
+        mine = owner == bone
+        target = drawn == bone
+        def score(d):
+            m = np.roll(np.roll(mine, d[1], 0), d[0], 1)
+            return int((m & target).sum()) - 0.5*int((m & ~figure).sum()), -abs(d[0]) - abs(d[1])
+        dx, dy = max(((dx, dy) for dy in range(-reach, reach + 1) for dx in range(-reach, reach + 1)), key=score) \
+            if target.any() and bone != "upper" else (0, 0)  # the upper body is the base's own, already exact
+        layer = np.roll(np.roll(np.where(mine[..., None], canvas, 0), dy, 0), dx, 1)
+        put = layer[..., 3] > 0
+        out[put], out_owner[put] = layer[put], bone
+    return out, out_owner
+
+
+def stage_part(base_dir, slot_name, design):
+    """A part on every frame: designed once, its bone pieces posed as the body's are, split by body node."""
     out = _out(base_dir)
-    shoe_dir = design_shoe(out, design)
-    shoe = Image.open(shoe_dir / "base-shoe.png").convert("RGBA")
-    meta = json.loads((shoe_dir / "base-shoe.json").read_text())
-    dark = min(meta["palette"], key=lambda c: 299*c[0] + 587*c[1] + 114*c[2])
-    src = _sole(shoe, meta["heel"], meta["toe"])
-    shade = _far_shade(out)
-    ground = json.loads((out / "body.json").read_text())["body"]["ground"]
-    folder = out / cycle_name
-    work = folder / design
-    work.mkdir(exist_ok=True)
-    report = []
-    for t, pose in enumerate(json.loads((folder / "skeleton.json").read_text())["poses"]):
-        both = Image.new("RGBA", (CANVAS, CANVAS))
-        for side in ("far", "near"):
-            heel, toe = _planted(pose["legs"][side], ground)
-            placed = _grounded(_place(shoe, *src, heel, toe), ground)
-            placed = np.asarray(grid.silhouette_outline(Image.fromarray(placed), [int(v) for v in dark])).copy()
-            if side == "far":
-                placed = _shaded(placed, shade)
-            image = Image.fromarray(placed)
-            image.save(work / f"shoes-{t}-{side}.png")
-            both.alpha_composite(image)
-        both.save(work / f"shoes-{t}.png")
-        report.append({"frame": t, "feet": {s: {"heel": pose["legs"][s]["heel"], "toe": pose["legs"][s]["toe"]}
-                                             for s in ("far", "near")}})
-    (work / "report.json").write_text(json.dumps(report, indent=1))
-    return len(report)
+    slot = SLOTS[slot_name]
+    info = json.loads((out / "body.json").read_text())
+    body, stand = info["body"], info["pose"]
+    folder = out / "parts" / slot_name / design
+    report = design_part(out, slot_name, design) if not (folder / "design.json").exists() else \
+        {k: v for k, v in json.loads((folder / "design.json").read_text()).items() if k != "palette"}
+    pieces = {p.stem[len("piece-"):]: np.asarray(Image.open(p).convert("RGBA")) for p in folder.glob("piece-*.png")}
+    ground = body["ground"] if slot.get("whole") else None
+    frames = {}
+    for cycle_name in CYCLES:
+        path = out / cycle_name / "skeleton.json"
+        if not path.exists():
+            continue
+        work = out / cycle_name / slot_name / design
+        work.mkdir(parents=True, exist_ok=True)
+        for t, pose in enumerate(json.loads(path.read_text())["poses"]):
+            canvas, owner = pose_pieces(pieces, body, stand, pose, ground)
+            frame = np.asarray(Image.open(out / cycle_name / f"frame-{t}.png").convert("RGBA"))
+            canvas, owner = _fit(canvas, owner, frame, body, stand, pose)
+            canvas[body["ground"] + 1:], owner[body["ground"] + 1:] = 0, ""
+            Image.fromarray(canvas).save(work / f"{t}.png")
+            for node in sorted(set(slot["nodes"].values())):
+                mask = np.isin(owner.astype(str), [b for b in pieces if _slot_node(slot, b) == node])
+                Image.fromarray(np.where(mask[..., None], canvas, 0).astype(np.uint8)).save(work / f"{t}-{node}.png")
+        frames[cycle_name] = t + 1
+    return dict(report, frames=frames)
+
+
+def stage_dress(base_dir, looks=None):
+    """Every frame dressed in each look (body frame under its parts, back to front by node), one sheet."""
+    import sd_avatar_process as avatar
+    out = _out(base_dir)
+    looks = looks or _looks(out)
+    rows = []
+    for cycle_name in CYCLES:
+        path = out / cycle_name / "skeleton.json"
+        if not path.exists():
+            continue
+        n = len(json.loads(path.read_text())["poses"])
+        for t in range(n):
+            row = []
+            for look in looks.values():
+                frame = np.asarray(Image.open(out / cycle_name / f"frame-{t}.png").convert("RGBA")).copy()
+                layers = []
+                for slot_name, design in look.items():
+                    for node in set(SLOTS[slot_name]["nodes"].values()):
+                        file = out / cycle_name / slot_name / design / f"{t}-{node}.png"
+                        if file.exists():
+                            layers.append((avatar.LAYERS.index(node), np.asarray(Image.open(file).convert("RGBA"))))
+                        if SLOTS[slot_name].get("replaces"):
+                            owner = _owners(frame, json.loads((out / "body.json").read_text())["body"],
+                                            json.loads(path.read_text())["poses"][t])
+                            frame[np.isin(owner.astype(str), ["near_foot", "far_foot"])] = 0
+                canvas = frame
+                for _, layer in sorted(layers, key=lambda l: l[0]):
+                    canvas = np.where(layer[..., 3:4] > 0, layer, canvas)
+                row.append(Image.fromarray(canvas.astype(np.uint8)))
+            rows.append(row)
+    crop, scale = (24, 4, 104, 124), 3
+    w, h = (crop[2]-crop[0])*scale, (crop[3]-crop[1])*scale
+    sheet = Image.new("RGBA", (w*len(rows), h*len(looks)), (236, 236, 236, 255))
+    for c, row in enumerate(rows):
+        for r, image in enumerate(row):
+            sheet.alpha_composite(image.crop(crop).resize((w, h), Image.Resampling.NEAREST), (c*w, r*h))
+    sheet.save(out / "dressed.png")
+    return {"looks": list(looks), "frames": len(rows), "sheet": str(out / "dressed.png")}
+
+
+def _looks(out):
+    """bare, then one outfit per design index (the first design of every slot, the second, ...)."""
+    made = {s: [d for d in slot["designs"] if (out / "parts" / s / d / "design.json").exists()] for s, slot in SLOTS.items()}
+    looks = {"bare": {}}
+    for k in range(max((len(v) for v in made.values()), default=0)):
+        looks[f"look{k + 1}"] = {s: v[k] for s, v in made.items() if len(v) > k}
+    return looks
 
 
 # --- body segments: which piece each pixel is, from the skeleton -------------------------------------------
@@ -838,8 +1139,8 @@ def stage_library(base_dir, prefix):
 
 
 def stage_packs(base_dir, prefix):
-    """Each shoe design as a part (a near and a far piece,
-    one full-canvas drawing per sample, moved as the motion build moved its clip); then an appearance."""
+    """Each part design as a pack: one piece per body node of its slot, one full-canvas drawing per sample,
+    moved as the motion build moved its clip."""
     from sprite_gen.frames import parts_import
     from sprite_gen.spec import parts_assets as assets, parts_workspace as workspace
     out = _out(base_dir)
@@ -847,41 +1148,44 @@ def stage_packs(base_dir, prefix):
     mapping = json.loads((out / "library-map.json").read_text())
     index, registry = workspace.read_workspace(assembly)
     motion = registry[index["motion"]["id"]]
+    rig = registry[index["rig"]["id"]]
     made = {}
-    for design in DESIGNS:
-        src = out / "packs" / design
-        src.mkdir(parents=True, exist_ok=True)
-        pieces = {side: {} for side in ("near", "far")}
-        complete = True
-        for clip in motion["clips"]:
-            state = clip["state"]
-            dx, dy = mapping["shifts"][state]
-            for k, sample in enumerate(clip["samples"]):
-                t = mapping["starts"][state][k]
-                for side, node in (("far", "foot_back"), ("near", "foot_front")):
-                    file = out / state / design / f"shoes-{t}-{side}.png"
-                    if not file.exists():
-                        complete = False
-                        continue
-                    image = np.roll(np.roll(np.asarray(Image.open(file).convert("RGBA")), dy, 0), dx, 1)
-                    name = f"{state}-{t}-{side}.png"
-                    Image.fromarray(image).save(src / name)
-                    ref = {"file": name, "sha256": assets.sha256((src / name).read_bytes())}
-                    pieces[side].setdefault(clip["id"], {})[sample["id"]] = {
-                        "image": ref, "format": "full-canvas", "pivot": [0, 0], "target_socket": "root",
-                        "visible": bool((image[..., 3] > 0).any())}
-        if not complete:
-            continue
-        rig = registry[index["rig"]["id"]]
-        part_id = f"{prefix}.shoes.{design}"
-        spec = {"kind": "parts-pack-import", "schema_version": 1, "id": part_id, "design_id": f"{prefix}.{design}",
-                "role": "part", "body_mode": "segmented", "style": rig["style"], "rig": index["rig"], "motion": index["motion"],
-                "view": rig["view"], "binding_id": f"{part_id}.binding", "occupies": ["footwear"],
-                "pieces": [{"id": f"shoe_{side}", "slot": "footwear", "node": node, "mode": "raster",
-                            "provides": [node], "replaces": [node], "sample_map": pieces[side]} for side, node in (("far", "foot_back"), ("near", "foot_front"))]}
-        (src / "import.json").write_text(json.dumps(spec, indent=1))
-        parts_import.import_pack(assembly, src / "import.json", src)
-        made[design] = part_id
+    import sd_avatar_process as avatar
+    for slot_name, slot in SLOTS.items():
+        nodes = sorted(set(slot["nodes"].values()))
+        socket = avatar.SLOTS[slot_name][3][0]  # the slot's socket; a full-canvas drawing's pivot is where it is
+        for design in slot["designs"]:
+            part_id = f"{prefix}.{slot_name}.{design}"
+            if part_id in registry or not (out / "parts" / slot_name / design / "design.json").exists():
+                continue
+            src = out / "packs" / slot_name / design
+            src.mkdir(parents=True, exist_ok=True)
+            pieces = {node: {} for node in nodes}
+            for clip in motion["clips"]:
+                state = clip["state"]
+                dx, dy = mapping["shifts"][state]
+                for k, sample in enumerate(clip["samples"]):
+                    t = mapping["starts"][state][k]
+                    for node in nodes:
+                        file = out / state / slot_name / design / f"{t}-{node}.png"
+                        image = np.roll(np.roll(np.asarray(Image.open(file).convert("RGBA")), dy, 0), dx, 1)
+                        name = f"{state}-{t}-{node}.png"
+                        Image.fromarray(image).save(src / name)
+                        ref = {"file": name, "sha256": assets.sha256((src / name).read_bytes())}
+                        pieces[node].setdefault(clip["id"], {})[sample["id"]] = {
+                            "image": ref, "format": "full-canvas", "pivot": sample["sockets"][socket]["position"],
+                            "target_socket": socket, "visible": bool((image[..., 3] > 0).any())}
+            replaces = slot.get("replaces", False)
+            spec = {"kind": "parts-pack-import", "schema_version": 1, "id": part_id, "design_id": f"{prefix}.{design}",
+                    "role": "part", "body_mode": "segmented", "style": rig["style"], "rig": index["rig"],
+                    "motion": index["motion"], "view": rig["view"], "binding_id": f"{part_id}.binding",
+                    "occupies": [slot_name],
+                    "pieces": [{"id": f"{slot_name}_{node}", "slot": slot_name, "node": node, "mode": "raster",
+                                **({"provides": [node], "replaces": [node]} if replaces else {}),
+                                "sample_map": pieces[node]} for node in nodes]}
+            (src / "import.json").write_text(json.dumps(spec, indent=1))
+            parts_import.import_pack(assembly, src / "import.json", src)
+            made[part_id] = len(nodes)
     return made
 
 
@@ -895,7 +1199,8 @@ def stage_play(base_dir, prefix):
     assembly = (out / "library/assembly.json").absolute()
     index, registry = workspace.read_workspace(assembly)
     catalog = registry[index["catalog"]["id"]]
-    looks = {"bare": {}} | {d: {"footwear": f"{prefix}.shoes.{d}"} for d in DESIGNS if f"{prefix}.shoes.{d}" in registry}
+    looks = {name: {s: f"{prefix}.{s}.{d}" for s, d in look.items() if f"{prefix}.{s}.{d}" in registry}
+             for name, look in _looks(out).items()}
     selection = out / "packs/selection.json"
     selection.write_text(json.dumps({"kind": "parts-appearance-selection", "schema_version": 1, "id": f"{prefix}.look",
                                      "selections": {s["id"]: None for s in catalog["slots"]}}))
@@ -932,11 +1237,12 @@ def stage_play(base_dir, prefix):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--base", required=True, type=Path, help="the character's folder")
-    parser.add_argument("stage", choices=("base", "calibrate", "frames", "puppet", "shoes", "library", "segments", "packs", "play"))
+    parser.add_argument("stage", choices=("base", "calibrate", "frames", "puppet", "part", "dress", "library", "segments", "packs", "play"))
     parser.add_argument("--prefix", default="sd.rig.slim")
     parser.add_argument("--body", default="slim", choices=tuple(BODIES))
     parser.add_argument("--cycle", default="walk", choices=tuple(CYCLES))
-    parser.add_argument("--design", default="sneakers", choices=tuple(DESIGNS))
+    parser.add_argument("--slot", default="footwear", choices=tuple(SLOTS))
+    parser.add_argument("--design", help="one of the slot's designs (default: every one)")
     args = parser.parse_args()
     if args.stage == "base":
         result = stage_base(args.base, args.body)
@@ -946,8 +1252,10 @@ if __name__ == "__main__":
         result = stage_puppet(args.base, args.cycle)
     elif args.stage == "calibrate":
         result = stage_calibrate(args.base)
-    elif args.stage == "shoes":
-        result = stage_shoes(args.base, args.cycle, args.design)
+    elif args.stage == "part":
+        result = [stage_part(args.base, args.slot, d) for d in ([args.design] if args.design else SLOTS[args.slot]["designs"])]
+    elif args.stage == "dress":
+        result = stage_dress(args.base)
     elif args.stage == "library":
         result = stage_library(args.base, args.prefix)
     elif args.stage == "segments":
