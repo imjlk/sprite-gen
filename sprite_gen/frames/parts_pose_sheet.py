@@ -534,6 +534,54 @@ def lone_outline(part, under, *, luma=60):
     return Image.fromarray(pixels)
 
 
+_STEPS = ((-1, 0), (1, 0), (0, -1), (0, 1))
+
+
+def _shifted(array, dy, dx, fill=0):
+    """array[y+dy, x+dx] at every (y, x), `fill` off the edge."""
+    out = np.full_like(array, fill)
+    h, w = array.shape[:2]
+    out[max(0, -dy):h-max(0, dy), max(0, -dx):w-max(0, dx)] = array[max(0, dy):h-max(0, -dy), max(0, dx):w-max(0, -dx)]
+    return out
+
+
+def cover_rim(part, drawn, under, rounds, *, luma=60):
+    """Grow the part over body the drawing left as background right beside it, `rounds` px.
+
+    A model often draws hair or a hat a pixel or two inside the head it was given, and the
+    bald skull then shows around it as a ring. The part grows outward with its own outline;
+    the old outline, now inside, takes the color just inside it.
+    """
+    pixels = np.asarray(part).copy()
+    alpha = pixels[..., 3] > 0
+    exposed = (np.asarray(under)[..., 3] > 0) & (np.asarray(drawn)[..., 3] == 0)
+    added = np.zeros_like(alpha)
+    for _ in range(rounds):
+        grow = exposed & ~alpha
+        grown = np.zeros_like(alpha)
+        for dy, dx in _STEPS:
+            take = grow & ~grown & _shifted(alpha, dy, dx, False)
+            pixels[take] = _shifted(pixels, dy, dx)[take]
+            grown |= take
+        if not grown.any():
+            break
+        alpha |= grown
+        added |= grown
+    dark = alpha & (pixels[..., :3].astype(np.int32) @ np.array([299, 587, 114]) < luma*1000)
+    inside = alpha.copy()
+    for dy, dx in _STEPS:
+        inside &= _shifted(alpha, dy, dx, False)
+    stale = dark & inside & ~added
+    stale &= np.any([_shifted(added, dy, dx, False) for dy, dx in _STEPS], axis=0)
+    fill = alpha & ~dark & ~added
+    done = np.zeros_like(alpha)
+    for dy, dx in _STEPS:
+        take = stale & ~done & _shifted(fill, dy, dx, False)
+        pixels[take] = _shifted(pixels, dy, dx)[take]
+        done |= take
+    return Image.fromarray(pixels)
+
+
 def under_colors(under, *, luma=60):
     """The colors of what was under the part, outline colors left out (part and body share them)."""
     pixels = np.asarray(under)
@@ -577,7 +625,7 @@ def misaligned(alignment, coverage=None):
 
 
 def cut_cell(drawn, body, *, method="difference", body_threshold=None, near_body=None, min_island=0, outline=False,
-             fill_holes=0, close_body=0, colors=None, cover_threshold=24, keep_palette=None, prune=0):
+             fill_holes=0, close_body=0, colors=None, cover_threshold=24, keep_palette=None, prune=0, rim=0):
     """One drawn cell to the part alone, on the cell's own crop of the canvas.
 
     `difference` removes what still matches the body (garments drawn over a dressed sheet);
@@ -612,6 +660,8 @@ def cut_cell(drawn, body, *, method="difference", body_threshold=None, near_body
             part = keep_outline(Image.fromarray(np.where(mask[..., None], np.asarray(drawn), 0).astype(np.uint8)), drawn, luma=60)
     if prune:
         part = prune_spurs(part, prune)
+    if rim:
+        part = cover_rim(part, drawn, body, rim)
     holes = 0
     if fill_holes:
         part, holes = pixel_grid.fill_small_holes(part, fill_holes)

@@ -57,10 +57,11 @@ _CUT = contract._record({"method": contract._enum(*sheets.METHODS), "body_thresh
                          "min_island": contract._integer, "outline": contract._boolean, "fill_holes": contract._integer,
                          "close_body": contract._integer, "region": contract._nullable(contract._rectangle),
                          "palette": contract._nullable(contract._relative_file),
-                         "keep_palette": contract._nullable(contract._integer), "prune": contract._integer},
+                         "keep_palette": contract._nullable(contract._integer), "prune": contract._integer,
+                         "rim": contract._integer},
                         {"method": "difference", "body_threshold": 40, "tolerance": 80, "near_body": 2, "min_island": 12,
                          "outline": True, "fill_holes": 6, "close_body": 5, "region": None, "palette": None,
-                         "keep_palette": None, "prune": 0})
+                         "keep_palette": None, "prune": 0, "rim": 0})
 _PIECE = contract._record({"id": contract._id, "node": contract._id, "segments": contract._list(contract._string, nonempty=True)})
 _PROMPT = contract._record({"text": contract._string, "refs": contract._list(contract._relative_file)}, {"refs": []})
 _DRAW = contract._record({"provider": contract._id, "model": contract._nullable(contract._string)},
@@ -167,6 +168,24 @@ def _redo(row):
     """Missing, rejected, or failing a check with an error nobody approved anyway."""
     return (row.get("selected") is None or row.get("decision") == "rejected"
             or ((row.get("check") or {}).get("status") == "error" and row.get("decision") != "approved"))
+
+
+def _redo_notes(production, rows, wanted, order):
+    """What went wrong with the drawings being replaced, for the model to avoid this time."""
+    looked = order if production["config"]["mode"] == "held" else wanted  # a held drawing is judged on every pose
+    notes, misaligned = [], False
+    for pose in looked:
+        row = rows["poses"].get(pose, {})
+        if row.get("decision") == "rejected" and row.get("note") and row["note"] not in notes:
+            notes.append(row["note"])
+        misaligned |= pose in wanted and any(f.startswith("alignment") for f in (row.get("check") or {}).get("findings", []))
+    text = ""
+    if misaligned:
+        text += (" The previous drawing moved, resized or left out the figure: draw the whole figure exactly where it is"
+                 " and exactly as big as it is in image 1.")
+    if notes:
+        text += " The previous drawing was sent back at review: " + "; ".join(notes) + ". Fix that this time."
+    return text
 
 
 def _todo(production, track, order):
@@ -279,7 +298,8 @@ def sheet(assembly, part, *, poses=None, track=None):
         # production draws the dressed figure and cuts the part out of it (alignment needs the body).
         prompt.write_text(settings["prompt"]["text"] + f" Keep this {made['size'][0]}x{made['size'][1]} image and its grid "
                           "exactly, with the whole figure (head, body, limbs and feet) still drawn in every cell. "
-                          "Keep every figure exactly in its own cell: do not move, mirror, resize, rearrange or re-space figures.")
+                          "Keep every figure exactly in its own cell: do not move, mirror, resize, rearrange or re-space figures."
+                          + _redo_notes(production, rows, wanted, order))
     pages = [{"guide": Path(p["guide"]).relative_to(root).as_posix(), "sheet": Path(p["sheet"]).relative_to(root).as_posix(),
               "art": (Path(p["sheet"]).parent / "drawn.png").relative_to(root).as_posix()} for p in made["pages"]]
     entry = {"id": batch, "motion": index["motion"], "poses": wanted, "pages": pages,
@@ -413,7 +433,7 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
                                               body_threshold=cut["body_threshold"], near_body=cut["near_body"],
                                               min_island=cut["min_island"], outline=cut["outline"],
                                               fill_holes=cut["fill_holes"], close_body=cut["close_body"], colors=colors,
-                                              keep_palette=cut["keep_palette"], prune=cut["prune"])
+                                              keep_palette=cut["keep_palette"], prune=cut["prune"], rim=cut["rim"])
                 full = Image.new("RGBA", canvas)
                 full.alpha_composite(piece, tuple(crop[:2]))
                 if cut["region"] is not None:

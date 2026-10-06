@@ -78,6 +78,7 @@ def test_a_rejected_pose_is_the_only_one_drawn_again(tmp_path):
     assert reviewed["status"] == "rejected" and reviewed["rejected"] == ["walk.02"]
     redo = production.sheet(assembly, "test.badge")
     assert redo["poses"] == ["walk.02"] and not (assembly.parent / redo["pages"][0]["art"]).exists()
+    assert "sent back at review: badge too low." in (assembly.parent / redo["prompt"]).read_text()
     draw_batch(assembly, redo)
     production.slice_batch(assembly, "test.badge")
     state = json.loads((assembly.parent / "productions/test.badge/production.json").read_text())

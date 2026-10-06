@@ -322,3 +322,16 @@ def test_a_big_part_on_a_figure_that_sits_right_is_not_misaligned():
     assert big[0] < sheets.MIN_ALIGNMENT and not sheets.misaligned(*big)
     assert sheets.misaligned(*sheets.overlap(alone, body))
     assert sheets.misaligned(0.6) and sheets.misaligned(0.45, 0.99)
+
+
+def test_cover_rim_hides_the_skull_a_part_was_drawn_inside_of():
+    body = Image.new("RGBA", (24, 24))
+    ImageDraw.Draw(body).ellipse((4, 4, 19, 19), fill=(230, 180, 150, 255), outline=(40, 20, 20, 255))
+    drawn = Image.new("RGBA", (24, 24))  # the hair drawn 2 px inside the head
+    ImageDraw.Draw(drawn).ellipse((6, 6, 17, 17), fill=(90, 60, 50, 255), outline=(40, 20, 20, 255))
+    hair = np.array([[90, 60, 50], [40, 20, 20]])
+    tight, _ = sheets.cut_cell(drawn, body, method="covering", colors=hair, keep_palette=24)
+    covered, _ = sheets.cut_cell(drawn, body, method="covering", colors=hair, keep_palette=24, rim=3)
+    assert tight.getpixel((11, 4))[3] == 0 and covered.getpixel((11, 4))[3] > 0
+    assert covered.getpixel((11, 4))[:3] == (40, 20, 20)  # the outline moved out
+    assert covered.getpixel((11, 6))[:3] == (90, 60, 50)  # the old outline is filled

@@ -214,6 +214,8 @@ def stage_init(base):
                                     "near_body": None, "close_body": 0, "fill_holes": 0, "keep_palette": 48, "prune": 2},
                             "prompt": {"text": HELD_PROMPT.format(what=WHAT[slot], fit=FIT[slot]) + style.format(px=4),
                                        "refs": [f"inputs/design/{reference}"]}}
+            if slot != "expression":
+                config_value["cut"]["rim"] = 3  # hair and hats drawn a little inside the skull
             if slot == "hair":
                 config_value["cover_rule"] = {"tag": "headwear", "show": "uncovered"}
                 if "headwear" in character["designs"]:
@@ -315,7 +317,15 @@ def stage_recut(base, only=None):
         tracks = json.loads((root / "productions" / part / "production.json").read_text())["tracks"]
         for track in tracks:
             track = None if track == production.MAIN else track
-            sliced = production.slice_batch(assembly, part, track=track)
+            try:
+                sliced = production.slice_batch(assembly, part, track=track)
+            except contract.PartsContractError as exc:
+                if "has changed since" not in str(exc):
+                    raise
+                # Drawn over a worn part that is cut differently now: the check queues a redraw.
+                report.append({"part": part, "track": track, "status": "stale; produce redraws it",
+                               "summary": production.check(assembly, part, track=track)["summary"]})
+                continue
             report.append({"part": part, "track": track, "candidates": len(sliced["candidates"]),
                            "summary": production.check(assembly, part, track=track)["summary"]})
         production.build(assembly, part)
