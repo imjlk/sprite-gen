@@ -52,6 +52,10 @@ FIT = {"hair": " The hair covers the whole top and back of the skull, so no bald
                    " no bald scalp shows; the brim sits above the eyebrow so the eye stays fully visible."}
 
 
+CAPPED_KEEP = (" Below the brim the hairstyle keeps its own length and shape from image 2: a ponytail, braid or long"
+               " hair still hangs down the back exactly as long as without the cap.")
+
+
 def config(base):
     return json.loads((base / "character.json").read_text())
 
@@ -261,7 +265,7 @@ def stage_init(base):
                 if "headwear" in character["designs"]:
                     config_value["variants"] = [{"id": "capped", "cover_rule": {"tag": "headwear", "show": "covered"},
                                                  "wearing": [w for w in (face, rebuild.PART_ID[character["designs"]["headwear"]]) if w],
-                                                 "prompt": {"text": avatar.CAPPED_PROMPT,
+                                                 "prompt": {"text": avatar.CAPPED_PROMPT + CAPPED_KEEP,
                                                             "refs": [f"inputs/design/{reference}"]}}]
             if slot == "headwear":
                 config_value["covers"] = ["headwear"]
