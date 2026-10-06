@@ -62,6 +62,9 @@ SPLITS = {
     "footwear": [("shoe_back", "foot_back", ["*"]), ("shoe_front", "foot_front", ["leg_front", "arm_front"])],
     "gloves": [("glove_back", "hand_back", ["*"]), ("glove_front", "hand_front", ["arm_front", "leg_front"])],
 }
+# How far drawn pixels may stand off the body before they count as fringe. A hood and a loose
+# hoodie stand several pixels off the back; at 2 px their outer edge was cut away.
+NEAR_BODY = {"upper.c": 6}
 WHOLE = {"gloves", "footwear"}  # separate objects: each stroke goes whole to one piece
 GARMENTS = ["upper.a", "upper.b", "lower.a", "lower.b", "footwear.a", "footwear.b", "gloves"]
 LABEL_PROMPT = """Edit image 1. Image 1 is a pixel-art pose sheet: copies of one bald chibi character in pure side view facing right, in different idle, walking and running poses, each in its own grid cell on a flat pure magenta #FF00FF background.
@@ -664,7 +667,7 @@ def stage_new_slice(base, only=None):
         palette = base / "design" / f"{name}.palette.json"
         sliced = sheets.slice_sheet(assembly, None, None, base / "sliced" / name, pages=pages, part_id=rebuild.PART_ID[name],
             slot=slot, node=SLOTS[slot][2][0], socket=socket, piece=slot, body_threshold=threshold,
-            min_island=6 if feet else 12, outline=True, near_body=2, region=region, tolerance=80, palette=palette,
+            min_island=6 if feet else 12, outline=True, near_body=NEAR_BODY.get(name, 2), region=region, tolerance=80, palette=palette,
             fill_holes=6, close_body=5, by_pose=True)
         split = parts_segments.split_piece(Path(sliced["spec"]), base / "body/segments.json", base / "split" / name,
                                            piece=slot, into=SPLITS[slot], by_component=slot in WHOLE)
