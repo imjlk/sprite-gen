@@ -104,6 +104,18 @@ def test_a_pose_failing_a_check_is_drawn_again_unless_someone_approved_it():
     assert production._todo(held, None, list(rows)) == ["walk.01"]
 
 
+def test_an_excluded_zone_is_left_empty_in_every_candidate(tmp_path):
+    assembly = setup(tmp_path)
+    value = json.loads((tmp_path / "badge.json").read_text())
+    value["cut"]["exclude"] = [[0, 0, 128, 128]]
+    (tmp_path / "v2.json").write_text(json.dumps(value))
+    production.configure(assembly, "test.badge", tmp_path / "v2.json")
+    draw_batch(assembly, production.sheet(assembly, "test.badge"))
+    sliced = production.slice_batch(assembly, "test.badge")
+    record = json.loads((assembly.parent / sliced["candidates"][0]["candidate"] / "candidate.json").read_text())
+    assert record["pixels"] == 0
+
+
 def test_an_explicit_mask_and_adopting_a_pack(tmp_path):
     assembly = setup(tmp_path)
     draw_batch(assembly, production.sheet(assembly, "test.badge"))
@@ -231,12 +243,17 @@ def test_a_held_part_with_a_covered_variant_is_drawn_once_per_track(tmp_path):
     pieces = {p["id"]: p for p in registry["test.hair"]["bindings"][0]["pieces"]}
     assert set(pieces) == {"hair", "capped"} and pieces["capped"]["cover_rule"]["show"] == "covered"
     assert all(p["mode"] == "held" for p in pieces.values())
+    hat["design_id"] = "hat.renamed"  # a new hat pack version that draws the same pixels
+    (tmp_path / "hat.json").write_text(json.dumps(hat))
+    parts_import.import_pack(assembly, tmp_path / "hat.json", source)
+    assert production.check(assembly, "test.hair", track="capped")["summary"]["capped"]["error"] == 0
     Image.new("RGBA", (8, 4), (60, 90, 140, 255)).save(source / "piece.png")  # the hat redrawn
     hat = json.loads(part_spec(tmp_path / "hat.json", assembly, source, slot="headwear", node="head", socket="head",
                                identity="test.hat", pivot=(4, 4)).read_text())
     hat["covers"] = ["headwear"]
     (tmp_path / "hat.json").write_text(json.dumps(hat))
     parts_import.import_pack(assembly, tmp_path / "hat.json", source)
+    production.slice_batch(assembly, "test.hair", track="capped")  # cut again over what the sheet showed
     checked = production.check(assembly, "test.hair", track="capped")
     assert checked["summary"]["capped"]["error"] == 2 and "test.hat as it was before" in checked["findings"]["capped:walk.01"][0]
     redo = production.sheet(assembly, "test.hair", track="capped")

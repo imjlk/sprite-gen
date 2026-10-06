@@ -180,9 +180,14 @@ def dressed_body(motion, index, topology, clip_id, sample, load, packs):
         return canvas
     ranks = parts_resolve.layer_ranks(topology)
     entries = []
-    for pack in packs:
-        binding = next(b for b in pack["bindings"] if b["motion"] == index["motion"] and b["rig"] == index["rig"])
+    bindings = [(pack, next(b for b in pack["bindings"] if b["motion"] == index["motion"] and b["rig"] == index["rig"]))
+                for pack in packs]
+    covered = {tag for _, binding in bindings for tag in binding.get("covers", [])}
+    for pack, binding in bindings:
         for piece in binding["pieces"]:
+            rule = piece.get("cover_rule")
+            if rule is not None and (rule["tag"] in covered) != (rule["show"] == "covered"):
+                continue  # as the resolver does: worn hair without a hat is the full hair, not its capped piece
             placement = piece["sample_map"].get(clip_id, {}).get(sample["id"])
             socket = None if placement is None else sample["sockets"].get(placement["target_socket"])
             if placement is None or not placement["visible"] or socket is None or not socket["visible"]:
@@ -431,19 +436,45 @@ def drawn_cells(pairs, index, clips, tolerance):
                                              size=(cell[0]//scale, cell[1]//scale)), sheet
 
 
-def _under(sheet, entry, sample, motion, index, registry, topology, load):
-    """The raster a cell was drawn over: the body, or the body wearing the guide's parts."""
+def _under(sheet, entry, sample, motion, index, registry, topology, load, *, sheet_image=None):
+    """The raster a cell was drawn over: the body, or the body wearing the guide's parts.
+
+    When the worn parts render differently now and the sheet image is given, the cell is
+    read back from it: what the model saw, not what the parts look like today.
+    """
     if not sheet.get("wearing"):
         return load(motion, sample["image"])
-    packs = []
-    for ref in sheet["wearing"]:
-        if registry.get(ref["id"], {}).get("digest") != ref["digest"]:
-            raise contract.PartsContractError(f"pose sheet was drawn over {ref['id']}, which has changed since")
-        packs.append(registry[ref["id"]])
-    dressed = dressed_body(motion, index, topology, entry["clip"], sample, load, packs)
-    if assets.sha256(assets.png_bytes(dressed)) != entry["under_sha256"]:
-        raise contract.PartsContractError(f"{entry['clip']}/{entry['sample']}: the worn parts render differently than when drawn")
+    dressed = worn_now(sheet["wearing"], entry["clip"], sample, motion, index, registry, topology, load)
+    if dressed is not None and sheet_image is not None and assets.sha256(assets.png_bytes(dressed)) != entry["under_sha256"]:
+        seen = sheet_cell(sheet, entry, sheet_image, dressed)
+        if assets.sha256(assets.png_bytes(seen)) == entry["under_sha256"]:
+            return seen
+    if dressed is None or assets.sha256(assets.png_bytes(dressed)) != entry["under_sha256"]:
+        # A worn pack may change without changing what it drew here (a hair gaining its capped
+        # piece); only a different render means the sheet was drawn over something else.
+        changed = [ref["id"] for ref in sheet["wearing"] if registry.get(ref["id"], {}).get("digest") != ref["digest"]]
+        raise contract.PartsContractError(f"{entry['clip']}/{entry['sample']}: pose sheet was drawn over "
+                                          f"{', '.join(changed) or 'worn parts'}, which has changed since")
     return dressed
+
+
+def sheet_cell(sheet, entry, sheet_image, around):
+    """`around` with the sheet crop replaced by what the cell shows, read back at native size."""
+    crop, scale = sheet["crop"], sheet["scale"]
+    width, height = crop[2]-crop[0], crop[3]-crop[1]
+    x, y = entry["origin"]
+    block = np.asarray(sheet_image.convert("RGBA"))[y:y+height*scale, x:x+width*scale][scale//2::scale, scale//2::scale].copy()
+    block[(block[..., :3] == np.array(sheet["key"])).all(-1)] = 0
+    canvas = around.copy()
+    canvas.paste(Image.fromarray(block), tuple(crop[:2]))
+    return canvas
+
+
+def worn_now(wearing, clip_id, sample, motion, index, registry, topology, load):
+    """The body dressed in the active versions of the worn parts, or None if one is gone."""
+    if any(ref["id"] not in registry for ref in wearing):
+        return None
+    return dressed_body(motion, index, topology, clip_id, sample, load, [registry[ref["id"]] for ref in wearing])
 
 
 def enclosed(mask):
@@ -496,24 +527,45 @@ def _nearest(rgb, colors):
     return np.abs(rgb[:, None, :] - np.asarray(colors, dtype=int)[None]).max(-1).min(-1)
 
 
-def near_palette(part, colors, distance, *, against=None):
+def near_palette(part, colors, distance, *, under=None, window=2, luma=60, against=None):
     """Keep pixels within `distance` (max channel) of a palette color, and nearer to it than to
-    any of the colors `against` (what was under it): drop the body the model repainted."""
+    what was under them nearby (`window` px; outline colors left out): drop the body the model
+    repainted. Judged locally, an eye's white is not mistaken for a white shirt elsewhere."""
     pixels = np.asarray(part).copy()
     alpha = pixels[..., 3] > 0
     if alpha.any():
-        rgb = pixels[alpha][:, :3].astype(int)
-        nearest = _nearest(rgb, colors)
+        rgb = pixels[..., :3].astype(int)
+        nearest = _nearest(rgb[alpha], colors)
         keep = np.zeros(alpha.shape, dtype=bool)
-        keep[alpha] = (nearest <= distance) & ((nearest < _nearest(rgb, against)) if against is not None and len(against) else True)
+        keep[alpha] = nearest <= distance
+        if under is not None:
+            keep[alpha] &= nearest < _local_distance(rgb, under, window, luma)[alpha]
+        if against is not None and len(against):
+            # Another part's colors (the face or the hat this one was drawn over, redrawn by
+            # the model a little differently): nearer to them, the pixel is theirs.
+            keep[alpha] &= nearest <= _nearest(rgb[alpha], against)
         pixels[alpha & ~keep] = 0
     return Image.fromarray(pixels)
+
+
+def _local_distance(rgb, under, window, luma):
+    """Per pixel, the max-channel distance to the nearest non-outline under color within `window`."""
+    base = np.asarray(under)
+    usable = (base[..., 3] > 0) & (base[..., :3].astype(np.int32) @ np.array([299, 587, 114]) >= luma*1000)
+    best = np.full(rgb.shape[:2], 10**6)
+    colors = base[..., :3].astype(int)
+    for dy in range(-window, window+1):
+        for dx in range(-window, window+1):
+            there = _shifted(usable, dy, dx, False)
+            gap = np.abs(rgb - _shifted(colors, dy, dx)).max(-1)
+            best = np.where(there, np.minimum(best, gap), best)
+    return best
 
 
 def repainted(drawn, under, colors, distance):
     """Changed pixels `near_palette` would drop: the body the model repainted, not the part."""
     changed = np.asarray(cover(drawn, under))
-    kept = np.asarray(near_palette(Image.fromarray(changed), colors, distance, against=under_colors(under)))
+    kept = np.asarray(near_palette(Image.fromarray(changed), colors, distance, under=under))
     return (changed[..., 3] > 0) & (kept[..., 3] == 0)
 
 
@@ -571,23 +623,79 @@ def cover_rim(part, drawn, under, rounds, *, luma=60):
     inside = alpha.copy()
     for dy, dx in _STEPS:
         inside &= _shifted(alpha, dy, dx, False)
-    stale = dark & inside & ~added
-    stale &= np.any([_shifted(added, dy, dx, False) for dy, dx in _STEPS], axis=0)
-    fill = alpha & ~dark & ~added
-    done = np.zeros_like(alpha)
-    for dy, dx in _STEPS:
-        take = stale & ~done & _shifted(fill, dy, dx, False)
-        pixels[take] = _shifted(pixels, dy, dx)[take]
-        done |= take
+    # Only the new edge keeps the outline: grown pixels inside it and the old outline they
+    # cover take the fill color next to them, working outward from the part's own fill.
+    near_added = added | np.any([_shifted(added, dy, dx, False) for dy, dx in _STEPS], axis=0)
+    stale = dark & inside & near_added
+    fill = alpha & ~dark
+    for _ in range(rounds + 1):
+        grew = np.zeros_like(alpha)
+        for dy, dx in _STEPS:
+            take = stale & ~grew & _shifted(fill, dy, dx, False)
+            pixels[take] = _shifted(pixels, dy, dx)[take]
+            grew |= take
+        if not grew.any():
+            break
+        stale &= ~grew
+        fill |= grew
     return Image.fromarray(pixels)
 
 
-def under_colors(under, *, luma=60):
-    """The colors of what was under the part, outline colors left out (part and body share them)."""
-    pixels = np.asarray(under)
-    rgb = pixels[pixels[..., 3] > 0][:, :3].astype(int)
-    rgb = rgb[rgb @ np.array([299, 587, 114]) >= luma*1000]
-    return np.unique(rgb, axis=0)
+def add_back(part, drawn, under, colors, margin, *, window=2, luma=60):
+    """`part` plus changed drawn pixels nearer a palette color than any nearby under color by `margin`."""
+    changed = np.asarray(cover(drawn, under))
+    alpha = changed[..., 3] > 0
+    rgb = changed[..., :3].astype(int)
+    keep = np.zeros(alpha.shape, dtype=bool)
+    if alpha.any():
+        nearest = _nearest(rgb[alpha], colors)
+        keep[alpha] = nearest + margin < _local_distance(rgb, under, window, luma)[alpha]
+    pixels = np.asarray(part).copy()
+    add = keep & (pixels[..., 3] == 0)
+    pixels[add] = changed[add]
+    return Image.fromarray(pixels)
+
+
+def keep_largest(part, share, *, reach=2):
+    """Keep the solid core of the largest piece (and of any at least `share` of its size) and
+    what lies within `reach` px of it: one hat, not the strands and face lines the model drew
+    hanging from its brim. Thin lines are cut off by eroding first, so touching does not count."""
+    from sprite_gen.frames.parts_segments import _components
+    pixels = np.asarray(part).copy()
+    mask = pixels[..., 3] > 0
+    core = mask & np.all([_shifted(mask, dy, dx, False) for dy, dx in _STEPS], axis=0)
+    components = list(_components(core))
+    if not components:
+        return part
+    biggest = max(int(c.sum()) for c in components)
+    kept = np.any([c for c in components if c.sum() >= share*biggest], axis=0)
+    for _ in range(reach):
+        kept = kept | np.any([_shifted(kept, dy, dx, False) for dy, dx in _STEPS], axis=0)
+    pixels[mask & ~kept] = 0
+    return Image.fromarray(pixels)
+
+
+def drop_specks(part, minimum, *, luma=60):
+    """Remove 8-connected bits under `minimum` px with no outline ink: crumbs of a repainted
+    face. A mouth or eyebrow as small carries dark ink and stays."""
+    from sprite_gen.frames.parts_segments import _components
+    pixels = np.asarray(part).copy()
+    dark = pixels[..., :3].astype(np.int32) @ np.array([299, 587, 114]) < luma*1000
+    for component in _components(pixels[..., 3] > 0):
+        if component.sum() < minimum and not (dark & component).any():
+            pixels[component] = 0
+    return Image.fromarray(pixels)
+
+
+def inside_edge(part, under, depth):
+    """Keep only pixels at least `depth` px inside the under silhouette: features drawn on a face
+    (eyes, mouth), not the profile line the model redrew a pixel off."""
+    inner = np.asarray(under)[..., 3] > 0
+    for _ in range(depth):
+        inner = inner & np.all([_shifted(inner, dy, dx, False) for dy, dx in _STEPS], axis=0)
+    pixels = np.asarray(part).copy()
+    pixels[~inner] = 0
+    return Image.fromarray(pixels)
 
 
 def prune_spurs(part, rounds):
@@ -625,7 +733,8 @@ def misaligned(alignment, coverage=None):
 
 
 def cut_cell(drawn, body, *, method="difference", body_threshold=None, near_body=None, min_island=0, outline=False,
-             fill_holes=0, close_body=0, colors=None, cover_threshold=24, keep_palette=None, prune=0, rim=0):
+             fill_holes=0, close_body=0, colors=None, cover_threshold=24, keep_palette=None, prune=0, rim=0,
+             inset=0, specks=0, rescue=None, against=None, largest=None):
     """One drawn cell to the part alone, on the cell's own crop of the canvas.
 
     `difference` removes what still matches the body (garments drawn over a dressed sheet);
@@ -649,15 +758,30 @@ def cut_cell(drawn, body, *, method="difference", body_threshold=None, near_body
             part = drop_islands(part, min_island, body=body)
         if outline:
             part = keep_outline(part, drawn)
+    if rescue is not None and colors is not None and method == "difference":
+        # The difference cut drops what is near the body's color, but a far leg's dark denim
+        # sits next to charcoal shorts: changed pixels clearly nearer the part's palette than to
+        # anything under them nearby come back.
+        part = add_back(part, drawn, body, colors, rescue)
     if keep_palette is not None and colors is not None:
         # An image model often repaints the body it was asked to keep (a darker face under new
         # hair): such pixels changed, but they are far from every color of the part's design.
-        part = near_palette(part, colors, keep_palette, against=under_colors(body))
+        part = near_palette(part, colors, keep_palette, under=body, against=against)
         part = lone_outline(part, body)
         if method == "covering":
+            # Fill the part's enclosed gaps (a strand matching the skull's outline), but only with
+            # pixels that pass the same palette test: a face framed by bangs is enclosed too.
             mask = np.asarray(part)[..., 3] > 0
-            mask |= enclosed(mask) & (np.asarray(drawn)[..., 3] > 0)
+            gaps = Image.fromarray(np.where((enclosed(mask) & (np.asarray(drawn)[..., 3] > 0))[..., None],
+                                            np.asarray(drawn), 0).astype(np.uint8))
+            mask |= np.asarray(near_palette(gaps, colors, keep_palette, under=body, against=against))[..., 3] > 0
             part = keep_outline(Image.fromarray(np.where(mask[..., None], np.asarray(drawn), 0).astype(np.uint8)), drawn, luma=60)
+    if inset:
+        part = inside_edge(part, body, inset)
+    if specks:
+        part = drop_specks(part, specks)
+    if largest is not None:
+        part = keep_largest(part, largest)
     if prune:
         part = prune_spurs(part, prune)
     if rim:

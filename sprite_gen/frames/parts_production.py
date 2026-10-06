@@ -58,10 +58,13 @@ _CUT = contract._record({"method": contract._enum(*sheets.METHODS), "body_thresh
                          "close_body": contract._integer, "region": contract._nullable(contract._rectangle),
                          "palette": contract._nullable(contract._relative_file),
                          "keep_palette": contract._nullable(contract._integer), "prune": contract._integer,
-                         "rim": contract._integer},
+                         "rim": contract._integer, "inset": contract._integer, "specks": contract._integer,
+                         "rescue": contract._nullable(contract._integer),
+                         "against": contract._list(contract._relative_file),
+                         "exclude": contract._list(contract._rectangle), "largest": contract._nullable(contract._integer)},
                         {"method": "difference", "body_threshold": 40, "tolerance": 80, "near_body": 2, "min_island": 12,
                          "outline": True, "fill_holes": 6, "close_body": 5, "region": None, "palette": None,
-                         "keep_palette": None, "prune": 0, "rim": 0})
+                         "keep_palette": None, "prune": 0, "rim": 0, "inset": 0, "specks": 0, "rescue": None, "against": [], "exclude": [], "largest": None})
 _PIECE = contract._record({"id": contract._id, "node": contract._id, "segments": contract._list(contract._string, nonempty=True)})
 _PROMPT = contract._record({"text": contract._string, "refs": contract._list(contract._relative_file)}, {"refs": []})
 _DRAW = contract._record({"provider": contract._id, "model": contract._nullable(contract._string)},
@@ -92,7 +95,7 @@ DECISIONS = ("unverified", "approved", "rejected")
 FIXED = ("part_id", "design_id", "role", "slot", "node", "socket", "mode")
 # Check bounds, judged on the SD demo (docs/parts/10-production.md).
 LIMITS = {"area_jump": 0.45, "dropped_share": 0.04, "specks": 0, "holes": 0, "painted_share": 0.5,
-          "repainted_share": 1.0}
+          "repainted_share": 1.0, "worn_drift": 0.1}
 
 
 def _folder(root, part_id):
@@ -362,6 +365,12 @@ def _palette(root, cut):
     return None if cut["palette"] is None else pixel_grid.read_palette(root / cut["palette"])
 
 
+def _against(root, cut):
+    """The palettes of parts this one must not take pixels from, as one color list."""
+    lists = [pixel_grid.read_palette(root / path) for path in cut["against"]]
+    return np.concatenate(lists) if lists else None
+
+
 def _publish_candidate(root, part, record, images):
     payloads = {f"{name}.png": assets.png_bytes(image) for name, image in images.items()}
     record = {**record, "images": {name.removesuffix(".png"): {"file": name, "sha256": assets.sha256(data)}
@@ -412,9 +421,10 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
     canvas = (rig["canvas"]["width"], rig["canvas"]["height"])
     made = []
     for guide, art in pairs:
+        sheet_image = Image.open(Path(guide).parent / "pose-sheet.png")
         for cell, sample, drawn, page in sheets.drawn_cells([(guide, art)], index, clips, cut["tolerance"]):
             crop = page["crop"]
-            under = sheets._under(page, cell, sample, motion, index, registry, topology, load)
+            under = sheets._under(page, cell, sample, motion, index, registry, topology, load, sheet_image=sheet_image)
             drawn_full = Image.new("RGBA", canvas)
             drawn_full.alpha_composite(drawn, tuple(crop[:2]))
             extra = {}
@@ -433,13 +443,19 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
                                               body_threshold=cut["body_threshold"], near_body=cut["near_body"],
                                               min_island=cut["min_island"], outline=cut["outline"],
                                               fill_holes=cut["fill_holes"], close_body=cut["close_body"], colors=colors,
-                                              keep_palette=cut["keep_palette"], prune=cut["prune"], rim=cut["rim"])
+                                              keep_palette=cut["keep_palette"], prune=cut["prune"], rim=cut["rim"],
+                                              inset=cut["inset"], specks=cut["specks"], rescue=cut["rescue"],
+                                              against=_against(root, cut),
+                                              largest=None if cut["largest"] is None else cut["largest"]/100)
                 full = Image.new("RGBA", canvas)
                 full.alpha_composite(piece, tuple(crop[:2]))
                 if cut["region"] is not None:
                     kept = Image.new("RGBA", canvas)
                     kept.paste(full.crop(tuple(cut["region"])), tuple(cut["region"][:2]))
                     full = kept
+                for x0, y0, x1, y1 in cut["exclude"]:
+                    # A zone another part owns (the face under capped hair): whatever was drawn there is theirs.
+                    full.paste((0, 0, 0, 0), (x0, y0, x1, y1))
                 alignment, holes = info["alignment"], info["holes"]
             mask = Image.fromarray(((np.asarray(full)[..., 3] > 0)*255).astype(np.uint8), "L")
             socket = sample["sockets"][config["socket"]]
@@ -643,7 +659,29 @@ def _pinholes(mask, size=12):
     return int(sum(c.sum() for c in parts_segments._components(sheets.enclosed(mask)) if c.sum() <= size))
 
 
-def _measure(root, config, settings, location, registry):
+def _drawn_over_changed(record, context, base):
+    """Worn parts whose current render under this drawing differs from the one it was drawn over
+    by more than a few pixels (a recut hair is still the hair the hat was fitted to)."""
+    if not record.get("wearing") or record.get("under_sha256") is None:
+        return []
+    motion, index, registry, topology, load = context
+    clip = next(c for c in motion["clips"] if c["id"] == record["clip"])
+    sample = next(s for s in clip["samples"] if s["id"] == record["sample"])
+    dressed = sheets.worn_now(record["wearing"], record["clip"], sample, motion, index, registry, topology, load)
+    if dressed is not None:
+        if assets.sha256(assets.png_bytes(dressed)) == record["under_sha256"]:
+            return []
+        if (base / "under.png").exists():
+            then, now = np.asarray(Image.open(base / "under.png").convert("RGBA")), np.asarray(dressed)
+            bare = np.asarray(load(motion, sample["image"]).convert("RGBA"))
+            worn = int((now != bare).any(-1).sum())
+            if then.shape == now.shape and int((then != now).any(-1).sum()) <= LIMITS["worn_drift"]*worn:
+                return []
+    return [ref["id"] for ref in record["wearing"] if registry.get(ref["id"], {}).get("digest") != ref["digest"]] \
+        or [ref["id"] for ref in record["wearing"]]
+
+
+def _measure(root, config, settings, location, context):
     """Metrics of one candidate, and its findings as (level, message)."""
     base = root / location
     record = workspace.decode_json((base / "candidate.json").read_bytes())
@@ -680,10 +718,9 @@ def _measure(root, config, settings, location, registry):
             metrics["repainted"] = int(repainted.sum())
             changed &= ~repainted
         metrics["dropped"] = int((changed & ~mask).sum())
-    for ref in record.get("wearing") or ():
-        # Drawn over a worn part that has since been redrawn (the hat under capped hair).
-        if registry.get(ref["id"], {}).get("digest") != ref["digest"]:
-            findings.append(("error", f"drawn over {ref['id']} as it was before; redraw over the current one"))
+    for name in _drawn_over_changed(record, context, base):
+        # Drawn over a worn part that now looks different (the hat under capped hair, redrawn).
+        findings.append(("error", f"drawn over {name} as it was before; redraw over the current one"))
     if metrics["pixels"] == 0:
         findings.append(("warning", "empty: nothing drawn for this pose (hidden, or lost in the cut)"))
     if sheets.misaligned(metrics["alignment"], metrics["coverage"]):
@@ -712,6 +749,8 @@ def check(assembly, part, *, track=None):
     states = _states(production, index)
     order, _ = _poses(motion, states)
     near = _neighbours(motion, states)
+    context = (motion, index, registry, registry[registry[index["rig"]["id"]]["topology"]["id"]],
+               compose_parts.AssetLoader(root, index))
     summary, findings_by = {}, {}
     for name in ([track] if track else list(production["tracks"])):
         rows = production["tracks"][name]["poses"]
@@ -722,7 +761,7 @@ def check(assembly, part, *, track=None):
             if row is None or row["selected"] is None:
                 continue
             if row["selected"] not in measured:
-                measured[row["selected"]] = _measure(root, config, settings, row["selected"], registry)
+                measured[row["selected"]] = _measure(root, config, settings, row["selected"], context)
             metrics, findings = deepcopy(measured[row["selected"]])
             area[pose] = metrics["pixels"]
             row["check"] = {"metrics": metrics, "findings": findings}

@@ -335,3 +335,63 @@ def test_cover_rim_hides_the_skull_a_part_was_drawn_inside_of():
     assert tight.getpixel((11, 4))[3] == 0 and covered.getpixel((11, 4))[3] > 0
     assert covered.getpixel((11, 4))[:3] == (40, 20, 20)  # the outline moved out
     assert covered.getpixel((11, 6))[:3] == (90, 60, 50)  # the old outline is filled
+    assert covered.getpixel((11, 5))[:3] == (90, 60, 50)  # and so is the grown ring inside the new edge
+
+
+def test_a_worn_hair_dresses_the_body_with_its_full_piece_not_the_capped_one():
+    def piece(name, color, rule, offset):
+        return {"id": name, "node": "hair", "provides": [], "cover_rule": rule, "sample_map": {"walk.right": {
+            "sample.0": {"target_socket": "head", "pivot": [0, 0], "offset": offset, "visible": True, "image": color}}}}
+    hair = {"id": "hair", "bindings": [{"motion": "m", "rig": "r", "covers": [], "pieces": [
+        piece("hair", (90, 60, 50, 255), {"tag": "headwear", "show": "uncovered"}, [0, 0]),
+        piece("capped", (200, 0, 0, 255), {"tag": "headwear", "show": "covered"}, [3, 3])]}]}
+    sample = {"id": "sample.0", "image": None, "sockets": {"head": {"position": [2, 2], "visible": True}}}
+    load = lambda pack, image: Image.new("RGBA", (8, 8)) if image is None else Image.new("RGBA", (2, 2), image)
+    dressed = sheets.dressed_body({}, {"motion": "m", "rig": "r"}, {"layers": []}, "walk.right", sample, load, [hair])
+    assert dressed.getpixel((2, 2)) == (90, 60, 50, 255) and dressed.getpixel((5, 5))[3] == 0
+
+
+def test_rescue_brings_back_dark_cloth_the_difference_cut_took_for_the_body():
+    body = Image.new("RGBA", (24, 24))
+    ImageDraw.Draw(body).rectangle((6, 4, 17, 19), fill=(52, 54, 62, 255))  # charcoal shorts
+    drawn = body.copy()
+    ImageDraw.Draw(drawn).rectangle((6, 4, 11, 19), fill=(36, 52, 92, 255))  # far leg's dark denim
+    ImageDraw.Draw(drawn).rectangle((12, 4, 17, 19), fill=(60, 110, 170, 255))  # near leg's denim
+    denim = np.array([[36, 52, 92], [60, 110, 170]])
+    plain, _ = sheets.cut_cell(drawn, body, body_threshold=40, colors=denim)
+    rescued, _ = sheets.cut_cell(drawn, body, body_threshold=40, colors=denim, rescue=16)
+    assert plain.getpixel((8, 10))[3] == 0 and rescued.getpixel((8, 10))[:3] == (36, 52, 92)
+
+
+def test_a_face_framed_by_hair_is_not_filled_in_as_a_gap():
+    body = Image.new("RGBA", (24, 24))
+    ImageDraw.Draw(body).rectangle((4, 4, 19, 19), fill=(240, 190, 155, 255))
+    drawn = body.copy()
+    draw = ImageDraw.Draw(drawn)
+    draw.rectangle((4, 4, 19, 19), outline=(60, 30, 20, 255), width=3)  # hair all around the face
+    hair = np.array([[60, 30, 20], [170, 128, 108]])  # a light brown highlight, skin-like
+    part, _ = sheets.cut_cell(drawn, body, method="covering", colors=hair, keep_palette=48)
+    assert part.getpixel((4, 4))[3] > 0 and part.getpixel((12, 12))[3] == 0
+
+
+def test_against_leaves_a_redrawn_eye_to_the_face_part():
+    body = Image.new("RGBA", (24, 24))
+    ImageDraw.Draw(body).rectangle((4, 4, 19, 19), fill=(240, 190, 155, 255))
+    drawn = body.copy()
+    ImageDraw.Draw(drawn).rectangle((4, 4, 19, 8), fill=(110, 30, 24, 255))  # hair
+    ImageDraw.Draw(drawn).rectangle((12, 11, 13, 13), fill=(128, 74, 56, 255))  # the eye, redrawn
+    hair, face = np.array([[110, 30, 24], [150, 50, 40]]), np.array([[129, 74, 55], [250, 250, 250]])
+    taken, _ = sheets.cut_cell(drawn, body, method="covering", colors=hair, keep_palette=48)
+    left, _ = sheets.cut_cell(drawn, body, method="covering", colors=hair, keep_palette=48, against=face)
+    assert taken.getpixel((12, 12))[3] > 0 and left.getpixel((12, 12))[3] == 0 and left.getpixel((8, 6))[3] > 0
+
+
+def test_keep_largest_drops_lines_detached_from_the_hat():
+    body = Image.new("RGBA", (24, 24))
+    ImageDraw.Draw(body).rectangle((4, 4, 19, 19), fill=(240, 190, 155, 255))
+    drawn = body.copy()
+    ImageDraw.Draw(drawn).rectangle((2, 2, 21, 8), fill=(200, 160, 120, 255))  # the hat
+    ImageDraw.Draw(drawn).line((10, 9, 10, 16), fill=(40, 20, 10, 255))  # a strand hanging from the brim
+    hat = np.array([[200, 160, 120], [40, 20, 10]])
+    part, _ = sheets.cut_cell(drawn, body, method="covering", colors=hat, keep_palette=48, largest=0.25)
+    assert part.getpixel((5, 5))[3] > 0 and part.getpixel((10, 14))[3] == 0

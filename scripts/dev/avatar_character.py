@@ -45,9 +45,11 @@ HELD_PROMPT = """Edit image 1, a pixel-art sprite of a chibi character in pure s
 
 Give the character in image 1 exactly that {what}: the same shape, colors, shading and pixel style as image 2, fitted to this character's own head size and shape.{fit} Change nothing else: the whole character from head to feet stays in the picture at the same position and size, with the same pose, body, skin color, clothes and outline; do not recolor or reshade the skin. Keep the image size and the flat #FF00FF background. """
 WHAT = {"hair": "hair", "expression": "face (eye, eyebrow and mouth only)", "headwear": "hat"}
-FIT = {"hair": " The hair covers the whole top and back of the skull, so no bald scalp shows.",
+FIT = {"hair": " The hair covers the whole top and back of the skull, so no bald scalp shows. The eye, eyebrow and"
+               " mouth already drawn on the face stay fully visible: bangs end above the eyebrow.",
        "expression": " Draw only the eye, eyebrow and mouth on the existing face.",
-       "headwear": " The hat sits down over the skull, wide enough that no bald scalp shows above or behind the brim."}
+       "headwear": " The hat sits over the hair already drawn, wide enough that no hair pokes through its crown and"
+                   " no bald scalp shows; the brim sits above the eyebrow so the eye stays fully visible."}
 
 
 def config(base):
@@ -174,6 +176,31 @@ def _face_region(still):
     return [int(cols.min() + 0.4*(cols.max()-cols.min())), top+6, int(cols.max())+4, top+40]
 
 
+def _without_skin(source, still, out, distance=24, share=0.7):
+    """A held part's palette without the skin tones it was read off with.
+
+    Design palettes come from a whole character, so a face or hair palette holds skin
+    shades; a repainted cheek then passes the palette test and is cut as part of the face or
+    the hair. Colors close to the body's dominant colors (its skin) are left out; a hair
+    highlight that close still snaps to the nearest hair color.
+    """
+    pixels = np.asarray(still)
+    counts = {}
+    rgb = pixels[pixels[..., 3] > 0][:, :3]
+    for color in map(tuple, rgb[rgb.astype(np.int32) @ np.array([299, 587, 114]) >= 60*1000].tolist()):  # not outline ink
+        counts[color] = counts.get(color, 0) + 1
+    dominant, total, seen = [], sum(counts.values()), 0
+    for color, n in sorted(counts.items(), key=lambda kv: -kv[1]):
+        dominant.append(color)
+        seen += n
+        if seen >= share*total:
+            break
+    dominant = np.array(dominant)
+    colors = [c for c in json.loads(source.read_text())["colors"]
+              if np.abs(np.array(c)[None] - dominant).max(-1).min() > distance]
+    write(out, {"colors": colors})
+
+
 def stage_init(base):
     """The body production and one production per design taken from the SD explorer."""
     character = config(base)
@@ -208,19 +235,32 @@ def stage_init(base):
                        "slot": slot, "node": avatar.SLOTS[slot][2][0], "draw": draw}
         if slot in ("hair", "expression", "headwear"):
             region = _face_region(still) if slot == "expression" else rebuild.PARTS[name][4]
+            if slot == "expression":  # its crumbs of repainted cheek are skin; hair highlights may be skin-like
+                _without_skin(inputs / palette, still, inputs / f"{name}.held-palette.json")
+                palette = f"{name}.held-palette.json"
             config_value = {**base_config, "socket": "head", "mode": "held", "reference_pose": "idle.01",
                             "sheet": {"crop": [8, 0, 120, 96], "scale": 4, "page_size": None, "aspect": "1:1"},
                             "cut": {"method": "covering", "region": region, "palette": f"inputs/design/{palette}",
                                     "near_body": None, "close_body": 0, "fill_holes": 0, "keep_palette": 48, "prune": 2},
                             "prompt": {"text": HELD_PROMPT.format(what=WHAT[slot], fit=FIT[slot]) + style.format(px=4),
                                        "refs": [f"inputs/design/{reference}"]}}
+            if slot == "expression":
+                config_value["cut"].update(inset=1, specks=6)  # not the redrawn profile line, not crumbs
+            if slot == "hair":
+                config_value["cut"]["rim"] = 3  # hair drawn a little inside the skull
+            if slot == "headwear":
+                config_value["cut"]["largest"] = 25  # one solid hat, not face lines redrawn under the brim
             if slot != "expression":
-                config_value["cut"]["rim"] = 3  # hair and hats drawn a little inside the skull
+                # Drawn over what is under them at runtime: the face (eyes stay clear of bangs and
+                # brims), and for the hat the hair it sits on.
+                face = rebuild.PART_ID[character["designs"]["expression"]] if "expression" in character["designs"] else None
+                under = {"hair": [face], "headwear": [face, rebuild.PART_ID[character["designs"].get("hair", "")] if "hair" in character["designs"] else None]}[slot]
+                config_value["wearing"] = [w for w in under if w]
             if slot == "hair":
                 config_value["cover_rule"] = {"tag": "headwear", "show": "uncovered"}
                 if "headwear" in character["designs"]:
                     config_value["variants"] = [{"id": "capped", "cover_rule": {"tag": "headwear", "show": "covered"},
-                                                 "wearing": [rebuild.PART_ID[character["designs"]["headwear"]]],
+                                                 "wearing": [w for w in (face, rebuild.PART_ID[character["designs"]["headwear"]]) if w],
                                                  "prompt": {"text": avatar.CAPPED_PROMPT,
                                                             "refs": [f"inputs/design/{reference}"]}}]
             if slot == "headwear":
@@ -240,11 +280,23 @@ def stage_init(base):
                             "cut": {"method": "difference", "body_threshold": rebuild.PARTS[name][5], "tolerance": 80,
                                     "near_body": avatar.NEAR_BODY.get(name, 3), "min_island": 6 if feet else 12,
                                     "outline": True, "fill_holes": 6, "close_body": 5, "region": None,
-                                    "palette": f"inputs/design/{palette}"},
+                                    "palette": f"inputs/design/{palette}", "rescue": 16},
                             "pieces": [{"id": p, "node": n, "segments": s} for p, n, s in avatar.SPLITS[slot]],
                             "by_component": slot in avatar.WHOLE, "segments": segments,
                             "prompt": {"text": text + avatar.KEEP_LAYOUT, "refs": [f"inputs/design/{reference}"]}}
         configs[name] = config_value
+    # A held part drawn over others must not take their pixels the model redrew (eyes under
+    # bangs, the hat over capped hair).
+    held_palette = {configs[n]["slot"]: configs[n]["cut"]["palette"] for n in configs
+                    if n != "body" and configs[n].get("mode") == "held"}
+    for name, value in configs.items():
+        if value.get("mode") != "held" or value["slot"] == "expression":
+            continue
+        value["cut"]["against"] = [held_palette[w] for w in ("expression", "hair") if w in held_palette and w != value["slot"]]
+        for variant in value.get("variants", []):
+            # Under a hat little hair reaches the face; what the model draws there is the face redrawn.
+            variant["cut"] = {**value["cut"], "against": [held_palette[w] for w in ("expression", "headwear") if w in held_palette],
+                              "exclude": [_face_region(still)]}
     for name, value in configs.items():
         file = write(base / "production-configs" / f"{name}.json", value)
         if not (root / "productions" / value["part_id"] / "production.json").exists():
@@ -285,16 +337,19 @@ def stage_produce(base, only=None):
     prefix = character["prefix"]
     report = []
     designs = {slot: rebuild.PART_ID[name] for slot, name in character["designs"].items()}
-    waves = [[f"{prefix}.body"], [designs[s] for s in ("headwear",) if s in designs],
-             [p for s, p in designs.items() if s != "headwear"]]
+    for file in sorted((base / "production-configs").glob("*.json")):  # what init last wrote applies to new drawings
+        production.configure(assembly, json.loads(file.read_text())["part_id"], file)
+    # Each held part is drawn over the ones before it: face, hair, hat (then the capped hair).
+    waves = [[f"{prefix}.body"], [p for s, p in designs.items() if s not in ("hair", "headwear")],
+             [designs[s] for s in ("hair",) if s in designs], [designs[s] for s in ("headwear",) if s in designs]]
     for wave in waves:
         wave = [p for p in wave if not only or p in only]
         with ThreadPoolExecutor(3) as pool:
             report += list(pool.map(lambda part: _produce_one(assembly, part), wave))
-        hair_waits = designs.get("hair") if "headwear" in designs else None  # built once its capped drawing exists
+        capped_later = designs.get("hair") if "headwear" in designs else None  # the hat is drawn over it first
         for part in wave:
-            if part != hair_waits and not any(r["part"] == part and r["status"] == "draw failed" for r in report):
-                production.build(assembly, part)
+            if not any(r["part"] == part and r["status"] == "draw failed" for r in report):
+                production.build(assembly, part, allow_incomplete=part == capped_later)
     hair = designs.get("hair")
     if hair and "headwear" in designs and (not only or hair in only):
         report.append(_produce_one(assembly, hair, track="capped"))
