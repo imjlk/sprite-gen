@@ -105,7 +105,7 @@ BODIES["maple_a"] = dict(
     BODIES["maple34h"],
     # The ear a third of the way in from the back, at eye level, inside the outline: on the outline (where the
     # model drew it for [-12, 4]) it read as a bump on the back of the head, and long hair had no room behind it.
-    head={"center": [64, 44], "radius": 22, "rx": 23, "ry": 20, "jaw": 0.6, "chin": 2, "ear": [-8, 5],
+    head={"center": [64, 44], "radius": 22, "rx": 23, "ry": 20, "jaw": 0.6, "chin": 2, "ear": [-13, 7],
           "ear_size": (1.5, 2.5)},
     prompt=BODIES["maple34h"]["prompt"].replace("a big round head", _HEAD_WORDS.format(
         shape="wider than tall, a soft rounded-square shape with full cheeks and a gently squared jaw, the chin a "
@@ -437,6 +437,52 @@ def cycle_poses(body, cycle):
             arms = {"near": (cycle["arm_swing"]*far[0], cycle["elbow"]), "far": (cycle["arm_swing"]*near[0], cycle["elbow"])}
         poses.append(skeleton(body, near, far, arms, cycle["lift"][t]))
     return poses
+
+
+EDIT_PROMPT = (
+    "Edit image 1, a pixel-art game sprite of one character, pure side view facing right, on a flat pure magenta "
+    "#FF00FF background. Change only these things and keep every other pixel exactly as it is:\n{changes}\n{style} "
+    "Keep the image size; everything else stays flat #FF00FF.")
+EDIT_EAR = ("- The ear: erase the current ear completely (paint that spot as the bald head's own skin and shading, the "
+            "head's outline running on smoothly) and draw one small ear inside the thin cyan ring instead - inside the "
+            "head's outline, never on its edge; remove the cyan ring.")
+EDIT_LEGS = ("- The legs: redraw both legs smooth - clean, continuous outlines from the shorts down to the ankles, no "
+             "bumps or notches at the knees, softly rounded calves - at the same length, place and pose, the same "
+             "skin colors and the far leg still a little darker.")
+
+
+def stage_edit(base_dir):
+    """The base edited by the model instead of drawn again (a new drawing changes the whole character): the
+    ear moved to the template's ear mark and the legs made smooth; only the back of the head and the legs below
+    the shorts are taken from the edit - the face, torso and arms stay the base's own pixels."""
+    out = _out(base_dir)
+    info = json.loads((out / "body.json").read_text())
+    body, stand = info["body"], info["pose"]
+    base = Image.open(out / "base.png").convert("RGBA")
+    if not (out / "base-before-edit.png").exists():
+        base.save(out / "base-before-edit.png")
+    base = Image.open(out / "base-before-edit.png").convert("RGBA")
+    palette = pixel_grid.read_palette(out / "base.palette.json")
+    ear = _ear_mask(body, stand)
+    guide = np.asarray(base).copy()
+    guide[_dilate(ear, 1) & ~ear] = (*CYAN, 255)
+    sheet, origins = _sheet([Image.fromarray(guide)], 8, 1, gutter=0)
+    sheet.save(out / "edit-sheet.png")
+    drawn = _draw(EDIT_PROMPT.format(changes=EDIT_EAR + "\n" + EDIT_LEGS, style=STYLE.format(px=8)), out,
+                  out / "edit-sheet.png", [], "edit-drawn")
+    box = base.getbbox()
+    edited, _ = _clean_native(drawn, out / "edit-sheet.png", origins[0], 8, palette=palette,
+                              expect=(box[2] - box[0], box[3] - box[1]))
+    edited, shift = _onto_guide(edited, base)
+    ys, xs = np.mgrid[0:CANVAS, 0:CANVAS]
+    cx = stand["head"]["center"][0]
+    back_of_head = (ys <= stand["neck"][1]) & (xs < cx - 3)
+    legs = ys >= stand["hip"][1] + 3
+    take = back_of_head | legs
+    merged = np.asarray(base).copy()
+    merged[take] = np.asarray(edited)[take]
+    Image.fromarray(merged).save(out / "base.png")
+    return {"shift": list(shift), "taken": int(take.sum())}
 
 
 def stage_calibrate(base_dir):
@@ -824,8 +870,8 @@ SLOTS = {
                                          "leaves the whole ear uncovered - draw no hair over it.", "show_ear": True}}},
     "expression": {
         "bones": ["upper"], "zone": "head", "nodes": {"upper": "eyes"}, "sheet": True, "margin": 3, "what": "the face",
-        "fit": "a MapleStory-style face: big glossy dark-brown eyes with a white highlight, short soft brows, a small "
-               "mouth, a faint pink blush.",
+        "fit": "a MapleStory-style face: big glossy dark-brown eyes (tall ovals, each about a fifth of the head's "
+               "width) with a white highlight, short soft brows, a small mouth, a faint pink blush.",
         "designs": {"neutral": "calm, eyes open, small closed mouth",
                     "smile": "happy: a wide open smile, eyes curved up",
                     "blink": "eyes closed as short downward curves, otherwise calm",
@@ -1216,6 +1262,8 @@ FACE_PROMPT = (
     "view facing right, on a flat pure magenta #FF00FF background. In each cell draw ONLY the face, {fit} The cells, "
     "left to right then top to bottom, show these expressions: {faces}. The face sits on the front of the head turned "
     "toward the viewer, at the same size and place and in the same style in every cell; only the expression changes. "
+    "Both eyes are whole and well inside the head's outline - the far eye a little narrower, never touching or cut "
+    "by the outline. "
     "Keep the head's dark outline exactly where it is in every cell (it aligns the layers), and turn every skin pixel "
     "of the head into flat #FF00FF: a cell shows only that outline and the face. {style} Keep every cell exactly in "
     "place; keep this {w}x{h} image and its grid exactly.")
@@ -1232,12 +1280,26 @@ def _block_reduce(drawn_path, sheet_path, origin, scale, crop, share=0.12):
     cell = np.asarray(drawn).astype(int)
     key = (np.abs(cell[..., :3] - np.array(KEY)).max(-1) <= 60) | (cell[..., 3] < 128)
     out = np.zeros((CANVAS, CANVAS, 4), np.uint8)
+    def box(i, j):
+        return (int(round(origin[0]*ratio + i*step)), int(round(origin[1]*ratio + j*step)),
+                int(round(origin[0]*ratio + (i + 1)*step)), int(round(origin[1]*ratio + (j + 1)*step)))
+    cover = np.zeros((h, w))
     for j in range(h):
         for i in range(w):
-            x0, y0 = int(round(origin[0]*ratio + i*step)), int(round(origin[1]*ratio + j*step))
-            x1, y1 = int(round(origin[0]*ratio + (i + 1)*step)), int(round(origin[1]*ratio + (j + 1)*step))
+            x0, y0, x1, y1 = box(i, j)
+            e = key[y0:y1, x0:x1]
+            cover[j, i] = (~e).mean() if e.size else 0
+    # A thin stroke straddling two blocks covers both a little: only the block it covers most is ink (or a block
+    # well covered on its own) - else every eye line and brow came out a pixel thicker.
+    padded = np.pad(cover, 1)
+    neighbors = np.max([padded[1 + dy:1 + dy + h, 1 + dx:1 + dx + w] for dy in (-1, 0, 1) for dx in (-1, 0, 1)
+                        if dy or dx], axis=0)
+    inked = (cover >= 0.4) | ((cover >= share) & (cover >= 0.7*neighbors))
+    for j in range(h):
+        for i in range(w):
+            x0, y0, x1, y1 = box(i, j)
             block, empty = cell[y0:y1, x0:x1, :3].reshape(-1, 3), key[y0:y1, x0:x1].reshape(-1)
-            if block.size == 0 or (~empty).mean() < share or not (0 <= crop[1] + j < CANVAS and 0 <= crop[0] + i < CANVAS):
+            if not inked[j, i] or block.size == 0 or not (0 <= crop[1] + j < CANVAS and 0 <= crop[0] + i < CANVAS):
                 continue
             ink = block[~empty]
             codes = (ink[:, 0] >> 4)*256 + (ink[:, 1] >> 4)*16 + (ink[:, 2] >> 4)
@@ -1285,8 +1347,12 @@ def design_faces(out, slot_name):
         art = np.roll(np.roll(art, d[1], 0), d[0], 1)
         # A three-quarter face reaches the outline (the far eye): keep what is on the outline unless it only
         # restates the head's own outline there.
-        same = np.abs(art[..., :3].astype(int) - rgba[..., :3].astype(int)).max(-1) <= 48
-        face = (art[..., 3] > 0) & head & ~(_dilate(~head, 1) & head & same) & ~(band & ~head)
+        dark = (art[..., 3] > 0) & (art[..., :3].astype(float) @ np.array([0.299, 0.587, 0.114]) < 90)
+        restated = np.zeros_like(dark)
+        for c in _components(dark & band):  # the model's copy of the outline: long strokes along it
+            if c.sum() >= 12:
+                restated |= c
+        face = (art[..., 3] > 0) & head & ~restated & ~(band & ~head)
         if face.sum() > 0.35*inside.sum():  # skin painted after all: drop what is the head's own skin
             near_skin = np.abs(art[..., None, :3].astype(int) - skin[None, None]).max(-1).min(-1) <= 24
             face &= ~near_skin
@@ -1885,7 +1951,7 @@ def stage_play(base_dir, prefix):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--base", required=True, type=Path, help="the character's folder")
-    parser.add_argument("stage", choices=("base", "calibrate", "frames", "puppet", "part", "mend", "dress", "library", "segments", "packs", "play"))
+    parser.add_argument("stage", choices=("base", "edit", "calibrate", "frames", "puppet", "part", "mend", "dress", "library", "segments", "packs", "play"))
     parser.add_argument("--prefix", default="sd.rig.slim")
     parser.add_argument("--body", default="slim", choices=tuple(BODIES))
     parser.add_argument("--cycle", default="walk", choices=tuple(CYCLES))
@@ -1900,6 +1966,8 @@ if __name__ == "__main__":
         result = stage_puppet(args.base, args.cycle)
     elif args.stage == "calibrate":
         result = stage_calibrate(args.base)
+    elif args.stage == "edit":
+        result = stage_edit(args.base)
     elif args.stage == "part":
         result = [stage_part(args.base, args.slot, d) for d in ([args.design] if args.design else SLOTS[args.slot]["designs"])]
     elif args.stage == "mend":
