@@ -92,6 +92,12 @@ BODIES["maple34"] = dict(
     offsets={"shoulder": {"near": -8, "far": 8}, "hip": {"near": -3, "far": 3}},
     stand={"near": (-8, 3, 11), "far": (10, 3, -7), "arms": {"near": (-10, 10), "far": (16, 12)}},
 )
+BODIES["maple34h"] = dict(
+    BODIES["maple34"],
+    prompt=BODIES["maple34"]["prompt"].replace("short stubby arms", "short slim arms ending in round stubby "
+                                                "mitten-like hands with no fingers,").replace(", small round hands and feet", ", small round feet"),
+    forearm=7, width={"thigh": 7, "shin": 6, "arm": 4}, hand={"length": 6, "radius": 3},
+)
 SIDE = "pure side view facing right"
 VIEW = {"text": SIDE, "style": ""}  # the character's own view and style, read from body.json by _out
 # Standing for the base: both feet and both hands in sight.
@@ -114,8 +120,11 @@ CYCLES = {
              "lift": [0]*4, "sink": [0, 0, 1, 1], "rigid": True, "verb": "standing and breathing", "ms": 250},
     "walk": {"legs": [(22, 0, 12), (8, 10, 0), (-10, 4, -6), (-22, 22, -28), (-4, 40, -10), (16, 22, 4)],
              "arm_swing": 0.7, "elbow": 12, "lift": [0]*6, "verb": "walking", "ms": 130},
-    "run": {"legs": [(30, 14, 6), (0, 26, 0), (-28, 30, -30), (-6, 95, -20), (30, 80, -6), (40, 24, 6)],
-            "arm_swing": 1.0, "elbow": 70, "lift": [0, 0, 0, 3, 0, 3], "verb": "running", "ms": 90},
+    # Both strides alike: contact, the stance knee bending under the body (lowest), push-off into the air
+    # (highest) - the hip goes 90.5 -> 91.2 -> 89.7 and back, a pixel or two a frame (it lifted only one
+    # stride, and the straight-legged midstance was the highest frame, so the run jolted).
+    "run": {"legs": [(30, 14, 6), (0, 55, 0), (-28, 30, -30), (-6, 95, -20), (30, 80, -6), (40, 24, 6)],
+            "arm_swing": 1.0, "elbow": 70, "lift": [0, 0, 2, 0, 0, 2], "verb": "running", "ms": 90},
 }
 
 
@@ -146,8 +155,12 @@ def _leg(hip, pose, body):
 def _arm(shoulder, swing, elbow, body):
     down = np.array([0.0, 1.0])
     el = np.array(shoulder) + _turn(down, -swing)*body["upper_arm"]
-    wrist = el + _turn(down, -(swing + elbow))*body["forearm"]
-    return {"elbow": el.tolist(), "wrist": wrist.tolist()}
+    along = _turn(down, -(swing + elbow))
+    wrist = el + along*body["forearm"]
+    arm = {"elbow": el.tolist(), "wrist": wrist.tolist()}
+    if "hand" in body:  # a round hand past the wrist, its own bone (so gloves can replace it as shoes do feet)
+        arm["hand"] = (wrist + along*body["hand"]["length"]).tolist()
+    return arm
 
 
 def skeleton(body, near, far, arms, lift=0, sink=0):
@@ -185,6 +198,10 @@ def draw_guide(body, pose, upper=None):
     def arm(side, color):
         A = pose["arms"][side]
         draw.line([tuple(_at(pose, "shoulders", side)), tuple(A["elbow"]), tuple(A["wrist"])], fill=(*color, 255), width=w["arm"])
+        if "hand" in A:
+            r = body["hand"]["radius"]
+            cx, cy = (np.array(A["wrist"]) + np.array(A["hand"])) / 2
+            draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=(*color, 255))
 
     arm("far", FAR_ARM)
     leg("far", FAR)
@@ -463,6 +480,8 @@ def _bones(pose):
         bones[f"{side}_foot"] = (L["ankle"], L["toe"], layer + 0.15)
         bones[f"{side}_upper_arm"] = (_at(pose, "shoulders", side), A["elbow"], layer + (-0.5 if side == "far" else 1.0))
         bones[f"{side}_forearm"] = (A["elbow"], A["wrist"], layer + (-0.4 if side == "far" else 1.1))
+        if "hand" in A:
+            bones[f"{side}_hand"] = (A["wrist"], A["hand"], layer + (-0.35 if side == "far" else 1.2))
     return bones
 
 
@@ -482,12 +501,14 @@ def _reach(body, stand):
         L = stand["legs"][side]
         dist[f"{side}_foot"] = np.minimum(dist[f"{side}_foot"], np.minimum(_seg_distance(xs, ys, L["ankle"], L["heel"]),
                                                                            _seg_distance(xs, ys, L["heel"], L["toe"])))
-        A = stand["arms"][side]  # the hand past the wrist goes with the forearm, not left on the torso
-        elbow, wrist = np.array(A["elbow"], float), np.array(A["wrist"], float)
-        hand = wrist + (wrist - elbow) / max(np.hypot(*(wrist - elbow)), 1e-6)*body["width"]["arm"]
-        dist[f"{side}_forearm"] = _seg_distance(xs, ys, elbow, hand)
+        A = stand["arms"][side]
+        if "hand" not in A:  # no hand bone: the hand past the wrist goes with the forearm, not left on the torso
+            elbow, wrist = np.array(A["elbow"], float), np.array(A["wrist"], float)
+            hand = wrist + (wrist - elbow) / max(np.hypot(*(wrist - elbow)), 1e-6)*body["width"]["arm"]
+            dist[f"{side}_forearm"] = _seg_distance(xs, ys, elbow, hand)
     widths = {"thigh": body["width"]["thigh"], "shin": body["width"]["shin"], "foot": 4,
-              "upper_arm": body["width"]["arm"], "forearm": body["width"]["arm"] + 1}
+              "upper_arm": body["width"]["arm"], "forearm": body["width"]["arm"] + 1,
+              "hand": 2*body.get("hand", {}).get("radius", 2) + 1}
     return {n: d - widths[n.split("_", 1)[1]]/2 for n, d in dist.items()}
 
 
@@ -532,10 +553,11 @@ def _owners(rgba, body, stand, bones=None, whole=False, torso_only=False):
     if "near" in best:
         owner[rest & ~far_first] = best["near"][0][rest & ~far_first]
     owner[~alpha] = ""
-    if whole:
-        for c in _components(alpha):
+    if whole:  # a stroke goes whole to the bone most of it is on - unless two pieces touch (a pair of shoes
+        for c in _components(alpha):  # drawn touching): then each pixel goes to its nearest bone
             names_in, counts = np.unique(owner[c].astype(str), return_counts=True)
-            owner[c] = names_in[counts.argmax()]
+            if counts.max() >= 0.75*counts.sum():
+                owner[c] = names_in[counts.argmax()]
     return owner
 
 
@@ -604,7 +626,7 @@ def _motion(stand, pose):
 # angles between the two, under both, so the outline closes around the joint instead of leaving a gap.
 JOINTS = [(p.format(s=s), c.format(s=s), w) for s in ("far", "near") for p, c, w in (
     ("upper", "{s}_thigh", "thigh"), ("{s}_thigh", "{s}_shin", "shin"), ("{s}_shin", "{s}_foot", "shin"),
-    ("{s}_upper_arm", "{s}_forearm", "arm"))]  # the shoulder sits inside the torso: a sweep there only fans out behind
+    ("{s}_upper_arm", "{s}_forearm", "arm"), ("{s}_forearm", "{s}_hand", "arm"))]  # the shoulder sits inside the torso: a sweep there only fans out behind
 
 
 def pose_pieces(pieces, body, stand, pose, ground=None):
@@ -709,8 +731,15 @@ def _body_owner(rgba, body, pose):
     """A body frame's bones, every pixel past the ankle given to the foot (heel and toe tips included), so a
     shoe that replaces the foot hides all of the bare foot."""
     owner = _owners(rgba, body, pose)
+    ys, xs = np.mgrid[0:CANVAS, 0:CANVAS]
     for side in ("near", "far"):
         owner[_foot_mask(owner, pose, side)] = f"{side}_foot"
+        A = pose["arms"][side]
+        if "hand" in A:  # and past the wrist, the hand
+            elbow, wrist = np.array(A["elbow"], float), np.array(A["wrist"], float)
+            u = (wrist - elbow) / max(np.hypot(*(wrist - elbow)), 1e-6)
+            past = (xs + 0.5 - wrist[0])*u[0] + (ys + 0.5 - wrist[1])*u[1] >= 0
+            owner[np.isin(owner.astype(str), [f"{side}_forearm", f"{side}_hand"]) & past] = f"{side}_hand"
     return owner
 
 
@@ -754,10 +783,10 @@ SLOTS = {
                     "surprised": "round wide eyes, a small round open mouth"}},
     "upper": {
         "bones": ["upper"] + LIMBS_ARM, "mend": True,
-        "cells": [{"bones": ["upper"], "hide": LIMBS_ARM,
+        "cells": [{"bones": ["upper"], "hide": LIMBS_ARM + ["near_hand", "far_hand"],
                    "ask": "only the top's body, from the neck down to the hips, without sleeves - this body has its "
                           "arms taken away, so draw the torso part whole and closed where the arms would join"},
-                  {"bones": ["near_upper_arm", "near_forearm"], "show": ["near_upper_arm", "near_forearm"],
+                  {"bones": ["near_upper_arm", "near_forearm"], "show": ["near_upper_arm", "near_forearm", "near_hand"],
                    "ask": "only the sleeve on this arm, as long as the design's sleeve (nothing if it has none)"}],
         "zone": "chest", "core": ["upper"], "nodes": {"upper": "torso", "near": "arm_front", "far": "arm_back"},
         "margin": 6, "fill": True, "view": "the upper body", "what": "the top",
@@ -773,6 +802,15 @@ SLOTS = {
                "has them (the near leg in front, the far leg behind). The feet stay bare: leave them out.",
         "designs": {"jeans": "long slightly loose blue denim jeans down to the ankles",
                     "shorts": "khaki cargo shorts down to mid-thigh with a brown belt"}},
+    "gloves": {
+        "bones": ["near_hand", "far_hand"], "core": ["near_hand", "far_hand"], "whole": True,
+        "nodes": {"near": "hand_front", "far": "hand_back"}, "replaces": True, "angles": 30, "margin": 5,
+        "view": "the arms and round hands", "what": "the two gloves",
+        "one": "glove (one round, mitten-like glove, its cuff at the wrist)",
+        "fit": "One glove on each hand, exactly where its hand is, covering the whole round hand and the wrist and only a "
+               "little bigger than the hand: small, simple, rounded MapleStory-style gloves.",
+        "designs": {"mittens": "red knitted mittens with a fluffy white cuff",
+                    "leather": "dark brown leather gloves with a tan cuff"}},
     "footwear": {
         "bones": ["near_foot", "far_foot"], "core": ["near_foot", "far_foot"], "whole": True, "nodes": {"near": "foot_front", "far": "foot_back"},
         "replaces": True, "angles": 15, "margin": 5, "view": "the lower legs and bare feet", "what": "the two shoes",
@@ -1017,9 +1055,13 @@ def design_part(out, slot_name, design):
         part, shift = _register(part, target, np.asarray(base)[..., 3] > 0)
         covered = float(((part[..., 3] > 0) & core).sum() / max(core.sum(), 1))
         why = "too small, away from the body" if covered < 0.8 else ""
-        if not why and slot.get("whole"):  # each piece against the bare body piece it covers
-            for c in _components(part[..., 3] > 0, 6)[:len(slot["bones"])]:
-                bone = max(slot["bones"], key=lambda n: int((c & (base_owner == n)).sum()))
+        if not why and slot.get("whole") and slot["bones"][0].endswith("_foot"):  # a shoe against its bare foot
+            split = _owners(part, body, stand, slot["bones"], True)
+            for bone in slot["bones"]:
+                c = split == bone
+                if not c.any():
+                    why, covered = f"no {bone.replace('_', ' ')} piece", min(covered, 0.79)
+                    break
                 L = stand["legs"][bone.split("_")[0]]  # the skeleton's foot: labels spill where the feet overlap
                 ratio = (np.ptp(np.nonzero(c.any(0))[0]) + 1) / (abs(L["toe"][0] - L["heel"][0]) + 1)
                 if not 0.95 <= ratio <= 1.4:
@@ -1104,7 +1146,7 @@ def _block_reduce(drawn_path, sheet_path, origin, scale, crop, share=0.12):
             x0, y0 = int(round(origin[0]*ratio + i*step)), int(round(origin[1]*ratio + j*step))
             x1, y1 = int(round(origin[0]*ratio + (i + 1)*step)), int(round(origin[1]*ratio + (j + 1)*step))
             block, empty = cell[y0:y1, x0:x1, :3].reshape(-1, 3), key[y0:y1, x0:x1].reshape(-1)
-            if block.size == 0 or (~empty).mean() < share:
+            if block.size == 0 or (~empty).mean() < share or not (0 <= crop[1] + j < CANVAS and 0 <= crop[0] + i < CANVAS):
                 continue
             ink = block[~empty]
             codes = (ink[:, 0] >> 4)*256 + (ink[:, 1] >> 4)*16 + (ink[:, 2] >> 4)
@@ -1280,14 +1322,21 @@ ANGLE_PROMPT = (
     "every cell exactly in place; keep this {w}x{h} image and its grid exactly.")
 
 
-def _foot_turns(out, stand):
-    """Every foot angle a pose uses, against the standing near foot, in degrees."""
+def _turn_of(pose, stand, bone, master):
+    """How far a pose turns `bone` from the standing `master` bone, in degrees."""
+    a, b = _bones(pose)[bone][:2]
+    a0, b0 = _bones(stand)[master][:2]
+    return float(np.degrees(_angle(a, b) - _angle(a0, b0)) + 180) % 360 - 180
+
+
+def _bone_turns(out, stand, bones, master):
+    """Every angle the poses turn the slot's bones to, against the standing master bone."""
     turns = []
     for cycle_name in CYCLES:
         path = out / cycle_name / "skeleton.json"
         if path.exists():
             for pose in json.loads(path.read_text())["poses"]:
-                turns += [pose["legs"][s]["foot_turn"] - stand["legs"]["near"]["foot_turn"] for s in ("near", "far")]
+                turns += [_turn_of(pose, stand, b, master) for b in bones]
     return turns
 
 
@@ -1301,21 +1350,25 @@ def design_angles(out, slot_name, design):
     folder = out / "parts" / slot_name / design
     work = folder / "angles"
     work.mkdir(exist_ok=True)
-    master = np.asarray(Image.open(folder / "piece-near_foot.png").convert("RGBA"))
+    near = slot["bones"][0]  # the near piece is the master; the far one is the same drawing, shaded
+    master = np.asarray(Image.open(folder / f"piece-{near}.png").convert("RGBA"))
     palette = np.array(json.loads((folder / "design.json").read_text())["palette"])
-    ankle = np.array(stand["legs"]["near"]["ankle"], float)
+    ankle = np.array(_bones(stand)[near][0], float)  # the bone's root (ankle, wrist): every drawing turns about it
     step = slot["angles"]
-    bins = sorted({int(round(t / step))*step for t in _foot_turns(out, stand)} | {0})
+    bins = sorted({int(round(t / step))*step for t in _bone_turns(out, stand, slot["bones"], near)} | {0})
     up = _upsampled(master)
     roughs = {b: _warp(up, np.radians(b), ankle, ankle) for b in bins}
     boxes = np.array([Image.fromarray(r).getbbox() for r in roughs.values()])
-    crop = (int(boxes[:, 0].min()) - 3, int(boxes[:, 1].min()) - 3, int(boxes[:, 2].max()) + 3, int(boxes[:, 3].max()) + 3)
+    crop = (max(int(boxes[:, 0].min()) - 3, 0), max(int(boxes[:, 1].min()) - 3, 0),
+            min(int(boxes[:, 2].max()) + 3, CANVAS), min(int(boxes[:, 3].max()) + 3, CANVAS))
     scale = int(np.clip(300 // max(crop[2] - crop[0], crop[3] - crop[1]), 6, 14))
     sheet, origins = _sheet([Image.fromarray(roughs[b]) for b in bins], scale, 4, crop=crop)
     sheet.save(work / "sheet.png")
     design_view = Image.open(out / "base.png").convert("RGBA")
     design_view.alpha_composite(Image.open(folder / "design.png").convert("RGBA"))
     box = Image.open(folder / "design.png").getbbox()
+    near_box = Image.fromarray(master).getbbox()
+    box = (min(box[0], near_box[0]), min(box[1], near_box[1]), max(box[2], near_box[2]), max(box[3], near_box[3]))
     design_view.crop((box[0] - 4, box[1] - 8, box[2] + 4, box[3] + 3)).resize(
         ((box[2] - box[0] + 8)*scale, (box[3] - box[1] + 11)*scale), Image.Resampling.NEAREST).save(work / "design.png")
     drawn = _draw(ANGLE_PROMPT.format(one=slot["one"], style=STYLE.format(px=scale), w=sheet.width, h=sheet.height),
@@ -1357,8 +1410,8 @@ def _far_shade_of(out):
 
 
 def pose_angles(out, slot_name, design, pose):
-    """Both feet of a pose from the angle drawings: the nearest angle, moved so its ankle is the foot's (no
-    rotation), kept out of the ground; the far one shaded as the far limbs are."""
+    """A rigid pair (feet, hands) of a pose from the angle drawings: the nearest angle, moved so its root is the
+    bone's (no rotation), kept out of the ground; the far one shaded as the far limbs are."""
     folder = out / "parts" / slot_name / design / "angles"
     meta = json.loads((folder / "angles.json").read_text())
     info = json.loads((out / "body.json").read_text())
@@ -1368,11 +1421,13 @@ def pose_angles(out, slot_name, design, pose):
     canvas = np.zeros((CANVAS, CANVAS, 4), np.uint8)
     owner = np.full((CANVAS, CANVAS), "", dtype=object)
     shade = _far_shade_of(out)
-    for side in ("far", "near"):
-        turn = pose["legs"][side]["foot_turn"] - stand["legs"]["near"]["foot_turn"]
+    bones = SLOTS[slot_name]["bones"]
+    for bone in sorted(bones, key=lambda n: not n.startswith("far")):
+        side = bone.split("_")[0]
+        turn = _turn_of(pose, stand, bone, bones[0])
         b = int(bins[np.abs(bins - turn).argmin()])
         image = np.asarray(Image.open(folder / f"{b}.png").convert("RGBA")).copy()
-        dx, dy = (int(v) for v in np.round(np.array(pose["legs"][side]["ankle"]) - pivot))
+        dx, dy = (int(v) for v in np.round(np.array(_bones(pose)[bone][0]) - pivot))
         image = np.roll(np.roll(image, dy, 0), dx, 1)
         rows = np.nonzero(image[..., 3].any(1))[0]
         if len(rows) and rows.max() > ground:
@@ -1380,7 +1435,7 @@ def pose_angles(out, slot_name, design, pose):
         if side == "far":
             image[..., :3] = np.clip(image[..., :3]*shade, 0, 255).astype(np.uint8)
         put = image[..., 3] > 0
-        canvas[put], owner[put] = image[put], f"{side}_foot"
+        canvas[put], owner[put] = image[put], bone
     return canvas, owner
 
 
@@ -1459,7 +1514,7 @@ def stage_dress(base_dir, looks=None):
                             layers.append((avatar.LAYERS.index(node), np.asarray(Image.open(file).convert("RGBA"))))
                         if SLOTS[slot_name].get("replaces"):
                             owner = _body_owner(frame, body_info, pose)
-                            frame[np.isin(owner.astype(str), ["near_foot", "far_foot"])] = 0
+                            frame[np.isin(owner.astype(str), SLOTS[slot_name]["bones"])] = 0
                 canvas = frame
                 body_at = avatar.LAYERS.index("root")
                 front = None
@@ -1495,13 +1550,13 @@ def _looks(out):
 # --- body segments: which piece each pixel is, from the skeleton -------------------------------------------
 # Body pieces back to front, each a label color; the feet are pieces of their own so footwear can
 # replace them (a shoe hides the whole bare foot, toes included, whatever its outline).
-SEGMENTS = {"arm_back": {"color": "#00a000", "provides": ["hand_back"]}, "leg_back": "#00ffff", "foot_back": "#0000ff",
+SEGMENTS = {"arm_back": "#00a000", "hand_back": "#005000", "leg_back": "#00ffff", "foot_back": "#0000ff",
             "root": "#ffff00", "leg_front": "#ff8000", "foot_front": "#ff0000",
-            "arm_front": {"color": "#ffffff", "provides": ["hand_front"]}}
+            "arm_front": "#ffffff", "hand_front": "#a0a0a0"}
 SEGMENT_OF = {"upper": "root"}  # bone -> body piece node
 for _side, _node in (("far", "back"), ("near", "front")):
     SEGMENT_OF |= {f"{_side}_thigh": f"leg_{_node}", f"{_side}_shin": f"leg_{_node}", f"{_side}_foot": f"foot_{_node}",
-                   f"{_side}_upper_arm": f"arm_{_node}", f"{_side}_forearm": f"arm_{_node}"}
+                   f"{_side}_upper_arm": f"arm_{_node}", f"{_side}_forearm": f"arm_{_node}", f"{_side}_hand": f"hand_{_node}"}
 
 
 def _moved(value, dx, dy):
