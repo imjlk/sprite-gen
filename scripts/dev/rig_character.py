@@ -77,6 +77,21 @@ BODIES["maple"] = {
     "foot_limit": 25,
     "stand": {"near": (20, 4, -16), "far": (-20, 4, 24), "arms": {"near": (20, 15), "far": (-40, 10)}},
 }
+# The Maple body for costumes: three-quarter, so a top has a front to show, and each limb hangs from its own
+# hip or shoulder - the near arm at the back edge of the torso, the far arm at the front edge, the legs side by
+# side - so sleeves, torso cloth and trouser legs barely overlap and each reads on its own.
+BODIES["maple34"] = dict(
+    BODIES["maple"],
+    prompt="a cute MapleStory-style character base mannequin, two heads tall: a big round head as tall as the whole "
+           "body below it, a small short body with its chest turned toward the viewer, short stubby arms hanging a "
+           "little away from the body (the near arm at the back of the torso, the far arm at the front of the chest), "
+           "short legs side by side and slightly apart, small round hands and feet, both feet pointing right",
+    view="MapleStory-style three-quarter view facing right (the head and the chest turned toward the viewer, the face "
+         "on the head's right half)",
+    head={"center": [64, 44], "radius": 21, "ear": [-11, 4]}, torso={"top": 17, "bottom": 16},
+    offsets={"shoulder": {"near": -8, "far": 8}, "hip": {"near": -3, "far": 3}},
+    stand={"near": (-8, 3, 11), "far": (10, 3, -7), "arms": {"near": (-10, 10), "far": (16, 12)}},
+)
 SIDE = "pure side view facing right"
 VIEW = {"text": SIDE, "style": ""}  # the character's own view and style, read from body.json by _out
 # Standing for the base: both feet and both hands in sight.
@@ -93,13 +108,18 @@ def stand_pose(body):
 # Few-frame cycles, near leg: thigh swing from vertical (deg, forward +), knee bend, foot pitch (toe up +).
 # The far leg runs half a cycle later; arms swing against their legs. `lift` raises the hip (flight, breath).
 CYCLES = {
-    "idle": {"legs": [(10, 4, 0)]*3, "far": [(-10, 4, 0)]*3, "arm_swing": 0.0, "arm": (22, 15), "elbow": 12,
+    "idle": {"stands": True, "legs": [(10, 4, 0)]*3, "far": [(-10, 4, 0)]*3, "arm_swing": 0.0, "arm": (22, 15), "elbow": 12,
              "lift": [0, -1, 0], "verb": "standing and breathing", "ms": 260},
     "walk": {"legs": [(22, 0, 12), (8, 10, 0), (-10, 4, -6), (-22, 22, -28), (-4, 40, -10), (16, 22, 4)],
              "arm_swing": 0.7, "elbow": 12, "lift": [0]*6, "verb": "walking", "ms": 130},
     "run": {"legs": [(30, 14, 6), (0, 26, 0), (-28, 30, -30), (-6, 95, -20), (30, 80, -6), (40, 24, 6)],
             "arm_swing": 1.0, "elbow": 70, "lift": [0, 0, 0, 3, 0, 3], "verb": "running", "ms": 90},
 }
+
+
+def _at(pose, joint, side):
+    """A side's own hip or shoulder (poses from before three-quarter bodies have only the middle one)."""
+    return pose.get(joint, {}).get(side, pose[joint[:-1]])
 
 
 def _turn(vector, degrees):
@@ -135,11 +155,15 @@ def skeleton(body, near, far, arms, lift=0):
     hip = [body["hip"][0], body["ground"] - lowest - lift]
     shift = hip[1] - body["hip"][1]
     shoulder = [body["shoulder"][0], body["shoulder"][1] + shift]
-    return {"hip": hip, "shift": shift, "shoulder": shoulder,
+    # A three-quarter body has width: each leg hangs from its own hip, each arm from its own shoulder.
+    off = body.get("offsets", {})
+    hips = {side: [hip[0] + off.get("hip", {}).get(side, 0), hip[1]] for side in ("near", "far")}
+    shoulders = {side: [shoulder[0] + off.get("shoulder", {}).get(side, 0), shoulder[1]] for side in ("near", "far")}
+    return {"hip": hip, "shift": shift, "shoulder": shoulder, "hips": hips, "shoulders": shoulders,
             "head": {"center": [body["head"]["center"][0], body["head"]["center"][1] + shift], "radius": body["head"]["radius"]},
             "neck": [body["neck"][0], body["neck"][1] + shift],
-            "legs": {"near": _leg(hip, near, body), "far": _leg(hip, far, body)},
-            "arms": {side: _arm(shoulder, *arms[side], body) for side in ("near", "far")}}
+            "legs": {side: _leg(hips[side], legs, body) for side, legs in (("near", near), ("far", far))},
+            "arms": {side: _arm(shoulders[side], *arms[side], body) for side in ("near", "far")}}
 
 
 def draw_guide(body, pose, upper=None):
@@ -150,13 +174,13 @@ def draw_guide(body, pose, upper=None):
 
     def leg(side, color):
         L = pose["legs"][side]
-        draw.line([tuple(pose["hip"]), tuple(L["knee"])], fill=(*color, 255), width=w["thigh"])
+        draw.line([tuple(_at(pose, "hips", side)), tuple(L["knee"])], fill=(*color, 255), width=w["thigh"])
         draw.line([tuple(L["knee"]), tuple(L["ankle"])], fill=(*color, 255), width=w["shin"])
         draw.polygon([tuple(L["ankle"]), tuple(L["heel"]), tuple(L["toe"])], fill=(*color, 255))
 
     def arm(side, color):
         A = pose["arms"][side]
-        draw.line([tuple(pose["shoulder"]), tuple(A["elbow"]), tuple(A["wrist"])], fill=(*color, 255), width=w["arm"])
+        draw.line([tuple(_at(pose, "shoulders", side)), tuple(A["elbow"]), tuple(A["wrist"])], fill=(*color, 255), width=w["arm"])
 
     arm("far", FAR_ARM)
     leg("far", FAR)
@@ -330,8 +354,8 @@ def follows(image, body, pose):
     for side in ("near", "far"):
         L = pose["legs"][side]
         A = pose["arms"][side]
-        for name, (a, b) in {f"{side}_thigh": (pose["hip"], L["knee"]), f"{side}_shin": (L["knee"], L["ankle"]),
-                             f"{side}_foot": (L["heel"], L["toe"]), f"{side}_arm": (pose["shoulder"], A["wrist"])}.items():
+        for name, (a, b) in {f"{side}_thigh": (_at(pose, "hips", side), L["knee"]), f"{side}_shin": (L["knee"], L["ankle"]),
+                             f"{side}_foot": (L["heel"], L["toe"]), f"{side}_arm": (_at(pose, "shoulders", side), A["wrist"])}.items():
             pts = [np.array(a) + (np.array(b) - np.array(a))*t for t in np.linspace(0.15, 0.85, 12)]
             hit = [alpha[int(round(p[1])), int(round(p[0]))] if 0 <= p[0] < CANVAS and 0 <= p[1] < CANVAS else False for p in pts]
             result[name] = round(float(np.mean(hit)), 2)
@@ -344,6 +368,11 @@ def cycle_poses(body, cycle):
     for t in range(n):
         near = cycle["legs"][t]
         far = cycle["far"][t] if "far" in cycle else cycle["legs"][(t + n//2) % n]
+        if cycle.get("stands") and "stand" in body:  # a body with its own stand idles in it
+            s = body["stand"]
+            poses.append(skeleton(body, tuple(s["near"]), tuple(s["far"]), {k: tuple(v) for k, v in s["arms"].items()},
+                                  cycle["lift"][t]))
+            continue
         if "arm" in cycle:
             arms = {"near": cycle["arm"], "far": (-cycle["arm"][0], cycle["arm"][1])}
         else:
@@ -425,10 +454,10 @@ def _bones(pose):
     bones = {}
     for side, layer in (("far", 0), ("near", 3)):
         L, A = pose["legs"][side], pose["arms"][side]
-        bones[f"{side}_thigh"] = (pose["hip"], L["knee"], layer + (0.2 if side == "far" else 0.5))
+        bones[f"{side}_thigh"] = (_at(pose, "hips", side), L["knee"], layer + (0.2 if side == "far" else 0.5))
         bones[f"{side}_shin"] = (L["knee"], L["ankle"], layer + 0.1)
         bones[f"{side}_foot"] = (L["ankle"], L["toe"], layer + 0.15)
-        bones[f"{side}_upper_arm"] = (pose["shoulder"], A["elbow"], layer + (-0.5 if side == "far" else 1.0))
+        bones[f"{side}_upper_arm"] = (_at(pose, "shoulders", side), A["elbow"], layer + (-0.5 if side == "far" else 1.0))
         bones[f"{side}_forearm"] = (A["elbow"], A["wrist"], layer + (-0.4 if side == "far" else 1.1))
     return bones
 
@@ -665,6 +694,15 @@ def _components(mask, minimum=1):
     return sorted((c for c in components(mask) if c.sum() >= minimum), key=lambda c: -int(c.sum()))
 
 
+def _body_owner(rgba, body, pose):
+    """A body frame's bones, every pixel past the ankle given to the foot (heel and toe tips included), so a
+    shoe that replaces the foot hides all of the bare foot."""
+    owner = _owners(rgba, body, pose)
+    for side in ("near", "far"):
+        owner[_foot_mask(owner, pose, side)] = f"{side}_foot"
+    return owner
+
+
 def _foot_mask(owner, pose, side):
     """A leg's foot: its pixels past the plane through the ankle across the shin (heel and its outline
     included, unlike the nearest-bone split)."""
@@ -688,11 +726,13 @@ SLOTS = {
         "bones": ["upper"], "zone": "head", "core": ["upper"], "core_zone": "crown", "rim": 3, "nodes": {"upper": "hair"}, "margin": 12,
         "view": "the head and shoulders", "what": "the hair",
         "fit": "The hair sits on its bald head as the hairstyle does: it hugs the skull outline exactly - no gap of bald "
-               "scalp between the hair and the head's outline - and leaves the face (the right side of the head) open "
-               "below the bangs; it may cover the ear.",
+               "scalp between the hair and the head's outline. The whole face stays open: bangs stop well above where "
+               "the eyes go (the middle of the face, on the head's right half), and no hair falls across the cheeks or "
+               "the front of the face; side hair stays behind the face, toward the back of the head. It may cover the "
+               "ear.",
         "designs": {"bob": "a chin-length chestnut-brown bob with straight-cut bangs, a 4-step warm brown ramp",
-                    "ponytail": "glossy black hair with side-swept bangs, pulled back into a high ponytail that hangs "
-                                "behind the head down to the nape"}},
+                    "ponytail": "glossy black hair with short side-swept bangs, all the rest pulled back into a ponytail "
+                                "tied at the back of the head that hangs down behind it to the nape"}},
     "expression": {
         "bones": ["upper"], "zone": "head", "nodes": {"upper": "eyes"}, "sheet": True, "margin": 3, "what": "the face",
         "fit": "a MapleStory-style face: big glossy dark-brown eyes with a white highlight, short soft brows, a small "
@@ -807,7 +847,9 @@ def _torso_mask(body, stand, grow=2):
     """The skeleton's torso shape (the guide's), a little grown: the body there is torso even where an arm
     hid it on the base."""
     image = Image.new("L", (CANVAS, CANVAS))
-    top, bottom = body["torso"]["top"] + grow*2, body["torso"]["bottom"] + grow*2
+    span = body.get("offsets", {}).get("shoulder", {})  # a three-quarter torso reaches its shoulders
+    top = max(body["torso"]["top"], abs(span.get("far", 0) - span.get("near", 0)) + body["width"]["arm"]) + grow*2
+    bottom = body["torso"]["bottom"] + grow*2
     (sx, sy), (hx, hy) = stand["shoulder"], stand["hip"]
     ImageDraw.Draw(image).polygon([(sx - top/2, sy - 3), (sx + top/2, sy - 3), (hx + bottom/2, hy + 2),
                                    (hx - bottom/2, hy + 2)], fill=255)
@@ -967,8 +1009,8 @@ def design_part(out, slot_name, design):
         if not why and slot.get("whole"):  # each piece against the bare body piece it covers
             for c in _components(part[..., 3] > 0, 6)[:len(slot["bones"])]:
                 bone = max(slot["bones"], key=lambda n: int((c & (base_owner == n)).sum()))
-                cols = np.nonzero((base_owner == bone).any(0))[0]
-                ratio = (np.ptp(np.nonzero(c.any(0))[0]) + 1) / max(np.ptp(cols) + 1, 1)
+                L = stand["legs"][bone.split("_")[0]]  # the skeleton's foot: labels spill where the feet overlap
+                ratio = (np.ptp(np.nonzero(c.any(0))[0]) + 1) / (abs(L["toe"][0] - L["heel"][0]) + 1)
                 if not 0.95 <= ratio <= 1.4:
                     why = f"{'too short' if ratio < 0.95 else 'too long'} against the foot ({ratio:.2f}x)"
                     covered = min(covered, 0.79)
@@ -1209,6 +1251,7 @@ def stage_mend(base_dir, slot_name, design):
             image[dropped] = rough[dropped]
             alpha = image[..., 3] > 0
             node_of = _spread_owner(np.where(alpha, owner, ""), alpha)
+            image, node_of = _despeckle(image, node_of)
             Image.fromarray(image).save(work / f"{t}.png")
             for node in nodes:
                 Image.fromarray(np.where((node_of == node)[..., None], image, 0).astype(np.uint8)).save(work / f"{t}-{node}.png")
@@ -1330,6 +1373,15 @@ def pose_angles(out, slot_name, design, pose):
     return canvas, owner
 
 
+def _despeckle(canvas, owner, minimum=6):
+    """Islands of a few pixels cut off from the rest of a posed part (a turned piece's stray corner) dropped."""
+    alpha = canvas[..., 3] > 0
+    for c in _components(alpha):
+        if c.sum() < minimum:
+            canvas[c], owner[c] = 0, ""
+    return canvas, owner
+
+
 def stage_part(base_dir, slot_name, design):
     """A part on every frame: designed once, its bone pieces posed as the body's are, split by body node."""
     out = _out(base_dir)
@@ -1363,6 +1415,7 @@ def stage_part(base_dir, slot_name, design):
             frame = np.asarray(Image.open(out / cycle_name / f"frame-{t}.png").convert("RGBA"))
             canvas, owner = _fit(canvas, owner, frame, body, stand, pose)
             canvas[body["ground"] + 1:], owner[body["ground"] + 1:] = 0, ""
+            canvas, owner = _despeckle(canvas, owner)
             Image.fromarray(canvas).save(work / f"{t}.png")
             for node in sorted(set(slot["nodes"].values())):
                 mask = np.isin(owner.astype(str), [b for b in pieces if _slot_node(slot, b) == node])
@@ -1394,7 +1447,7 @@ def stage_dress(base_dir, looks=None):
                         if file.exists():
                             layers.append((avatar.LAYERS.index(node), np.asarray(Image.open(file).convert("RGBA"))))
                         if SLOTS[slot_name].get("replaces"):
-                            owner = _owners(frame, body_info, pose)
+                            owner = _body_owner(frame, body_info, pose)
                             frame[np.isin(owner.astype(str), ["near_foot", "far_foot"])] = 0
                 canvas = frame
                 body_at = avatar.LAYERS.index("root")
@@ -1474,7 +1527,7 @@ def stage_segments(base_dir, prefix):
         for k, sample in enumerate(clip["samples"]):
             pose = _moved(poses[mapping["starts"][state][k] % len(poses)], *mapping["shifts"][state])
             pixels = np.asarray(load(motion, sample["image"]).convert("RGBA"))
-            owner = _owners(pixels, body, pose)
+            owner = _body_owner(pixels, body, pose)
             paint = np.zeros_like(pixels)
             for bone, node in SEGMENT_OF.items():
                 paint[owner == bone] = (*rgb[node], 255)
