@@ -895,14 +895,19 @@ def _dilate(mask, n=1):
     return mask
 
 
-def _register(part, target, body_alpha, reach=8):
+def _register(part, target, body_alpha, reach=8, core=None):
     """A drawn part moved by whole pixels onto the base: most of its target covered, least of the rest of the
-    body (the model shifts its output a few pixels)."""
+    body (the model shifts its output a few pixels). With a `core` (what the part must cover - a hair's crown,
+    not the whole head with its face), the core is what counts, and each pixel moved costs 2% of it: the
+    model's own placement is usually right, and covering more of a big target (the face) is not better."""
     alpha = np.asarray(part)[..., 3] > 0
     other = body_alpha & ~_dilate(target, 1)
+    goal = target if core is None else core
+    cost = 0 if core is None else 0.02*int(core.sum())
     def score(d):
         a = np.roll(np.roll(alpha, d[1], 0), d[0], 1)
-        return int((a & target).sum()) - 0.5*int((a & other).sum()), -abs(d[0]) - abs(d[1])
+        return (int((a & goal).sum()) - 0.5*int((a & other).sum()) - cost*(abs(d[0]) + abs(d[1])),
+                -abs(d[0]) - abs(d[1]))
     best = max(((dx, dy) for dy in range(-reach, reach + 1) for dx in range(-reach, reach + 1)), key=score)
     return np.roll(np.roll(np.asarray(part), best[1], 0), best[0], 1), best
 
@@ -1084,7 +1089,7 @@ def design_part(out, slot_name, design):
         for c in _components(part[..., 3] > 0):
             if c.sum() < 4:  # specks
                 part[c] = 0
-        part, shift = _register(part, target, np.asarray(base)[..., 3] > 0)
+        part, shift = _register(part, target, np.asarray(base)[..., 3] > 0, core=core)
         covered = float(((part[..., 3] > 0) & core).sum() / max(core.sum(), 1))
         why = "too small, away from the body" if covered < 0.8 else ""
         if not why and slot.get("whole") and slot["bones"][0].endswith("_foot"):  # a shoe against its bare foot
