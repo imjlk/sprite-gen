@@ -103,7 +103,10 @@ _HEAD_WORDS = ("a big MapleStory-style head that fills the grey head shape exact
                "NOT a ball")
 BODIES["maple_a"] = dict(
     BODIES["maple34h"],
-    head={"center": [64, 44], "radius": 22, "rx": 23, "ry": 20, "jaw": 0.6, "chin": 2, "ear": [-12, 4]},
+    # The ear a third of the way in from the back, at eye level, inside the outline: on the outline (where the
+    # model drew it for [-12, 4]) it read as a bump on the back of the head, and long hair had no room behind it.
+    head={"center": [64, 44], "radius": 22, "rx": 23, "ry": 20, "jaw": 0.6, "chin": 2, "ear": [-8, 5],
+          "ear_size": (1.5, 2.5)},
     prompt=BODIES["maple34h"]["prompt"].replace("a big round head", _HEAD_WORDS.format(
         shape="wider than tall, a soft rounded-square shape with full cheeks and a gently squared jaw, the chin a "
               "little toward the face")),
@@ -232,7 +235,8 @@ def draw_guide(body, pose, upper=None):
                      fill=(*TORSO, 255))
         _draw_head(draw, body["head"], cx, cy, r)
         ex, ey = cx + body["head"]["ear"][0], cy + body["head"]["ear"][1]
-        draw.ellipse((ex - 2, ey - 3, ex + 2, ey + 3), fill=(*EAR, 255))
+        ew, eh = body["head"].get("ear_size", (2, 3))
+        draw.ellipse((ex - ew, ey - eh, ex + ew, ey + eh), fill=(*EAR, 255))
     else:
         image.alpha_composite(upper, (0, int(round(pose["shift"]))))
     leg("near", NEAR)
@@ -353,7 +357,8 @@ BASE_PROMPT = (
     "far arm, the green line the ground.\n\n"
     "Draw on exactly this guide {who}, standing. The head fills the grey circle, the face toward the right; its one "
     "visible ear sits exactly on the small dark grey mark - a little behind the middle of the head, level with where "
-    "the eyes would be, never down by the jaw or neck. Completely bald, a blank face: NO eyes, NO eyebrows, NO mouth, "
+    "the eyes would be, never down by the jaw or neck, and well inside the head's outline: the head's back edge runs "
+    "on behind the ear, the ear never sits on that edge or sticks out past it. Completely bald, a blank face: NO eyes, NO eyebrows, NO mouth, "
     "NO hair (features are separate layers); the torso fills the grey "
     "shape; every limb lies along its stick - thigh, knee, shin, ankle and foot exactly where the stick and foot shape "
     "put them, both feet flat on the green line; each arm along its stick with a small hand at its end. The near limbs "
@@ -800,11 +805,23 @@ SLOTS = {
         "fit": "The hair sits on its bald head as the hairstyle does: it hugs the skull outline exactly - no gap of bald "
                "scalp between the hair and the head's outline. The whole face stays open: bangs stop well above where "
                "the eyes go (the middle of the face, on the head's right half), and no hair falls across the cheeks or "
-               "the front of the face; side hair stays behind the face, toward the back of the head. It may cover the "
-               "ear.",
+               "the front of the face; side hair stays behind the face, toward the back of the head. Unless told otherwise "
+               "below, it may cover the ear.",
         "designs": {"bob": "a chin-length chestnut-brown bob with straight-cut bangs, a 4-step warm brown ramp",
                     "ponytail": "glossy black hair with short side-swept bangs, all the rest pulled back into a ponytail "
-                                "tied at the back of the head that hangs down behind it to the nape"}},
+                                "tied at the back of the head that hangs down behind it to the nape",
+                    # ear-showing styles, to settle where the ear sits
+                    "long_ear": {"desc": "long straight honey-blonde hair falling down the back past the shoulders, with "
+                                         "soft bangs, tucked behind the ear",
+                                 "fit": "The ear stays fully visible: the side hair is tucked behind the ear - it runs "
+                                        "from the temple over the top of the ear, then down behind it onto the back - so "
+                                        "every pixel of the ear and a thin line of skin around it stay uncovered; the "
+                                        "long hair hangs down the back of the head and the back, behind the ear.",
+                                 "below": 34, "show_ear": True},
+                    "short_ear": {"desc": "a short dark-brown pixie cut with a soft side-swept fringe, cropped above and "
+                                          "around the ear",
+                                  "fit": "The ear stays fully visible: the hair is cut short above and around the ear and "
+                                         "leaves the whole ear uncovered - draw no hair over it.", "show_ear": True}}},
     "expression": {
         "bones": ["upper"], "zone": "head", "nodes": {"upper": "eyes"}, "sheet": True, "margin": 3, "what": "the face",
         "fit": "a MapleStory-style face: big glossy dark-brown eyes with a white highlight, short soft brows, a small "
@@ -864,6 +881,12 @@ REDO_NOTE = (" A first try drew it {why}. The thin cyan line in image 1 outlines
              "everything inside it (the item may reach past it where the design does) at full body size, and do not "
              "draw the cyan line.")
 CYAN = (0, 255, 255)
+
+
+def _design(slot, design):
+    """A slot's design as {"desc", optional "fit" words added to the slot's, optional "below" px of extra reach}."""
+    spec = slot["designs"][design]
+    return {"desc": spec} if isinstance(spec, str) else spec
 
 
 def _slot_node(slot, bone):
@@ -965,6 +988,29 @@ def _far_from_near(pieces, base, body, stand):
     return rebuilt
 
 
+def _ear_mask(body, stand):
+    """The template ear (its guide mark grown by a pixel): what an ear-showing hairstyle keeps clear."""
+    ex = stand["head"]["center"][0] + body["head"]["ear"][0]
+    ey = stand["head"]["center"][1] + body["head"]["ear"][1]
+    ew, eh = body["head"].get("ear_size", (2, 3))
+    ys, xs = np.mgrid[0:CANVAS, 0:CANVAS]
+    return ((xs + 0.5 - ex) / (ew + 1.5))**2 + ((ys + 0.5 - ey) / (eh + 1.5))**2 <= 1
+
+
+def _clear_ear(part, ear):
+    """Hair drawn over the ear taken off it, the cut edge closed with the hair's darkest color."""
+    part = part.copy()
+    alpha = part[..., 3] > 0
+    if not (alpha & ear).any():
+        return part
+    colors = part[alpha][:, :3].astype(int)
+    dark = colors[(colors @ np.array([299, 587, 114])).argmin()]
+    part[ear] = 0
+    edge = (part[..., 3] > 0) & _dilate(ear, 1)
+    part[edge, :3] = dark
+    return part
+
+
 def _rim(part, base, core, n):
     """A head-covering part grown up to `n` pixels over the bare head next to it: models draw held hair a
     pixel or two inside the skull, and a bald ring shows. New pixels on the head's outline take the part's
@@ -1023,7 +1069,7 @@ def _design_cells(out, slot, design, folder, base, base_owner, body, stand, crop
     sheet, origins = _sheet(images, scale, len(images), crop=crop)
     sheet.save(folder / "sheet.png")
     cells = "; ".join(f"cell {k + 1}{' (left)' if k == 0 else ''}: {c['ask']}" for k, c in enumerate(slot["cells"]))
-    drawn = _draw(CELLS_PROMPT.format(n=len(images), what=slot["what"], desc=slot["designs"][design], fit=slot["fit"],
+    drawn = _draw(CELLS_PROMPT.format(n=len(images), what=slot["what"], desc=_design(slot, design)["desc"], fit=slot["fit"],
                                       cells=cells, style=STYLE.format(px=scale), w=sheet.width, h=sheet.height),
                   folder, folder / "sheet.png", [], "drawn")
     pieces, palettes, shifts = {}, [], []
@@ -1059,12 +1105,17 @@ def design_part(out, slot_name, design):
     target = _target(slot, base_owner, stand)
     ys, xs = np.nonzero(target)
     m = slot["margin"]
+    spec = _design(slot, design)
     crop = (max(int(xs.min()) - m, 0), max(int(ys.min()) - m, 0), min(int(xs.max()) + m + 1, CANVAS),
-            min(int(ys.max()) + m + 1, CANVAS))
+            min(int(ys.max()) + m + 1 + spec.get("below", 0), CANVAS))
     scale = int(np.clip(768 // max(crop[2] - crop[0], crop[3] - crop[1]), 4, 16))
     core = _target(dict(slot, bones=slot["core"], zone=slot.get("core_zone", slot.get("zone"))), base_owner, stand)
-    prompt = PART_PROMPT.format(view=slot["view"], what=slot["what"], desc=slot["designs"][design], fit=slot["fit"],
-                                style=STYLE.format(px=scale))
+    prompt = PART_PROMPT.format(view=slot["view"], what=slot["what"], desc=spec["desc"],
+                                fit=(slot["fit"] + " " + spec.get("fit", "")).strip(), style=STYLE.format(px=scale))
+    ear = _ear_mask(body, stand)
+    if spec.get("show_ear"):
+        prompt += (" The thin cyan ring in image 1 goes round the ear: leave everything inside it uncovered (the hair "
+                   "goes round and behind it), and do not draw the cyan ring.")
     rounds, best = [], None
     if slot.get("cells"):
         part, pieces, palette, shift = _design_cells(out, slot, design, folder, base, base_owner, body, stand, crop, scale)
@@ -1073,13 +1124,14 @@ def design_part(out, slot_name, design):
         best = (covered, part, palette, shift)
     for k in range(0 if slot.get("cells") else 3):  # a first drawing, then up to two redraws over the outlined core
         name = "sheet" if k == 0 else f"sheet-{k + 1}"
-        if k == 0:
-            image = base
-        else:
-            edge = _dilate(core, 1) & ~core
-            guide = np.asarray(base).copy()
-            guide[edge] = (*CYAN, 255)
-            image = Image.fromarray(guide)
+        guide = np.asarray(base).copy()
+        if k > 0:
+            guide[_dilate(core, 1) & ~core] = (*CYAN, 255)
+        if spec.get("show_ear"):  # a cyan ring round the ear marks it as kept clear
+            ring = _dilate(ear, 1) & ~ear
+            guide[ring] = (*CYAN, 255)
+        image = Image.fromarray(guide)
+        if k > 0:
             prompt += REDO_NOTE.format(why=rounds[-1]["why"], what=slot["what"])
         sheet, origins = _sheet([image], scale, 1, crop=crop, gutter=0)
         sheet.save(folder / f"{name}.png")
@@ -1112,6 +1164,8 @@ def design_part(out, slot_name, design):
     _, part, palette, shift = best  # the round that covered most, not merely the last
     if slot.get("rim"):
         part = _rim(part, base, core, slot["rim"])
+    if spec.get("show_ear"):
+        part = _clear_ear(part, ear)
     if not slot.get("cells"):
         pieces = _cut_on_body(part, base_owner, body, stand, slot)
     if slot.get("fill") and "upper" in pieces:
