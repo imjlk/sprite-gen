@@ -446,43 +446,76 @@ EDIT_PROMPT = (
 EDIT_EAR = ("- The ear: erase the current ear completely (paint that spot as the bald head's own skin and shading, the "
             "head's outline running on smoothly) and draw one small ear inside the thin cyan ring instead - inside the "
             "head's outline, never on its edge; remove the cyan ring.")
-EDIT_LEGS = ("- The legs: redraw both legs smooth - clean, continuous outlines from the shorts down to the ankles, no "
-             "bumps or notches at the knees, softly rounded calves - at the same length, place and pose, the same "
-             "skin colors and the far leg still a little darker.")
+EDIT_LEGS = ("- The legs: redraw both legs smooth and slim - clean, continuous outlines from the shorts down to the "
+             "ankles, no bumps or notches at the knees; each leg tapers evenly: the thigh the thickest part, the calf "
+             "a little thinner than the thigh (never thicker), the ankle thinnest - at the same length, place and "
+             "pose, the same skin colors and the far leg still a little darker.")
 
 
-def stage_edit(base_dir):
-    """The base edited by the model instead of drawn again (a new drawing changes the whole character): the
-    ear moved to the template's ear mark and the legs made smooth; only the back of the head and the legs below
-    the shorts are taken from the edit - the face, torso and arms stay the base's own pixels."""
+EDIT_LEG_GUIDE = ("- The legs: redraw both legs to fill exactly the thin cyan outlines - each thigh the thickest "
+                  "part, the calf thinner than the thigh, tapering evenly to the ankle - with smooth continuous "
+                  "outlines, no bumps or notches; the same skin colors, the far leg still a little darker; remove "
+                  "the cyan lines.")
+EDITS = {"ear": EDIT_EAR, "legs": EDIT_LEGS, "leg_shape": EDIT_LEG_GUIDE}
+LEG_TAPER = {"hip": 10, "knee": 7.5, "ankle": 5}  # outer widths, outline included
+
+
+def _leg_shape(stand, side, taper=LEG_TAPER):
+    """A leg's wanted silhouette: a quad from the hip to the knee and from the knee to the ankle, tapering."""
+    from PIL import ImageDraw
+    image = Image.new("L", (CANVAS, CANVAS))
+    draw = ImageDraw.Draw(image)
+    L = stand["legs"][side]
+    points = [(np.array(_at(stand, "hips", side), float), taper["hip"]), (np.array(L["knee"], float), taper["knee"]),
+              (np.array(L["ankle"], float), taper["ankle"])]
+    for (a, wa), (b, wb) in zip(points, points[1:]):
+        u = (b - a) / max(np.hypot(*(b - a)), 1e-6)
+        n = np.array([-u[1], u[0]])
+        draw.polygon([tuple(a + n*wa/2), tuple(b + n*wb/2), tuple(b - n*wb/2), tuple(a - n*wa/2)], fill=255)
+        draw.ellipse((b[0] - wb/2, b[1] - wb/2, b[0] + wb/2, b[1] + wb/2), fill=255)
+    return np.asarray(image) > 0
+
+
+def stage_edit(base_dir, what):
+    """The base edited by the model instead of drawn again (a new drawing changes the whole character): `ear`
+    moves the ear to the template's ear mark, `legs` makes the legs smooth and tapered. Only the region an edit
+    is about is taken from it (the back of the head; the legs below the shorts) - everything else stays the
+    base's own pixels. Each edit starts from the current base, which is kept aside first."""
     out = _out(base_dir)
     info = json.loads((out / "body.json").read_text())
     body, stand = info["body"], info["pose"]
     base = Image.open(out / "base.png").convert("RGBA")
-    if not (out / "base-before-edit.png").exists():
-        base.save(out / "base-before-edit.png")
-    base = Image.open(out / "base-before-edit.png").convert("RGBA")
+    k = len(list(out.glob("base-before-edit*.png")))
+    base.save(out / f"base-before-edit-{k}.png")
     palette = pixel_grid.read_palette(out / "base.palette.json")
-    ear = _ear_mask(body, stand)
     guide = np.asarray(base).copy()
-    guide[_dilate(ear, 1) & ~ear] = (*CYAN, 255)
+    if "ear" in what:
+        ear = _ear_mask(body, stand)
+        guide[_dilate(ear, 1) & ~ear] = (*CYAN, 255)
+    if "leg_shape" in what:  # the wanted legs outlined, below the shorts
+        rows = np.mgrid[0:CANVAS, 0:CANVAS][0] >= stand["hip"][1] + 3
+        for side in ("far", "near"):
+            shape = _leg_shape(stand, side)
+            guide[_dilate(shape, 1) & ~shape & rows] = (*CYAN, 255)
+    name = "-".join(what)
     sheet, origins = _sheet([Image.fromarray(guide)], 8, 1, gutter=0)
-    sheet.save(out / "edit-sheet.png")
-    drawn = _draw(EDIT_PROMPT.format(changes=EDIT_EAR + "\n" + EDIT_LEGS, style=STYLE.format(px=8)), out,
-                  out / "edit-sheet.png", [], "edit-drawn")
+    sheet.save(out / f"edit-{name}-sheet.png")
+    drawn = _draw(EDIT_PROMPT.format(changes="\n".join(EDITS[w] for w in what), style=STYLE.format(px=8)), out,
+                  out / f"edit-{name}-sheet.png", [], f"edit-{name}-drawn")
     box = base.getbbox()
-    edited, _ = _clean_native(drawn, out / "edit-sheet.png", origins[0], 8, palette=palette,
+    edited, _ = _clean_native(drawn, out / f"edit-{name}-sheet.png", origins[0], 8, palette=palette,
                               expect=(box[2] - box[0], box[3] - box[1]))
     edited, shift = _onto_guide(edited, base)
     ys, xs = np.mgrid[0:CANVAS, 0:CANVAS]
-    cx = stand["head"]["center"][0]
-    back_of_head = (ys <= stand["neck"][1]) & (xs < cx - 3)
-    legs = ys >= stand["hip"][1] + 3
-    take = back_of_head | legs
+    take = np.zeros((CANVAS, CANVAS), bool)
+    if "ear" in what:
+        take |= (ys <= stand["neck"][1]) & (xs < stand["head"]["center"][0] - 3)
+    if "legs" in what or "leg_shape" in what:
+        take |= ys >= stand["hip"][1] + 3
     merged = np.asarray(base).copy()
     merged[take] = np.asarray(edited)[take]
     Image.fromarray(merged).save(out / "base.png")
-    return {"shift": list(shift), "taken": int(take.sum())}
+    return {"edit": what, "shift": list(shift), "taken": int(take.sum())}
 
 
 def stage_calibrate(base_dir):
@@ -847,6 +880,7 @@ LIMBS_LEG = ["near_thigh", "near_shin", "far_thigh", "far_shin"]
 SLOTS = {
     "hair": {
         "bones": ["upper"], "zone": "head", "core": ["upper"], "core_zone": "crown", "rim": 3, "nodes": {"upper": "hair"}, "margin": 12,
+        "reduce": "block",
         "view": "the head and shoulders", "what": "the hair",
         "fit": "The hair sits on its bald head as the hairstyle does: it hugs the skull outline exactly - no gap of bald "
                "scalp between the hair and the head's outline. The whole face stays open: bangs stop well above where "
@@ -1043,16 +1077,70 @@ def _ear_mask(body, stand):
     return ((xs + 0.5 - ex) / (ew + 1.5))**2 + ((ys + 0.5 - ey) / (eh + 1.5))**2 <= 1
 
 
+def _tidy_strands(part, colors=16):
+    """A block-reduced drawing of strands (hair) on a small shared palette, gaps of a few pixels between
+    strands closed with the nearest strand color (the head showing through a pinhole read as a black fleck
+    once outlined), and a closed outline on the outer silhouette only - never round the gaps inside it."""
+    from sprite_gen.frames import extract
+    part = np.asarray(part).copy()
+    alpha = part[..., 3] > 0
+    for c in _components(~alpha):
+        if c.sum() <= 4 and not (c[0].any() or c[-1].any() or c[:, 0].any() or c[:, -1].any()):
+            ys, xs = np.nonzero(c)
+            for y, x in zip(ys, xs):
+                for dy, dx in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+                    if alpha[y + dy, x + dx]:
+                        part[y, x] = part[y + dy, x + dx]
+                        break
+    image = Image.fromarray(part)
+    palette = np.array(extract.build_shared_palette([image], colors))
+    image = pixel_grid.snap(image, palette)
+    snapped = np.asarray(image).copy()
+    alpha = snapped[..., 3] > 0
+    outer = ~alpha
+    for c in _components(~alpha):  # the background reaching the canvas edge is outside; enclosed gaps are not
+        if not (c[0].any() or c[-1].any() or c[:, 0].any() or c[:, -1].any()):
+            outer &= ~c
+    dark = min(palette.tolist(), key=lambda c: 299*c[0] + 587*c[1] + 114*c[2])
+    snapped[alpha & _dilate(outer, 1), :3] = dark
+    return snapped, palette
+
+
+def _drawn_ear(base, body, stand):
+    """The ear as the base draws it - its outline and inside, found around the template mark as the pixels that
+    are not the head's own skin - so a hair cut round it fits the ear, not the (smaller) template mark."""
+    rgba = np.asarray(base)
+    ys, xs = np.mgrid[0:CANVAS, 0:CANVAS]
+    head = (rgba[..., 3] > 0) & (ys <= stand["neck"][1])
+    inside = head & ~_dilate(~head, 1)
+    colors = rgba[..., :3].astype(int)
+    codes = colors[..., 0]*65536 + colors[..., 1]*256 + colors[..., 2]
+    values, counts = np.unique(codes[inside], return_counts=True)
+    skin = values[np.argsort(counts)[::-1][:6]]  # the head's commonest tones are its skin and shading
+    mark = _ear_mask(body, stand)
+    near = _dilate(mark, 4) & inside & ~np.isin(codes, skin)
+    parts = [c for c in _components(near) if (c & _dilate(mark, 1)).any()]
+    ear = np.any(parts, 0) if parts else mark
+    # fill the ear's inside (skin-colored pixels enclosed by its outline)
+    filled = ear.copy()
+    for c in _components(~ear & _dilate(ear, 3)):
+        if not (c & ~_dilate(ear, 2)).any():
+            filled |= c
+    return filled | mark
+
+
 def _clear_ear(part, ear):
-    """Hair drawn over the ear taken off it, the cut edge closed with the hair's darkest color."""
+    """Hair drawn over the ear taken off it with a pixel of skin round it, the cut edge closed with the hair's
+    darkest color - one ear in the opening, not the hair's cut edge crossing the ear's own outline."""
     part = part.copy()
     alpha = part[..., 3] > 0
-    if not (alpha & ear).any():
+    if not (alpha & _dilate(ear, 1)).any():
         return part
     colors = part[alpha][:, :3].astype(int)
     dark = colors[(colors @ np.array([299, 587, 114])).argmin()]
-    part[ear] = 0
-    edge = (part[..., 3] > 0) & _dilate(ear, 1)
+    opening = _dilate(ear, 1)
+    part[opening] = 0
+    edge = (part[..., 3] > 0) & _dilate(opening, 1)
     part[edge, :3] = dark
     return part
 
@@ -1158,7 +1246,7 @@ def design_part(out, slot_name, design):
     core = _target(dict(slot, bones=slot["core"], zone=slot.get("core_zone", slot.get("zone"))), base_owner, stand)
     prompt = PART_PROMPT.format(view=slot["view"], what=slot["what"], desc=spec["desc"],
                                 fit=(slot["fit"] + " " + spec.get("fit", "")).strip(), style=STYLE.format(px=scale))
-    ear = _ear_mask(body, stand)
+    ear = _drawn_ear(base, body, stand) if spec.get("show_ear") else _ear_mask(body, stand)
     if spec.get("show_ear"):
         prompt += (" The thin cyan ring in image 1 goes round the ear: leave everything inside it uncovered (the hair "
                    "goes round and behind it), and do not draw the cyan ring.")
@@ -1182,7 +1270,11 @@ def design_part(out, slot_name, design):
         sheet, origins = _sheet([image], scale, 1, crop=crop, gutter=0)
         sheet.save(folder / f"{name}.png")
         drawn = _draw(prompt, folder, folder / f"{name}.png", [], "drawn" if k == 0 else f"drawn-{k + 1}")
-        part, palette = _clean_native(drawn, folder / f"{name}.png", origins[0], scale, crop=crop, colors=16)
+        if slot.get("reduce") == "block":  # strands: the commonest color per block, the outer outline only
+            part = _block_reduce(drawn, folder / f"{name}.png", origins[0], scale, crop)
+            part, palette = _tidy_strands(part)
+        else:
+            part, palette = _clean_native(drawn, folder / f"{name}.png", origins[0], scale, crop=crop, colors=16)
         part = np.asarray(part).copy()
         for c in _components(part[..., 3] > 0):
             if c.sum() < 4:  # specks
@@ -1956,6 +2048,7 @@ if __name__ == "__main__":
     parser.add_argument("--body", default="slim", choices=tuple(BODIES))
     parser.add_argument("--cycle", default="walk", choices=tuple(CYCLES))
     parser.add_argument("--slot", default="footwear", choices=tuple(SLOTS))
+    parser.add_argument("--edit", default="legs", help="what the edit stage changes: ear, legs (comma-separated)")
     parser.add_argument("--design", help="one of the slot's designs (default: every one)")
     args = parser.parse_args()
     if args.stage == "base":
@@ -1967,7 +2060,7 @@ if __name__ == "__main__":
     elif args.stage == "calibrate":
         result = stage_calibrate(args.base)
     elif args.stage == "edit":
-        result = stage_edit(args.base)
+        result = stage_edit(args.base, args.edit.split(","))
     elif args.stage == "part":
         result = [stage_part(args.base, args.slot, d) for d in ([args.design] if args.design else SLOTS[args.slot]["designs"])]
     elif args.stage == "mend":
