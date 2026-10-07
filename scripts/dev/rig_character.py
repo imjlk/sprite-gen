@@ -460,7 +460,7 @@ EDIT_LEG_GUIDE = ("- The legs: redraw both legs to fill exactly the thin cyan ou
                   "outlines, no bumps or notches; the same skin colors, the far leg still a little darker; remove "
                   "the cyan lines.")
 EDITS = {"ear": EDIT_EAR, "legs": EDIT_LEGS, "leg_shape": EDIT_LEG_GUIDE}
-LEG_TAPER = {"hip": 10, "knee": 7, "ankle": 4.5}  # outer widths, outline included
+LEG_TAPER = {"hip": 10, "knee": 7, "ankle": 4}  # outer widths, outline included
 
 
 def _leg_shape(stand, side, taper=LEG_TAPER):
@@ -1083,7 +1083,7 @@ def _ear_mask(body, stand):
 def _tidy_strands(part, colors=16):
     """A reduced drawing of strands (hair) on a shared palette, gaps of a few pixels between
     strands closed with the nearest strand color (the head showing through a pinhole read as a black fleck
-    once outlined), and a closed outline on the outer silhouette only - never round the gaps inside it."""
+    once outlined). Its outline is closed later, where it meets the background (_outline_against)."""
     from sprite_gen.frames import extract
     part = np.asarray(part).copy()
     alpha = part[..., 3] > 0
@@ -1104,9 +1104,24 @@ def _tidy_strands(part, colors=16):
     for c in _components(~alpha):  # the background reaching the canvas edge is outside; enclosed gaps are not
         if not (c[0].any() or c[-1].any() or c[:, 0].any() or c[:, -1].any()):
             outer &= ~c
-    dark = min(palette.tolist(), key=lambda c: 299*c[0] + 587*c[1] + 114*c[2])
-    snapped[alpha & _dilate(outer, 1), :3] = dark
     return snapped, palette
+
+
+def _outline_against(part, body_alpha):
+    """A placed part's edge darkened only where it meets the background - not where it lies over the body (the
+    hair's edge over the face is the model's own line; a second dark ring there read as a thick band) - and
+    only on pixels not already dark."""
+    part = part.copy()
+    alpha = part[..., 3] > 0
+    if not alpha.any():
+        return part
+    luma = part[..., :3].astype(float) @ np.array([0.299, 0.587, 0.114])
+    colors = part[alpha][:, :3].astype(int)
+    dark = colors[(colors @ np.array([299, 587, 114])).argmin()]
+    background = ~alpha & ~body_alpha
+    edge = alpha & _dilate(background, 1) & (luma > np.percentile(luma[alpha], 20))
+    part[edge, :3] = dark
+    return part
 
 
 def _drawn_ear(base, body, stand):
@@ -1123,7 +1138,11 @@ def _drawn_ear(base, body, stand):
     mark = _ear_mask(body, stand)
     near = _dilate(mark, 4) & inside & ~np.isin(codes, skin)
     parts = [c for c in _components(near) if (c & _dilate(mark, 1)).any()]
-    ear = np.any(parts, 0) if parts else mark
+    ex = stand["head"]["center"][0] + body["head"]["ear"][0]
+    ey = stand["head"]["center"][1] + body["head"]["ear"][1]
+    ew, eh = body["head"].get("ear_size", (2, 3))
+    roomy = ((xs + 0.5 - ex) / (ew + 2.5))**2 + ((ys + 0.5 - ey) / (eh + 3))**2 <= 1
+    ear = (np.any(parts, 0) if parts else mark) | (roomy & inside)
     # fill the ear's inside (skin-colored pixels enclosed by its outline)
     filled = ear.copy()
     for c in _components(~ear & _dilate(ear, 3)):
@@ -1143,7 +1162,8 @@ def _clear_ear(part, ear):
     dark = colors[(colors @ np.array([299, 587, 114])).argmin()]
     opening = _dilate(ear, 1)
     part[opening] = 0
-    edge = (part[..., 3] > 0) & _dilate(opening, 1)
+    luma = part[..., :3].astype(float) @ np.array([0.299, 0.587, 0.114])
+    edge = (part[..., 3] > 0) & _dilate(opening, 1) & (luma > float(dark @ np.array([0.299, 0.587, 0.114])) + 30)
     part[edge, :3] = dark
     return part
 
@@ -1156,8 +1176,9 @@ def _rim(part, base, core, n):
     alpha = part[..., 3] > 0
     drawn = alpha.copy()
     body = np.asarray(base)[..., 3] > 0
+    rim = body & _dilate(~body, 2)  # within two pixels of the head's outline - never down over the forehead
     for _ in range(n):
-        grow = _dilate(alpha, 1) & core & body & ~alpha
+        grow = _dilate(alpha, 1) & core & rim & ~alpha
         for y, x in zip(*np.nonzero(grow)):
             for dy, dx in ((0, -1), (0, 1), (-1, 0), (1, 0)):
                 if 0 <= y + dy < CANVAS and 0 <= x + dx < CANVAS and alpha[y + dy, x + dx]:
@@ -1308,6 +1329,8 @@ def design_part(out, slot_name, design):
         part = _rim(part, base, core, slot["rim"])
     if spec.get("show_ear"):
         part = _clear_ear(part, ear)
+    if slot.get("reduce") == "strands":
+        part = _outline_against(part, np.asarray(base)[..., 3] > 0)
     if not slot.get("cells"):
         pieces = _cut_on_body(part, base_owner, body, stand, slot)
     if slot.get("fill") and "upper" in pieces:
