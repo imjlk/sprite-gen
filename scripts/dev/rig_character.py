@@ -74,6 +74,7 @@ BODIES["maple"] = {
     "ground": 116, "head": {"center": [64, 44], "radius": 21, "ear": [-9, 4]}, "neck": [64, 65], "shoulder": [64, 67],
     "hip": [64, 89], "torso": {"top": 14, "bottom": 15}, "thigh": 12, "shin": 11,
     "heel": [-3, 3], "toe": [7, 3], "upper_arm": 9, "forearm": 8, "width": {"thigh": 7, "shin": 6, "arm": 5},
+    "foot_limit": 25,
     "stand": {"near": (20, 4, -16), "far": (-20, 4, 24), "arms": {"near": (20, 15), "far": (-40, 10)}},
 }
 SIDE = "pure side view facing right"
@@ -114,6 +115,8 @@ def _leg(hip, pose, body):
     knee = np.array(hip) + _turn(down, -thigh_deg)*body["thigh"]
     ankle = knee + _turn(down, -(thigh_deg - knee_deg))*body["shin"]
     foot = -(thigh_deg - knee_deg) - pitch
+    if "foot_limit" in body:  # Maple style: the feet stay near level whatever the leg does
+        foot = float(np.clip(foot, -body["foot_limit"], body["foot_limit"]))
     return {"knee": knee.tolist(), "ankle": ankle.tolist(), "heel": (ankle + _turn(body["heel"], foot)).tolist(),
             "toe": (ankle + _turn(body["toe"], foot)).tolist(), "foot_turn": float(foot)}
 
@@ -699,7 +702,13 @@ SLOTS = {
                     "blink": "eyes closed as short downward curves, otherwise calm",
                     "surprised": "round wide eyes, a small round open mouth"}},
     "upper": {
-        "bones": ["upper"] + LIMBS_ARM, "mend": True, "zone": "chest", "core": ["upper"], "nodes": {"upper": "torso", "near": "arm_front", "far": "arm_back"},
+        "bones": ["upper"] + LIMBS_ARM, "mend": True,
+        "cells": [{"bones": ["upper"], "hide": LIMBS_ARM,
+                   "ask": "only the top's body, from the neck down to the hips, without sleeves - this body has its "
+                          "arms taken away, so draw the torso part whole and closed where the arms would join"},
+                  {"bones": ["near_upper_arm", "near_forearm"], "show": ["near_upper_arm", "near_forearm"],
+                   "ask": "only the sleeve on this arm, as long as the design's sleeve (nothing if it has none)"}],
+        "zone": "chest", "core": ["upper"], "nodes": {"upper": "torso", "near": "arm_front", "far": "arm_back"},
         "margin": 6, "fill": True, "view": "the upper body", "what": "the top",
         "fit": "The top covers the whole torso from the neck down to just over the hips, hiding the undershirt "
                "completely, and its sleeves lie along the arms as the design has them (the near sleeve in front of "
@@ -715,12 +724,14 @@ SLOTS = {
                     "shorts": "khaki cargo shorts down to mid-thigh with a brown belt"}},
     "footwear": {
         "bones": ["near_foot", "far_foot"], "core": ["near_foot", "far_foot"], "whole": True, "nodes": {"near": "foot_front", "far": "foot_back"},
-        "replaces": True, "margin": 5, "view": "the lower legs and bare feet", "what": "the two shoes",
+        "replaces": True, "angles": 15, "margin": 5, "view": "the lower legs and bare feet", "what": "the two shoes",
+        "one": "shoe (one shoe in side view; level, its toe points right)",
         "fit": "One shoe on each foot, exactly where its foot is, at its angle, the sole on the sole, covering every bit "
-               "of bare foot and only a little bigger than the foot; the shoe's top ends just above the ankle bone, "
-               "never up the shin.",
-        "designs": {"sneakers": "red canvas high-top sneakers with white rubber soles, white toe caps and white laces",
-                    "boots": "tan-brown leather ankle boots with laces and dark soles"}},
+               "of bare foot and only a little bigger than the foot: small, simple, rounded MapleStory-style shoes whose "
+               "top ends at the ankle, never up the shin.",
+        "designs": {"sneakers": "low-top red canvas sneakers with a white rubber sole and white laces",
+                    "boots": "short chestnut-brown leather boots ending just above the ankle, a rounded toe, a thick "
+                             "dark-brown sole band along the whole bottom, a lighter fold at the top"}},
 }
 PART_PROMPT = (
     "Image 1 is a pixel-art close-up of {view} of one character in pure side view facing right, on a flat pure magenta "
@@ -849,6 +860,64 @@ def _rim(part, base, core, n):
     return part
 
 
+def _cut_on_body(part, base_owner, body, stand, slot):
+    """A single-drawing part cut into bone pieces by the nearest bone (strokes whole for `whole` parts)."""
+    return cut_puppet(part, body, stand, slot["bones"], slot.get("whole", False))
+
+
+CELLS_PROMPT = (
+    "Image 1 is a pixel-art sheet of {n} cells, each a close-up of part of one character in pure side view facing right, "
+    "on a flat pure magenta #FF00FF background. The character wears {what}: {desc}. {fit} Draw {what} in separate "
+    "pieces, one per cell, each exactly where it sits on the body shown in that cell, at the same size and grid, as if "
+    "the body were invisible: {cells}. Draw nothing else: no skin, no head, no hands, no body outline, nothing of the "
+    "character's undershirt or shorts - every other pixel is flat #FF00FF. {style} Keep every cell exactly in place; "
+    "keep this {w}x{h} image and its grid exactly.")
+
+
+def _design_cells(out, slot, design, folder, base, base_owner, body, stand, crop, scale):
+    """A part whose pieces overlap in the side view (a top's body and its sleeve) drawn as separate pieces in
+    one call: each cell shows only the body parts that piece sits on (the torso with the arms taken away; the
+    arm alone), so the torso cloth is whole and the sleeve is only sleeve. Each cell is registered on its own
+    body parts; a cell's pixels belong to its bones."""
+    base_pieces = cut_puppet(base, body, stand)
+    images, targets = [], []
+    for cell in slot["cells"]:
+        shown = [n for n in base_pieces if n not in cell.get("hide", [])] if "hide" in cell else cell["show"]
+        image = np.zeros((CANVAS, CANVAS, 4), np.uint8)
+        for n in sorted(shown, key=lambda n: {**{k: v[2] for k, v in _bones(stand).items()}, "upper": 1.5}[n]):
+            put = base_pieces[n][..., 3] > 0
+            image[put] = base_pieces[n][put]
+        images.append(Image.fromarray(image))
+        target = np.isin(base_owner.astype(str), [b for b in cell["bones"] if b != "upper"])
+        if "upper" in cell["bones"]:
+            target |= ((base_owner == "upper") | _torso_mask(body, stand)) & _zone(slot, stand) & (np.asarray(base)[..., 3] > 0)
+        targets.append(target)
+    sheet, origins = _sheet(images, scale, len(images), crop=crop)
+    sheet.save(folder / "sheet.png")
+    cells = "; ".join(f"cell {k + 1}{' (left)' if k == 0 else ''}: {c['ask']}" for k, c in enumerate(slot["cells"]))
+    drawn = _draw(CELLS_PROMPT.format(n=len(images), what=slot["what"], desc=slot["designs"][design], fit=slot["fit"],
+                                      cells=cells, style=STYLE.format(px=scale), w=sheet.width, h=sheet.height),
+                  folder, folder / "sheet.png", [], "drawn")
+    pieces, palettes, shifts = {}, [], []
+    combined = np.zeros((CANVAS, CANVAS, 4), np.uint8)
+    for cell, origin, image, target in zip(slot["cells"], origins, images, targets):
+        art, palette = _clean_native(drawn, folder / "sheet.png", origin, scale, crop=crop, colors=16)
+        art = np.asarray(art).copy()
+        for c in _components(art[..., 3] > 0):
+            if c.sum() < 4:
+                art[c] = 0
+        art, shift = _register(art, target, np.asarray(image)[..., 3] > 0)
+        palettes.append(palette), shifts.append(list(shift))
+        bones = cell["bones"]
+        owner = _owners(art, body, stand, bones) if len(bones) > 1 else np.where(art[..., 3] > 0, bones[0], "")
+        for n in bones:
+            if (owner == n).any():
+                pieces[n] = np.where((owner == n)[..., None], art, 0).astype(np.uint8)
+        put = art[..., 3] > 0
+        combined[put] = art[put]
+    return combined, pieces, np.unique(np.concatenate(palettes), axis=0), shifts
+
+
 def design_part(out, slot_name, design):
     """The one model call per design: the part alone, drawn over a close-up of the base, reduced to native
     pixels with its own palette and registered onto the base."""
@@ -869,7 +938,12 @@ def design_part(out, slot_name, design):
     prompt = PART_PROMPT.format(view=slot["view"], what=slot["what"], desc=slot["designs"][design], fit=slot["fit"],
                                 style=STYLE.format(px=scale))
     rounds, best = [], None
-    for k in range(3):  # a first drawing, then up to two redraws over the outlined core
+    if slot.get("cells"):
+        part, pieces, palette, shift = _design_cells(out, slot, design, folder, base, base_owner, body, stand, crop, scale)
+        covered = float(((part[..., 3] > 0) & core).sum() / max(core.sum(), 1))
+        rounds.append({"round": 1, "core": round(covered, 2), "why": ""})
+        best = (covered, part, palette, shift)
+    for k in range(0 if slot.get("cells") else 3):  # a first drawing, then up to two redraws over the outlined core
         name = "sheet" if k == 0 else f"sheet-{k + 1}"
         if k == 0:
             image = base
@@ -890,6 +964,14 @@ def design_part(out, slot_name, design):
         part, shift = _register(part, target, np.asarray(base)[..., 3] > 0)
         covered = float(((part[..., 3] > 0) & core).sum() / max(core.sum(), 1))
         why = "too small, away from the body" if covered < 0.8 else ""
+        if not why and slot.get("whole"):  # each piece against the bare body piece it covers
+            for c in _components(part[..., 3] > 0, 6)[:len(slot["bones"])]:
+                bone = max(slot["bones"], key=lambda n: int((c & (base_owner == n)).sum()))
+                cols = np.nonzero((base_owner == bone).any(0))[0]
+                ratio = (np.ptp(np.nonzero(c.any(0))[0]) + 1) / max(np.ptp(cols) + 1, 1)
+                if not 0.95 <= ratio <= 1.4:
+                    why = f"{'too short' if ratio < 0.95 else 'too long'} against the foot ({ratio:.2f}x)"
+                    covered = min(covered, 0.79)
         rounds.append({"round": k + 1, "core": round(covered, 2), "why": why})
         if best is None or covered > best[0]:
             best = (covered, part, palette, shift)
@@ -898,13 +980,14 @@ def design_part(out, slot_name, design):
     _, part, palette, shift = best  # the round that covered most, not merely the last
     if slot.get("rim"):
         part = _rim(part, base, core, slot["rim"])
-    pieces = cut_puppet(part, body, stand, slot["bones"], slot.get("whole", False))
+    if not slot.get("cells"):
+        pieces = _cut_on_body(part, base_owner, body, stand, slot)
     if slot.get("fill") and "upper" in pieces:
         pieces["upper"] = _fill_rows(pieces["upper"], slot, body, stand, base)
     rebuilt = _far_from_near(pieces, base, body, stand)
     alpha = part[..., 3] > 0
     body_alpha = np.asarray(base)[..., 3] > 0
-    report = {"slot": slot_name, "design": design, "shift": list(shift), "rounds": rounds, "far_from_near": rebuilt,
+    report = {"slot": slot_name, "design": design, "shift": shift if isinstance(shift, list) else list(shift), "rounds": rounds, "far_from_near": rebuilt,
               "covers": round(float((alpha & target).sum() / max(target.sum(), 1)), 2),
               "off_body": round(float((alpha & ~_dilate(body_alpha, 3)).sum() / max(alpha.sum(), 1)), 2),
               "pieces": {n: int((p[..., 3] > 0).sum()) for n, p in pieces.items()}}
@@ -1134,6 +1217,119 @@ def stage_mend(base_dir, slot_name, design):
     return report
 
 
+ANGLE_PROMPT = (
+    "Image 1 is a pixel-art sheet: each grid cell shows the same {one} on a flat pure magenta #FF00FF background, "
+    "turned to a different angle by rotating the pixels - so its outline and details are jagged. Image 2 is that shoe "
+    "as designed, on the character's foot.\n\nIn every cell redraw the shoe cleanly at exactly that cell's angle, "
+    "place and size: the same design, colors, outline and shading as image 2, crisp one-pixel outline, the sole a "
+    "clean band along the bottom of the shoe. Draw only the shoe; every other pixel stays flat #FF00FF. {style} Keep "
+    "every cell exactly in place; keep this {w}x{h} image and its grid exactly.")
+
+
+def _foot_turns(out, stand):
+    """Every foot angle a pose uses, against the standing near foot, in degrees."""
+    turns = []
+    for cycle_name in CYCLES:
+        path = out / cycle_name / "skeleton.json"
+        if path.exists():
+            for pose in json.loads(path.read_text())["poses"]:
+                turns += [pose["legs"][s]["foot_turn"] - stand["legs"]["near"]["foot_turn"] for s in ("near", "far")]
+    return turns
+
+
+def design_angles(out, slot_name, design):
+    """A rigid part redrawn by the model at every angle the poses need, `angles` degrees apart (one call,
+    one cell per angle, the roughly turned design as the guide): each frame then places the nearest
+    drawing by translation only, so nothing is rotated per frame and the small drawing stays crisp."""
+    slot = SLOTS[slot_name]
+    info = json.loads((out / "body.json").read_text())
+    stand = info["pose"]
+    folder = out / "parts" / slot_name / design
+    work = folder / "angles"
+    work.mkdir(exist_ok=True)
+    master = np.asarray(Image.open(folder / "piece-near_foot.png").convert("RGBA"))
+    palette = np.array(json.loads((folder / "design.json").read_text())["palette"])
+    ankle = np.array(stand["legs"]["near"]["ankle"], float)
+    step = slot["angles"]
+    bins = sorted({int(round(t / step))*step for t in _foot_turns(out, stand)} | {0})
+    up = _upsampled(master)
+    roughs = {b: _warp(up, np.radians(b), ankle, ankle) for b in bins}
+    boxes = np.array([Image.fromarray(r).getbbox() for r in roughs.values()])
+    crop = (int(boxes[:, 0].min()) - 3, int(boxes[:, 1].min()) - 3, int(boxes[:, 2].max()) + 3, int(boxes[:, 3].max()) + 3)
+    scale = int(np.clip(300 // max(crop[2] - crop[0], crop[3] - crop[1]), 6, 14))
+    sheet, origins = _sheet([Image.fromarray(roughs[b]) for b in bins], scale, 4, crop=crop)
+    sheet.save(work / "sheet.png")
+    design_view = Image.open(out / "base.png").convert("RGBA")
+    design_view.alpha_composite(Image.open(folder / "design.png").convert("RGBA"))
+    box = Image.open(folder / "design.png").getbbox()
+    design_view.crop((box[0] - 4, box[1] - 8, box[2] + 4, box[3] + 3)).resize(
+        ((box[2] - box[0] + 8)*scale, (box[3] - box[1] + 11)*scale), Image.Resampling.NEAREST).save(work / "design.png")
+    drawn = _draw(ANGLE_PROMPT.format(one=slot["one"], style=STYLE.format(px=scale), w=sheet.width, h=sheet.height),
+                  work, work / "sheet.png", [work / "design.png"], "drawn")
+    dark = [int(v) for v in min(palette.tolist(), key=lambda c: 299*c[0] + 587*c[1] + 114*c[2])]
+    report = {}
+    for b, origin in zip(bins, origins):
+        rough = roughs[b]
+        ra = rough[..., 3] > 0
+        art = _block_reduce(drawn, work / "sheet.png", origin, scale, crop)
+        alpha = art[..., 3] > 0
+        parts = _components(alpha, 4)
+        alpha = np.any(parts, 0) if parts else alpha
+        art = np.where(alpha[..., None], art, 0).astype(np.uint8)
+        if alpha.any():
+            art = np.asarray(pixel_grid.snap(Image.fromarray(art), palette))
+            (cy, cx), (ry, rx) = np.argwhere(alpha).mean(0), np.argwhere(ra).mean(0)
+            art = np.roll(np.roll(art, int(round(ry - cy)), 0), int(round(rx - cx)), 1)
+            art = np.asarray(_onto_guide(Image.fromarray(art), Image.fromarray(rough), reach=2)[0])
+            art = np.asarray(pixel_grid.silhouette_outline(Image.fromarray(art), dark))
+        aa = art[..., 3] > 0
+        covered = float((aa & ra).sum() / max(ra.sum(), 1))
+        spill = float((aa & ~_dilate(ra, 1)).sum() / max(aa.sum(), 1))
+        kept = "drawn" if covered >= 0.75 and spill <= 0.25 else "turned"
+        Image.fromarray(art if kept == "drawn" else rough).save(work / f"{b}.png")
+        report[b] = {"covered": round(covered, 2), "spill": round(spill, 2), "kept": kept}
+    (work / "angles.json").write_text(json.dumps({"pivot": ankle.tolist(), "angles": report}, indent=1))
+    return report
+
+
+def _far_shade_of(out):
+    """How much darker the base draws a far leg than the near one."""
+    info = json.loads((out / "body.json").read_text())
+    rgba = np.asarray(Image.open(out / "base.png").convert("RGBA"))
+    owner = _owners(rgba, info["body"], info["pose"]).astype(str)
+    luma = rgba[..., :3].astype(float) @ np.array([0.299, 0.587, 0.114])
+    near, far = np.isin(owner, ["near_thigh", "near_shin"]), np.isin(owner, ["far_thigh", "far_shin"])
+    return float(luma[far].mean() / luma[near].mean()) if near.any() and far.any() else 0.8
+
+
+def pose_angles(out, slot_name, design, pose):
+    """Both feet of a pose from the angle drawings: the nearest angle, moved so its ankle is the foot's (no
+    rotation), kept out of the ground; the far one shaded as the far limbs are."""
+    folder = out / "parts" / slot_name / design / "angles"
+    meta = json.loads((folder / "angles.json").read_text())
+    info = json.loads((out / "body.json").read_text())
+    stand, ground = info["pose"], info["body"]["ground"]
+    pivot = np.array(meta["pivot"])
+    bins = np.array(sorted(int(b) for b in meta["angles"]))
+    canvas = np.zeros((CANVAS, CANVAS, 4), np.uint8)
+    owner = np.full((CANVAS, CANVAS), "", dtype=object)
+    shade = _far_shade_of(out)
+    for side in ("far", "near"):
+        turn = pose["legs"][side]["foot_turn"] - stand["legs"]["near"]["foot_turn"]
+        b = int(bins[np.abs(bins - turn).argmin()])
+        image = np.asarray(Image.open(folder / f"{b}.png").convert("RGBA")).copy()
+        dx, dy = (int(v) for v in np.round(np.array(pose["legs"][side]["ankle"]) - pivot))
+        image = np.roll(np.roll(image, dy, 0), dx, 1)
+        rows = np.nonzero(image[..., 3].any(1))[0]
+        if len(rows) and rows.max() > ground:
+            image = np.roll(image, -(int(rows.max()) - ground), 0)
+        if side == "far":
+            image[..., :3] = np.clip(image[..., :3]*shade, 0, 255).astype(np.uint8)
+        put = image[..., 3] > 0
+        canvas[put], owner[put] = image[put], f"{side}_foot"
+    return canvas, owner
+
+
 def stage_part(base_dir, slot_name, design):
     """A part on every frame: designed once, its bone pieces posed as the body's are, split by body node."""
     out = _out(base_dir)
@@ -1147,6 +1343,11 @@ def stage_part(base_dir, slot_name, design):
         {k: v for k, v in json.loads((folder / "design.json").read_text()).items() if k != "palette"}
     pieces = {p.stem[len("piece-"):]: np.asarray(Image.open(p).convert("RGBA")) for p in folder.glob("piece-*.png")}
     ground = body["ground"] if slot.get("whole") else None
+    if slot.get("angles"):
+        if not (folder / "angles" / "angles.json").exists():
+            report["angles"] = design_angles(out, slot_name, design)
+        else:
+            report["angles"] = json.loads((folder / "angles" / "angles.json").read_text())["angles"]
     frames = {}
     for cycle_name in CYCLES:
         path = out / cycle_name / "skeleton.json"
@@ -1157,7 +1358,8 @@ def stage_part(base_dir, slot_name, design):
         for stale in (work / "mend").glob("rough-*.png"):  # posed again: a mend starts from this pose
             stale.unlink()
         for t, pose in enumerate(json.loads(path.read_text())["poses"]):
-            canvas, owner = pose_pieces(pieces, body, stand, pose, ground)
+            canvas, owner = pose_angles(out, slot_name, design, pose) if slot.get("angles") else \
+                pose_pieces(pieces, body, stand, pose, ground)
             frame = np.asarray(Image.open(out / cycle_name / f"frame-{t}.png").convert("RGBA"))
             canvas, owner = _fit(canvas, owner, frame, body, stand, pose)
             canvas[body["ground"] + 1:], owner[body["ground"] + 1:] = 0, ""
@@ -1179,8 +1381,9 @@ def stage_dress(base_dir, looks=None):
         path = out / cycle_name / "skeleton.json"
         if not path.exists():
             continue
-        n = len(json.loads(path.read_text())["poses"])
-        for t in range(n):
+        poses = json.loads(path.read_text())["poses"]
+        body_info = json.loads((out / "body.json").read_text())["body"]
+        for t, pose in enumerate(poses):
             row = []
             for look in looks.values():
                 frame = np.asarray(Image.open(out / cycle_name / f"frame-{t}.png").convert("RGBA")).copy()
@@ -1191,12 +1394,19 @@ def stage_dress(base_dir, looks=None):
                         if file.exists():
                             layers.append((avatar.LAYERS.index(node), np.asarray(Image.open(file).convert("RGBA"))))
                         if SLOTS[slot_name].get("replaces"):
-                            owner = _owners(frame, json.loads((out / "body.json").read_text())["body"],
-                                            json.loads(path.read_text())["poses"][t])
+                            owner = _owners(frame, body_info, pose)
                             frame[np.isin(owner.astype(str), ["near_foot", "far_foot"])] = 0
                 canvas = frame
-                for _, layer in sorted(layers, key=lambda l: l[0]):
-                    canvas = np.where(layer[..., 3:4] > 0, layer, canvas)
+                body_at = avatar.LAYERS.index("root")
+                front = None
+                for k, layer in sorted(layers, key=lambda l: l[0]):
+                    put = layer[..., 3] > 0
+                    if k < body_at:  # a far-side piece: behind the torso and the near limbs, as the runtime has it
+                        if front is None:
+                            front = ~np.char.startswith(_owners(frame, body_info, pose).astype(str), "far") & \
+                                (frame[..., 3] > 0)
+                        put &= ~front
+                    canvas = np.where(put[..., None], layer, canvas)
                 row.append(Image.fromarray(canvas.astype(np.uint8)))
             rows.append(row)
     crop, scale = (24, 4, 104, 124), 3
