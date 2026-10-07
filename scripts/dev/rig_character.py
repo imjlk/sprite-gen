@@ -479,6 +479,49 @@ def _leg_shape(stand, side, taper=LEG_TAPER):
     return np.asarray(image) > 0
 
 
+def _draw_legs(base, body, stand, taper=LEG_TAPER):
+    """Both legs drawn by code below the shorts: the wanted tapered shape on the skeleton, the base's own leg
+    skin in three tones lit from the upper left, a one-pixel outline, the far leg a step darker, and the
+    base's own feet and shorts kept. (Three model edits only roughly followed an outlined shape.)"""
+    rgba = np.asarray(base).copy()
+    owner = _body_owner(rgba, body, stand)
+    leg_px = np.isin(owner.astype(str), ["near_thigh", "near_shin"])
+    skin = rgba[leg_px][:, :3].astype(float)
+    luma = skin @ np.array([0.299, 0.587, 0.114])
+    skin, luma = skin[luma > 0.55*luma.max()], luma[luma > 0.55*luma.max()]  # the skin, not its outline
+    order = np.argsort(luma)
+    light, mid, shade = (skin[order[int(len(order)*q)]] for q in (0.85, 0.5, 0.15))
+    palette = np.array(json.loads(Path(base.filename).with_name("base.palette.json").read_text())["colors"]) \
+        if getattr(base, "filename", "") else None
+    outline = rgba[(rgba[..., 3] > 0)][:, :3].astype(int)
+    outline = outline[(outline @ np.array([299, 587, 114])).argmin()]
+    ys, xs = np.mgrid[0:CANVAS, 0:CANVAS]
+    below = ys >= stand["hip"][1] + 3
+    near_skin = np.abs(rgba[..., None, :3].astype(float) - skin[None, None]).max(-1).min(-1) <= 24
+    shorts = (owner == "upper") & below & ~near_skin  # the shorts are not skin: skin under them is thigh
+    feet = np.isin(owner.astype(str), ["near_foot", "far_foot"])
+    keep_feet = np.where(feet[..., None], rgba, 0)
+    old_legs = np.isin(owner.astype(str), ["near_thigh", "near_shin", "far_thigh", "far_shin"]) | ((owner == "upper") & near_skin)
+    rgba[old_legs & below & ~feet] = 0
+    for side, tones in (("far", (mid, shade, shade*0.88)), ("near", (light, mid, shade))):
+        shape = _leg_shape(stand, side, taper) & below & ~shorts
+        # lit from the upper left: in each row, the left part of the leg light, the right part in shadow
+        color = np.zeros((CANVAS, CANVAS, 3))
+        for y in np.nonzero(shape.any(1))[0]:
+            cols = np.nonzero(shape[y])[0]
+            t = (np.arange(len(cols)) + 0.5) / len(cols)
+            tone = np.where(t[:, None] < 0.34, tones[0], np.where(t[:, None] > 0.72, tones[2], tones[1]))
+            color[y, cols] = tone
+        rgba[shape] = np.concatenate([np.clip(color[shape], 0, 255), np.full((shape.sum(), 1), 255)], -1).astype(np.uint8)
+        outside = ~shape & below & ~shorts  # the top joins the shorts: no line there
+        edge = shape & _dilate(outside, 1)
+        rgba[edge] = (*outline, 255)
+    rgba[feet] = keep_feet[feet]
+    if palette is not None:
+        rgba = np.asarray(pixel_grid.snap(Image.fromarray(rgba), palette)).copy()
+    return Image.fromarray(rgba)
+
+
 def stage_edit(base_dir, what):
     """The base edited by the model instead of drawn again (a new drawing changes the whole character): `ear`
     moves the ear to the template's ear mark, `legs` makes the legs smooth and tapered. Only the region an edit
@@ -490,6 +533,10 @@ def stage_edit(base_dir, what):
     base = Image.open(out / "base.png").convert("RGBA")
     k = len(list(out.glob("base-before-edit*.png")))
     base.save(out / f"base-before-edit-{k}.png")
+    if what == ["legs_draw"]:  # no model: the legs drawn by code
+        drawn_legs = _draw_legs(Image.open(out / "base.png"), body, stand)
+        drawn_legs.save(out / "base.png")
+        return {"edit": what}
     palette = pixel_grid.read_palette(out / "base.palette.json")
     guide = np.asarray(base).copy()
     if "ear" in what:
@@ -1141,8 +1188,8 @@ def _drawn_ear(base, body, stand):
     ex = stand["head"]["center"][0] + body["head"]["ear"][0]
     ey = stand["head"]["center"][1] + body["head"]["ear"][1]
     ew, eh = body["head"].get("ear_size", (2, 3))
-    roomy = ((xs + 0.5 - ex) / (ew + 2.5))**2 + ((ys + 0.5 - ey) / (eh + 3))**2 <= 1
-    ear = (np.any(parts, 0) if parts else mark) | (roomy & inside)
+    snug = ((xs + 0.5 - ex) / (ew + 1))**2 + ((ys + 0.5 - ey) / (eh + 1.5))**2 <= 1
+    ear = (np.any(parts, 0) if parts else mark) | (snug & inside)
     # fill the ear's inside (skin-colored pixels enclosed by its outline)
     filled = ear.copy()
     for c in _components(~ear & _dilate(ear, 3)):
@@ -1152,15 +1199,15 @@ def _drawn_ear(base, body, stand):
 
 
 def _clear_ear(part, ear):
-    """Hair drawn over the ear taken off it with a pixel of skin round it, the cut edge closed with the hair's
-    darkest color - one ear in the opening, not the hair's cut edge crossing the ear's own outline."""
+    """Hair drawn over the ear taken off it, the cut edge closed with the hair's darkest color - one ear in the
+    opening, not the hair's cut edge crossing the ear's own outline."""
     part = part.copy()
     alpha = part[..., 3] > 0
     if not (alpha & _dilate(ear, 1)).any():
         return part
     colors = part[alpha][:, :3].astype(int)
     dark = colors[(colors @ np.array([299, 587, 114])).argmin()]
-    opening = _dilate(ear, 1)
+    opening = ear  # the ear itself: its own outline bounds the opening (a pixel round it dug too big a hole)
     part[opening] = 0
     luma = part[..., :3].astype(float) @ np.array([0.299, 0.587, 0.114])
     edge = (part[..., 3] > 0) & _dilate(opening, 1) & (luma > float(dark @ np.array([0.299, 0.587, 0.114])) + 30)
