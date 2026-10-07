@@ -108,8 +108,10 @@ def stand_pose(body):
 # Few-frame cycles, near leg: thigh swing from vertical (deg, forward +), knee bend, foot pitch (toe up +).
 # The far leg runs half a cycle later; arms swing against their legs. `lift` raises the hip (flight, breath).
 CYCLES = {
-    "idle": {"stands": True, "legs": [(10, 4, 0)]*3, "far": [(-10, 4, 0)]*3, "arm_swing": 0.0, "arm": (22, 15), "elbow": 12,
-             "lift": [0, -1, 0], "verb": "standing and breathing", "ms": 260},
+    # Breathing over planted feet: the upper body sinks a pixel and rises (held half a second each way), moved
+    # from the base itself - no model redraw, so nothing but the breath changes between frames.
+    "idle": {"stands": True, "legs": [(10, 4, 0)]*4, "far": [(-10, 4, 0)]*4, "arm_swing": 0.0, "arm": (22, 15), "elbow": 12,
+             "lift": [0]*4, "sink": [0, 0, 1, 1], "rigid": True, "verb": "standing and breathing", "ms": 250},
     "walk": {"legs": [(22, 0, 12), (8, 10, 0), (-10, 4, -6), (-22, 22, -28), (-4, 40, -10), (16, 22, 4)],
              "arm_swing": 0.7, "elbow": 12, "lift": [0]*6, "verb": "walking", "ms": 130},
     "run": {"legs": [(30, 14, 6), (0, 26, 0), (-28, 30, -30), (-6, 95, -20), (30, 80, -6), (40, 24, 6)],
@@ -148,18 +150,20 @@ def _arm(shoulder, swing, elbow, body):
     return {"elbow": el.tolist(), "wrist": wrist.tolist()}
 
 
-def skeleton(body, near, far, arms, lift=0):
-    """One pose: legs from the hip, the hip set so the lower foot stands on the ground (then `lift`)."""
+def skeleton(body, near, far, arms, lift=0, sink=0):
+    """One pose: legs from the hip, the hip set so the lower foot stands on the ground (then `lift`, which
+    raises the whole figure, feet too). `sink` lowers only the upper body - head, torso and arms - by whole
+    pixels over planted legs: a breath."""
     probe = [_leg([0.0, 0.0], p, body) for p in (near, far)]
     lowest = max(max(p["heel"][1], p["toe"][1]) for p in probe)
     hip = [body["hip"][0], body["ground"] - lowest - lift]
-    shift = hip[1] - body["hip"][1]
+    shift = hip[1] - body["hip"][1] + sink
     shoulder = [body["shoulder"][0], body["shoulder"][1] + shift]
     # A three-quarter body has width: each leg hangs from its own hip, each arm from its own shoulder.
     off = body.get("offsets", {})
     hips = {side: [hip[0] + off.get("hip", {}).get(side, 0), hip[1]] for side in ("near", "far")}
     shoulders = {side: [shoulder[0] + off.get("shoulder", {}).get(side, 0), shoulder[1]] for side in ("near", "far")}
-    return {"hip": hip, "shift": shift, "shoulder": shoulder, "hips": hips, "shoulders": shoulders,
+    return {"hip": hip, "shift": shift, "sink": sink, "shoulder": shoulder, "hips": hips, "shoulders": shoulders,
             "head": {"center": [body["head"]["center"][0], body["head"]["center"][1] + shift], "radius": body["head"]["radius"]},
             "neck": [body["neck"][0], body["neck"][1] + shift],
             "legs": {side: _leg(hips[side], legs, body) for side, legs in (("near", near), ("far", far))},
@@ -371,7 +375,7 @@ def cycle_poses(body, cycle):
         if cycle.get("stands") and "stand" in body:  # a body with its own stand idles in it
             s = body["stand"]
             poses.append(skeleton(body, tuple(s["near"]), tuple(s["far"]), {k: tuple(v) for k, v in s["arms"].items()},
-                                  cycle["lift"][t]))
+                                  cycle["lift"][t], cycle.get("sink", [0]*n)[t]))
             continue
         if "arm" in cycle:
             arms = {"near": cycle["arm"], "far": (-cycle["arm"][0], cycle["arm"][1])}
@@ -589,7 +593,7 @@ def _motion(stand, pose):
     """Bone -> (turn, source pivot, target pivot): the upper body moves by whole pixels, every limb turns
     about its joint."""
     src, dst = _bones(stand), _bones(pose)
-    shift = [0.0, float(round(pose["hip"][1] - stand["hip"][1]))]
+    shift = [0.0, float(round(pose["hip"][1] - stand["hip"][1]) + pose.get("sink", 0) - stand.get("sink", 0))]
     moves = {"upper": (0.0, np.array(stand["hip"], float), np.array(stand["hip"], float) + shift)}
     for n in src:
         moves[n] = (_angle(*dst[n][:2]) - _angle(*src[n][:2]), np.array(src[n][0], float), np.array(dst[n][0], float))
@@ -673,6 +677,13 @@ def stage_puppet(base_dir, cycle_name):
     roughs = [pose_puppet(pieces, body, stand, p) for p in poses]
     for t, r in enumerate(roughs):
         r.save(work / f"rough-{t}.png")
+    if CYCLES[cycle_name].get("rigid"):  # the base moved by whole pixels only: it is its own clean drawing
+        for t, r in enumerate(roughs):
+            r.save(folder / f"frame-{t}.png")
+        for stale in folder.glob("frame-*.png"):
+            if int(stale.stem.split("-")[1]) >= len(roughs):
+                stale.unlink()
+        return [{"frame": t, "rigid": True} for t in range(len(roughs))]
     sheet, origins = _sheet(roughs, 4, 3)
     sheet.save(work / "sheet.png")
     drawn = _draw(PUPPET_PROMPT.format(verb=CYCLES[cycle_name]["verb"], style=STYLE.format(px=4), w=sheet.width,
@@ -1202,8 +1213,8 @@ def stage_mend(base_dir, slot_name, design):
     for cycle_name in CYCLES:
         path = out / cycle_name / "skeleton.json"
         work = out / cycle_name / slot_name / design
-        if not path.exists() or not work.exists():
-            continue
+        if not path.exists() or not work.exists() or CYCLES[cycle_name].get("rigid"):
+            continue  # a rigid cycle's garment is the design moved by whole pixels: nothing to mend
         n = len(json.loads(path.read_text())["poses"])
         roughs, owners, cells = [], [], []
         mend = work / "mend"
