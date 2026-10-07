@@ -90,7 +90,7 @@ BODIES["maple34"] = dict(
          "on the head's right half)",
     head={"center": [64, 44], "radius": 21, "ear": [-11, 4]}, torso={"top": 17, "bottom": 16},
     offsets={"shoulder": {"near": -8, "far": 8}, "hip": {"near": -3, "far": 3}},
-    stand={"near": (-8, 3, 11), "far": (10, 3, -7), "arms": {"near": (-10, 10), "far": (16, 12)}},
+    stand={"near": (-8, 0, 8), "far": (10, 0, -10), "arms": {"near": (-10, 10), "far": (16, 12)}},  # straight knees
 )
 BODIES["maple34h"] = dict(
     BODIES["maple34"],
@@ -297,7 +297,8 @@ def _onto_guide(image, guide, reach=4):
     return Image.fromarray(np.roll(np.roll(np.asarray(image), best[1], 0), best[0], 1)), best
 
 
-def _clean_native(drawn_path, sheet_path, origin, scale, crop=CROP, colors=None, palette=None, expect=None):
+def _clean_native(drawn_path, sheet_path, origin, scale, crop=CROP, colors=None, palette=None, expect=None,
+                  outline=True):
     """One drawn cell back to native pixels where the guide put it: the drawing's own grid found
     (models resample their output), one pixel read per block, a palette and a closed outline."""
     from sprite_gen.frames import extract
@@ -323,7 +324,9 @@ def _clean_native(drawn_path, sheet_path, origin, scale, crop=CROP, colors=None,
     if palette is None:
         palette = np.array(extract.build_shared_palette([art], colors or COLORS))
     dark = min(palette.tolist(), key=lambda c: 299*c[0] + 587*c[1] + 114*c[2])
-    art = pixel_grid.silhouette_outline(pixel_grid.snap(art, palette), [int(v) for v in dark])
+    art = pixel_grid.snap(art, palette)
+    if outline:
+        art = pixel_grid.silhouette_outline(art, [int(v) for v in dark])
     art = art.crop(art.getbbox())
     full = Image.new("RGBA", (CANVAS, CANVAS))
     full.alpha_composite(art, (int(round(crop[0] + bbox[0]/pitch)), int(round(crop[1] + bbox[1]/pitch))))
@@ -457,7 +460,7 @@ EDIT_LEG_GUIDE = ("- The legs: redraw both legs to fill exactly the thin cyan ou
                   "outlines, no bumps or notches; the same skin colors, the far leg still a little darker; remove "
                   "the cyan lines.")
 EDITS = {"ear": EDIT_EAR, "legs": EDIT_LEGS, "leg_shape": EDIT_LEG_GUIDE}
-LEG_TAPER = {"hip": 10, "knee": 7.5, "ankle": 5}  # outer widths, outline included
+LEG_TAPER = {"hip": 10, "knee": 7, "ankle": 4.5}  # outer widths, outline included
 
 
 def _leg_shape(stand, side, taper=LEG_TAPER):
@@ -880,7 +883,7 @@ LIMBS_LEG = ["near_thigh", "near_shin", "far_thigh", "far_shin"]
 SLOTS = {
     "hair": {
         "bones": ["upper"], "zone": "head", "core": ["upper"], "core_zone": "crown", "rim": 3, "nodes": {"upper": "hair"}, "margin": 12,
-        "reduce": "block",
+        "reduce": "strands",
         "view": "the head and shoulders", "what": "the hair",
         "fit": "The hair sits on its bald head as the hairstyle does: it hugs the skull outline exactly - no gap of bald "
                "scalp between the hair and the head's outline. The whole face stays open: bangs stop well above where "
@@ -1078,7 +1081,7 @@ def _ear_mask(body, stand):
 
 
 def _tidy_strands(part, colors=16):
-    """A block-reduced drawing of strands (hair) on a small shared palette, gaps of a few pixels between
+    """A reduced drawing of strands (hair) on a shared palette, gaps of a few pixels between
     strands closed with the nearest strand color (the head showing through a pinhole read as a black fleck
     once outlined), and a closed outline on the outer silhouette only - never round the gaps inside it."""
     from sprite_gen.frames import extract
@@ -1270,9 +1273,10 @@ def design_part(out, slot_name, design):
         sheet, origins = _sheet([image], scale, 1, crop=crop, gutter=0)
         sheet.save(folder / f"{name}.png")
         drawn = _draw(prompt, folder, folder / f"{name}.png", [], "drawn" if k == 0 else f"drawn-{k + 1}")
-        if slot.get("reduce") == "block":  # strands: the commonest color per block, the outer outline only
-            part = _block_reduce(drawn, folder / f"{name}.png", origins[0], scale, crop)
-            part, palette = _tidy_strands(part)
+        if slot.get("reduce") == "strands":  # read on the drawing's own grid; gaps filled, the outer outline only
+            part, _ = _clean_native(drawn, folder / f"{name}.png", origins[0], scale, crop=crop, colors=24,
+                                    outline=False)
+            part, palette = _tidy_strands(part, colors=24)
         else:
             part, palette = _clean_native(drawn, folder / f"{name}.png", origins[0], scale, crop=crop, colors=16)
         part = np.asarray(part).copy()
