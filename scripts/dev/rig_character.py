@@ -98,6 +98,23 @@ BODIES["maple34h"] = dict(
                                                 "mitten-like hands with no fingers,").replace(", small round hands and feet", ", small round feet"),
     forearm=7, width={"thigh": 7, "shin": 6, "arm": 4}, hand={"length": 6, "radius": 3},
 )
+# Head shapes for review (the circle read as a ball): both wider than tall, as Maple heads are.
+_HEAD_WORDS = ("a big MapleStory-style head that fills the grey head shape exactly: {shape} - NOT a perfect circle, "
+               "NOT a ball")
+BODIES["maple_a"] = dict(
+    BODIES["maple34h"],
+    head={"center": [64, 44], "radius": 22, "rx": 23, "ry": 20, "jaw": 0.6, "chin": 2, "ear": [-12, 4]},
+    prompt=BODIES["maple34h"]["prompt"].replace("a big round head", _HEAD_WORDS.format(
+        shape="wider than tall, a soft rounded-square shape with full cheeks and a gently squared jaw, the chin a "
+              "little toward the face")),
+)
+BODIES["maple_b"] = dict(
+    BODIES["maple34h"],
+    head={"center": [64, 44], "radius": 22, "rx": 23, "ry": 19, "jaw": 0.25, "chin": 1, "ear": [-12, 4]},
+    prompt=BODIES["maple34h"]["prompt"].replace("a big round head", _HEAD_WORDS.format(
+        shape="a wide soft oval, wider than tall, with plump round cheeks that make the lower half a little fuller "
+              "than the top")),
+)
 SIDE = "pure side view facing right"
 VIEW = {"text": SIDE, "style": ""}  # the character's own view and style, read from body.json by _out
 # Standing for the base: both feet and both hands in sight.
@@ -213,7 +230,7 @@ def draw_guide(body, pose, upper=None):
         hx, hy = pose["hip"]
         draw.polygon([(sx - top/2, sy - 3), (sx + top/2, sy - 3), (hx + bottom/2, hy + 2), (hx - bottom/2, hy + 2)],
                      fill=(*TORSO, 255))
-        draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=(*HEAD, 255))
+        _draw_head(draw, body["head"], cx, cy, r)
         ex, ey = cx + body["head"]["ear"][0], cy + body["head"]["ear"][1]
         draw.ellipse((ex - 2, ey - 3, ex + 2, ey + 3), fill=(*EAR, 255))
     else:
@@ -222,6 +239,21 @@ def draw_guide(body, pose, upper=None):
     arm("near", NEAR_ARM)
     draw.line([(0, body["ground"] + 1), (CANVAS, body["ground"] + 1)], fill=(*GROUND, 255), width=1)
     return image
+
+
+def _draw_head(draw, head, cx, cy, r):
+    """The guide's head: a circle, or a shaped head - wider than tall (`rx`, `ry`), with a lower part that is
+    `jaw` square (0 round, 1 square corners) and pushed `chin` pixels toward the face."""
+    if "rx" not in head:
+        draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=(*HEAD, 255))
+        return
+    rx, ry = head["rx"], head["ry"]
+    draw.ellipse((cx - rx, cy - ry, cx + rx, cy + ry), fill=(*HEAD, 255))
+    jaw, chin = head.get("jaw", 0), head.get("chin", 0)
+    if jaw:  # the lower half as a rounded box: cheeks and a jaw instead of a ball's underside
+        w = rx*(0.75 + 0.2*jaw)
+        corner = max(int(round(ry*(1 - jaw)*0.9)), 3)
+        draw.rounded_rectangle((cx - w + chin, cy, cx + w + chin, cy + ry*0.95), radius=corner, fill=(*HEAD, 255))
 
 
 def _sheet(cells, scale, columns, crop=CROP, gutter=16):
