@@ -13,6 +13,18 @@ from sprite_gen.frames import parts_import, parts_pose_sheet as sheets
 from sprite_gen.spec import parts_contract as contract, parts_workspace as workspace
 
 
+def test_part_only_keeps_matching_colors_alpha_and_off_body_shape():
+    body = Image.new("RGBA", (16, 16))
+    body.paste((100, 150, 200, 255), (8, 8, 10, 10))
+    drawn = Image.new("RGBA", (16, 16))
+    drawn.putpixel((8, 8), (100, 150, 200, 128))
+    drawn.putpixel((0, 0), (40, 90, 120, 255))
+    part, info = sheets.cut_cell(drawn, body, method="part-only", body_threshold=40,
+                                 near_body=0, outline=True, close_body=5, fill_holes=6, rim=3)
+    assert np.array_equal(np.asarray(part), np.asarray(drawn))
+    assert info == {"alignment": None, "coverage": None, "holes": 0}
+
+
 def drawn_sheet(guide, path, *, size=None, body=None):
     """Draw a 6x4 native-pixel badge per cell at the guide scale, optionally over a body."""
     image = body.copy() if body is not None else Image.new("RGBA", tuple(guide["size"]), (*guide["key"], 255))

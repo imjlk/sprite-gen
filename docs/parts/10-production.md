@@ -26,7 +26,8 @@ sprite-gen parts-part-status --assembly lib/assembly.json
 | `part_id`, `design_id`, `slot`, `node`, `socket` | 만들 pack과 그 piece가 놓일 slot·node·부착점 |
 | `role`, `mode` | `part` 또는 `body`. `raster`(포즈마다 그림) 또는 `held`(기준 포즈 한 그림) |
 | `sheet` | 시트 crop·배율·페이지 크기·비율 |
-| `cut` | 자르는 방식(`difference`/`covering`)과 파라미터(몸 차이 임계값, 몸에서 허용 거리, 잔조각, 외곽선, 구멍 메우기, 영역, 팔레트) |
+| `cut` | 자르는 방식(`part-only`/`difference`/`covering`)과 파라미터(몸 차이 임계값, 몸에서 허용 거리, 잔조각, 외곽선, 구멍 메우기, 영역, 팔레트) |
+| `pose_checks` | 선택 사항. 포즈 ID마다 rig canvas 크기의 `required`·`protected`·`allowed`·`occluded` PNG 상대경로. 후보에 사본과 hash를 고정한다 |
 | `wearing` | 이 파츠를 그릴 때 이미 입혀 둘 파츠 ID(부츠는 바지 위에서) |
 | `pieces`, `segments`, `by_component` | 몸 조각 라벨로 나눌 조각(몸통·앞소매·뒷소매), 덩어리 단위 배정 |
 | `cover_rule`, `covers`, `variants`, `follow`, `trail`, `body` | 아래 "한 장짜리 파츠, 변형, 몸" 참고 |
@@ -54,8 +55,9 @@ sprite-gen parts-part-status --assembly lib/assembly.json
 | `part.png` | 잘라 낸 파츠 |
 | `candidate.json` | 포즈·sample·몸 raster hash·바탕 hash, 자르기 방식과 파라미터, 원본 페이지와 guide의 hash·칸 위치, 배치(pivot·socket), 정렬도 |
 
-색 차이로 자르는 것은 영역을 제안하는 한 방법일 뿐이다. 결과 영역은 마스크 파일로 남고, 틀렸으면 `parts-part-mask --pose P --mask region.png`로 명시적인 마스크를 주어 새 후보를 만든다. 자르는 방식은 두 가지다.
+색 차이로 자르는 것은 영역을 제안하는 한 방법일 뿐이다. 결과 영역은 마스크 파일로 남고, 틀렸으면 `parts-part-mask --pose P --mask region.png`로 명시적인 마스크를 주어 새 후보를 만든다.
 
+- `part-only`: **처음부터 파츠만 그린 시트**를 그대로 독립 레이어로 옮긴다. key 제거·격자 정규화 후 몸과 같은 색도 보존하고, 몸 차분·실루엣 절단·구멍 메우기·외곽선 보충을 실행하지 않는다. 요청한 팔레트 snap과 명시적인 `region`/`exclude`는 적용한다. 전체 body IoU는 검사하지 않는다. [직접 생성과 첫 결과물](11-part-only-production.md) 참고.
 - `difference`: 몸과 같은 픽셀을 지운다. 몸을 그대로 둔 채 옷을 입혀 그린 시트용이다. 몸 밖으로 크게 나오는 옷(후드)은 `near_body`를 넓힌다.
 - `covering`: 그림이 바꾼 실루엣을 통째로 잡고, 안쪽 빈틈은 그림의 픽셀로 채운다. 머리카락·모자처럼 몸을 덮는 파츠용이다. 픽셀 차분은 머리 외곽선·명암과 비슷한 머리카락이나 띠를 지워 두피를 비치게 했다.
 
@@ -77,6 +79,9 @@ sprite-gen parts-part-status --assembly lib/assembly.json
 | `specks`, `holes` | 4 px 미만 잔조각, 12 px 이하의 갇힌 구멍(몸이 비침). 다리 사이처럼 큰 틈은 모양이라 세지 않는다 |
 | `off_palette` | 설정 팔레트 밖의 색 |
 | `pixels` | 0이면 warning(가려진 포즈인지, 자르다 잃었는지 확인) |
+| `required_pixels`, `protected_pixels`, `allowed_pixels` | 동결된 인터페이스의 미덮임·침범·허용 영역 밖 픽셀. 각각 1 px부터 error. `occluded`로 가려진 픽셀은 실제 보이는 영역 검사에서 제외한다 |
+
+`occluded`는 머리·손 등 앞에 놓이는 몸 픽셀이 파츠를 가리는 영역이다. `part.png` 원본은 보존하고 `render_mask.png`와 `render_part.png`를 파생한다. pack에는 `render_part`를 넣어 기존 렌더러와 export를 그대로 사용한다. 이것은 다른 body provider를 가리는 런타임 `placement.mask`와 다른 기능이다. 구멍·잔조각 검사는 원본 파츠에 수행하고, 의도적인 가림은 `dropped`로 세지 않는다. 명시적인 파츠 마스크를 재적용해도 후보의 검사·가림 지도를 보존한다.
 
 ## 파츠 단위 승인
 

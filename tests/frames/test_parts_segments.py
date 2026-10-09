@@ -90,12 +90,15 @@ def test_split_piece_follows_the_body_segment_under_each_pixel(tmp_path):
     shirt = Image.new("RGBA", (128, 128))
     shirt.paste((200, 40, 40, 255), (30, 30, 67, 110))
     shirt.save(garment / "shirt.png")
+    Image.new("L", (128, 128), 255).save(garment / "mask.png")
+    mask_ref = {"file": "mask.png", "sha256": assets.sha256((garment / "mask.png").read_bytes())}
     ref = {"file": "shirt.png", "sha256": assets.sha256((garment / "shirt.png").read_bytes())}
     spec = {"kind": "parts-pack-import", "schema_version": 1, "id": "test.shirt", "design_id": "shirt",
             "role": "part", "style": rig["style"], "rig": index["rig"], "motion": index["motion"], "view": rig["view"],
             "binding_id": "shirt.binding", "occupies": ["upper"], "pieces": [{"id": "shirt", "slot": "upper",
             "node": "torso", "mode": "raster", "sample_map": {"walk.right": {s["id"]: {
-                "image": ref, "format": "full-canvas", "pivot": [64, 64], "target_socket": "shoulder_l"}
+                "image": ref, "format": "full-canvas", "pivot": [64, 64], "target_socket": "shoulder_l",
+                "mask": {"image": mask_ref, "space": "rig-canvas", "target_node": "torso", "channel": "luma"}}
                 for s in motion["clips"][0]["samples"]}}}]}
     (garment / "import.json").write_bytes(workspace.json_bytes(spec))
     with pytest.raises(contract.PartsContractError, match="no piece takes"):
@@ -107,6 +110,11 @@ def test_split_piece_follows_the_body_segment_under_each_pixel(tmp_path):
     assert result["pieces"]["body"]["pixels"] + result["pieces"]["sleeve"]["pixels"] == total
     written = json.loads(Path(result["spec"]).read_text())
     assert [p["node"] for p in written["pieces"]] == ["torso", "arm_l"]
+    for piece in written["pieces"]:
+        for placement in piece["sample_map"]["walk.right"].values():
+            assert placement["mask"]["target_node"] == "torso"
+            copied_mask = tmp_path / "split" / placement["mask"]["image"]["file"]
+            assert copied_mask.read_bytes() == (garment / "mask.png").read_bytes()
     sleeve = np.asarray(Image.open(tmp_path / "split" / "sleeve" / "walk.right" / "sample.0.png"))[..., 3] > 0
     assert sleeve[100].any() and not sleeve[40].any()
     imported = parts_import.import_pack(assembly, Path(result["spec"]), Path(result["source_root"]))

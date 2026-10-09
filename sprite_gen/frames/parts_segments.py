@@ -408,7 +408,10 @@ def split_piece(spec, segments, out, *, piece, into, source_root=None, part_id=N
         clip_id, sample_id = record["poses"][pose_id]
         for name, value in split(placement, clip_id, sample_id, f"pose-{pose_id}").items():
             split_pieces[name].setdefault("pose_map", {})[pose_id] = value
-    written = {id(value) for item in split_pieces.values() for value in _assets(item)}
+    written = {id(placement["image"]) for item in split_pieces.values()
+               for mapping in item.get("sample_map", {}).values() for placement in mapping.values()}
+    written.update(id(placement["image"]) for item in split_pieces.values()
+                   for placement in item.get("pose_map", {}).values())
     result = deepcopy(request)
     position = next(n for n, item in enumerate(result["pieces"]) if item.get("id") == piece)
     result["pieces"][position:position+1] = list(split_pieces.values())

@@ -67,6 +67,101 @@ def test_a_part_goes_from_sheet_to_an_approved_part_review(tmp_path):
     assert production.status(assembly)["productions"][0]["state"] == "approved"
 
 
+def test_part_only_uses_frozen_interfaces_instead_of_whole_body_overlap(tmp_path):
+    assembly = setup(tmp_path)
+    config = json.loads((tmp_path / "badge.json").read_text())
+    config["cut"]["method"] = "part-only"
+    config["prompt"]["text"] = "Draw only the badge."
+    for name in ("required", "protected", "allowed"):
+        region = Image.new("L", (128, 128), 255 if name == "allowed" else 0)
+        region.putpixel((110, 110) if name == "required" else (36, 42), 0 if name == "allowed" else 255)
+        region.save(assembly.parent / f"{name}.png")
+    config["pose_checks"] = {"walk.01": {n: f"{n}.png" for n in ("required", "protected", "allowed")}}
+    (tmp_path / "direct.json").write_text(json.dumps(config))
+    production.configure(assembly, "test.badge", tmp_path / "direct.json")
+    made = production.sheet(assembly, "test.badge")
+    prompt = (assembly.parent / made["prompt"]).read_text()
+    assert "Draw ONLY the requested part" in prompt and "whole figure" not in prompt
+    for page in made["pages"]:
+        guide = json.loads((assembly.parent / page["guide"]).read_text())
+        drawn_sheet(guide, assembly.parent / page["art"])
+    sliced = production.slice_batch(assembly, "test.badge")
+    candidate = assembly.parent / sliced["candidates"][0]["candidate"]
+    assert Image.open(candidate / "part.png").getpixel((36, 42)) == (200, 40, 40, 255)
+    # Changing the author's input masks cannot rewrite a candidate's checks.
+    for name in ("required", "protected", "allowed"):
+        Image.new("L", (128, 128), 255 if name == "allowed" else 0).save(assembly.parent / f"{name}.png")
+    checked = production.check(assembly, "test.badge")
+    assert checked["summary"]["error"] == 1
+    state = production._load(assembly.parent, "test.badge")
+    metrics = state["tracks"]["main"]["poses"]["walk.01"]["check"]["metrics"]
+    assert metrics["alignment"] is None
+    assert (metrics["required_pixels"], metrics["protected_pixels"], metrics["allowed_pixels"]) == (1, 1, 1)
+    production.build(assembly, "test.badge")
+    with pytest.raises(contract.PartsContractError, match="fix errors"):
+        production.review(assembly, "test.badge", reviewer="tester", approve=["walk.01"])
+    Image.new("L", (128, 128)).save(candidate / "qa_required.png")
+    with pytest.raises(contract.PartsContractError, match="changed required mask"):
+        production.check(assembly, "test.badge")
+
+
+def test_provider_failures_survive_reexecution_and_dry_run(tmp_path, monkeypatch):
+    assembly = setup(tmp_path)
+    production.sheet(assembly, "test.badge")
+    monkeypatch.setattr(production.subprocess, "run", lambda *a, **kw:
+                        production.subprocess.CompletedProcess(a[0], 1, stderr="provider refused"))
+    for _ in range(2):
+        assert production.draw(assembly, "test.badge")["pages"][0]["status"] == "failed"
+    path = assembly.parent / "productions/test.badge/production.json"
+    before = path.read_bytes()
+    production.draw(assembly, "test.badge", dry_run=True)
+    assert path.read_bytes() == before
+    attempts = json.loads(before)["tracks"]["main"]["batches"][-1]["attempts"]
+    assert len(attempts) == 2 and all(a["error"] == "provider refused" for a in attempts)
+
+
+def test_occlusion_preserves_raw_part_and_builds_a_visible_layer(tmp_path):
+    assembly = setup(tmp_path)
+    config = json.loads((tmp_path / "badge.json").read_text())
+    config["cut"]["method"] = "part-only"
+    region = Image.new("L", (128, 128))
+    region.putpixel((36, 42), 255)
+    region.save(assembly.parent / "occluded.png")
+    config["pose_checks"] = {"walk.01": {name: "occluded.png" for name in
+                                        ("occluded", "protected", "required")}}
+    file = tmp_path / "direct.json"
+    file.write_text(json.dumps(config))
+    production.configure(assembly, "test.badge", file)
+    made = production.sheet(assembly, "test.badge")
+    for page in made["pages"]:
+        guide = json.loads((assembly.parent / page["guide"]).read_text())
+        drawn_sheet(guide, assembly.parent / page["art"])
+    sliced = production.slice_batch(assembly, "test.badge")
+    candidate = assembly.parent / sliced["candidates"][0]["candidate"]
+    raw = Image.open(candidate / "part.png").convert("RGBA")
+    visible = Image.open(candidate / "render_part.png").convert("RGBA")
+    assert raw.getpixel((36, 42)) == (200, 40, 40, 255)
+    assert visible.getpixel((36, 42))[3] == 0
+    assert visible.getpixel((37, 42)) == raw.getpixel((37, 42))
+    assert production.check(assembly, "test.badge")["summary"]["error"] == 0
+    metrics = production._load(assembly.parent, "test.badge")["tracks"]["main"]["poses"]["walk.01"]["check"]["metrics"]
+    assert metrics["occluded_pixels"] == 1 and metrics["dropped"] == 0
+    production.build(assembly, "test.badge")
+    _, registry = workspace.read_workspace(assembly)
+    placement = registry["test.badge"]["bindings"][0]["pieces"][0]["sample_map"]["walk.right"]["sample.0"]
+    assert placement["mask"] is None  # Runtime masks target body providers, not this layer.
+    from sprite_gen.spec import parts_assets
+    assert placement["image"]["sha256"] == parts_assets.sha256((candidate / "render_part.png").read_bytes())
+    manual = production.mask(assembly, "test.badge", "walk.01", candidate / "mask.png")
+    new_candidate = assembly.parent / manual["candidate"]
+    assert Image.open(new_candidate / "render_part.png").getpixel((36, 42))[3] == 0
+    assert (new_candidate / "qa_required.png").read_bytes() == (candidate / "qa_required.png").read_bytes()
+    # Candidate-local pinning also detects a changed occlusion guide.
+    Image.new("L", (128, 128)).save(new_candidate / "render_mask.png")
+    with pytest.raises(contract.PartsContractError, match="changed occlusion mask"):
+        production.check(assembly, "test.badge")
+
+
 def test_a_rejected_pose_is_the_only_one_drawn_again(tmp_path):
     assembly = setup(tmp_path)
     draw_batch(assembly, production.sheet(assembly, "test.badge"))

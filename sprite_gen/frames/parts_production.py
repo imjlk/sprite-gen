@@ -31,6 +31,7 @@ anything.
 from __future__ import annotations
 
 import argparse
+from io import BytesIO
 from copy import deepcopy
 from fractions import Fraction
 from pathlib import Path
@@ -78,6 +79,11 @@ _VARIANT = contract._record({"id": contract._id, "node": contract._nullable(cont
 _SEGMENT = contract._record({"color": contract._string, "provides": contract._ids}, {"provides": []})
 _BODY = contract._record({"colors": contract._mapping(_SEGMENT), "near_lighter": contract._list(contract._list(contract._id)),
                           "tolerance": contract._integer}, {"near_lighter": [], "tolerance": 60})
+_POSE_CHECK = contract._record({"required": contract._nullable(contract._relative_file),
+                               "protected": contract._nullable(contract._relative_file),
+                               "allowed": contract._nullable(contract._relative_file),
+                               "occluded": contract._nullable(contract._relative_file)},
+                              {"required": None, "protected": None, "allowed": None, "occluded": None})
 _CONFIG = contract._record({
     "kind": contract._enum("parts-production-config"), "schema_version": contract._positive,
     "part_id": contract._id, "design_id": contract._id, "role": contract._enum("part", "body"),
@@ -88,9 +94,11 @@ _CONFIG = contract._record({
     "prompt": contract._nullable(_PROMPT), "draw": _DRAW, "follow": contract._nullable(_FOLLOW),
     "trail": contract._nullable(_TRAIL), "cover_rule": contract._nullable(contract._cover_rule), "covers": contract._ids,
     "variants": contract._list(_VARIANT), "body": contract._nullable(_BODY),
+    "pose_checks": contract._mapping(_POSE_CHECK),
 }, {"role": "part", "slot": None, "node": None, "socket": None, "mode": "raster", "draw": {}, "states": [],
     "reference_pose": None, "sheet": {}, "cut": {}, "wearing": [], "pieces": [], "by_component": False, "segments": None,
-    "prompt": None, "follow": None, "trail": None, "cover_rule": None, "covers": [], "variants": [], "body": None})
+    "prompt": None, "follow": None, "trail": None, "cover_rule": None, "covers": [], "variants": [], "body": None,
+    "pose_checks": {}})
 DECISIONS = ("unverified", "approved", "rejected")
 FIXED = ("part_id", "design_id", "role", "slot", "node", "socket", "mode")
 # Check bounds, judged on the SD demo (docs/parts/10-production.md).
@@ -176,18 +184,25 @@ def _redo(row):
 def _redo_notes(production, rows, wanted, order):
     """What went wrong with the drawings being replaced, for the model to avoid this time."""
     looked = order if production["config"]["mode"] == "held" else wanted  # a held drawing is judged on every pose
-    notes, misaligned = [], False
+    notes, failures, misaligned = [], [], False
     for pose in looked:
         row = rows["poses"].get(pose, {})
         if row.get("decision") == "rejected" and row.get("note") and row["note"] not in notes:
             notes.append(row["note"])
         misaligned |= pose in wanted and any(f.startswith("alignment") for f in (row.get("check") or {}).get("findings", []))
+        check = row.get("check") or {}
+        if pose in wanted and check.get("status") == "error":
+            failures.append(pose + ": " + "; ".join(check.get("findings", [])))
     text = ""
     if misaligned:
         text += (" The previous drawing moved, resized or left out the figure: draw the whole figure exactly where it is"
                  " and exactly as big as it is in image 1.")
     if notes:
         text += " The previous drawing was sent back at review: " + "; ".join(notes) + ". Fix that this time."
+    if failures:
+        text += " The previous part failed these checks: " + "; ".join(failures) + ". " \
+                "Cover required regions, leave protected regions visible, and stay within the allowed silhouette. " \
+                "Match the reference pose's position and size."
     return text
 
 
@@ -287,7 +302,7 @@ def sheet(assembly, part, *, poses=None, track=None):
         "motion": index["motion"], "poses": wanted, "track": track or MAIN,
         "wearing": [{"id": w, "digest": registry.get(w, {}).get("digest")} for w in settings["wearing"]],
         "replaces": [rows["poses"].get(p, {}).get("selected") for p in wanted],
-        "prompt": settings["prompt"]})[:12]
+        "prompt": settings["prompt"], "sheet": config["sheet"], "output_method": settings["cut"]["method"]})[:12]
     folder = _folder(root, part) / "batches" / batch
     look = config["sheet"]
     crop = ",".join(map(str, look["crop"])) if look["crop"] else None
@@ -297,10 +312,12 @@ def sheet(assembly, part, *, poses=None, track=None):
     prompt = None
     if settings["prompt"] is not None:
         prompt = folder / "prompt.txt"
-        # Not the sheet's own hint: that asks for the part alone with the body erased, while a
-        # production draws the dressed figure and cuts the part out of it (alignment needs the body).
+        output = ("Draw ONLY the requested part in every cell; the body is a placement reference, not output. "
+                  "Do not draw skin, face, hands, legs or other clothing. Leave all other pixels on the sheet's key background. "
+                  if settings["cut"]["method"] == "part-only" else
+                  "Keep the whole figure (head, body, limbs and feet) still drawn in every cell. ")
         prompt.write_text(settings["prompt"]["text"] + f" Keep this {made['size'][0]}x{made['size'][1]} image and its grid "
-                          "exactly, with the whole figure (head, body, limbs and feet) still drawn in every cell. "
+                          "exactly. " + output +
                           "Keep every figure exactly in its own cell: do not move, mirror, resize, rearrange or re-space figures."
                           + _redo_notes(production, rows, wanted, order))
     pages = [{"guide": Path(p["guide"]).relative_to(root).as_posix(), "sheet": Path(p["sheet"]).relative_to(root).as_posix(),
@@ -345,8 +362,11 @@ def draw(assembly, part, *, batch=None, provider=None, model=None, dry_run=False
             results.append({"art": page["art"], "status": "planned", "command": command})
             continue
         done = subprocess.run(command, capture_output=True, text=True)
-        results.append({"art": page["art"], "status": "drawn" if done.returncode == 0 else "failed",
-                        "error": done.stderr[-400:] if done.returncode else None})
+        attempt = {"art": page["art"], "status": "drawn" if done.returncode == 0 else "failed",
+                   "error": done.stderr[-400:] if done.returncode else None, "provider": provider, "model": model}
+        entry.setdefault("attempts", []).append(attempt)
+        _save(root, production)
+        results.append(attempt)
     return {"part": part, "track": track or MAIN, "batch": entry["id"], "pages": results, "release_ready": False}
 
 
@@ -428,6 +448,16 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
             drawn_full = Image.new("RGBA", canvas)
             drawn_full.alpha_composite(drawn, tuple(crop[:2]))
             extra = {}
+            guard_images = {}
+            for name, file in config["pose_checks"].get(sample["pose_id"], {}).items():
+                if file is not None:
+                    guard = Image.open(BytesIO(assets.read_file(root, file))).convert("L")
+                    if guard.size != canvas:
+                        raise contract.PartsContractError(f"{sample['pose_id']}: {name} mask must match the rig canvas")
+                    guard_images[f"qa_{name}"] = guard
+                    if name == "occluded":
+                        guard_images["render_mask"] = Image.fromarray(
+                            np.where(np.asarray(guard) > 0, 0, 255).astype(np.uint8))
             if config["role"] == "body":
                 # The painted cell labels the body; every body pixel takes the nearest painted label.
                 nodes = list(config["body"]["colors"])
@@ -457,6 +487,8 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
                     # A zone another part owns (the face under capped hair): whatever was drawn there is theirs.
                     full.paste((0, 0, 0, 0), (x0, y0, x1, y1))
                 alignment, holes = info["alignment"], info["holes"]
+            if "render_mask" in guard_images:
+                guard_images["render_part"] = _visible_part(full, guard_images["render_mask"])
             mask = Image.fromarray(((np.asarray(full)[..., 3] > 0)*255).astype(np.uint8), "L")
             socket = sample["sockets"][config["socket"]]
             record = {"kind": "parts-production-candidate", "schema_version": 1, "policy": POLICY, "part": part,
@@ -472,7 +504,7 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
                       "alignment": alignment, "holes_filled": holes,
                       "pixels": int((np.asarray(full)[..., 3] > 0).sum()), **extra}
             record, location = _publish_candidate(root, part, record, {"drawn": drawn_full, "under": under,
-                                                                        "mask": mask, "part": full})
+                                                                        "mask": mask, "part": full, **guard_images})
             # A held part is one drawing: the drawing made on its reference pose hangs on every pose.
             targets = order if config["mode"] == "held" else [sample["pose_id"]]
             _select(rows, targets, location, keep_approved=config["mode"] != "held")
@@ -481,6 +513,13 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
     _save(root, production)
     return {"part": part, "track": track or MAIN, "candidates": made,
             "next": "parts-part-check, then parts-part-build and parts-part-review", "status": "draft", "release_ready": False}
+
+
+def _visible_part(raw, visibility):
+    pixels = np.asarray(raw.convert("RGBA")).copy()
+    pixels[..., 3] = (pixels[..., 3].astype(np.uint16) *
+                     np.asarray(visibility.convert("L"), dtype=np.uint16) // 255).astype(np.uint8)
+    return Image.fromarray(pixels)
 
 
 def mask(assembly, part, pose, image, *, track=None):
@@ -506,12 +545,21 @@ def mask(assembly, part, pose, image, *, track=None):
     colors = _palette(root, _settings(production["config"], track)["cut"])
     if colors is not None:
         full = pixel_grid.snap(full, colors)
+    guards = {}
+    for name, ref in record["images"].items():
+        if name.startswith("qa_") or name == "render_mask":
+            encoded = assets.read_file(base, ref["file"])
+            if assets.sha256(encoded) != ref["sha256"]:
+                raise contract.PartsContractError(f"{pose}: changed {name} mask")
+            guards[name] = Image.open(BytesIO(encoded)).copy()
+    if "render_mask" in guards:
+        guards["render_part"] = _visible_part(full, guards["render_mask"])
     new = {k: deepcopy(v) for k, v in record.items() if k not in ("digest", "images")}
     new["method"] = {**new["method"], "mask": assets.sha256(Path(image).read_bytes()), "replaces": record["digest"]}
     new["pixels"] = int(keep.sum())
     new, location = _publish_candidate(root, part, new, {"drawn": drawn, "under": Image.open(base / "under.png"),
                                                           "mask": Image.fromarray((keep*255).astype(np.uint8), "L"),
-                                                          "part": full})
+                                                          "part": full, **guards})
     order, _ = _poses(registry[index["motion"]["id"]], _states(production, index))
     _select(rows, order if production["config"]["mode"] == "held" else [pose], location, keep_approved=False)
     _save(root, production)
@@ -687,7 +735,17 @@ def _measure(root, config, settings, location, context):
     record = workspace.decode_json((base / "candidate.json").read_bytes())
     image = np.asarray(Image.open(base / "part.png").convert("RGBA"))
     mask = image[..., 3] > 0
+    raw_mask = mask.copy()
+    visible = np.ones(mask.shape, dtype=bool)
     metrics = {"pixels": int(mask.sum()), "alignment": record["alignment"], "coverage": None}
+    if "render_mask" in record["images"]:
+        ref = record["images"]["render_mask"]
+        encoded = assets.read_file(base, ref["file"])
+        if assets.sha256(encoded) != ref["sha256"]:
+            raise contract.PartsContractError(f"{record['pose_id']}: changed occlusion mask")
+        visible = np.asarray(Image.open(BytesIO(encoded)).convert("L")) > 0
+        metrics["occluded_pixels"] = int((mask & ~visible).sum())
+        mask &= visible
     if record["alignment"] is not None and "drawn" in record["images"] and "under" in record["images"]:
         crop = config["sheet"]["crop"]
         drawn, under = (Image.open(base / f"{n}.png").convert("RGBA") for n in ("drawn", "under"))
@@ -702,7 +760,23 @@ def _measure(root, config, settings, location, context):
         if metrics["swapped"]:
             findings.append(("warning", f"near/far labels swapped by shading ({', '.join(metrics['swapped'])}); confirm"))
         return metrics, findings
-    metrics.update(specks=_islands(mask, 4), holes=_pinholes(mask))
+    metrics.update(specks=_islands(raw_mask, 4), holes=_pinholes(raw_mask), visible_pixels=int(mask.sum()))
+    # These authored interfaces are frozen with the candidate, not read from a
+    # later mutable config. Matching the body's RGB is not a new garment's gate.
+    for name in ("required", "protected", "allowed"):
+        ref = record["images"].get(f"qa_{name}")
+        if ref is not None:
+            encoded = assets.read_file(base, ref["file"])
+            if assets.sha256(encoded) != ref["sha256"]:
+                raise contract.PartsContractError(f"{record['pose_id']}: changed {name} mask")
+            region = np.asarray(Image.open(BytesIO(encoded)).convert("L")) > 0
+            if name == "required":
+                region &= visible
+            count = int((region & ~mask).sum() if name == "required" else
+                        (region & mask).sum() if name == "protected" else (~region & mask).sum())
+            metrics[f"{name}_pixels"] = count
+            if count:
+                findings.append(("error", f"{name}: {count} missing or forbidden pixels"))
     colors = _palette(root, settings["cut"])
     if colors is not None and mask.any():
         pixels = image[mask][:, :3]
@@ -711,13 +785,14 @@ def _measure(root, config, settings, location, context):
         # What the drawing changed but the part left out: a cut too tight (a hood off the back).
         drawn = Image.open(base / "drawn.png").convert("RGBA")
         under = Image.open(base / "under.png").convert("RGBA")
-        changed = np.asarray(sheets.cover(drawn, under))[..., 3] > 0
-        if colors is not None and settings["cut"]["keep_palette"] is not None:
+        part_only = record["method"].get("cut", {}).get("method") == "part-only"
+        changed = np.asarray(drawn)[..., 3] > 0 if part_only else np.asarray(sheets.cover(drawn, under))[..., 3] > 0
+        if not part_only and colors is not None and settings["cut"]["keep_palette"] is not None:
             # Repainted body is left out on purpose; it only says how much the model strayed.
             repainted = sheets.repainted(drawn, under, colors, settings["cut"]["keep_palette"])
             metrics["repainted"] = int(repainted.sum())
             changed &= ~repainted
-        metrics["dropped"] = int((changed & ~mask).sum())
+        metrics["dropped"] = int((changed & ~raw_mask).sum())
     for name in _drawn_over_changed(record, context, base):
         # Drawn over a worn part that now looks different (the hat under capped hair, redrawn).
         findings.append(("error", f"drawn over {name} as it was before; redraw over the current one"))
@@ -818,8 +893,10 @@ def _track_piece(root, part, config, motion, states, name, rows, order, first):
         if row is None or row["selected"] is None:
             continue
         record = workspace.decode_json((root / row["selected"] / "candidate.json").read_bytes())
-        image = (root / row["selected"] / "part.png").relative_to(_folder(root, part)).as_posix()
-        placements[pose] = {**record["placement"], "image": {"file": image, "sha256": record["images"]["part"]["sha256"]},
+        # The raw drawing remains reviewable; only the derived visible raster is assembled.
+        ref = record["images"].get("render_part", record["images"]["part"])
+        image = (root / row["selected"] / ref["file"]).relative_to(_folder(root, part)).as_posix()
+        placements[pose] = {**record["placement"], "image": {"file": image, "sha256": ref["sha256"]},
                             "visible": record["pixels"] > 0}
     piece = {"id": config["slot"] if name == MAIN else name, "slot": config["slot"], "node": settings["node"],
              "mode": config["mode"]}

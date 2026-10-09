@@ -520,7 +520,7 @@ def cover(dressed, body, *, threshold=24, minimum=6, prune=2):
     return Image.fromarray(np.where(mask[..., None], d, 0).astype(np.uint8))
 
 
-METHODS = ("difference", "covering")
+METHODS = ("difference", "covering", "part-only")
 
 
 def _nearest(rgb, colors):
@@ -739,9 +739,17 @@ def cut_cell(drawn, body, *, method="difference", body_threshold=None, near_body
 
     `difference` removes what still matches the body (garments drawn over a dressed sheet);
     `covering` keeps everything the drawing changed, whole (hair, hats, loose hoods).
+    `part-only` preserves an independently drawn layer without body subtraction or filling.
     Returns the part and {alignment with the body, coverage of the body, holes filled}.
     """
     contract._enum(*METHODS)(method, "method")
+    if method == "part-only":
+        # The provider already drew an independent layer. Never subtract matching body
+        # colors, clip to its silhouette, or fill the layer with body-derived pixels.
+        part = drawn.copy()
+        if colors is not None:
+            part = pixel_grid.snap(part, colors)
+        return part, {"alignment": None, "coverage": None, "holes": 0}
     if near_body is not None:
         drawn = within_body(drawn, body, near_body)
     alignment = coverage = None
@@ -984,7 +992,7 @@ def add_slice_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--by-pose", action="store_true",
                         help="write a pose_map (one drawing per pose_id, reused by every sample of the pose)")
     parser.add_argument("--method", choices=METHODS, default="difference",
-                        help="difference: remove what matches the body; covering: keep everything the drawing changed (hair, hats)")
+                        help="difference: remove body matches; covering: keep changed shapes; part-only: preserve an independent layer")
 
 
 def _page_pair(value):
