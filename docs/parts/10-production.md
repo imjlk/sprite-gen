@@ -11,6 +11,7 @@ sprite-gen parts-part-draw   --assembly lib/assembly.json --part sd.wardrobe.upp
 sprite-gen parts-part-slice  --assembly lib/assembly.json --part sd.wardrobe.upper.c
 sprite-gen parts-part-check  --assembly lib/assembly.json --part sd.wardrobe.upper.c
 sprite-gen parts-part-build  --assembly lib/assembly.json --part sd.wardrobe.upper.c
+sprite-gen parts-part-select --assembly lib/assembly.json --part sd.wardrobe.upper.c --pose walk.01 --candidate productions/.../candidates/walk.01/DIGEST
 sprite-gen parts-review-serve --assembly lib/assembly.json                                 # 검수 데스크
 sprite-gen parts-part-status --assembly lib/assembly.json
 ```
@@ -97,10 +98,13 @@ sprite-gen parts-part-status --assembly lib/assembly.json
 
 `parts-review-serve`는 127.0.0.1에서 제작 기록마다 포즈 그리드를 보여 준다.
 
-- **보기:** 몸 위 파츠, 자른 결과, 모델이 그린 칸 사이를 전환할 수 있다. 각 포즈에 검사 결과와 판정이 붙는다.
-- **판정:** 포즈를 눌러 승인·반려를 표시하고 사유와 함께 저장한다.
-- **재작업:** 반려·누락 포즈 시트, 그리기, 자르기, 검사, 빌드를 차례로 실행할 수 있다.
+- **보기:** 실제 레이어 빌드, 독립 파츠, 가림 적용 파츠, 생성 참조, 검사 지도, 오류 위치, 생성 원본 칸을 구분한다. 포즈 클릭은 검사 패널을 열며 승인하지 않는다.
+- **큐레이션:** 같은 포즈의 이전 후보를 같은 좌표·배율로 비교하고 선택한다. 바꾸면 해당 포즈의 승인과 검사 상태를 초기화한다. held 파츠는 공유하는 모든 포즈가 바뀐다. 최신 빌드가 아닌 경우 배치 미리보기라고 표시한다.
+- **판정:** 검수자·사유를 입력해 현재 선택 파츠를 승인·반려한다. 빌드가 오래됐거나 검사 error인 후보는 승인할 수 없다. 이전 승인 문서만으로 변경된 production을 release할 수도 없다.
+- **재작업:** 실패·반려·누락 포즈 전체 또는 검사 중인 한 포즈를 시트로 만들고 생성·분리·검사·빌드한다. 생성 기준 묶음을 내려받을 수 있다.
 - **보안:** 쓰기 요청은 서버를 시작할 때 출력한 주소의 `#token=…`이 있어야 받는다.
+
+새 시트는 [생성 입력과 큐레이션 규격](12-generation-curation.md)에 따라 body·포즈·디자인 참조·검사 지도·프롬프트를 생성 전에 고정한다. 그 이후 설정 변경은 이미 생성한 후보의 기준을 바꾸지 않는다. 구버전 후보는 구버전 출처라고 표시하며 생성 전 고정된 입력이 있었다고 소급해서 기록하지 않는다.
 
 ## 상태와 릴리스
 

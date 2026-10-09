@@ -525,6 +525,11 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         parts_production.add_mask_arguments,
         parts_production.run_mask,
     ),
+    "parts-part-select": (
+        "Choose a previous immutable candidate for a pose and reset its review decision.",
+        parts_production.add_select_arguments,
+        parts_production.run_select,
+    ),
     "parts-part-adopt": (
         "Take an existing pack's drawings into a production as per-pose candidates.",
         parts_production.add_adopt_arguments,

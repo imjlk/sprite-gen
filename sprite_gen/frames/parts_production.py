@@ -43,7 +43,7 @@ from PIL import Image, ImageDraw
 from sprite_gen._deps import np
 from sprite_gen.compose import compose_parts, parts_resolve
 from sprite_gen.curate import parts_motion, parts_review
-from sprite_gen.frames import parts_import, parts_pose_sheet as sheets, parts_segments, pixel_grid
+from sprite_gen.frames import parts_import, parts_pose_sheet as sheets, parts_reference, parts_segments, pixel_grid
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 from sprite_gen.spec.runio import atomic_write_text, publish_guard
 
@@ -302,7 +302,11 @@ def sheet(assembly, part, *, poses=None, track=None):
         "motion": index["motion"], "poses": wanted, "track": track or MAIN,
         "wearing": [{"id": w, "digest": registry.get(w, {}).get("digest")} for w in settings["wearing"]],
         "replaces": [rows["poses"].get(p, {}).get("selected") for p in wanted],
-        "prompt": settings["prompt"], "sheet": config["sheet"], "output_method": settings["cut"]["method"]})[:12]
+        "prompt": settings["prompt"], "sheet": config["sheet"], "output_method": settings["cut"]["method"],
+        "redo_notes": _redo_notes(production, rows, wanted, order),
+        "inputs": {file: assets.sha256(assets.read_file(root, file)) for file in
+                   [*((settings["prompt"] or {}).get("refs", [])),
+                    *(file for pose in wanted for file in config["pose_checks"].get(pose, {}).values() if file)]}})[:12]
     folder = _folder(root, part) / "batches" / batch
     look = config["sheet"]
     crop = ",".join(map(str, look["crop"])) if look["crop"] else None
@@ -322,13 +326,17 @@ def sheet(assembly, part, *, poses=None, track=None):
                           + _redo_notes(production, rows, wanted, order))
     pages = [{"guide": Path(p["guide"]).relative_to(root).as_posix(), "sheet": Path(p["sheet"]).relative_to(root).as_posix(),
               "art": (Path(p["sheet"]).parent / "drawn.png").relative_to(root).as_posix()} for p in made["pages"]]
+    reference = parts_reference.freeze(root, _folder(root, part), index, registry, config, settings, pages, prompt)
+    inputs, reference_base = parts_reference.read(root, reference)
+    previous = next((b for b in rows["batches"] if b["id"] == batch), {})
     entry = {"id": batch, "motion": index["motion"], "poses": wanted, "pages": pages,
              "prompt": None if prompt is None else prompt.relative_to(root).as_posix(),
-             "refs": [] if settings["prompt"] is None else settings["prompt"]["refs"]}
+             "reference": reference, "attempts": previous.get("attempts", []),
+             "refs": [(reference_base / item["image"]["file"]).as_posix() for item in inputs["design"]]}
     rows["batches"] = [b for b in rows["batches"] if b["id"] != batch] + [entry]
     _save(root, production)
     return {"part": part, "track": track or MAIN, "batch": batch, "poses": wanted, "pages": pages,
-            "prompt": entry["prompt"], "refs": entry["refs"],
+            "prompt": entry["prompt"], "refs": entry["refs"], "reference": reference,
             "next": "draw each page to its art path (parts-part-draw, or by hand), then parts-part-slice",
             "status": "draft", "release_ready": False}
 
@@ -345,15 +353,20 @@ def draw(assembly, part, *, batch=None, provider=None, model=None, dry_run=False
     entry = _batch(_track(production, track), batch)
     if entry["prompt"] is None:
         raise contract.PartsContractError(f"{part}: config has no prompt; draw the pages by hand")
+    frozen, frozen_base = parts_reference.read(root, entry["reference"]) if entry.get("reference") else (None, None)
+    if frozen:
+        parts_reference.verify(root, frozen, frozen_base)
     results = []
-    for page in entry["pages"]:
+    for number, page in enumerate(entry["pages"]):
         art = root / page["art"]
         if art.exists():
             results.append({"art": page["art"], "status": "exists"})
             continue
+        prompt_file = frozen_base / frozen["prompt"]["file"] if frozen else entry["prompt"]
+        sheet_file = frozen_base / frozen["pages"][number]["sheet"]["file"] if frozen else page["sheet"]
         command = [sys.executable, "-m", "sprite_gen.cli", "gen", "--provider", provider, "--prompt-file",
-                   str(root / entry["prompt"]), "--out", str(art), "--report", str(art.with_suffix(".report.json")),
-                   "--ref", str(root / page["sheet"])]
+                   str(root / prompt_file), "--out", str(art), "--report", str(art.with_suffix(".report.json")),
+                   "--ref", str(root / sheet_file)]
         for ref in entry.get("refs", []):
             command += ["--ref", str(root / ref)]
         if model:
@@ -419,6 +432,42 @@ def _rgb(text):
     return tuple(int(text[i:i+2], 16) for i in (0, 2, 4))
 
 
+def candidate_record(root, state, pose, candidate, *, track=None):
+    """Only immutable candidates belonging to this production/pose/track are exposed."""
+    row = _track(state, track)["poses"].get(pose, {})
+    if candidate not in row.get("candidates", []):
+        raise contract.PartsContractError(f"{pose}: unknown candidate")
+    record = workspace.decode_json(assets.read_file(root, candidate + "/candidate.json"))
+    if (record["part"] != state["config"]["part_id"] or record["track"] != (track or MAIN) or
+            (state["config"]["mode"] != "held" and record["pose_id"] != pose)):
+        raise contract.PartsContractError(f"{pose}: candidate belongs to a different part, track or pose")
+    if contract.content_digest({k: v for k, v in record.items() if k != "digest"}) != record["digest"]:
+        raise contract.PartsContractError(f"{pose}: candidate record changed")
+    for ref in record["images"].values():
+        if assets.sha256(assets.read_file(root / candidate, ref["file"])) != ref["sha256"]:
+            raise contract.PartsContractError(f"{pose}: candidate image changed")
+    return record
+
+
+def select_candidate(assembly, part, pose, candidate, *, track=None):
+    """Curate an existing candidate; a changed selection always requires fresh review."""
+    root, index, registry, _ = parts_motion._active(assembly)
+    state = _load(root, part)
+    record = candidate_record(root, state, pose, candidate, track=track)
+    if record["motion"] != index["motion"]:
+        raise contract.PartsContractError("candidate was drawn for a different motion revision")
+    rows = _track(state, track)
+    order, _ = _poses(registry[index["motion"]["id"]], _states(state, index))
+    contract._members([pose], order, "pose")
+    targets = order if state["config"]["mode"] == "held" else [pose]
+    changed = any(rows["poses"][p]["selected"] != candidate for p in targets)
+    if changed:
+        _select(rows, targets, candidate, keep_approved=False)
+        _save(root, state)
+    return {"part": part, "pose": pose, "candidate": candidate, "changed": changed,
+            "poses": targets, "release_ready": False}
+
+
 def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
     """Cut every drawn cell of a batch into a candidate and select it for its pose."""
     root, index, registry, _ = parts_motion._active(assembly)
@@ -437,7 +486,15 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
         [(root / p["guide"], root / p["art"]) for p in entry["pages"] if (root / p["art"]).exists()]
     if not pairs:
         raise contract.PartsContractError("no drawn page to slice: draw the batch's art paths first")
-    cut, colors = settings["cut"], _palette(root, settings["cut"])
+    frozen, frozen_base = parts_reference.read(root, entry["reference"]) if entry and entry.get("reference") else (None, None)
+    if frozen and (frozen["motion"] != index["motion"] or frozen["rig"] != index["rig"] or frozen["body"] != index["body"]):
+        raise contract.PartsContractError("generation reference belongs to a different body, rig or motion revision")
+    if frozen:
+        parts_reference.verify(root, frozen, frozen_base)
+        pairs = [(root / frozen_base / p["guide"]["file"], root / p["art"])
+                 for p in frozen["pages"] if (root / p["art"]).exists()]
+    cut = parts_reference.cut_policy(frozen, frozen_base) if frozen else settings["cut"]
+    colors = _palette(root, cut)
     canvas = (rig["canvas"]["width"], rig["canvas"]["height"])
     made = []
     for guide, art in pairs:
@@ -449,9 +506,15 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
             drawn_full.alpha_composite(drawn, tuple(crop[:2]))
             extra = {}
             guard_images = {}
-            for name, file in config["pose_checks"].get(sample["pose_id"], {}).items():
+            guards = ({name: (frozen_base / ref["file"]).as_posix()
+                       for name, ref in frozen["poses"][sample["pose_id"]]["checks"].items()} if frozen else
+                      config["pose_checks"].get(sample["pose_id"], {}))
+            for name, file in guards.items():
                 if file is not None:
-                    guard = Image.open(BytesIO(assets.read_file(root, file))).convert("L")
+                    encoded = assets.read_file(root, file)
+                    if frozen and assets.sha256(encoded) != frozen["poses"][sample["pose_id"]]["checks"][name]["sha256"]:
+                        raise contract.PartsContractError(f"{sample['pose_id']}: generation {name} mask changed")
+                    guard = Image.open(BytesIO(encoded)).convert("L")
                     if guard.size != canvas:
                         raise contract.PartsContractError(f"{sample['pose_id']}: {name} mask must match the rig canvas")
                     guard_images[f"qa_{name}"] = guard
@@ -501,6 +564,7 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
                                  "origin": cell["origin"]},
                       "placement": {"format": "full-canvas", "pivot": list(socket["position"]),
                                     "target_socket": config["socket"], "offset": [0, 0]},
+                      "generation_reference": None if not frozen else entry["reference"], "crop": crop,
                       "alignment": alignment, "holes_filled": holes,
                       "pixels": int((np.asarray(full)[..., 3] > 0).sum()), **extra}
             record, location = _publish_candidate(root, part, record, {"drawn": drawn_full, "under": under,
@@ -733,6 +797,10 @@ def _measure(root, config, settings, location, context):
     """Metrics of one candidate, and its findings as (level, message)."""
     base = root / location
     record = workspace.decode_json((base / "candidate.json").read_bytes())
+    if record.get("generation_reference"):
+        reference, reference_base = parts_reference.read(root, record["generation_reference"])
+        parts_reference.verify(root, reference, reference_base)
+    settings = {**settings, "cut": record.get("method", {}).get("cut", settings["cut"])}
     image = np.asarray(Image.open(base / "part.png").convert("RGBA"))
     mask = image[..., 3] > 0
     raw_mask = mask.copy()
@@ -747,7 +815,7 @@ def _measure(root, config, settings, location, context):
         metrics["occluded_pixels"] = int((mask & ~visible).sum())
         mask &= visible
     if record["alignment"] is not None and "drawn" in record["images"] and "under" in record["images"]:
-        crop = config["sheet"]["crop"]
+        crop = record.get("crop", config["sheet"]["crop"])
         drawn, under = (Image.open(base / f"{n}.png").convert("RGBA") for n in ("drawn", "under"))
         if crop:
             drawn, under = drawn.crop(tuple(crop)), under.crop(tuple(crop))
@@ -1195,6 +1263,12 @@ def release_reviews(root, registry, appearance):
     for ref in candidates:
         if not (_folder(root, ref["id"]) / "production.json").exists():
             continue
+        state = _load(root, ref["id"])
+        order, _ = _poses(registry[appearance["motion"]["id"]], _states(state, appearance))
+        if (not _current(state, registry, order) or
+                any(track["poses"].get(p, {}).get("decision") != "approved"
+                    for track in state["tracks"].values() for p in order)):
+            raise contract.PartsContractError(f"release requires current approved production selections for {ref['id']}")
         review = registry.get("review.part." + ref["id"])
         if review is None or review["status"] != "approved" or review["subject_digest"] != ref["digest"]:
             raise contract.PartsContractError(f"release requires an approved part review of {ref['id']} (parts-part-review)")
@@ -1264,6 +1338,13 @@ def add_adopt_arguments(parser):
     _with_track(parser)
 
 
+def add_select_arguments(parser):
+    add_part_arguments(parser)
+    parser.add_argument("--pose", required=True)
+    parser.add_argument("--candidate", required=True, help="workspace-relative candidate path recorded for this pose")
+    _with_track(parser)
+
+
 def add_part_arguments(parser):
     parser.add_argument("--assembly", required=True, type=Path)
     parser.add_argument("--part", required=True)
@@ -1301,3 +1382,4 @@ def _runner(action):
 run_init, run_sheet, run_draw, run_slice = _runner(init), _runner(sheet), _runner(draw), _runner(slice_batch)
 run_mask, run_adopt, run_check, run_build = _runner(mask), _runner(adopt), _runner(check), _runner(build)
 run_review, run_status, run_config = _runner(review), _runner(status), _runner(configure)
+run_select = _runner(select_candidate)

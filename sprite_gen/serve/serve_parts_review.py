@@ -14,13 +14,16 @@ import json
 from pathlib import Path
 import secrets
 import threading
-from urllib.parse import unquote, urlsplit
+import zipfile
+from urllib.parse import parse_qs, unquote, urlsplit
 
 from PIL import Image
+from sprite_gen._deps import np
 
 from sprite_gen.curate import parts_motion
 from sprite_gen.frames import parts_production as production
-from sprite_gen.spec import parts_contract as contract, parts_workspace as workspace
+from sprite_gen.frames import parts_reference
+from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 
 STATIC = Path(__file__).resolve().parent / "parts_player"
 MAX_BODY = 64 * 1024
@@ -31,6 +34,7 @@ class ReviewDesk:
         self.assembly = Path(assembly).absolute()
         self.token = secrets.token_urlsafe(18)
         self.lock = threading.Lock()
+        self.actions = threading.Lock()
         self._renders = {}
 
     def _state(self):
@@ -62,7 +66,51 @@ class ReviewDesk:
                 "built_current": production._current(state, registry, order),
                 "batches": production._track(state, track)["batches"][-3:]}
 
-    def render(self, name, pose, kind):
+    def candidates(self, name, pose):
+        part, track = self._split(name)
+        root, index, registry, _ = self._state()
+        state = production._load(root, part)
+        row = production._track(state, track)["poses"].get(pose)
+        if row is None:
+            raise contract.PartsContractError("unknown pose")
+        motion = registry[index["motion"]["id"]]
+        context = (motion, index, registry, registry[registry[index["rig"]["id"]]["topology"]["id"]],
+                   production.compose_parts.AssetLoader(root, index))
+        result = []
+        for candidate in reversed(row["candidates"]):
+            record = production.candidate_record(root, state, pose, candidate, track=track)
+            metrics, findings = production._measure(root, state["config"], production._settings(state["config"], track), candidate, context)
+            result.append({"id": record["digest"], "path": candidate, "selected": candidate == row["selected"],
+                           "images": list(record["images"]), "placement": record["placement"], "source": record.get("source"),
+                           "method": record["method"], "reference": record.get("generation_reference"),
+                           "metrics": metrics, "findings": [message for _, message in findings],
+                           "status": "error" if any(level == "error" for level, _ in findings) else "warning" if findings else "passed"})
+        return {"part": name, "pose": pose, "candidates": result}
+
+    def reference_archive(self, name, batch):
+        part, track = self._split(name)
+        root, _, _, _ = self._state()
+        state = production._load(root, part)
+        entry = production._batch(production._track(state, track), batch)
+        if not entry.get("reference"):
+            raise contract.PartsContractError("this legacy batch has no frozen generation reference")
+        document, base = parts_reference.read(root, entry["reference"])
+        data = BytesIO()
+        reader = parts_reference.verify(root, document, base)
+        seen = set()
+        with zipfile.ZipFile(data, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            def put(file, encoded):
+                info = zipfile.ZipInfo(file, date_time=(1980, 1, 1, 0, 0, 0))
+                info.compress_type = zipfile.ZIP_DEFLATED
+                archive.writestr(info, encoded)
+            put("reference.json", assets.read_file(root, entry["reference"]["file"]))
+            for ref in parts_reference.files(document):
+                if ref["file"] not in seen:
+                    put(ref["file"], reader.read(ref["file"], ref["sha256"]))
+                    seen.add(ref["file"])
+        return data.getvalue()
+
+    def render(self, name, pose, kind, candidate=None):
         """PNG of one pose: the part on the body alone (built), or the drawn cell / cut on what it was drawn over."""
         part, track = self._split(name)
         root, index, registry, _ = self._state()
@@ -70,10 +118,20 @@ class ReviewDesk:
         row = production._track(state, track)["poses"].get(pose)
         if row is None or row.get("selected") is None:
             raise contract.PartsContractError(f"{pose} has no drawing yet")
-        base = root / row["selected"]
+        allowed = ("body", "cut", "part", "visible", "drawn", "reference", "interfaces", "errors")
+        if kind not in allowed:
+            raise contract.PartsContractError("unknown render view")
+        location = row["selected"] if candidate is None else next(
+            (c for c in row["candidates"] if Path(c).name == candidate), None)
+        if location is None:
+            raise contract.PartsContractError("unknown candidate")
+        record = production.candidate_record(root, state, pose, location, track=track)
+        base = root / location
         built = state["built"]
         box = None
-        if built is not None and registry.get(part, {}).get("digest") == built["part"]["digest"]:
+        motion = registry[index["motion"]["id"]]
+        order, _ = production._poses(motion, production._states(state, index))
+        if location == row["selected"] and production._current(state, registry, order):
             digest = built["part"]["digest"]
             with self.lock:
                 if (digest, pose) not in self._renders:
@@ -89,12 +147,29 @@ class ReviewDesk:
                 box = self._renders[(digest, "box")]
         if kind == "body" and box is not None and track is None:
             image = self._renders[(built["part"]["digest"], pose)]
-        elif kind == "drawn" and (base / "drawn.png").exists():
-            image = Image.open(base / "drawn.png").convert("RGBA")
+        elif kind in ("part", "cut", "visible", "drawn", "reference"):
+            key = {"cut": "part", "visible": "render_part", "reference": "under"}.get(kind, kind)
+            if key not in record["images"]:
+                if kind in ("reference", "drawn"):
+                    raise contract.PartsContractError("this candidate did not retain this source view")
+                key = "part"
+            image = Image.open(base / record["images"][key]["file"]).convert("RGBA")
+        elif kind in ("interfaces", "errors"):
+            image = Image.open(base / "under.png").convert("RGBA")
+            masks = {n: Image.open(base / ref["file"]).convert("L") for n in parts_reference.COLORS
+                     if (ref := record["images"].get(f"qa_{n}"))}
+            if kind == "errors":
+                visible = Image.open(base / record["images"].get("render_part", record["images"]["part"])["file"]).convert("RGBA")
+                ink = np.asarray(visible)[..., 3] > 0
+                allowed_pixels = np.asarray(Image.open(base / "render_mask.png").convert("L")) > 0 if "render_mask" in record["images"] else np.ones_like(ink)
+                masks = {n: Image.fromarray((255 * ((np.asarray(m) > 0) & allowed_pixels & ~ink if n == "required" else
+                                (np.asarray(m) > 0) & ink if n == "protected" else ~(np.asarray(m) > 0) & ink)).astype("uint8"))
+                         for n, m in masks.items() if n != "occluded"}
+            image = parts_reference.overlay(image, masks)
         else:
-            image = production.drawn_over(root, row["selected"])
-        if box is not None and image.size == self._renders[(built["part"]["digest"], pose)].size:
-            image = image.crop(box)
+            image = Image.open(base / "under.png").convert("RGBA")
+            ref = record["images"].get("render_part", record["images"]["part"])
+            image.alpha_composite(Image.open(base / ref["file"]).convert("RGBA"))
         scale = 4
         large = image.resize((image.width*scale, image.height*scale), Image.Resampling.NEAREST)
         out = BytesIO()
@@ -103,8 +178,9 @@ class ReviewDesk:
 
     def act(self, name, action, body):
         part, track = self._split(name)
-        with self.lock:
-            self._renders.clear()
+        with self.actions:
+            with self.lock:
+                self._renders.clear()
             if action == "review":
                 return production.review(self.assembly, part, reviewer=body.get("reviewer"), track=track,
                                          approve=body.get("approve", []), reject=body.get("reject", []),
@@ -120,6 +196,8 @@ class ReviewDesk:
                 return production.check(self.assembly, part, track=track)
             if action == "build":
                 return production.build(self.assembly, part)
+            if action == "select":
+                return production.select_candidate(self.assembly, part, body.get("pose"), body.get("candidate"), track=track)
         raise contract.PartsContractError(f"unknown action {action}")
 
 
@@ -145,13 +223,23 @@ def handler_for(desk):
             try:
                 if path in ("/", "/review.html"):
                     self.reply(200, (STATIC / "review.html").read_bytes(), "text/html; charset=utf-8")
+                elif path in ("/review.js", "/review.css"):
+                    self.reply(200, (STATIC / path[1:]).read_bytes(),
+                               "text/javascript; charset=utf-8" if path.endswith(".js") else "text/css; charset=utf-8")
                 elif path == "/api/status":
                     self.json(desk.productions())
                 elif path.startswith("/api/part/"):
                     self.json(desk.part(unquote(path.removeprefix("/api/part/"))))
+                elif path.startswith("/api/candidates/"):
+                    name, pose = unquote(path.removeprefix("/api/candidates/")).split("/")
+                    self.json(desk.candidates(name, pose))
+                elif path.startswith("/api/reference/") and path.endswith(".zip"):
+                    name, batch = unquote(path.removeprefix("/api/reference/").removesuffix(".zip")).split("/")
+                    self.reply(200, desk.reference_archive(name, batch), "application/zip")
                 elif path.startswith("/api/render/") and path.endswith(".png"):
                     name, pose, kind = unquote(path.removeprefix("/api/render/").removesuffix(".png")).split("/")
-                    self.reply(200, desk.render(name, pose, kind), "image/png")
+                    candidate = parse_qs(urlsplit(self.path).query).get("candidate", [None])[0]
+                    self.reply(200, desk.render(name, pose, kind, candidate), "image/png")
                 else:
                     self.json({"error": "not found"}, 404)
             except (contract.PartsContractError, ValueError, OSError) as exc:

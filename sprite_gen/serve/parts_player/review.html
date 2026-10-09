@@ -1,117 +1,32 @@
 <!doctype html>
 <html lang="ko">
-<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>파츠 검수</title>
-<style>
-:root{--bg:#f4f4f2;--panel:#fff;--ink:#1d1d1b;--muted:#6b6b66;--line:#dcdcd6;--ok:#2f8f4e;--bad:#c23b31;--warn:#b7791f;--sel:#2b6cb0}
-@media (prefers-color-scheme:dark){:root{--bg:#18181a;--panel:#222225;--ink:#ececea;--muted:#9a9a95;--line:#38383c;--sel:#63a4ff}}
-*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink)}
-header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:2}
-h1{font-size:16px;margin:0 8px 0 0}select,input,button{font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
-button{cursor:pointer}button.primary{background:var(--sel);color:#fff;border-color:var(--sel)}button:disabled{opacity:.5;cursor:default}
-main{padding:16px;max-width:1500px;margin:0 auto}.summary{color:var(--muted);margin:0 0 12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.pose{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:8px;cursor:pointer;position:relative}
-.pose.mark-approve{border-color:var(--ok)}.pose.mark-reject{border-color:var(--bad)}
-.pose img{width:100%;image-rendering:pixelated;background:repeating-conic-gradient(#e8e8e4 0 25%,#f8f8f6 0 50%) 0 0/16px 16px;border-radius:6px;display:block}
-.pair{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:6px}
-.tag{font-size:12px;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
-.tag.passed,.tag.approved{color:var(--ok);border-color:var(--ok)}.tag.warning{color:var(--warn);border-color:var(--warn)}
-.tag.error,.tag.rejected{color:var(--bad);border-color:var(--bad)}
-.find{font-size:12px;color:var(--muted);margin:4px 0 0;padding-left:16px}
-.mark{position:absolute;top:6px;right:8px;font-weight:600}.mark.approve{color:var(--ok)}.mark.reject{color:var(--bad)}
-.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
-#log{white-space:pre-wrap;font:12px/1.4 ui-monospace,monospace;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px;max-height:240px;overflow:auto;margin-top:16px}
-.hint{color:var(--muted);font-size:12px}
-</style>
-</head>
-<body>
-<header>
-  <h1>파츠 검수</h1>
-  <select id="part" aria-label="파츠"></select>
-  <label>보기 <select id="view"><option value="body">몸 위 파츠</option><option value="cut">자른 결과</option><option value="drawn">모델이 그린 칸</option></select></label>
-  <span class="hint">포즈를 누르면 승인 → 반려 → 미정 순으로 바뀝니다.</span>
-</header>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>파츠 제작 검수</title>
+<link rel="stylesheet" href="/review.css">
+<header><h1>파츠 제작 검수</h1><select id="part" aria-label="파츠"></select><span id="access"></span></header>
 <main>
-  <p class="summary" id="summary"></p>
-  <div class="bar">
-    <input id="reviewer" placeholder="검수자" size="10">
-    <input id="note" placeholder="반려 사유 (예: 신발 윗단이 정강이를 덮음)" size="40">
-    <button class="primary" id="save">판정 저장</button>
-    <button id="all">검사 통과 포즈 모두 승인 표시</button>
-    <span class="hint">재작업:</span>
-    <button data-act="sheet">반려·누락 포즈 시트</button>
-    <button data-act="draw">그리기(공급자)</button>
-    <button data-act="slice">자르기</button>
-    <button data-act="check">검사</button>
-    <button data-act="build">빌드</button>
-  </div>
-  <div class="grid" id="grid"></div>
-  <div id="log"></div>
+<section class="workspace">
+ <div class="toolbar">
+  <select id="filter" aria-label="포즈 필터"><option value="all">전체 포즈</option><option value="error">검사 오류</option><option value="unverified">미승인</option></select>
+  <select id="view" aria-label="포즈 보기"><option value="body">몸 위 레이어</option><option value="part">독립 원본 파츠</option><option value="visible">가림 적용 파츠</option><option value="reference">생성 참조</option><option value="interfaces">검사 영역</option><option value="errors">오류 위치</option><option value="drawn">생성 원본 칸</option></select>
+ </div>
+ <p id="summary" class="muted"></p><p id="view-note" class="muted"></p>
+ <div id="grid" class="grid"></div>
+ <div class="toolbar actions"><button data-act="sheet">실패·반려·누락 포즈 시트</button><button data-act="draw">최신 시트 생성</button><button data-act="slice">생성물 분리</button><button data-act="check">전체 검사</button><button data-act="build">레이어 빌드</button></div>
+ <a id="reference-download" hidden>최신 생성 기준 묶음 ↓</a>
+ <details><summary>작업 기록</summary><pre id="log"></pre></details>
+</section>
+<aside id="inspector">
+ <h2 id="pose-title">포즈를 선택하세요</h2><p id="pose-status" class="muted"></p>
+ <div class="comparison"><figure><img id="reference-image" alt="이 후보가 생성될 때 사용한 참조"><figcaption>생성 당시 참조</figcaption></figure><figure><img id="part-image" alt="선택한 후보의 독립 원본 파츠"><figcaption>독립 원본 파츠</figcaption></figure></div>
+ <p class="muted">녹색: 덮어야 할 곳 · 빨강: 보호 · 파랑: 허용 · 보라: 앞에서 가림</p>
+ <ul id="findings"></ul><div id="candidates" class="candidates"></div>
+ <button id="select-candidate">이 후보를 사용</button><p id="candidate-note" class="muted"></p>
+ <details><summary>포즈·배치·생성 출처</summary><pre id="evidence"></pre></details>
+ <div class="review-actions"><input id="reviewer" aria-label="검수자" placeholder="검수자"><textarea id="note" aria-label="검수 사유" placeholder="이 포즈의 검수·재작업 사유"></textarea><div class="toolbar"><button id="approve">현재 파츠 승인</button><button id="reject">현재 파츠 반려</button></div><button id="redo">이 포즈 재작업 시트</button></div>
+ <p class="muted">검사 통과는 시각 승인이 아닙니다. 승인·반려는 현재 빌드에 저장됩니다.</p>
+</aside>
 </main>
-<script>
-const token = new URLSearchParams(location.hash.slice(1)).get("token") || "";
-const $ = id => document.getElementById(id);
-const esc = text => String(text).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const marks = new Map();
-let current = null;
-const log = text => { $("log").textContent = text + "\n" + $("log").textContent; };
-async function get(path){ const r = await fetch(path); const j = await r.json(); if(!r.ok) throw new Error(j.error); return j; }
-async function act(action, body={}){
-  const r = await fetch(`/api/act/${encodeURIComponent(current)}/${action}`, {method:"POST",
-    headers:{"Content-Type":"application/json","X-Review-Token":token}, body:JSON.stringify(body)});
-  const j = await r.json(); if(!r.ok) throw new Error(j.error); return j;
-}
-async function loadList(){
-  const status = await get("/api/status");
-  $("part").innerHTML = status.productions.map(p => `<option value="${esc(p.part)}">${esc(p.part)} — ${esc(p.state)}</option>`).join("");
-  if(!status.productions.length){ $("summary").textContent = "제작 기록이 없습니다 (parts-part-init)."; return; }
-  current = current || status.productions[0].part; $("part").value = current; await loadPart();
-}
-async function loadPart(){
-  marks.clear();
-  const data = await get(`/api/part/${encodeURIComponent(current)}`);
-  const count = s => data.poses.filter(p => (p.decision||"") === s).length;
-  $("summary").textContent = `${data.poses.length}포즈 · 승인 ${count("approved")} · 반려 ${count("rejected")} · `
-    + `미정 ${count("unverified")} · 그림 없음 ${data.poses.filter(p => !p.selected).length} · `
-    + (data.built_current ? "빌드 최신" : "빌드 필요");
-  const view = $("view").value, stamp = Date.now();
-  $("grid").innerHTML = data.poses.map(p => {
-    const check = p.check ? p.check.status : (p.selected ? "unchecked" : "missing");
-    const img = p.selected ? `<img loading="lazy" alt="${p.pose}" src="/api/render/${encodeURIComponent(current)}/${encodeURIComponent(p.pose)}/${view}.png?${stamp}">` : `<div class="hint">그림 없음</div>`;
-    const finds = p.check && p.check.findings.length ? `<ul class="find">${p.check.findings.map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : "";
-    return `<div class="pose" data-pose="${p.pose}" data-check="${check}"><span class="mark"></span>${img}
-      <div class="row"><b>${p.pose}</b><span class="tag ${check}">${check}</span><span class="tag ${p.decision||""}">${p.decision||"-"}</span></div>
-      ${p.note ? `<div class="hint">${esc(p.note)}</div>` : ""}${finds}</div>`;
-  }).join("");
-  document.querySelectorAll(".pose").forEach(el => el.onclick = () => {
-    const next = {undefined:"approve", approve:"reject", reject:undefined}[marks.get(el.dataset.pose)];
-    if(next) marks.set(el.dataset.pose, next); else marks.delete(el.dataset.pose);
-    el.classList.toggle("mark-approve", next === "approve"); el.classList.toggle("mark-reject", next === "reject");
-    el.querySelector(".mark").className = "mark " + (next || ""); el.querySelector(".mark").textContent = {approve:"승인",reject:"반려"}[next] || "";
-  });
-}
-$("part").onchange = () => { current = $("part").value; loadPart().catch(e => log(e.message)); };
-$("view").onchange = () => loadPart().catch(e => log(e.message));
-$("all").onclick = () => document.querySelectorAll(".pose").forEach(el => {
-  if(["passed","warning"].includes(el.dataset.check) && !marks.has(el.dataset.pose)) el.click(); });
-$("save").onclick = async () => {
-  const approve = [...marks].filter(([,m]) => m === "approve").map(([p]) => p);
-  const reject = [...marks].filter(([,m]) => m === "reject").map(([p]) => p);
-  try { const r = await act("review", {reviewer:$("reviewer").value, approve, reject, note:$("note").value});
-    log(`검수 ${r.status}: 승인 ${r.approved}, 반려 ${r.rejected.join(", ") || "없음"}`); await loadList(); }
-  catch(e){ log("판정 실패: " + e.message); }
-};
-document.querySelectorAll("[data-act]").forEach(b => b.onclick = async () => {
-  b.disabled = true; log(`${b.dataset.act} 실행 중…`);
-  try { log(JSON.stringify(await act(b.dataset.act, {}), null, 1)); await loadList(); }
-  catch(e){ log(`${b.dataset.act} 실패: ` + e.message); } finally { b.disabled = false; }
-});
-if(!token) log("토큰이 없어 읽기 전용입니다. 서버가 출력한 주소(#token=...)로 여세요.");
-loadList().catch(e => log(e.message));
-</script>
-</body>
+<script src="/review.js"></script>
 </html>

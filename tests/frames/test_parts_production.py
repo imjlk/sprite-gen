@@ -120,6 +120,71 @@ def test_provider_failures_survive_reexecution_and_dry_run(tmp_path, monkeypatch
     assert len(attempts) == 2 and all(a["error"] == "provider refused" for a in attempts)
 
 
+def test_reference_inputs_are_frozen_before_drawing_and_checks(tmp_path):
+    from sprite_gen.frames import parts_reference
+    assembly = setup(tmp_path)
+    config = json.loads((tmp_path / "badge.json").read_text())
+    config["cut"]["method"] = "part-only"
+    region = Image.new("L", (128, 128)); region.putpixel((36, 42), 255)
+    region.save(assembly.parent / "protected.png")
+    Image.new("RGB", (12, 12), "red").save(assembly.parent / "design.png")
+    config["pose_checks"] = {"walk.01": {"protected": "protected.png"}}
+    config["prompt"]["refs"] = ["design.png"]
+    file = tmp_path / "direct.json"; file.write_text(json.dumps(config))
+    production.configure(assembly, "test.badge", file)
+    made = production.sheet(assembly, "test.badge")
+    frozen, base = parts_reference.read(assembly.parent, made["reference"])
+    before = (assembly.parent / base / frozen["design"][0]["image"]["file"]).read_bytes()
+    Image.new("RGB", (12, 12), "blue").save(assembly.parent / "design.png")
+    Image.new("L", (128, 128)).save(assembly.parent / "protected.png")
+    # Mutable original sheet and prompt cannot rewrite what the provider sees.
+    (assembly.parent / made["prompt"]).write_text("changed")
+    planned = production.draw(assembly, "test.badge", dry_run=True)["pages"][0]["command"]
+    assert str(assembly.parent / base / frozen["prompt"]["file"]) in planned
+    assert (assembly.parent / base / frozen["design"][0]["image"]["file"]).read_bytes() == before
+    draw_batch(assembly, made)
+    sliced = production.slice_batch(assembly, "test.badge")
+    assert production.check(assembly, "test.badge")["summary"]["error"] == 1
+    candidate = assembly.parent / sliced["candidates"][0]["candidate"]
+    record = json.loads((candidate / "candidate.json").read_text())
+    assert record["generation_reference"] == made["reference"]
+    assert Image.open(candidate / "qa_protected.png").convert("L").getpixel((36, 42)) == 255
+    # A changed pinned image is rejected, rather than silently drawn or cut.
+    (assembly.parent / base / frozen["design"][0]["image"]["file"]).write_bytes(b"bad")
+    with pytest.raises(contract.PartsContractError):
+        production.draw(assembly, "test.badge", dry_run=True)
+
+
+def test_curation_restores_a_candidate_and_invalidates_only_changed_pose(tmp_path):
+    assembly = setup(tmp_path)
+    draw_batch(assembly, production.sheet(assembly, "test.badge"))
+    first = production.slice_batch(assembly, "test.badge")["candidates"][0]["candidate"]
+    production.check(assembly, "test.badge"); production.build(assembly, "test.badge")
+    production.review(assembly, "test.badge", reviewer="tester", approve=["all"])
+    index, registry = workspace.read_workspace(assembly)
+    appearance = contract.seal({"kind": "parts-appearance", "schema_version": 1, "id": "curation.test",
+        **{k: index[k] for k in ("rig", "motion", "catalog", "body", "states")},
+        "selections": {slot["id"]: contract.reference(registry["test.badge"]) if slot["id"] == "hair" else None
+                       for slot in registry[index["catalog"]["id"]]["slots"]}})
+    assert production.release_reviews(assembly.parent, registry, appearance)
+    region = Image.open(assembly.parent / first / "mask.png").copy()
+    region.paste(0, (0, 44, 128, 128)); region.save(tmp_path / "smaller.png")
+    second = production.mask(assembly, "test.badge", "walk.01", tmp_path / "smaller.png")["candidate"]
+    restored = production.select_candidate(assembly, "test.badge", "walk.01", first)
+    assert restored["changed"] and second != first
+    rows = production._load(assembly.parent, "test.badge")["tracks"]["main"]["poses"]
+    assert rows["walk.01"]["decision"] == "unverified" and rows["walk.01"]["check"] is None
+    assert rows["walk.02"]["decision"] == "approved"
+    with pytest.raises(contract.PartsContractError, match="current approved production"):
+        production.release_reviews(assembly.parent, registry, appearance)
+    assert not production.select_candidate(assembly, "test.badge", "walk.01", first)["changed"]
+    with pytest.raises(contract.PartsContractError, match="unknown candidate"):
+        production.select_candidate(assembly, "test.badge", "walk.02", first)
+    Image.new("RGBA", (128, 128)).save(assembly.parent / first / "part.png")
+    with pytest.raises(contract.PartsContractError, match="image changed"):
+        production.select_candidate(assembly, "test.badge", "walk.01", first)
+
+
 def test_occlusion_preserves_raw_part_and_builds_a_visible_layer(tmp_path):
     assembly = setup(tmp_path)
     config = json.loads((tmp_path / "badge.json").read_text())
@@ -284,8 +349,45 @@ def test_the_review_desk_needs_its_token_and_records_decisions(tmp_path):
         sheet = json.loads(urllib.request.urlopen(urllib.request.Request(base + "/api/act/test.badge/sheet", data=b"{}",
                            method="POST", headers={"X-Review-Token": desk.token})).read())
         assert sheet["poses"] == ["walk.02"]
+        import zipfile
+        from io import BytesIO
+        reference_zip = urllib.request.urlopen(base + "/api/reference/test.badge/" + sheet["batch"] + ".zip").read()
+        with zipfile.ZipFile(BytesIO(reference_zip)) as archive:
+            manifest = json.loads(archive.read("reference.json"))
+            assert list(manifest["poses"]) == ["walk.02"]
+            assert archive.read(manifest["poses"]["walk.02"]["reference"]["file"]).startswith(b"\x89PNG")
+        candidates = json.loads(urllib.request.urlopen(base + "/api/candidates/test.badge/walk.01").read())
+        assert len(candidates["candidates"]) == 1 and candidates["candidates"][0]["selected"]
+        for name, mime in (("review.js", "javascript"), ("review.css", "css")):
+            assert mime in urllib.request.urlopen(base + "/" + name).headers["Content-Type"]
     finally:
         server.shutdown()
+
+
+def test_review_views_show_independent_parts_and_do_not_show_a_stale_build(tmp_path):
+    from io import BytesIO
+    from sprite_gen.serve.serve_parts_review import ReviewDesk
+    assembly = setup(tmp_path)
+    draw_batch(assembly, production.sheet(assembly, "test.badge"))
+    first = production.slice_batch(assembly, "test.badge")["candidates"][0]["candidate"]
+    production.check(assembly, "test.badge"); production.build(assembly, "test.badge")
+    mask = Image.open(assembly.parent / first / "mask.png").copy()
+    mask.paste(0, (0, 44, 128, 128)); mask.save(tmp_path / "smaller.png")
+    second = production.mask(assembly, "test.badge", "walk.01", tmp_path / "smaller.png")["candidate"]
+    desk = ReviewDesk(assembly)
+    raw = Image.open(assembly.parent / second / "part.png").convert("RGBA")
+    shown = Image.open(BytesIO(desk.render("test.badge", "walk.01", "cut")))
+    assert shown.tobytes() == raw.resize((512, 512), Image.Resampling.NEAREST).tobytes()
+    under = Image.open(assembly.parent / second / "under.png").convert("RGBA")
+    under.alpha_composite(raw)
+    body = Image.open(BytesIO(desk.render("test.badge", "walk.01", "body")))
+    assert body.tobytes() == under.resize((512, 512), Image.Resampling.NEAREST).tobytes()
+    listed = desk.candidates("test.badge", "walk.01")["candidates"]
+    assert len(listed) == 2 and listed[0]["selected"]
+    historical = Image.open(BytesIO(desk.render("test.badge", "walk.01", "part", Path(first).name)))
+    assert historical.getpixel((36*4, 44*4))[3] == 255 and shown.getpixel((36*4, 44*4))[3] == 0
+    with pytest.raises(contract.PartsContractError, match="unknown candidate"):
+        desk.render("test.badge", "walk.01", "part", "../../outside")
 
 
 def test_config_changes_apply_to_new_drawings_and_identity_stays_fixed(tmp_path):
