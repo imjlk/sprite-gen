@@ -220,7 +220,7 @@ def test_unmasked_body_and_zmap_views_restore_even_fully_hidden_art_without_muta
     from io import BytesIO
     from test_parts_pose_sheet import drawn_sheet
     assembly=setup(tmp_path)
-    config=json.loads((tmp_path/'badge.json').read_text());config['cut']['method']='part-only';config['part_id']='test.zbadge'
+    config=json.loads((tmp_path/'badge.json').read_text());config['cut']['method']='part-only';config['part_id']='test.zbadge';config['visibility']='mask'
     Image.new('L',(128,128),255).save(assembly.parent/'occluded.png')
     config['pose_checks']={'walk.01':{'occluded':'occluded.png'}}
     path=tmp_path/'masked.json';path.write_text(json.dumps(config));production.init(assembly,path)

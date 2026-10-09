@@ -38,10 +38,15 @@ def freeze(root, folder, index, registry, config, settings, pages, prompt=None):
     load = compose_parts.AssetLoader(root, index)
     samples = {(c["id"], s["id"]): s for c in motion["clips"] for s in c["samples"]}
     poses = {}
+    segments = workspace.decode_json(assets.read_file(root, config["segments"])) if config["segments"] else None
+    if segments and segments["motion"] != index["motion"]:
+        raise contract.PartsContractError("generation layer guide uses a different motion")
+    layer_pages = []
     for page in pages:
         guide_file = root / page["guide"]
         guide = workspace.decode_json(guide_file.read_bytes())
         sheet_image = Image.open(root / page["sheet"])
+        layer_page = Image.new("RGBA", sheet_image.size, (235, 235, 235, 255)) if segments else None
         for cell in guide["cells"]:
             sample = samples[cell["clip"], cell["sample"]]
             pose = sample["pose_id"]
@@ -61,6 +66,15 @@ def freeze(root, folder, index, registry, config, settings, pages, prompt=None):
                            "reference": keep(f"poses/{pose}/reference.png", assets.png_bytes(under)),
                            "overlay": keep(f"poses/{pose}/overlay.png", assets.png_bytes(overlay(under, masks))),
                            "checks": checks}
+            if segments:
+                source_clip, source_sample = segments["poses"][pose]
+                source = Path(config["segments"]).parent
+                label = Image.open(BytesIO(assets.read_file(root, (source / "labels" / source_clip / f"{source_sample}.png").as_posix()))).convert("RGBA")
+                poses[pose]["body_layers"] = {"labels": keep(f"poses/{pose}/body-layers.png", assets.png_bytes(label)),
+                    "colors": segments["colors"], "provides": segments["provides"], "zmap": topology["layers"]}
+                crop = guide["crop"];scale = guide["scale"]
+                layer_page.alpha_composite(label.crop(tuple(crop)).resize(((crop[2]-crop[0])*scale,(crop[3]-crop[1])*scale),Image.Resampling.NEAREST),tuple(cell["origin"]))
+        layer_pages.append(layer_page)
     design = []
     for number, file in enumerate((settings["prompt"] or {}).get("refs", [])):
         design.append({"source": file, "image": keep(f"design/{number}{Path(file).suffix}", assets.read_file(root, file))})
@@ -71,12 +85,15 @@ def freeze(root, folder, index, registry, config, settings, pages, prompt=None):
     frozen_pages = [{"guide": keep(f"pages/{n}/pose-sheet.json", assets.read_file(root, p["guide"])),
                      "sheet": keep(f"pages/{n}/pose-sheet.png", assets.read_file(root, p["sheet"])),
                      "art": p["art"]} for n, p in enumerate(pages)]
+    for number, layer_page in enumerate(layer_pages):
+        if layer_page is not None:
+            frozen_pages[number]["layers"] = keep(f"pages/{number}/body-layers.png", assets.png_bytes(layer_page))
     document = {"kind": "parts-generation-reference", "schema_version": 1,
                 "part": config["part_id"], "rig": index["rig"], "motion": index["motion"], "body": index["body"],
                 "canvas": rig["canvas"], "style": rig["style"], "poses": poses, "design": design,
                 "pages": frozen_pages, "prompt": keep("prompt.txt", prompt.read_bytes()) if prompt else None,
                 "contract": {"mode": config["mode"], "cut": cut, "sheet": config["sheet"],
-                             "pieces": config["pieces"], "node": settings["node"], "qa": config["qa"]}, "cut_files": cut_files,
+                             "pieces": config["pieces"], "node": settings["node"], "qa": config["qa"], "visibility": config["visibility"]}, "cut_files": cut_files,
                 "profiles": {name: keep(f"{name}.json", workspace.json_bytes(value))
                              for name, value in (("rig", rig), ("topology", topology), ("motion", motion))},
                 "art_approved": False}

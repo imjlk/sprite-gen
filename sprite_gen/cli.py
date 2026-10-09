@@ -35,7 +35,7 @@ from sprite_gen.spec import migrate_breathe, migrate_request, parts_workspace
 from sprite_gen.curate import parts_motion, parts_appearance, parts_poses, parts_review, parts_sockets
 from sprite_gen.qa import inspect_parts, parts_fit, parts_stability
 from sprite_gen.compose import compose_parts, parts_build, export_parts
-from sprite_gen.frames import parts_import, parts_interfaces, parts_loop_native, parts_pose_sheet, parts_production, parts_rebind, parts_segments
+from sprite_gen.frames import parts_body_refine, parts_import, parts_interfaces, parts_loop_native, parts_part_edit, parts_pose_sheet, parts_production, parts_rebind, parts_segments
 from sprite_gen.gen.prepare import BODY_PLAN_HELP, STYLE_DEFAULT, _outline_config
 from sprite_gen.spec.subject import SUBJECTS
 from sprite_gen.workflow import guide, preferences
@@ -539,6 +539,16 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         "Derive immutable per-pose interface masks from an explicit slot/body profile into a proposed config.",
         parts_interfaces.add_arguments,
         parts_interfaces.run,
+    ),
+    "parts-body-refine": (
+        "Refine authored body layers with an explicit topology revision and preserve every source pixel.",
+        parts_body_refine.add_arguments,
+        parts_body_refine.run,
+    ),
+    "parts-part-edit": (
+        "Create an unselected candidate through bounded, recorded pixel operations on retained source art.",
+        parts_part_edit.add_arguments,
+        parts_part_edit.run,
     ),
     "parts-part-adopt": (
         "Take an existing pack's drawings into a production as per-pose candidates.",

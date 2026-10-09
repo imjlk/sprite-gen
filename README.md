@@ -103,6 +103,8 @@ one shared browser clock and a standalone preview, without appearance baking.
 [Baked export](docs/parts/06-baked-export.md) emits deterministic multi-state snapshots
 and requires a current appearance approval for release. See the
 [parts contract and CLI](docs/parts/01-contract.md).
+The production path now [refines body layers and edits retained source art](docs/parts/14-body-zmap-source-edit.md),
+builds original parts with zmap by default, and reserves render masks for explicit designs.
 
 ## What you actually get
 

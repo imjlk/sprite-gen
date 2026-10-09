@@ -20,3 +20,5 @@ details{margin-top:18px}summary{cursor:pointer;color:var(--muted)}pre{white-spac
 @media(max-width:1000px){main{grid-template-columns:minmax(0,1fr) 350px}.workspace,#inspector{padding:16px}.grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
 @media(max-width:720px){header{padding:12px;flex-wrap:wrap}main{display:flex;flex-direction:column}#inspector{order:-1;position:static;max-height:none;border-left:0;border-bottom:1px solid var(--line)}.grid{grid-template-columns:repeat(3,1fr)}}
 @media(prefers-reduced-motion:reduce){button{transition:none}}
+
+#pixel-editor input[type=number]{width:65px}#pixel-editor .toolbar{margin:8px 0}#pixel-editor label{font-size:11px}#pixel-editor input:not([type=number]){width:140px}

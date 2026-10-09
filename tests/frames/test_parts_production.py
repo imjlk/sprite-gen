@@ -189,6 +189,7 @@ def test_occlusion_preserves_raw_part_and_builds_a_visible_layer(tmp_path):
     assembly = setup(tmp_path)
     config = json.loads((tmp_path / "badge.json").read_text())
     config["cut"]["method"] = "part-only"
+    config["visibility"] = "mask"
     region = Image.new("L", (128, 128))
     region.putpixel((36, 42), 255)
     region.save(assembly.parent / "occluded.png")

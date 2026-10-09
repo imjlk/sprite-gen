@@ -29,6 +29,7 @@ from sprite_gen.frames import parts_production as production
 from sprite_gen.frames import parts_reference
 from sprite_gen.frames import parts_quality
 from sprite_gen.frames import parts_segments
+from sprite_gen.frames import parts_part_edit
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 from sprite_gen.spec.runio import atomic_write_text
 
@@ -130,6 +131,7 @@ class ReviewDesk:
             result.append({"id": record["digest"], "path": candidate, "selected": candidate == row["selected"],
                            "images": list(record["images"]), "placement": record["placement"], "source": record.get("source"),
                            "method": record["method"], "reference": record.get("generation_reference"),
+                           "compatible": record["motion"] == index["motion"],
                            "metrics": metrics, "findings": [message for _, message in findings],
                            "criteria": parts_quality.criteria(metrics, mode=state["config"]["mode"]),
                            "status": row["check"]["status"] if candidate == row["selected"] and row.get("check") else
@@ -212,9 +214,14 @@ class ReviewDesk:
             masks = {n: Image.open(base / ref["file"]).convert("L") for n in parts_reference.COLORS
                      if (ref := record["images"].get(f"qa_{n}"))}
             if kind == "errors":
-                visible = Image.open(base / record["images"].get("render_part", record["images"]["part"])["file"]).convert("RGBA")
-                ink = np.asarray(visible)[..., 3] > 0
-                allowed_pixels = np.asarray(Image.open(base / "render_mask.png").convert("L")) > 0 if "render_mask" in record["images"] else np.ones_like(ink)
+                raw = Image.open(base / record["images"]["part"]["file"]).convert("RGBA")
+                ink = np.asarray(raw)[..., 3] > 0
+                if state["config"]["visibility"] == "zmap" and state["config"]["segments"]:
+                    from sprite_gen.frames import parts_candidate_scene
+                    allowed_pixels = parts_candidate_scene.visibility(root,index,registry,state["config"],pose,raw,record["placement"])
+                else:
+                    allowed_pixels = np.asarray(Image.open(base / "render_mask.png").convert("L")) > 0 if state["config"]["visibility"] == "mask" and "render_mask" in record["images"] else np.ones_like(ink)
+                ink &= allowed_pixels
                 masks = {n: Image.fromarray((255 * ((np.asarray(m) > 0) & allowed_pixels & ~ink if n == "required" else
                                 (np.asarray(m) > 0) & ink if n == "protected" else ~(np.asarray(m) > 0) & ink)).astype("uint8"))
                          for n, m in masks.items() if n != "occluded"}
@@ -314,6 +321,23 @@ class ReviewDesk:
                 return production.build(self.assembly, part)
             if action == "select":
                 return production.select_candidate(self.assembly, part, body.get("pose"), body.get("candidate"), track=track)
+            if action == "edit":
+                return parts_part_edit.edit(self.assembly, part, body.get("pose"), body.get("operations"), candidate=body.get("candidate"), track=track)
+            if action == "apply":
+                selected = production.select_candidate(self.assembly, part, body.get("pose"), body.get("candidate"), track=track)
+                checked = production.check(self.assembly, part, track=track)
+                built = production.build(self.assembly, part)
+                return {"selected": selected, "check": checked, "build": built, "art_approved": False}
+            if action == "visibility":
+                mode = contract._enum("zmap", "mask")(body.get("visibility"), "visibility")
+                root, _, _, _ = self._state()
+                state = production._load(root,part)
+                state["config"]["visibility"] = mode
+                with tempfile.TemporaryDirectory(prefix="parts-visibility-") as folder:
+                    file = Path(folder)/"config.json"
+                    file.write_bytes(workspace.json_bytes(state["config"]))
+                    production.configure(self.assembly,part,file)
+                return {"visibility":mode,"check":production.check(self.assembly,part),"build":production.build(self.assembly,part),"art_approved":False}
         raise contract.PartsContractError(f"unknown action {action}")
 
     def job(self, identity):

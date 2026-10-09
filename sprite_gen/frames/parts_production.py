@@ -101,10 +101,11 @@ _CONFIG = contract._record({
     "variants": contract._list(_VARIANT), "body": contract._nullable(_BODY),
     "pose_checks": contract._mapping(_POSE_CHECK),
     "qa": _QA,
+    "visibility": contract._enum("zmap", "mask"),
 }, {"role": "part", "slot": None, "node": None, "socket": None, "mode": "raster", "draw": {}, "states": [],
     "reference_pose": None, "sheet": {}, "cut": {}, "wearing": [], "pieces": [], "by_component": False, "segments": None,
     "prompt": None, "follow": None, "trail": None, "cover_rule": None, "covers": [], "variants": [], "body": None,
-    "pose_checks": {}, "qa": {}})
+    "pose_checks": {}, "qa": {}, "visibility": "zmap"})
 DECISIONS = ("unverified", "approved", "rejected")
 FIXED = ("part_id", "design_id", "role", "slot", "node", "socket", "mode")
 # Check bounds, judged on the SD demo (docs/parts/10-production.md).
@@ -305,7 +306,7 @@ def configure(assembly, part, config):
     if value["pieces"] and value["segments"] is None:
         raise contract.PartsContractError("pieces are cut by body segments: give config.segments")
     previous = production["config"]
-    if previous["qa"] != value["qa"]:
+    if any(previous[k] != value[k] for k in ("qa", "visibility", "pieces", "segments")):
         for track in production["tracks"].values():
             for row in track["poses"].values():
                 row.update(check=None, decision="unverified", reviewer=None, note=None)
@@ -402,6 +403,8 @@ def draw(assembly, part, *, batch=None, provider=None, model=None, dry_run=False
                    "--ref", str(root / sheet_file)]
         for ref in entry.get("refs", []):
             command += ["--ref", str(root / ref)]
+        if frozen and frozen["pages"][number].get("layers"):
+            command += ["--ref", str(root / frozen_base / frozen["pages"][number]["layers"]["file"])]
         if model:
             command += ["--model", model]
         if dry_run:
@@ -867,7 +870,7 @@ def _measure(root, config, settings, location, context):
     raw_mask = mask.copy()
     visible = np.ones(mask.shape, dtype=bool)
     metrics = {"pixels": int(mask.sum()), "alignment": record["alignment"], "coverage": None}
-    if "render_mask" in record["images"]:
+    if config["visibility"] == "mask" and "render_mask" in record["images"]:
         ref = record["images"]["render_mask"]
         encoded = assets.read_file(base, ref["file"])
         if assets.sha256(encoded) != ref["sha256"]:
@@ -875,6 +878,13 @@ def _measure(root, config, settings, location, context):
         visible = np.asarray(Image.open(BytesIO(encoded)).convert("L")) > 0
         metrics["occluded_pixels"] = int((mask & ~visible).sum())
         mask &= visible
+    elif config["visibility"] == "zmap" and config["segments"] and context[3]["layers"]:
+        from sprite_gen.frames import parts_candidate_scene
+        visible = parts_candidate_scene.visibility(context[4].root, context[1], context[2], config,
+            record["pose_id"], Image.fromarray(image), record["placement"])
+        metrics["occluded_pixels"] = int((mask & ~visible).sum())
+        mask &= visible
+    metrics["inspection_space"] = "zmap-visible" if config["visibility"] == "zmap" and config["segments"] and context[3]["layers"] else "mask-visible" if config["visibility"] == "mask" else "raw-source"
     if record["alignment"] is not None and "drawn" in record["images"] and "under" in record["images"]:
         crop = record.get("crop", config["sheet"]["crop"])
         drawn, under = (Image.open(base / f"{n}.png").convert("RGBA") for n in ("drawn", "under"))
@@ -1031,7 +1041,7 @@ def _track_piece(root, part, config, motion, states, name, rows, order, first):
             continue
         record = workspace.decode_json((root / row["selected"] / "candidate.json").read_bytes())
         # The raw drawing remains reviewable; only the derived visible raster is assembled.
-        ref = record["images"].get("render_part", record["images"]["part"])
+        ref = record["images"].get("render_part", record["images"]["part"]) if config["visibility"] == "mask" else record["images"]["part"]
         image = (root / row["selected"] / ref["file"]).relative_to(_folder(root, part)).as_posix()
         placements[pose] = {**record["placement"], "image": {"file": image, "sha256": ref["sha256"]},
                             "visible": record["pixels"] > 0}
@@ -1111,7 +1121,7 @@ def build(assembly, part, *, allow_incomplete=False):
             spec_file, source = Path(split["spec"]), Path(split["source_root"])
         imported = parts_import.import_pack(assembly, spec_file, source, allow_incomplete=allow_incomplete)
     production = _load(root, part)
-    production["built"] = {"part": imported["part"], "selection": {
+    production["built"] = {"part": imported["part"], "visibility": config["visibility"], "selection": {
         name: {p: row["selected"] for p, row in track["poses"].items() if p in order and row["selected"]}
         for name, track in production["tracks"].items()}}
     _save(root, production)
@@ -1185,6 +1195,8 @@ def contact(frames, order, rows, *, scale=3, columns=8, crop=None):
 def _current(production, registry, order):
     built = production["built"]
     if built is None or registry.get(production["config"]["part_id"], {}).get("digest") != built["part"]["digest"]:
+        return False
+    if built.get("visibility", "mask") != production["config"]["visibility"]:
         return False
     for name, track in production["tracks"].items():
         selected = {p: row["selected"] for p, row in track["poses"].items() if p in order and row["selected"]}
@@ -1310,7 +1322,7 @@ def status(assembly, part=None):
             if counts["unchecked"]:
                 steps.append("parts-part-check")
             if counts["errors"]:
-                steps.append(f"fix {counts['errors']} poses with check errors (redraw or parts-part-mask)")
+                steps.append(f"fix {counts['errors']} poses with check errors (parts-part-edit or redraw)")
             if not current and not counts["missing"]:
                 steps.append("parts-part-build")
             if current and counts["unverified"]:
