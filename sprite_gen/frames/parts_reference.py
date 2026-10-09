@@ -76,7 +76,7 @@ def freeze(root, folder, index, registry, config, settings, pages, prompt=None):
                 "canvas": rig["canvas"], "style": rig["style"], "poses": poses, "design": design,
                 "pages": frozen_pages, "prompt": keep("prompt.txt", prompt.read_bytes()) if prompt else None,
                 "contract": {"mode": config["mode"], "cut": cut, "sheet": config["sheet"],
-                             "pieces": config["pieces"], "node": settings["node"]}, "cut_files": cut_files,
+                             "pieces": config["pieces"], "node": settings["node"], "qa": config["qa"]}, "cut_files": cut_files,
                 "profiles": {name: keep(f"{name}.json", workspace.json_bytes(value))
                              for name, value in (("rig", rig), ("topology", topology), ("motion", motion))},
                 "art_approved": False}

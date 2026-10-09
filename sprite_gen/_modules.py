@@ -22,6 +22,8 @@ MODULE_DOMAIN = {
     'parts_rebind': 'frames',
     'parts_segments': 'frames',
     'parts_production': 'frames',
+    'parts_interfaces': 'frames',
+    'parts_quality': 'frames',
     'parts_resolve': 'compose',
     'parts_runtime': 'compose',
     'compose_parts': 'compose',

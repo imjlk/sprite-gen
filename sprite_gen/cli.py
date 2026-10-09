@@ -35,7 +35,7 @@ from sprite_gen.spec import migrate_breathe, migrate_request, parts_workspace
 from sprite_gen.curate import parts_motion, parts_appearance, parts_poses, parts_review, parts_sockets
 from sprite_gen.qa import inspect_parts, parts_fit, parts_stability
 from sprite_gen.compose import compose_parts, parts_build, export_parts
-from sprite_gen.frames import parts_import, parts_loop_native, parts_pose_sheet, parts_production, parts_rebind, parts_segments
+from sprite_gen.frames import parts_import, parts_interfaces, parts_loop_native, parts_pose_sheet, parts_production, parts_rebind, parts_segments
 from sprite_gen.gen.prepare import BODY_PLAN_HELP, STYLE_DEFAULT, _outline_config
 from sprite_gen.spec.subject import SUBJECTS
 from sprite_gen.workflow import guide, preferences
@@ -529,6 +529,16 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         "Choose a previous immutable candidate for a pose and reset its review decision.",
         parts_production.add_select_arguments,
         parts_production.run_select,
+    ),
+    "parts-part-rework": (
+        "Request explicit visual rework for any pose, including passed or approved drawings.",
+        parts_production.add_rework_arguments,
+        parts_production.run_rework,
+    ),
+    "parts-part-interfaces": (
+        "Derive immutable per-pose interface masks from an explicit slot/body profile into a proposed config.",
+        parts_interfaces.add_arguments,
+        parts_interfaces.run,
     ),
     "parts-part-adopt": (
         "Take an existing pack's drawings into a production as per-pose candidates.",

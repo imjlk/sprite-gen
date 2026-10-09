@@ -21,10 +21,11 @@
  <h2 id="pose-title">포즈를 선택하세요</h2><p id="pose-status" class="muted"></p>
  <div class="comparison"><figure><img id="reference-image" alt="이 후보가 생성될 때 사용한 참조"><figcaption>생성 당시 참조</figcaption></figure><figure><img id="part-image" alt="선택한 후보의 독립 원본 파츠"><figcaption>독립 원본 파츠</figcaption></figure></div>
  <p class="muted">녹색: 덮어야 할 곳 · 빨강: 보호 · 파랑: 허용 · 보라: 앞에서 가림</p>
- <ul id="findings"></ul><div id="candidates" class="candidates"></div>
+ <div class="review-actions"><textarea id="note" aria-label="재작업 지시" placeholder="구체적인 수정 지시 (예: 소매를 손목까지만 그리고 주머니를 모든 프레임에서 같은 위치에 유지)"></textarea><button id="redo">이 포즈 재작업 시작</button><p id="job-status" role="status" aria-live="polite"></p><button id="redo-marked">표시한 포즈 함께 재작업</button><input id="reviewer" aria-label="검수자" placeholder="시각 판정을 저장할 검수자"><div class="toolbar"><button id="approve">현재 파츠 승인</button><button id="reject">현재 파츠 반려</button></div></div>
+ <ul id="findings"></ul><table id="criteria"><caption>기계 검사 기준 · 시각 승인과 별개</caption><thead><tr><th>항목</th><th>측정 / 허용</th><th>결과</th></tr></thead><tbody></tbody></table><div id="candidates" class="candidates"></div>
  <button id="select-candidate">이 후보를 사용</button><p id="candidate-note" class="muted"></p>
  <details><summary>포즈·배치·생성 출처</summary><pre id="evidence"></pre></details>
- <div class="review-actions"><input id="reviewer" aria-label="검수자" placeholder="검수자"><textarea id="note" aria-label="검수 사유" placeholder="이 포즈의 검수·재작업 사유"></textarea><div class="toolbar"><button id="approve">현재 파츠 승인</button><button id="reject">현재 파츠 반려</button></div><button id="redo">이 포즈 재작업 시트</button></div>
+
  <p class="muted">검사 통과는 시각 승인이 아닙니다. 승인·반려는 현재 빌드에 저장됩니다.</p>
 </aside>
 </main>

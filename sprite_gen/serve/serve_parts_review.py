@@ -2,18 +2,21 @@
 """Local review desk for part productions: see each pose, approve or reject, redraw the rejected.
 
 Every request reads the workspace afresh, so decisions and rebuilt parts show at once.
-Writes (decisions and production steps) need the session token printed at start; the
+Writes (decisions and production steps) need the session token supplied to the local page; the
 server listens on 127.0.0.1 only. Nothing here releases anything.
 """
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
+from copy import deepcopy
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 import json
 from pathlib import Path
 import secrets
 import threading
+import time
 import zipfile
 from urllib.parse import parse_qs, unquote, urlsplit
 
@@ -23,7 +26,9 @@ from sprite_gen._deps import np
 from sprite_gen.curate import parts_motion
 from sprite_gen.frames import parts_production as production
 from sprite_gen.frames import parts_reference
+from sprite_gen.frames import parts_quality
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
+from sprite_gen.spec.runio import atomic_write_text
 
 STATIC = Path(__file__).resolve().parent / "parts_player"
 MAX_BODY = 64 * 1024
@@ -35,13 +40,49 @@ class ReviewDesk:
         self.token = secrets.token_urlsafe(18)
         self.lock = threading.Lock()
         self.actions = threading.Lock()
+        self.jobs_lock = threading.Lock()
+        self.jobs = {}
         self._renders = {}
+        root, _, _, _ = self._state()
+        self.jobs_folder = root / "review-jobs"
+        if self.jobs_folder.exists():
+            for file in self.jobs_folder.glob("*.json"):
+                job = workspace.decode_json(file.read_bytes())
+                if job["state"] == "running":
+                    job.update(state="failed", error="Server restarted during rework; inspect the retained candidate and request a retry.", finished=time.time())
+                    atomic_write_text(file, workspace.json_bytes(job).decode())
+                    part, track = self._split(job["part"])
+                    state = production._load(root, part)
+                    for pose in job["poses"]:
+                        row = production._track(state, track)["poses"].get(pose, {})
+                        if row.get("rework"):
+                            row["rework"].update(status="failed", error=job["error"])
+                    production._save(root, state)
+                self.jobs[job["id"]] = job
+
+    @contextmanager
+    def exclusive(self):
+        if not self.actions.acquire(blocking=False):
+            raise contract.PartsContractError("another production action is running")
+        try:
+            yield
+        finally:
+            self.actions.release()
+
+    def update_job(self, identity, **updates):
+        with self.jobs_lock:
+            self.jobs[identity].update(updates)
+            self.jobs_folder.mkdir(parents=True, exist_ok=True)
+            atomic_write_text(self.jobs_folder / f"{identity}.json", workspace.json_bytes(self.jobs[identity]).decode())
 
     def _state(self):
         return parts_motion._active(self.assembly)
 
     def productions(self):
-        return production.status(self.assembly)
+        result = production.status(self.assembly)
+        with self.jobs_lock:
+            result["active_job"] = next((deepcopy(j) for j in self.jobs.values() if j["state"] == "running"), None)
+        return result
 
     @staticmethod
     def _split(name):
@@ -60,7 +101,8 @@ class ReviewDesk:
             row = rows.get(pose) or {}
             poses.append({"pose": pose, "clip": first[pose][0], "selected": row.get("selected"),
                           "candidates": len(row.get("candidates", [])), "decision": row.get("decision"),
-                          "note": row.get("note"), "reviewer": row.get("reviewer"), "check": row.get("check")})
+                          "note": row.get("note"), "reviewer": row.get("reviewer"), "check": row.get("check"),
+                          "rework": row.get("rework")})
         return {"part": name, "config": state["config"], "track": track or production.MAIN, "poses": poses,
                 "built": state["built"]["part"] if state["built"] else None,
                 "built_current": production._current(state, registry, order),
@@ -80,11 +122,16 @@ class ReviewDesk:
         for candidate in reversed(row["candidates"]):
             record = production.candidate_record(root, state, pose, candidate, track=track)
             metrics, findings = production._measure(root, state["config"], production._settings(state["config"], track), candidate, context)
+            if candidate == row["selected"] and row.get("check"):
+                metrics = row["check"]["metrics"]
+                findings = [("warning", f) for f in row["check"]["findings"]]
             result.append({"id": record["digest"], "path": candidate, "selected": candidate == row["selected"],
                            "images": list(record["images"]), "placement": record["placement"], "source": record.get("source"),
                            "method": record["method"], "reference": record.get("generation_reference"),
                            "metrics": metrics, "findings": [message for _, message in findings],
-                           "status": "error" if any(level == "error" for level, _ in findings) else "warning" if findings else "passed"})
+                           "criteria": parts_quality.criteria(metrics, mode=state["config"]["mode"]),
+                           "status": row["check"]["status"] if candidate == row["selected"] and row.get("check") else
+                           "error" if any(level == "error" for level, _ in findings) else "warning" if findings else "partial"})
         return {"part": name, "pose": pose, "candidates": result}
 
     def reference_archive(self, name, batch):
@@ -178,7 +225,7 @@ class ReviewDesk:
 
     def act(self, name, action, body):
         part, track = self._split(name)
-        with self.actions:
+        with self.exclusive():
             with self.lock:
                 self._renders.clear()
             if action == "review":
@@ -200,6 +247,62 @@ class ReviewDesk:
                 return production.select_candidate(self.assembly, part, body.get("pose"), body.get("candidate"), track=track)
         raise contract.PartsContractError(f"unknown action {action}")
 
+    def job(self, identity):
+        with self.jobs_lock:
+            if identity not in self.jobs:
+                raise contract.PartsContractError("unknown rework job")
+            return deepcopy(self.jobs[identity])
+
+    def start_rework(self, name, body):
+        part, track = self._split(name)
+        if not self.actions.acquire(blocking=False):
+            raise contract.PartsContractError("another production action is running")
+        try:
+            request = production.request_rework(self.assembly, part, body.get("poses"), body.get("note"), track=track)
+            identity = secrets.token_hex(8)
+            with self.jobs_lock:
+                self.jobs[identity] = {"id": identity, "part": name, "poses": request["poses"],
+                                       "state": "running", "step": "requested", "started": time.time(), "results": {}}
+            self.update_job(identity)
+            def execute():
+                try:
+                    batch = None
+                    stages = [("sheet", lambda: production.sheet(self.assembly, part, poses=request["draw_poses"], track=track)),
+                              ("draw", lambda: production.draw(self.assembly, part, batch=batch, track=track)),
+                              ("slice", lambda: production.slice_batch(self.assembly, part, batch=batch, track=track)),
+                              ("check", lambda: production.check(self.assembly, part, track=track)),
+                              ("build", lambda: production.build(self.assembly, part))]
+                    for step, operation in stages:
+                        self.update_job(identity, step=step)
+                        result = operation()
+                        if step == "sheet":
+                            batch = result["batch"]
+                            self.update_job(identity, batch=batch)
+                        results = self.job(identity)["results"]
+                        results[step] = result
+                        self.update_job(identity, results=results)
+                        if step == "draw" and any(p["status"] == "failed" for p in result["pages"]):
+                            raise contract.PartsContractError("provider failed: " + str(result["pages"]))
+                    self.update_job(identity, state="completed", step="completed", finished=time.time())
+                except Exception as exc:
+                    self.update_job(identity, state="failed", error=str(exc), finished=time.time())
+                    root, _, _, _ = self._state()
+                    state = production._load(root, part)
+                    for pose in request["poses"]:
+                        row = production._track(state, track)["poses"][pose]
+                        if row.get("rework"):
+                            row["rework"].update(status="failed", error=str(exc))
+                    production._save(root, state)
+                finally:
+                    with self.lock:
+                        self._renders.clear()
+                    self.actions.release()
+            threading.Thread(target=execute, daemon=True).start()
+            return self.job(identity)
+        except Exception:
+            self.actions.release()
+            raise
+
 
 def handler_for(desk):
     class Handler(BaseHTTPRequestHandler):
@@ -212,22 +315,36 @@ def handler_for(desk):
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Content-Security-Policy", "frame-ancestors 'none'; base-uri 'self'")
             self.end_headers()
             self.wfile.write(data)
 
         def json(self, value, status=200):
             self.reply(status, json.dumps(value, ensure_ascii=False).encode(), "application/json; charset=utf-8")
 
+        def valid_host(self):
+            if self.headers.get("Host") not in {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}:
+                self.json({"error": "wrong review host"}, 403)
+                return False
+            return True
+
         def do_GET(self):
+            if not self.valid_host():
+                return
             path = urlsplit(self.path).path
             try:
                 if path in ("/", "/review.html"):
-                    self.reply(200, (STATIC / "review.html").read_bytes(), "text/html; charset=utf-8")
+                    page = (STATIC / "review.html").read_text()
+                    readonly = parse_qs(urlsplit(self.path).query).get("readonly") == ["1"]
+                    access = '<meta name="review-mode" content="readonly">' if readonly else f'<meta name="review-token" content="{desk.token}">'
+                    self.reply(200, page.replace('<title>', access + '<title>', 1).encode(), "text/html; charset=utf-8")
                 elif path in ("/review.js", "/review.css"):
                     self.reply(200, (STATIC / path[1:]).read_bytes(),
                                "text/javascript; charset=utf-8" if path.endswith(".js") else "text/css; charset=utf-8")
                 elif path == "/api/status":
                     self.json(desk.productions())
+                elif path.startswith("/api/jobs/"):
+                    self.json(desk.job(path.removeprefix("/api/jobs/")))
                 elif path.startswith("/api/part/"):
                     self.json(desk.part(unquote(path.removeprefix("/api/part/"))))
                 elif path.startswith("/api/candidates/"):
@@ -246,19 +363,26 @@ def handler_for(desk):
                 self.json({"error": str(exc)}, 400)
 
         def do_POST(self):
+            if not self.valid_host():
+                return
             path = urlsplit(self.path).path
+            origin = self.headers.get("Origin")
+            allowed_origins = {f"http://127.0.0.1:{self.server.server_port}", f"http://localhost:{self.server.server_port}"}
+            if origin and origin not in allowed_origins:
+                self.json({"error": "wrong review origin"}, 403)
+                return
             if self.headers.get("X-Review-Token") != desk.token:
                 self.json({"error": "missing or wrong review token"}, 403)
                 return
             try:
                 length = int(self.headers.get("Content-Length", "0"))
-                if length > MAX_BODY:
+                if not 0 <= length <= MAX_BODY:
                     raise ValueError("request too large")
                 body = json.loads(self.rfile.read(length) or b"{}")
                 if not path.startswith("/api/act/") or not isinstance(body, dict):
                     raise ValueError("expected POST /api/act/<part>/<action> with a JSON object")
                 name, action = unquote(path.removeprefix("/api/act/")).rsplit("/", 1)
-                self.json(desk.act(name, action, body))
+                self.json(desk.start_rework(name, body) if action == "rework" else desk.act(name, action, body))
             except (contract.PartsContractError, ValueError, OSError) as exc:
                 self.json({"error": str(exc)}, 400)
     return Handler
@@ -273,7 +397,7 @@ def run(*, assembly, port=8767):
     desk = ReviewDesk(assembly)
     desk.productions()
     server = ThreadingHTTPServer(("127.0.0.1", port), handler_for(desk))
-    print(f"Parts review desk: http://127.0.0.1:{server.server_port}/#token={desk.token}", flush=True)
+    print(f"Parts review desk: http://127.0.0.1:{server.server_port}/", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

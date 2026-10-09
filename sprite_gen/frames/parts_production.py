@@ -43,7 +43,7 @@ from PIL import Image, ImageDraw
 from sprite_gen._deps import np
 from sprite_gen.compose import compose_parts, parts_resolve
 from sprite_gen.curate import parts_motion, parts_review
-from sprite_gen.frames import parts_import, parts_pose_sheet as sheets, parts_reference, parts_segments, pixel_grid
+from sprite_gen.frames import parts_import, parts_pose_sheet as sheets, parts_reference, parts_quality, parts_segments, pixel_grid
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 from sprite_gen.spec.runio import atomic_write_text, publish_guard
 
@@ -84,6 +84,11 @@ _POSE_CHECK = contract._record({"required": contract._nullable(contract._relativ
                                "allowed": contract._nullable(contract._relative_file),
                                "occluded": contract._nullable(contract._relative_file)},
                               {"required": None, "protected": None, "allowed": None, "occluded": None})
+_STABLE = contract._record({"id": contract._id, "socket": contract._id, "bounds": contract._rectangle,
+                           "reference_pose": contract._nullable(contract._id), "max_alpha_pixels": contract._integer,
+                           "max_rgb_pixels": contract._integer, "rgb_threshold": contract._integer},
+                          {"reference_pose": None, "max_alpha_pixels": 0, "max_rgb_pixels": 0, "rgb_threshold": 24})
+_QA = contract._record({"stable_regions": contract._records(_STABLE)}, {"stable_regions": []})
 _CONFIG = contract._record({
     "kind": contract._enum("parts-production-config"), "schema_version": contract._positive,
     "part_id": contract._id, "design_id": contract._id, "role": contract._enum("part", "body"),
@@ -95,10 +100,11 @@ _CONFIG = contract._record({
     "trail": contract._nullable(_TRAIL), "cover_rule": contract._nullable(contract._cover_rule), "covers": contract._ids,
     "variants": contract._list(_VARIANT), "body": contract._nullable(_BODY),
     "pose_checks": contract._mapping(_POSE_CHECK),
+    "qa": _QA,
 }, {"role": "part", "slot": None, "node": None, "socket": None, "mode": "raster", "draw": {}, "states": [],
     "reference_pose": None, "sheet": {}, "cut": {}, "wearing": [], "pieces": [], "by_component": False, "segments": None,
     "prompt": None, "follow": None, "trail": None, "cover_rule": None, "covers": [], "variants": [], "body": None,
-    "pose_checks": {}})
+    "pose_checks": {}, "qa": {}})
 DECISIONS = ("unverified", "approved", "rejected")
 FIXED = ("part_id", "design_id", "role", "slot", "node", "socket", "mode")
 # Check bounds, judged on the SD demo (docs/parts/10-production.md).
@@ -178,6 +184,7 @@ def _reference(config, order):
 def _redo(row):
     """Missing, rejected, or failing a check with an error nobody approved anyway."""
     return (row.get("selected") is None or row.get("decision") == "rejected"
+            or row.get("rework", {}).get("status") in ("requested", "failed")
             or ((row.get("check") or {}).get("status") == "error" and row.get("decision") != "approved"))
 
 
@@ -187,6 +194,8 @@ def _redo_notes(production, rows, wanted, order):
     notes, failures, misaligned = [], [], False
     for pose in looked:
         row = rows["poses"].get(pose, {})
+        if row.get("rework", {}).get("note") and row["rework"]["note"] not in notes:
+            notes.append(row["rework"]["note"])
         if row.get("decision") == "rejected" and row.get("note") and row["note"] not in notes:
             notes.append(row["note"])
         misaligned |= pose in wanted and any(f.startswith("alignment") for f in (row.get("check") or {}).get("findings", []))
@@ -198,7 +207,7 @@ def _redo_notes(production, rows, wanted, order):
         text += (" The previous drawing moved, resized or left out the figure: draw the whole figure exactly where it is"
                  " and exactly as big as it is in image 1.")
     if notes:
-        text += " The previous drawing was sent back at review: " + "; ".join(notes) + ". Fix that this time."
+        text += " The previous drawing was sent back at review: " + "; ".join(notes) + ". Apply these requested visual changes to the new part."
     if failures:
         text += " The previous part failed these checks: " + "; ".join(failures) + ". " \
                 "Cover required regions, leave protected regions visible, and stay within the allowed silhouette. " \
@@ -211,10 +220,28 @@ def _todo(production, track, order):
     if production["config"]["mode"] == "held":
         # One drawing for every pose: redraw it when it is missing or any pose sends it back.
         reference = _reference(production["config"], order)
-        if _redo(rows.get(reference, {})) or any(rows.get(p, {}).get("decision") == "rejected" for p in order):
+        if _redo(rows.get(reference, {})) or any(_redo(rows.get(p, {})) for p in order):
             return [reference]
         return []
     return [p for p in order if _redo(rows.get(p, {}))]
+
+
+def _validate_qa(value, index, registry):
+    if not value["qa"]["stable_regions"]:
+        return
+    motion = registry[index["motion"]["id"]]
+    order, _ = _poses(motion, value["states"] or index["states"])
+    rig = registry[index["rig"]["id"]]
+    topology = registry[rig["topology"]["id"]]
+    for region in value["qa"]["stable_regions"]:
+        contract._members([region["socket"]], {s["id"] for s in topology["sockets"]}, "stable region socket")
+        if region["reference_pose"]:
+            contract._members([region["reference_pose"]], order, "stable region reference pose")
+        if min(region["max_alpha_pixels"], region["max_rgb_pixels"]) < 0 or not 0 <= region["rgb_threshold"] <= 255:
+            raise contract.PartsContractError("stable region limits must be nonnegative and RGB threshold 0..255")
+        a, b, c, d = region["bounds"]
+        if c-a > rig["canvas"]["width"] or d-b > rig["canvas"]["height"]:
+            raise contract.PartsContractError("stable region must not exceed the rig canvas")
 
 
 def init(assembly, config):
@@ -223,6 +250,7 @@ def init(assembly, config):
     value = _CONFIG(workspace.read_json(path.parent, path.name), "config")
     if value["schema_version"] != 1:
         raise contract.PartsContractError("only schema_version 1 is supported")
+    _validate_qa(value, index, registry)
     rig = registry[index["rig"]["id"]]
     topology = registry[rig["topology"]["id"]]
     if value["role"] == "body":
@@ -266,6 +294,7 @@ def configure(assembly, part, config):
     production = _load(root, part)
     path = Path(config).absolute()
     value = _CONFIG(workspace.read_json(path.parent, path.name), "config")
+    _validate_qa(value, index, registry)
     if value["role"] == "body":
         value.update(slot=None, node=value["node"] or production["config"]["node"],
                      socket=value["socket"] or production["config"]["socket"], mode="raster")
@@ -276,6 +305,10 @@ def configure(assembly, part, config):
     if value["pieces"] and value["segments"] is None:
         raise contract.PartsContractError("pieces are cut by body segments: give config.segments")
     previous = production["config"]
+    if previous["qa"] != value["qa"]:
+        for track in production["tracks"].values():
+            for row in track["poses"].values():
+                row.update(check=None, decision="unverified", reviewer=None, note=None)
     production.setdefault("history", []).append({"config": previous, "replaced_by": contract.content_digest(value)})
     production["config"] = value
     for variant in value["variants"]:
@@ -423,6 +456,8 @@ def _select(rows, poses, candidate, *, keep_approved=True):
             row["candidates"].append(candidate)
         if not (keep_approved and row["decision"] == "approved"):
             row.update(selected=candidate, decision="unverified", note=None, reviewer=None, check=None)
+            if row.get("rework"):
+                row["rework"].update(status="candidate-ready", result=candidate)
 
 
 def _rgb(text):
@@ -466,6 +501,32 @@ def select_candidate(assembly, part, pose, candidate, *, track=None):
         _save(root, state)
     return {"part": part, "pose": pose, "candidate": candidate, "changed": changed,
             "poses": targets, "release_ready": False}
+
+
+def request_rework(assembly, part, poses, note, *, track=None):
+    """Explicit art rework can target passed or approved drawings without a build."""
+    if not isinstance(note, str) or not note.strip():
+        raise contract.PartsContractError("rework requires concrete instructions")
+    root, index, registry, _ = parts_motion._active(assembly)
+    state = _load(root, part)
+    order, _ = _poses(registry[index["motion"]["id"]], _states(state, index))
+    if not isinstance(poses, list) or not poses or not all(isinstance(p, str) for p in poses):
+        raise contract.PartsContractError("choose at least one rework pose")
+    contract._members(poses, order, "rework poses")
+    held = state["config"]["mode"] == "held"
+    targets = order if held else list(dict.fromkeys(poses))
+    rows = _track(state, track)
+    previous = {}
+    for pose in targets:
+        row = rows["poses"].setdefault(pose, {"candidates": [], "selected": None, "check": None})
+        previous[pose] = row["selected"]
+        row.update(decision="unverified", reviewer=None, note=None,
+                   rework={"status": "requested", "note": note.strip(), "replaces": row["selected"]})
+    state.setdefault("rework_requests", []).append({"track": track or MAIN, "poses": targets,
+                                                    "note": note.strip(), "replaces": previous})
+    _save(root, state)
+    return {"part": part, "poses": targets, "draw_poses": [_reference(state["config"], order)] if held else targets,
+            "note": note.strip(), "art_approved": False}
 
 
 def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
@@ -890,7 +951,7 @@ def check(assembly, part, *, track=None):
     config = production["config"]
     motion = registry[index["motion"]["id"]]
     states = _states(production, index)
-    order, _ = _poses(motion, states)
+    order, first = _poses(motion, states)
     near = _neighbours(motion, states)
     context = (motion, index, registry, registry[registry[index["rig"]["id"]]["topology"]["id"]],
                compose_parts.AssetLoader(root, index))
@@ -917,8 +978,16 @@ def check(assembly, part, *, track=None):
                 metrics["area_jump"] = round(abs(metrics["pixels"] - reference) / max(reference, 1), 3)
                 if metrics["area_jump"] > LIMITS["area_jump"]:
                     findings.append(("warning", f"area differs {metrics['area_jump']:.0%} from neighbouring poses"))
+            regions = parts_quality.temporal(root, rows, pose, config["qa"]["stable_regions"], first)
+            if regions:
+                metrics["stable_regions"] = regions
+                findings.extend(("warning", f"stable region {r['id']} differs from {r['reference_pose']}")
+                                for r in regions if r["status"] == "warning")
+                findings.extend(("warning", f"stable region {r['id']} could not be inspected")
+                                for r in regions if r["status"] == "미검사")
             status = "error" if any(level == "error" for level, _ in findings) else "warning" if findings else "passed"
-            row["check"] = {"status": status, "metrics": metrics, "findings": [message for _, message in findings]}
+            row["check"] = {"status": status, "metrics": metrics, "findings": [message for _, message in findings],
+                            "criteria": parts_quality.criteria(metrics, mode=config["mode"]), "qa_policy": config["qa"], "art_approved": False}
         summary[name] = {s: sum(1 for p in area if rows[p]["check"]["status"] == s) for s in ("passed", "warning", "error")}
         findings_by.update({(p if name == MAIN else f"{name}:{p}"): rows[p]["check"]["findings"]
                             for p in area if rows[p]["check"]["findings"]})
@@ -1152,6 +1221,8 @@ def review(assembly, part, *, reviewer=None, approve=(), reject=(), note=None, c
     if (approved or rejected) and not reviewer:
         raise contract.PartsContractError("a decision needs --reviewer")
     for pose in approved:
+        if rows[pose].get("rework", {}).get("status") in ("requested", "failed"):
+            raise contract.PartsContractError(f"{pose}: finish the requested rework before approving")
         if (rows[pose].get("check") or {}).get("status") in (None, "error"):
             raise contract.PartsContractError(f"{pose}: check it first, and fix errors before approving")
         rows[pose].update(decision="approved", reviewer=reviewer, note=note)
@@ -1345,6 +1416,13 @@ def add_select_arguments(parser):
     _with_track(parser)
 
 
+def add_rework_arguments(parser):
+    add_part_arguments(parser)
+    parser.add_argument("--poses", type=_poses_arg, required=True)
+    parser.add_argument("--note", required=True, help="concrete visual changes, including for passed poses")
+    _with_track(parser)
+
+
 def add_part_arguments(parser):
     parser.add_argument("--assembly", required=True, type=Path)
     parser.add_argument("--part", required=True)
@@ -1383,3 +1461,4 @@ run_init, run_sheet, run_draw, run_slice = _runner(init), _runner(sheet), _runne
 run_mask, run_adopt, run_check, run_build = _runner(mask), _runner(adopt), _runner(check), _runner(build)
 run_review, run_status, run_config = _runner(review), _runner(status), _runner(configure)
 run_select = _runner(select_candidate)
+run_rework = _runner(request_rework)
