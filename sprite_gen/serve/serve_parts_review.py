@@ -17,6 +17,7 @@ from pathlib import Path
 import secrets
 import threading
 import time
+import tempfile
 import zipfile
 from urllib.parse import parse_qs, unquote, urlsplit
 
@@ -27,6 +28,7 @@ from sprite_gen.curate import parts_motion
 from sprite_gen.frames import parts_production as production
 from sprite_gen.frames import parts_reference
 from sprite_gen.frames import parts_quality
+from sprite_gen.frames import parts_segments
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 from sprite_gen.spec.runio import atomic_write_text
 
@@ -165,7 +167,7 @@ class ReviewDesk:
         row = production._track(state, track)["poses"].get(pose)
         if row is None or row.get("selected") is None:
             raise contract.PartsContractError(f"{pose} has no drawing yet")
-        allowed = ("body", "cut", "part", "visible", "drawn", "reference", "interfaces", "errors")
+        allowed = ("body", "body-raw", "body-zraw", "cut", "part", "visible", "drawn", "reference", "interfaces", "errors")
         if kind not in allowed:
             raise contract.PartsContractError("unknown render view")
         location = row["selected"] if candidate is None else next(
@@ -178,7 +180,7 @@ class ReviewDesk:
         box = None
         motion = registry[index["motion"]["id"]]
         order, _ = production._poses(motion, production._states(state, index))
-        if location == row["selected"] and production._current(state, registry, order):
+        if kind in ("body", "body-zraw") and location == row["selected"] and production._current(state, registry, order):
             digest = built["part"]["digest"]
             with self.lock:
                 if (digest, pose) not in self._renders:
@@ -192,7 +194,11 @@ class ReviewDesk:
                     self._renders[(digest, "box")] = (min(b[0] for b in boxes)-2, min(b[1] for b in boxes)-2,
                                                       max(b[2] for b in boxes)+2, max(b[3] for b in boxes)+2) if boxes else None
                 box = self._renders[(digest, "box")]
-        if kind == "body" and box is not None and track is None:
+        if kind == "body-zraw":
+            if box is None or track is not None or state["config"]["role"] != "part":
+                raise contract.PartsContractError("zmap-only preview needs the selected main-track part and a current build")
+            image = self.raw_zmap(root, index, registry, state, pose, record, base, motion)
+        elif kind == "body" and box is not None and track is None:
             image = self._renders[(built["part"]["digest"], pose)]
         elif kind in ("part", "cut", "visible", "drawn", "reference"):
             key = {"cut": "part", "visible": "render_part", "reference": "under"}.get(kind, kind)
@@ -215,13 +221,76 @@ class ReviewDesk:
             image = parts_reference.overlay(image, masks)
         else:
             image = Image.open(base / "under.png").convert("RGBA")
-            ref = record["images"].get("render_part", record["images"]["part"])
+            ref = record["images"]["part"] if kind == "body-raw" else record["images"].get("render_part", record["images"]["part"])
             image.alpha_composite(Image.open(base / ref["file"]).convert("RGBA"))
         scale = 4
         large = image.resize((image.width*scale, image.height*scale), Image.Resampling.NEAREST)
         out = BytesIO()
         large.save(out, "PNG")
         return out.getvalue()
+
+    def raw_zmap(self, root, index, registry, state, pose, record, base, motion):
+        """Restore raw garment pieces while retaining the actual resolver's draw plan.
+
+        Partitioning uses the same split_piece command as production. Temporary
+        preview files never activate packs, replace source images or change QC.
+        """
+        config = state["config"]
+        _, first = production._poses(motion, production._states(state, index))
+        clip_id, sample = first[pose]
+        raw = Image.open(base / record["images"]["part"]["file"]).convert("RGBA")
+        images = {config["slot"]: raw}
+        if config["pieces"]:
+            with tempfile.TemporaryDirectory(prefix="parts-zmap-preview-") as temporary:
+                folder = Path(temporary)
+                placement = {**record["placement"], "image": {
+                    "file": (base / record["images"]["part"]["file"]).relative_to(root).as_posix(),
+                    "sha256": record["images"]["part"]["sha256"]}}
+                request = {"motion": index["motion"], "pieces": [{"id": config["slot"],
+                           "node": config["node"], "pose_map": {pose: placement}}]}
+                spec = folder / "source.json"
+                spec.write_bytes(workspace.json_bytes(request))
+                result = parts_segments.split_piece(spec, root / config["segments"], folder / "split",
+                    piece=config["slot"], source_root=root, by_component=config["by_component"],
+                    into=[(p["id"], p["node"], p["segments"]) for p in config["pieces"]])
+                split = workspace.decode_json(Path(result["spec"]).read_bytes())
+                images = {p["id"]: Image.open(Path(result["source_root"]) / p["pose_map"][pose]["image"]["file"]).convert("RGBA")
+                          for p in split["pieces"]}
+        load = production.compose_parts.AssetLoader(root, index)
+        # Re-resolve rather than swap rasters in an already filtered plan: a
+        # masked piece may have become empty and hidden, but its raw art is visible.
+        pack = deepcopy(registry[state["built"]["part"]["id"]])
+        pack.pop("digest")
+        replacements = {}
+        for binding in pack["bindings"]:
+            for piece in binding["pieces"]:
+                if piece["id"] not in images:
+                    continue
+                image = images[piece["id"]]
+                reference = {"file": f"preview-raw/{piece['id']}.png", "sha256": assets.sha256(assets.png_bytes(image))}
+                replacements[reference["file"]] = image
+                for clip in motion["clips"]:
+                    for current in clip["samples"]:
+                        if current["pose_id"] == pose:
+                            piece["sample_map"][clip["id"]][current["id"]].update(
+                                image=reference, visible=image.getbbox() is not None, source=None)
+        pack = contract.seal(pack)
+        preview_ref = contract.reference(pack)
+        catalog = production.parts_import._replace_refs(registry[index["catalog"]["id"]], state["built"]["part"], preview_ref)
+        catalog.pop("digest")
+        catalog = contract.seal(catalog)
+        preview_index = {**index, "catalog": contract.reference(catalog)}
+        preview_registry = {name: document for name, document in registry.items() if document["kind"] not in
+                            {"parts-review", "parts-build-lock", "parts-appearance", "parts-fitting", "parts-stability"}}
+        preview_registry.update({pack["id"]: pack, catalog["id"]: catalog})
+        plan = production._part_plan(preview_index, preview_registry, preview_ref, production._states(state, index))
+        ordered = next(c for c in plan["clips"] if c["id"] == clip_id)
+        frame = next(s for s in ordered["samples"] if s["id"] == sample["id"])
+        def unmasked(pack, reference):
+            if pack == preview_ref and reference["file"] in replacements:
+                return replacements[reference["file"]].copy()
+            return load(pack, reference)
+        return production.compose_parts.render_sample(plan, frame, unmasked)[0]
 
     def act(self, name, action, body):
         part, track = self._split(name)

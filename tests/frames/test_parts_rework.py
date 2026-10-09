@@ -214,3 +214,33 @@ def test_marked_passed_poses_are_drawn_together_with_instructions(tmp_path, monk
     done=wait_job(desk,desk.start_rework('test.badge',{'poses':['walk.01','walk.02'],'note':'simplify both badges'})['id'])
     assert done['state']=='completed' and len(done['results']['slice']['candidates'])==2
     assert all(row['decision']=='unverified' for row in desk.part('test.badge')['poses'])
+
+
+def test_unmasked_body_and_zmap_views_restore_even_fully_hidden_art_without_mutation(tmp_path):
+    from io import BytesIO
+    from test_parts_pose_sheet import drawn_sheet
+    assembly=setup(tmp_path)
+    config=json.loads((tmp_path/'badge.json').read_text());config['cut']['method']='part-only';config['part_id']='test.zbadge'
+    Image.new('L',(128,128),255).save(assembly.parent/'occluded.png')
+    config['pose_checks']={'walk.01':{'occluded':'occluded.png'}}
+    path=tmp_path/'masked.json';path.write_text(json.dumps(config));production.init(assembly,path)
+    made=production.sheet(assembly,'test.zbadge')
+    for page in made['pages']:
+        drawn_sheet(json.loads((assembly.parent/page['guide']).read_text()),assembly.parent/page['art'])
+    production.slice_batch(assembly,'test.zbadge');production.check(assembly,'test.zbadge');production.build(assembly,'test.zbadge')
+    desk=ReviewDesk(assembly);state=production._load(assembly.parent,'test.zbadge')
+    candidate=assembly.parent/state['tracks']['main']['poses']['walk.01']['selected']
+    assert Image.open(candidate/'render_part.png').getbbox() is None
+    before={p.relative_to(assembly.parent).as_posix():p.read_bytes() for p in assembly.parent.rglob('*') if p.is_file()}
+    flat=Image.open(BytesIO(desk.render('test.zbadge','walk.01','body-raw')))
+    zmap=Image.open(BytesIO(desk.render('test.zbadge','walk.01','body-zraw')))
+    masked=Image.open(BytesIO(desk.render('test.zbadge','walk.01','body')))
+    assert flat.getpixel((36*4,42*4))==zmap.getpixel((36*4,42*4))==(200,40,40,255)
+    assert masked.getpixel((36*4,42*4))!=(200,40,40,255)
+    assert before=={p.relative_to(assembly.parent).as_posix():p.read_bytes() for p in assembly.parent.rglob('*') if p.is_file()}
+    # Inspection cannot silently borrow an older build after selecting another candidate.
+    production.request_rework(assembly,'test.zbadge',['walk.01'],'move the badge')
+    draw_batch(assembly,production.sheet(assembly,'test.zbadge'))
+    production.slice_batch(assembly,'test.zbadge')
+    with pytest.raises(contract.PartsContractError,match='current build'):
+        desk.render('test.zbadge','walk.01','body-zraw')

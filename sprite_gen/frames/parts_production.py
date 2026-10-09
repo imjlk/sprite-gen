@@ -1120,11 +1120,8 @@ def build(assembly, part, *, allow_incomplete=False):
             **extra, "release_ready": False}
 
 
-def _render_alone(root, index, registry, part_ref, states):
-    """Each pose of the part on the body alone (no other selections), through the shared resolver.
-
-    With `part_ref` None it is the body alone.
-    """
+def _part_plan(index, registry, part_ref, states):
+    """Resolve one part on the active body for production and inspection."""
     catalog = registry[index["catalog"]["id"]]
     slots = set()
     if part_ref is not None and registry[part_ref["id"]]["role"] == "part":
@@ -1133,7 +1130,12 @@ def _render_alone(root, index, registry, part_ref, states):
     appearance = contract.seal({"kind": "parts-appearance", "schema_version": 1, "id": "production.preview",
                                 "rig": index["rig"], "motion": index["motion"], "catalog": index["catalog"],
                                 "states": states, "selections": selections, "body": index["body"]})
-    plan = parts_resolve.resolve(appearance, [d for d in registry.values() if d["kind"] != "parts-appearance"], complete=False)
+    return parts_resolve.resolve(appearance, [d for d in registry.values() if d["kind"] != "parts-appearance"], complete=False)
+
+
+def _render_alone(root, index, registry, part_ref, states):
+    """Render each pose on the body alone through the shared resolver."""
+    plan = _part_plan(index, registry, part_ref, states)
     load = compose_parts.AssetLoader(root, index)
     frames = {}
     motion = registry[index["motion"]["id"]]

@@ -24,6 +24,7 @@ function controls(){
  $('redo-marked').textContent='표시한 '+state.marked.size+'포즈 함께 재작업';
  $('approve').disabled ||= !c?.selected || !state.data?.built_current || !['passed','warning'].includes(row?.check?.status);
  $('approve').disabled ||= ['requested','failed'].includes(row?.rework?.status);
+ $('approve').disabled ||= ['body-raw','body-zraw'].includes($('view').value);
  $('reject').disabled ||= !c?.selected || !state.data?.built_current;
  $('access').textContent=state.busy ? '재작업 중 · 후보 비교 가능' : token ? '검수·큐레이션 가능' : '읽기 전용';
 }
@@ -31,7 +32,7 @@ function grid(){
  const data=state.data; if(!data) return;
  const selected=state.pose, filter=$('filter').value, view=$('view').value;
  $('summary').textContent=data.poses.length+'포즈 · 오류 '+data.poses.filter(p=>p.check?.status==='error').length+' · 승인 '+data.poses.filter(p=>p.decision==='approved').length+' · '+(data.built_current?'빌드 최신':'선택 변경 · 빌드 필요');
- $('view-note').textContent=view==='body' ? (data.built_current?'현재 빌드의 실제 레이어 순서로 재생합니다.':'선택 후보를 참조 위에 놓은 배치 미리보기입니다. 레이어 검수는 빌드 후 진행하세요.') : view==='errors' ? '덮임 누락(녹색) · 보호 침범(빨강) · 허용 영역 밖(파랑). 오류 위치만 표시합니다.' : '모든 후보는 같은 캔버스 좌표와 배율로 비교합니다.';
+ $('view-note').textContent=view==='body' ? (data.built_current?'현재 빌드의 실제 레이어 순서로 재생합니다.':'선택 후보를 참조 위에 놓은 배치 미리보기입니다. 레이어 검수는 빌드 후 진행하세요.') : view==='body-raw' ? '생성 당시 참조 위에 원본 part.png를 그대로 덮습니다. 가림 마스크와 zmap을 적용하지 않습니다. 비교용이며 현재 빌드를 바꾸지 않습니다.' : view==='body-zraw' ? '현재 선택의 원본을 같은 조각으로 분리하고 실제 빌드의 zmap 순서로 그립니다. occluded 마스크를 적용하지 않습니다. 현재 선택·빌드가 필요하며, 수치 판정과 승인은 현재 빌드 기준입니다.' : view==='visible' ? 'occluded 마스크로 알파가 지워진 파생 파츠입니다. zmap 순서와는 별개의 처리입니다.' : view==='errors' ? '덮임 누락(녹색) · 보호 침범(빨강) · 허용 영역 밖(파랑). 오류 위치만 표시합니다.' : '모든 후보는 같은 캔버스 좌표와 배율로 비교합니다.';
  $('grid').replaceChildren();
  for(const p of data.poses){
   if(filter==='error' && p.check?.status!=='error' || filter==='unverified' && p.decision==='approved') continue;
@@ -51,8 +52,12 @@ function showCandidate(c){
  const row=state.data.poses.find(p=>p.pose===state.pose);
  $('pose-title').textContent=state.pose;
  $('pose-status').textContent=(c.selected?'현재 선택':'비교 중인 이전 후보')+' · '+statusName(c.status)+' · 후보 '+c.id.slice(0,10);
- $('reference-image').hidden=!c.images.includes('under');
- if(c.images.includes('under')) $('reference-image').src=url(state.pose,'reference',c.id);
+ const view=$('view').value, onBody=['body','body-raw','body-zraw'].includes(view);
+ const preview=view==='body'&&!c.selected?'body-raw':onBody&&(view!=='body-zraw'||c.selected&&state.data.built_current)?view:'reference';
+ $('reference-image').hidden=!c.images.includes('under')&&preview==='reference';
+ $('reference-image').alt=preview==='reference'?'이 후보가 생성될 때 사용한 참조':'선택한 후보를 몸 위에 놓은 비교';
+ $('reference-caption').textContent=preview==='body-raw'?'원본 덮기 · 가림 없음':preview==='body-zraw'?'원본 · zmap만':preview==='body'?'현재 빌드 · 마스크+zmap':'생성 당시 참조';
+ if(preview!=='reference'||c.images.includes('under'))$('reference-image').src=url(state.pose,preview,preview==='body-zraw'?null:c.id);
  $('part-image').src=url(state.pose,'part',c.id);
  $('part-image').hidden=false;
  $('findings').replaceChildren(...c.findings.map(f=>node('li',f)));
@@ -95,7 +100,7 @@ async function run(action,body={}){
  finally{state.busy=false;controls();}
 }
 $('part').onchange=()=>{state.part=$('part').value;state.pose=null;state.marked.clear();state.revision++;loadPart().catch(e=>log(e.message));};
-$('view').onchange=grid;$('filter').onchange=grid;
+$('view').onchange=()=>{grid();if(state.candidate)showCandidate(state.candidate);};$('filter').onchange=grid;
 $('select-candidate').onclick=()=>run('select',{pose:state.pose,candidate:state.candidate.path});
 const stageNames={requested:'요청 저장',sheet:'참조 시트 준비',draw:'독립 파츠 생성',slice:'원본 분리',check:'검사',build:'레이어 빌드',completed:'완료'};
 async function followJob(job){
