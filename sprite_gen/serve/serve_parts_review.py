@@ -30,6 +30,7 @@ from sprite_gen.frames import parts_reference
 from sprite_gen.frames import parts_quality
 from sprite_gen.frames import parts_segments
 from sprite_gen.frames import parts_part_edit
+from sprite_gen.frames import parts_revalidation
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 from sprite_gen.spec.runio import atomic_write_text
 
@@ -107,6 +108,7 @@ class ReviewDesk:
                           "note": row.get("note"), "reviewer": row.get("reviewer"), "check": row.get("check"),
                           "rework": row.get("rework")})
         return {"part": name, "config": state["config"], "track": track or production.MAIN, "poses": poses,
+                "revalidation": parts_revalidation.latest(self.assembly, part, track=track),
                 "canvas": registry[index["rig"]["id"]]["canvas"],
                 "clips": [{"id": c["id"], "state": c["state"], "loop": c["loop"],
                            "samples": [{"pose": s["pose_id"], "duration_ms": s["duration_ticks"] * 1000 / c["timebase"]}
@@ -340,6 +342,8 @@ class ReviewDesk:
                 return production.slice_batch(self.assembly, part, track=track)
             if action == "check":
                 return production.check(self.assembly, part, track=track)
+            if action == "revalidate":
+                return parts_revalidation.prepare(self.assembly, part, track=track)
             if action == "build":
                 return self.build_preserving_appearance(part)
             if action == "select":
@@ -493,6 +497,10 @@ def handler_for(desk):
                 elif path.startswith("/api/reference/") and path.endswith(".zip"):
                     name, batch = unquote(path.removeprefix("/api/reference/").removesuffix(".zip")).split("/")
                     self.reply(200, desk.reference_archive(name, batch), "application/zip")
+                elif path.startswith("/api/revalidation/") and path.endswith(".zip"):
+                    name, identity = unquote(path.removeprefix("/api/revalidation/").removesuffix(".zip")).split("/")
+                    part, track = desk._split(name)
+                    self.reply(200, parts_revalidation.archive(desk.assembly, part, identity, track=track), "application/zip")
                 elif path.startswith("/api/render/") and path.endswith(".png"):
                     name, pose, kind = unquote(path.removeprefix("/api/render/").removesuffix(".png")).split("/")
                     query = parse_qs(urlsplit(self.path).query)

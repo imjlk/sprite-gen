@@ -12,6 +12,13 @@
   <select id="view" aria-label="포즈 보기"><option value="body">실제 빌드</option><option value="body-raw">몸 위 원본 · 가림 없음</option><option value="body-zraw">몸 위 원본 · zmap만</option><option value="part">독립 원본 파츠</option><option value="visible">가림 적용 파츠</option><option value="reference">생성 참조</option><option value="interfaces">검사 영역</option><option value="errors">오류 위치</option><option value="drawn">생성 원본 칸</option></select>
  </div>
  <p id="summary" class="muted"></p><p id="view-note" class="muted"></p>
+ <section id="revalidation-review">
+  <h2>프레임 재검증</h2>
+  <button data-act="revalidate">오류 분석 · 재검증 참조 준비</button>
+  <p id="revalidation-status" class="muted" role="status"></p>
+  <a id="revalidation-download" hidden>프레임별 원본·바디·검사 지도 묶음 ↓</a>
+  <div id="revalidation-frames"></div>
+ </section>
  <section id="motion-review" hidden>
   <h2>파츠 적용 모션 확인</h2>
   <div class="toolbar"><select id="motion-clip" aria-label="검수 모션"></select><button id="motion-play">재생</button><button id="motion-inspect">이 프레임 교정</button></div>
@@ -34,6 +41,7 @@
   <div class="toolbar"><label>X <input id="position-x" aria-label="파츠 X 교정" type="number" value="0" step="1"></label><label>Y <input id="position-y" aria-label="파츠 Y 교정" type="number" value="0" step="1"></label><label>간격 <input id="position-step" aria-label="교정 이동 간격" type="number" value="1" min="1" step="1"></label></div>
   <div class="toolbar"><button data-nudge="-1,0" aria-label="파츠 왼쪽 이동">←</button><button data-nudge="0,-1" aria-label="파츠 위로 이동">↑</button><button data-nudge="0,1" aria-label="파츠 아래로 이동">↓</button><button data-nudge="1,0" aria-label="파츠 오른쪽 이동">→</button><button id="position-reset">초기화</button></div>
   <button id="position-save">위치 교정 후보 저장</button><p id="position-status" class="muted" role="status"></p>
+  <button id="position-hint" hidden>분석한 위치 이동 미리보기</button><p id="revalidation-pose" class="muted"></p>
  </section>
  <details id="pixel-editor"><summary>프로그램으로 원본 수정</summary>
  <p class="muted">새 그림 생성 없이 수정 후보를 만듭니다. 범위는 원본 캔버스의 픽셀 좌표입니다.</p>

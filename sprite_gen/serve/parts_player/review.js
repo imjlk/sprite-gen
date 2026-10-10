@@ -1,7 +1,8 @@
 const $ = id => document.getElementById(id);
 const readonly = !!document.querySelector('meta[name=review-mode]');
 let token = readonly ? '' : document.querySelector('meta[name=review-token]')?.content || new URLSearchParams(location.hash.slice(1)).get('token') || '';
-const state = {part:null, data:null, pose:null, candidates:[], candidate:null, busy:false, revision:0,marked:new Set(),drafts:new Map(),activeJob:null};
+const reviewParams=new URLSearchParams(location.search);
+const state = {part:reviewParams.get('part'), data:null, pose:reviewParams.get('pose'), candidates:[], candidate:null, busy:false, revision:0,marked:new Set(),drafts:new Map(),activeJob:null};
 const draftKey=()=>state.part+'/'+state.pose;
 const statusName=(s,m)=>m&&['passed','warning'].includes(s)&&['required_pixels','protected_pixels','allowed_pixels'].every(k=>m[k]==null)?'기본 검사 · 배치 기준 미등록'+(s==='warning'?' · 경고':''):({passed:'기계 검사 범위 내 통과',warning:'검사 경고',error:'검사 오류',unchecked:'미검사',partial:'기본 검사만 완료'}[s]||s);
 const log = text => { $('log').textContent = text + '\n' + $('log').textContent; };
@@ -14,7 +15,8 @@ async function act(action, body={}){
  const j=await r.json(); if(!r.ok) throw new Error(j.error); return j;
 }
 function controls(){
- document.querySelectorAll('[data-act],#select-candidate,#approve,#reject,#redo,#redo-marked,#edit-candidate,#apply-visibility').forEach(b=>b.disabled=state.busy || !token || !state.data);
+ document.querySelectorAll('[data-act],#select-candidate,#approve,#reject,#redo,#redo-marked,#edit-candidate,#apply-visibility,#position-hint').forEach(b=>b.disabled=state.busy || !token || !state.data);
+ document.querySelector('[data-act="revalidate"]').disabled ||= state.data?.config.mode!=='raster'||state.data?.config.role!=='part';
  $('part').disabled=state.busy;$('visibility').disabled=state.busy||!token||!state.data;
  const row=state.data?.poses.find(p=>p.pose===state.pose);
  const c=state.candidate;
@@ -28,7 +30,7 @@ function controls(){
  $('approve').disabled ||= !!(position.dx||position.dy);
  $('select-candidate').disabled ||= !!(position.dx||position.dy);
  $('reject').disabled ||= !c?.selected || !state.data?.built_current;
- $('access').textContent=state.busy ? '재작업 중 · 후보 비교 가능' : token ? '검수·큐레이션 가능' : '읽기 전용';
+ $('access').textContent=state.busy ? '작업 중 · 후보 비교 가능' : token ? '검수·큐레이션 가능' : '읽기 전용';
  if(typeof positionControls==='function')positionControls();
 }
 function grid(){
@@ -49,7 +51,31 @@ function grid(){
  const ref=[...data.batches].reverse().find(b=>b.reference);
  $('reference-download').hidden=!ref;
  if(ref) $('reference-download').href='/api/reference/'+encodeURIComponent(state.part)+'/'+encodeURIComponent(ref.id)+'.zip';
+ revalidationPanel();
 }
+const nextStepNames={'create-part':'파츠 제작 필요','refresh-reference':'모션 기준 갱신 필요','audit-guide-and-shape':'검사 지도·형태 검수','author-placement-guide':'배치 기준 작성 필요','preview-position-then-review-shape':'위치 미리보기 후 형태 검수','position-helps-shape-still-unresolved':'위치 개선 가능 · 형태·기준 검수 필요'};
+function coverageText(row){const c=row.coverage;return c?c.required_visible?c.missing+'/'+c.required_visible+'px 누락 ('+(100*c.missing_ratio).toFixed(1)+'%)':'보이는 필수 영역 0px · 기준 검수 필요':'덮임 기준 미등록';}
+function revalidationPanel(){
+ const report=state.data?.revalidation;
+ $('revalidation-frames').replaceChildren();$('revalidation-download').hidden=!report;
+ $('revalidation-status').textContent=!report?'원본·검사 지도를 고정하고 누락 비율과 앞뒤 프레임을 분석합니다. 이미지 생성이나 승인 없이 준비합니다.':report.current?'현재 후보 분석 · '+report.frames.length+'프레임 · 오류 '+report.frames.filter(r=>r.status==='error').length+' · 배치 기준 미등록 '+report.frames.filter(r=>!(r.criteria_registered||[]).length).length:'후보·바디·기준 변경됨 · 이전 분석입니다. 재검증 참조를 다시 준비하세요.';
+ if(!report)return;
+ $('revalidation-download').href='/api/revalidation/'+encodeURIComponent(state.part)+'/'+report.id+'.zip';
+ const table=node('table'),head=node('tr');['프레임','누락 / 필수 영역','다음 검수'].forEach(t=>head.append(node('th',t)));table.append(head);
+ for(const row of report.frames){const tr=node('tr'),td=node('td'),button=node('button',row.pose);button.onclick=()=>inspect(row.pose).catch(e=>log(e.message));td.append(button);tr.append(td,node('td',coverageText(row)),node('td',nextStepNames[row.next_step]||row.next_step));table.append(tr);}
+ $('revalidation-frames').append(table);
+}
+function revalidationPose(){
+ const report=state.data?.revalidation,row=report?.frames.find(r=>r.pose===state.pose);
+ $('position-hint').hidden=true;$('revalidation-pose').textContent='';
+ if(!row)return;
+ const matching=report.current&&row.candidate_digest===state.candidate?.id;
+ const hint=row.translation;
+ $('revalidation-pose').textContent=(!matching?'이전 후보 분석 · ':'')+coverageText(row)+' · '+(nextStepNames[row.next_step]||row.next_step)+' · 앞뒤 '+row.neighbours.join(', ')+(hint?.usable?' · 양쪽 파츠 함께 이동 후 '+hint.after_missing+'px 누락 예상':'')+' · 각 발 형태·가림 별도 검수 · 시각 승인 아님';
+ $('position-hint').hidden=!(matching&&hint?.usable);
+ $('position-hint').disabled=state.busy||!token;
+}
+$('position-hint').onclick=()=>{const report=state.data?.revalidation,row=report?.frames.find(r=>r.pose===state.pose);if(report?.current&&row?.candidate_digest===state.candidate?.id&&row.translation?.usable)setPosition(row.translation.dx,row.translation.dy);};
 function showCandidate(c){
  state.candidate=c;
  const row=state.data.poses.find(p=>p.pose===state.pose);
@@ -72,12 +98,14 @@ function showCandidate(c){
  $('candidates').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.id===c.id));
  controls();
  resetPosition();
+ revalidationPose();
 }
 function clearInspector(message){
  state.candidate=null;state.candidates=[];
  $('candidates').replaceChildren();$('findings').replaceChildren();$('criteria').querySelector('tbody').replaceChildren();
  for(const id of ['part-image','reference-image']){const image=$(id);image.hidden=true;image.removeAttribute('src');}
  $('pose-status').textContent=message;$('candidate-note').textContent='';$('evidence').textContent='';
+ $('position-hint').hidden=true;$('revalidation-pose').textContent='';
  controls();
  resetPosition();stopMotion();
 }
@@ -98,6 +126,7 @@ async function inspect(pose){
 async function loadPart(){
  const part=state.part,revision=++state.revision;state.data=null;clearInspector('파츠 불러오는 중…');$('grid').replaceChildren();$('motion-review').hidden=true;$('motion-image').removeAttribute('src');
  $('summary').textContent='파츠 불러오는 중…';$('view-note').textContent='';$('reference-download').hidden=true;
+ $('revalidation-download').hidden=true;$('revalidation-frames').replaceChildren();$('revalidation-status').textContent='파츠 불러오는 중…';
  const data=await get('/api/part/'+encodeURIComponent(part));
  if(part!==state.part||revision!==state.revision)return;state.data=data;
  document.documentElement.dataset.sampling=state.data.sampling||'nearest';
@@ -107,7 +136,7 @@ async function loadPart(){
 }
 async function loadList(){
  const data=await get('/api/status');$('part').replaceChildren(...data.productions.map(p=>{const o=node('option',p.part+' · '+p.state);o.value=p.part;return o;}));
- state.activeJob=data.active_job;state.part=state.part||data.productions[0]?.part;$('part').value=state.part;
+ state.activeJob=data.active_job;if(!data.productions.some(p=>p.part===state.part))state.part=data.productions[0]?.part;$('part').value=state.part;
  if(state.part) await loadPart();else $('summary').textContent='제작 기록이 없습니다.';
 }
 async function run(action,body={}){
