@@ -1,6 +1,6 @@
 # AI independent footwear pilot — 2026-10-10
 
-This experiment now contains actual AI-drawn **pose-specific independent shoes**, rather than a standing shoe rotated/scaled along interpolated ankle vectors. It demonstrates eight shared run samples (`run.10–17`), not a completed run cycle or an approved production library.
+This experiment now contains actual AI-drawn **pose-specific independent shoes**, rather than a standing shoe rotated/scaled along interpolated ankle vectors. It provides a playable first result on eight shared run samples (`run.10–17`). The complete run cycle and production art approval remain outside this pilot.
 
 ## Open the result
 
@@ -17,9 +17,9 @@ The native Codex image generation tool made 12 images: eight pose-specific shoe 
 
 Each request used the exact body pose ROI plus the navy/cream sneaker design. The ROI was `[128,384,640,768]` on the immutable 768px body canvas, padded to 512px square and enlarged to a 1024px reference. The model did not consistently honor output framing or resolution; raw outputs therefore remain evidence rather than directly usable coordinates.
 
-`parts_ai_shoes_pilot.py` separates the two actual drawings and registers each with authored uniform scale/translation (and an explicit rotation if supplied). It preserves aspect and the newly drawn perspective. It never uses projected ankle-toe length to scale standing art, repaints a shoe, or extracts clothing from a generated full character. All original provider outputs and prompts are retained. The later small translation proposals were bounded to ±8 body pixels and remained unapproved; proposals based on ambiguous crossing rectangles were discarded in favor of body contour review or an AI redraw.
+`parts_ai_shoes_pilot.py` separates the two actual drawings and registers each with authored uniform scale/translation. The current native-art policy requires no rotation and uses a single premultiplied bilinear resize. A uniform 4% fit margin (5% for `run.10` rear shoe) and one-pixel translations for rear shoes in `run.10`/`run.11` cover the unchanged foot-core guides. Legacy resampling remains available to reproduce old candidates. It preserves aspect and the newly drawn perspective. It never uses projected ankle-toe length to scale standing art, repaints a shoe, or extracts clothing from a generated full character. All original provider outputs and prompts are retained. The later small translation proposals were bounded to ±8 body pixels and remained unapproved; proposals based on ambiguous crossing rectangles were discarded in favor of body contour review or an AI redraw.
 
-The source and transforms live in `generation-latest.json`, `registration.json`, `registration-report.json`, and the immutable `inputs/ai-shoes-pilot/revisions/…` directories. Curation candidates retain frozen QA images; `final-curation-lineage-body-corrected.json` identifies the selected candidates after ownership/QC updates.
+The source and transforms live in `generation-latest.json`, `registration.json`, `registration-report.json`, and the immutable `inputs/ai-shoes-pilot/revisions/…` directories. Curation candidates retain frozen QA images; `final-curation-lineage-final-fit.json` identifies the final selected candidates, while the body-corrected lineage remains the prior evidence.
 
 [Native outputs, prompts, guides, annotations and evidence](assets/ai-independent-shoes-20261010.sources.zip) are archived as 146 hash-verified files (12.0MB). The body/motion source dependency remains the archive in experiment 16.
 
@@ -39,16 +39,16 @@ The new guides check authored **foot-core** regions containing toes/heels agains
 
 | Pose | Required pixels missing | Allowed/protected violation | Status |
 |---|---:|---:|---|
-| run.10 | 36 | 0 | error |
-| run.11 | 5 | 0 | error |
-| run.12 | 0 | 0 | warning |
-| run.13 | 10 | 0 | error |
-| run.14 | 0 | 0 | warning |
-| run.15 | 15 | 0 | error |
-| run.16 | 6 | 0 | error |
+| run.10 | 0 | 0 | warning |
+| run.11 | 0 | 0 | passed |
+| run.12 | 0 | 0 | passed |
+| run.13 | 0 | 0 | passed |
+| run.14 | 0 | 0 | passed |
+| run.15 | 0 | 0 | passed |
+| run.16 | 0 | 0 | passed |
 | run.17 | 0 | 0 | warning |
 
-Total: 72 missing pixels across five poses, **zero approved art**. Internal alpha holes/small fragments still need inspection. The generic area-jump warning at the window endpoints compares against empty unproduced neighbors; it is not proof of temporal instability or stability. Review the eight produced images in sequence as well as the original body reference.
+Total: **zero missing foot-core pixels, zero allowed/protected violations, zero small alpha holes or fragments in all eight produced poses**. Art decisions remain unverified; these narrow checks do not approve the library. The earlier 72-pixel deficit and apparent alpha holes were investigated against actual source pixels. Most holes were silhouette ringing from low-alpha native cutout edges and two LANCZOS resizes. A positive filter removes this registration artifact without repainting shoes, erasing body pixels, or weakening the fixed criteria. The generic area-jump warning at the window endpoints compares against empty unproduced neighbors; it is not proof of temporal instability or stability. Review the eight produced images in sequence as well as the original body reference.
 
 The other 35 poses have explicit transparent preview placeholders and are **rejected as unproduced**, not accepted parts. Their ownership guides are empty. A new generation for one of these poses requires new ownership annotations. `parts_segments.split_piece` now fails before writing a split import if drawn pixels have no owner; it no longer silently discards such artwork. The review UI displays rejected decisions separately from unverified art.
 
@@ -58,8 +58,8 @@ The other 35 poses have explicit transparent preview placeholders and are **reje
 - Motion reference/sample IDs/timing are unchanged; shoe swaps preserve every sample.
 - Python and browser layer samplers match for 86 actual off/on cases.
 - Eight produced samples each have `shoe_back` and `shoe_front` layers; runtime masks and appearance-specific baked clips are both zero.
-- 59 focused tests cover production/revalidation, split pixel preservation, body-context render cache invalidation, export/player behavior, and variable/fractional-duration review windows. JS syntax, Ruff F checks and Git whitespace checks pass.
-- Live player and curation pages were checked, including original sample IDs and actual zmap rendering. Asset QA errors remain errors; code tests do not approve the art.
+- 61 focused tests cover production/revalidation, split pixel preservation, body-context render cache invalidation, export/player behavior, and variable/fractional-duration review windows. JS syntax, Ruff F checks and Git whitespace checks pass.
+- Live player and curation pages were checked, including original sample IDs, 8-frame stepping/window wrap, 11/13 off/on layers at the same paused sample, and actual zmap rendering. The fit-update archive contains 46 hash-verified files (2.48MB), supplementing the unchanged original source archive. The eight produced poses have no QA errors; endpoint warnings remain visible. Code tests do not approve the art.
 
 ## Reproduce / continue
 
@@ -74,6 +74,6 @@ Use the managed worktree `.venv` and the exact body library from experiment 16:
 .venv/bin/sprite-gen parts-review-serve --assembly assets/parts-ai-shoes-pilot-20261010/library/assembly.json --port 8785
 ```
 
-The provider calls are intentionally not replayed by those commands. Restore the archived raw art/prompts/guides and resolve frozen body source paths first. The source archive preserves native outputs, placement history, foot contours, selected-candidate lineage and verification evidence. The generated runtime export remains an independent layer library; the development workspace is separate from the previous experiment and the primary checkout.
+The provider calls are intentionally not replayed by those commands. Restore the archived raw art/prompts/guides and resolve frozen body source paths first. The source archive preserves native outputs, placement history, foot contours, selected-candidate lineage and verification evidence. Restore [the fit update](assets/ai-independent-shoes-20261010.fit-update.zip) over the original source archive to reproduce the final registration, selected-candidate lineage and verification. Then use `--refresh` when republishing an existing pilot; the immutable prior candidate revisions remain available. `parts_ai_shoes_verify.py --out …` checks the actual build against unchanged body pixels and Python/browser sampling. The generated runtime export remains an independent layer library; the development workspace is separate from the previous experiment and the primary checkout.
 
-Next required work: resolve the five residual coverage errors, distinguish alpha defects from intended openings, stabilize the shoe design across the sequence, and validate body ownership beyond this window before extending to the remaining poses or another garment/body type. The Codex Goal remains active for those quality steps.
+The first-result Goal is fulfilled by these eight consecutive frames, the real player swap/sequence check and the preserved source/verification artifacts. Further work is a separate expansion: complete the other 35 poses, inspect the complete loop, refine temporal lace/panel identity, validate body ownership outside this window, and add another garment/body type. The original body clip itself retains its original limb-shape and contour variation; the shoes pipeline does not repair those underlying video frames.

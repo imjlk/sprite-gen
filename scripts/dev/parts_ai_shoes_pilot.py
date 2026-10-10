@@ -24,13 +24,29 @@ def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def resize_registered(piece, scale, policy):
+    """One positive-kernel resize for smooth native art, with premultiplied RGB.
+
+    Negative-lobe filters can create detached alpha rings around a closed shoe.
+    The old two-pass route is retained only to reproduce archived candidates.
+    """
+    kernel = Image.Resampling.BILINEAR if policy['resampling']=='bilinear' else Image.Resampling.LANCZOS
+    size = (max(1,round(piece.width*scale)),max(1,round(piece.height*scale)))
+    return piece.convert('RGBa').resize(size,kernel).convert('RGBA')
+
+
 def register(out):
     spec = json.loads((out / 'registration.json').read_text())
     geo = json.loads((out / 'guides/geometry.json').read_text())
+    policy_file=out/'registration-policy.json'
+    policy=json.loads(policy_file.read_text()) if policy_file.exists() else {
+        'resampling':'lanczos','single_pass':False,'scale_margin':1,'source_alpha_bounds':1,'source_padding':0}
+    if policy['resampling'] not in ('bilinear','lanczos') or not 1<=policy['scale_margin']<=1.05:
+        raise ValueError('registration policy must use a supported filter and bounded uniform margin')
     (out / 'registered').mkdir(exist_ok=True)
     report = {'provider': 'codex-native-imagegen', 'motion_reference': geo,
               'art_approved': False, 'mask_rendering': False,
-              'standing_art_warped': False, 'poses': {}}
+              'standing_art_warped': False, 'registration_policy':policy, 'poses': {}}
     for pose, row in spec.items():
         src = out / row['raw']
         im = Image.open(src).convert('RGBA')
@@ -50,33 +66,57 @@ def register(out):
             rgba = np.asarray(im).copy()
             rgba[labels != i] = 0
             piece = Image.fromarray(rgba, 'RGBA')
-            box = piece.getbbox()
+            occupied=np.asarray(piece)[...,3]>=policy['source_alpha_bounds']
+            yy,xx=np.nonzero(occupied)
+            pad=policy['source_padding']
+            box=(max(0,int(xx.min())-pad),max(0,int(yy.min())-pad),
+                 min(piece.width,int(xx.max())+1+pad),min(piece.height,int(yy.max())+1+pad))
+            outside=np.asarray(piece)[...,3].copy();outside[box[1]:box[3],box[0]:box[2]]=0
+            if outside.max(initial=0)>=policy['source_alpha_bounds']:
+                raise ValueError(f'{pose}: source bounds discard significant painted alpha')
             x, y, right, bottom = placement['bounds']
-            scale = max((right-x)/(box[2]-box[0]), (bottom-y)/(box[3]-box[1]))
+            margin = placement.get('scale_margin', policy['scale_margin'])
+            if not 1 <= margin <= 1.05:
+                raise ValueError(f'{pose}: uniform shoe fit margin must stay within 5%')
+            scale = max((right-x)/(box[2]-box[0]), (bottom-y)/(box[3]-box[1]))*margin
             # Preserve aspect and painted perspective: no nonuniform fit,
             # limb-vector scale, mask-clipping or generated body extraction.
-            cropped = piece.crop(box).convert('RGBa')
-            resized = cropped.resize((round(cropped.width*scale), round(cropped.height*scale)),
-                                     Image.Resampling.LANCZOS).convert('RGBA')
             angle = placement.get('angle', 0)
-            if angle:
+            if policy['single_pass'] and angle:
+                raise ValueError('single-pass pilot requires an already drawn pose without registration rotation')
+            if policy['single_pass']:
+                small=resize_registered(piece.crop(box),scale/2,policy)
+                dx=round((x+right)/4-small.width/2)
+                dy=round((y+bottom)/4-small.height/2)
+                local=Image.new('RGBA',(1024,1024))
+                # This enlargement is for inspection only; runtime uses `small`.
+                local.alpha_composite(small.resize((small.width*2,small.height*2),Image.Resampling.BILINEAR),(dx*2,dy*2))
+            else:
+                resized=resize_registered(piece.crop(box),scale,policy)
+            if not policy['single_pass'] and angle:
                 resized = resized.convert('RGBa').rotate(angle, Image.Resampling.BICUBIC,
                                                          expand=True).convert('RGBA')
-            dx = round((x+right-resized.width)/2)
-            dy = round((y+bottom-resized.height)/2)
-            local = Image.new('RGBA', (1024, 1024))
-            local.alpha_composite(resized, (dx, dy))
+            if not policy['single_pass']:
+                dx = round((x+right-resized.width)/2)
+                dy = round((y+bottom-resized.height)/2)
+                local = Image.new('RGBA', (1024, 1024))
+                local.alpha_composite(resized, (dx, dy))
             fit.alpha_composite(local)
             # Known ROI resolution change, identical for every part and pose.
-            small = local.convert('RGBa').resize((512, 512), Image.Resampling.LANCZOS).convert('RGBA')
             full = Image.new('RGBA', (768, 768))
-            full.paste(small, (geo['roi'][0], geo['roi'][1]))
+            if policy['single_pass']:
+                full.paste(small,(geo['roi'][0]+dx,geo['roi'][1]+dy))
+            else:
+                small = local.convert('RGBa').resize((512, 512), Image.Resampling.LANCZOS).convert('RGBA')
+                full.paste(small,(geo['roi'][0],geo['roi'][1]))
             file = out / 'registered' / f"{pose}.{placement['node']}.png"
             full.save(file)
             combined.alpha_composite(full)
             details.append({'node': placement['node'], 'source_bounds': box,
-                            'target_bounds': placement['bounds'], 'scale': scale,
+                            'target_bounds': placement['bounds'], 'scale': scale, 'scale_margin':margin,
                             'rotation_degrees': angle,
+                            'translation_space':'roi-512' if policy['single_pass'] else 'guide-1024',
+                            'discarded_low_alpha_pixels':int(np.count_nonzero(outside)),
                             'translation': [dx, dy], 'file': str(file.relative_to(out)),
                             'sha256': digest(file)})
         combined.save(out / 'registered' / f'{pose}.png')
@@ -119,6 +159,8 @@ def publish(out, source, *, refresh=False):
             shutil.copytree(out / name, material / name)
         for name in ('registration.json', 'registration-report.json'):
             shutil.copy2(out / name, material / name)
+        if (out/'registration-policy.json').exists():
+            shutil.copy2(out/'registration-policy.json',material/'registration-policy.json')
         generation = out / 'generation-latest.json'
         shutil.copy2(generation if generation.exists() else out/'generation-complete.json', material/'generation-complete.json')
     art = json.loads((out / 'registration-report.json').read_text())['poses']
