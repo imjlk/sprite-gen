@@ -27,6 +27,7 @@ class PartsSession:
     """Immutable workspace snapshot with a bounded cache of resolved selections."""
 
     def __init__(self, assembly, *, interpolation="linear", title=None):
+        self.assembly = Path(assembly).absolute()
         contract._enum("linear", "frame")(interpolation, "interpolation")
         self.interpolate = interpolation == "linear"
         root, index, registry, _ = parts_motion._active(assembly)
@@ -168,6 +169,19 @@ class PartsSession:
 
 
 def handler_for(session):
+    refresh_lock = threading.Lock()
+    revision = session.assembly.read_bytes()
+    previous = None
+
+    def refreshed():
+        nonlocal session, revision, previous
+        with refresh_lock:
+            current = session.assembly.read_bytes()
+            if current != revision:
+                updated = PartsSession(session.assembly, interpolation=session.interpolation, title=session.title)
+                previous, session, revision = session, updated, current
+            return session
+
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *_):
             pass
@@ -189,6 +203,8 @@ def handler_for(session):
                 return
             request = urlsplit(self.path)
             try:
+                if request.path in {"/api/metadata", "/api/library", "/standalone", "/api/export"}:
+                    refreshed()
                 if request.path == "/api/metadata":
                     result = session.metadata
                 elif request.path == "/api/library":
@@ -205,7 +221,8 @@ def handler_for(session):
                     result = session.layer_frame(parse_qs(request.query,keep_blank_values=True,max_num_fields=max(24,len(session.options)+2)))
                 elif request.path.startswith("/api/textures/") and request.path.endswith(".png"):
                     digest = request.path.removeprefix("/api/textures/").removesuffix(".png")
-                    self.reply(200,session.texture(digest),"image/png",immutable=True)
+                    owner = previous if previous and digest in previous.texture_refs and digest not in session.texture_refs else session
+                    self.reply(200,owner.texture(digest),"image/png",immutable=True)
                     return
                 elif request.path in {"/","/index.html","/player.js","/runtime.js","/player.css"}:
                     name = "index.html" if request.path=="/" else request.path[1:]

@@ -107,6 +107,11 @@ class ReviewDesk:
                           "note": row.get("note"), "reviewer": row.get("reviewer"), "check": row.get("check"),
                           "rework": row.get("rework")})
         return {"part": name, "config": state["config"], "track": track or production.MAIN, "poses": poses,
+                "canvas": registry[index["rig"]["id"]]["canvas"],
+                "clips": [{"id": c["id"], "state": c["state"], "loop": c["loop"],
+                           "samples": [{"pose": s["pose_id"], "duration_ms": s["duration_ticks"] * 1000 / c["timebase"]}
+                                       for s in c["samples"]]} for c in motion["clips"]
+                          if c["state"] in production._states(state, index)],
                 "sampling": registry[index["rig"]["id"]].get("sampling", "nearest"),
                 "built": state["built"]["part"] if state["built"] else None,
                 "built_current": production._current(state, registry, order),
@@ -163,7 +168,7 @@ class ReviewDesk:
                     seen.add(ref["file"])
         return data.getvalue()
 
-    def render(self, name, pose, kind, candidate=None):
+    def render(self, name, pose, kind, candidate=None, *, dx=0, dy=0):
         """PNG of one pose: the part on the body alone (built), or the drawn cell / cut on what it was drawn over."""
         part, track = self._split(name)
         root, index, registry, _ = self._state()
@@ -171,7 +176,7 @@ class ReviewDesk:
         row = production._track(state, track)["poses"].get(pose)
         if row is None or row.get("selected") is None:
             raise contract.PartsContractError(f"{pose} has no drawing yet")
-        allowed = ("body", "body-raw", "body-zraw", "cut", "part", "visible", "drawn", "reference", "interfaces", "errors")
+        allowed = ("position", "body", "body-raw", "body-zraw", "cut", "part", "visible", "drawn", "reference", "interfaces", "errors")
         if kind not in allowed:
             raise contract.PartsContractError("unknown render view")
         location = row["selected"] if candidate is None else next(
@@ -198,7 +203,17 @@ class ReviewDesk:
                     self._renders[(digest, "box")] = (min(b[0] for b in boxes)-2, min(b[1] for b in boxes)-2,
                                                       max(b[2] for b in boxes)+2, max(b[3] for b in boxes)+2) if boxes else None
                 box = self._renders[(digest, "box")]
-        if kind == "body-zraw":
+        if kind == "position":
+            from sprite_gen.frames import parts_candidate_scene
+            if record["motion"] != index["motion"] or state["config"]["role"] != "part":
+                raise contract.PartsContractError("position preview needs a compatible part candidate")
+            raw = Image.open(base / record["images"]["part"]["file"]).convert("RGBA")
+            raw = parts_part_edit.translate_image(raw, dx, dy)
+            if state["config"]["visibility"] == "mask" and "render_mask" in record["images"]:
+                raw = production._visible_part(raw, Image.open(base / record["images"]["render_mask"]["file"]))
+            plan, sample, load = parts_candidate_scene.scene(root, index, registry, state["config"], pose, raw, record["placement"])
+            image = production.compose_parts.render_sample(plan, sample, load)[0]
+        elif kind == "body-zraw":
             if box is None or track is not None or state["config"]["role"] != "part":
                 raise contract.PartsContractError("zmap-only preview needs the selected main-track part and a current build")
             image = self.raw_zmap(root, index, registry, state, pose, record, base, motion)
@@ -326,7 +341,7 @@ class ReviewDesk:
             if action == "check":
                 return production.check(self.assembly, part, track=track)
             if action == "build":
-                return production.build(self.assembly, part)
+                return self.build_preserving_appearance(part)
             if action == "select":
                 return production.select_candidate(self.assembly, part, body.get("pose"), body.get("candidate"), track=track)
             if action == "edit":
@@ -334,7 +349,7 @@ class ReviewDesk:
             if action == "apply":
                 selected = production.select_candidate(self.assembly, part, body.get("pose"), body.get("candidate"), track=track)
                 checked = production.check(self.assembly, part, track=track)
-                built = production.build(self.assembly, part)
+                built = self.build_preserving_appearance(part)
                 return {"selected": selected, "check": checked, "build": built, "art_approved": False}
             if action == "visibility":
                 mode = contract._enum("zmap", "mask")(body.get("visibility"), "visibility")
@@ -345,8 +360,32 @@ class ReviewDesk:
                     file = Path(folder)/"config.json"
                     file.write_bytes(workspace.json_bytes(state["config"]))
                     production.configure(self.assembly,part,file)
-                return {"visibility":mode,"check":production.check(self.assembly,part),"build":production.build(self.assembly,part),"art_approved":False}
+                return {"visibility":mode,"check":production.check(self.assembly,part),"build":self.build_preserving_appearance(part),"art_approved":False}
         raise contract.PartsContractError(f"unknown action {action}")
+
+    def build_preserving_appearance(self, part):
+        """Rebind the saved outfit after a part revision; never carry art approval."""
+        from sprite_gen.curate import parts_appearance
+        _, before, documents, _ = self._state()
+        appearance = documents[before["appearance"]["id"]] if before["appearance"] else None
+        result = production.build(self.assembly, part)
+        _, after, current, _ = self._state()
+        if appearance and after["appearance"] is None:
+            def rebind(value):
+                if isinstance(value, dict):
+                    if set(value) == {"id", "digest"} and value["id"] in current:
+                        return contract.reference(current[value["id"]])
+                    return {k: rebind(v) for k, v in value.items()}
+                if isinstance(value, list):
+                    return [rebind(v) for v in value]
+                return value
+            selection = {k: rebind(appearance[k]) for k in ("id", "selections", "palette", "mirror", "presets") if k in appearance}
+            selection.update(kind="parts-appearance-selection", schema_version=1)
+            with tempfile.TemporaryDirectory(prefix="parts-outfit-rebind-") as folder:
+                file = Path(folder)/"selection.json"
+                file.write_bytes(workspace.json_bytes(selection))
+                result["appearance"] = parts_appearance.create(self.assembly, file)
+        return result
 
     def job(self, identity):
         with self.jobs_lock:
@@ -372,7 +411,7 @@ class ReviewDesk:
                               ("draw", lambda: production.draw(self.assembly, part, batch=batch, track=track)),
                               ("slice", lambda: production.slice_batch(self.assembly, part, batch=batch, track=track)),
                               ("check", lambda: production.check(self.assembly, part, track=track)),
-                              ("build", lambda: production.build(self.assembly, part))]
+                              ("build", lambda: self.build_preserving_appearance(part))]
                     for step, operation in stages:
                         self.update_job(identity, step=step)
                         result = operation()
@@ -456,8 +495,10 @@ def handler_for(desk):
                     self.reply(200, desk.reference_archive(name, batch), "application/zip")
                 elif path.startswith("/api/render/") and path.endswith(".png"):
                     name, pose, kind = unquote(path.removeprefix("/api/render/").removesuffix(".png")).split("/")
-                    candidate = parse_qs(urlsplit(self.path).query).get("candidate", [None])[0]
-                    self.reply(200, desk.render(name, pose, kind, candidate), "image/png")
+                    query = parse_qs(urlsplit(self.path).query)
+                    candidate = query.get("candidate", [None])[0]
+                    dx, dy = (int(query.get(axis, ["0"])[0]) for axis in ("dx", "dy"))
+                    self.reply(200, desk.render(name, pose, kind, candidate, dx=dx, dy=dy), "image/png")
                 else:
                     self.json({"error": "not found"}, 404)
             except (contract.PartsContractError, ValueError, OSError) as exc:

@@ -252,6 +252,11 @@ def test_native_sock_production_replaces_only_explicit_feet_and_restores_body(tm
     player = PartsPlayer.from_workspace(assembly, state="fit")
     dressed = player.layers(interpolate=False)
     assert dressed["masks"] == []
+    # Large blank borders are removed, while the existing assertions below
+    # verify exact body reconstruction and Python/browser coordinate parity.
+    from sprite_gen.compose.compose_parts import AssetLoader
+    compact = AssetLoader(assembly.parent, index)
+    assert all(max(compact(layer["pack"],layer["image"]).size) < 1254 for layer in dressed["layers"])
     assert not any(
         layer["slot"] is None and layer["node"] in ("foot_front", "foot_back")
         for layer in dressed["layers"]

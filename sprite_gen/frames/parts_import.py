@@ -197,6 +197,21 @@ def import_pack(assembly: Path, spec: Path, source_root: Path, *, allow_incomple
                 data = library.image_bytes(payloads[region["file"]])
                 if data.size != image.size:
                     raise contract.PartsContractError(f"{where}: piece palette region differs from image size; use sample-specific regions")
+            # Native illustration frames otherwise retain a full canvas per limb.
+            # Keep source provenance, but use only the occupied rectangle at runtime.
+            # Masks and palette regions have their own coordinate space: leave those
+            # inputs intact until they can be trimmed together.
+            if (rig.get("sampling") == "smooth" and normalized["mask"] is None
+                    and not normalized["palette_regions"] and not piece["palette_regions"]):
+                box = image.getchannel("A").getbbox() or (0, 0, 1, 1)
+                if box != (0, 0, image.width, image.height):
+                    image = image.crop(box)
+                    encoded = library.png_bytes(image)
+                    digest = library.sha256(encoded)
+                    filename = f"images/{digest}.png"
+                    payloads[filename] = encoded
+                    normalized["image"] = {"file": filename, "sha256": digest}
+                    normalized["pivot"] = [normalized["pivot"][0]-box[0], normalized["pivot"][1]-box[1]]
             return normalized, image
 
         def place(normalized, image, clip_id, sample):

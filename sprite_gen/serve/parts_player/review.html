@@ -12,6 +12,12 @@
   <select id="view" aria-label="포즈 보기"><option value="body">실제 빌드</option><option value="body-raw">몸 위 원본 · 가림 없음</option><option value="body-zraw">몸 위 원본 · zmap만</option><option value="part">독립 원본 파츠</option><option value="visible">가림 적용 파츠</option><option value="reference">생성 참조</option><option value="interfaces">검사 영역</option><option value="errors">오류 위치</option><option value="drawn">생성 원본 칸</option></select>
  </div>
  <p id="summary" class="muted"></p><p id="view-note" class="muted"></p>
+ <section id="motion-review" hidden>
+  <h2>파츠 적용 모션 확인</h2>
+  <div class="toolbar"><select id="motion-clip" aria-label="검수 모션"></select><button id="motion-play">재생</button><button id="motion-inspect">이 프레임 교정</button></div>
+  <img id="motion-image" alt="현재 파츠를 적용한 모션 프레임">
+  <input id="motion-frame" aria-label="모션 프레임" type="range" min="0" value="0"><p id="motion-caption" class="muted"></p>
+ </section>
  <div id="grid" class="grid"></div>
  <div class="toolbar actions"><button data-act="sheet">실패·반려·누락 포즈 참조 준비</button><button data-act="draw">최신 시트 이미지 생성</button><button data-act="slice">생성물 분리</button><button data-act="check">전체 검사</button><button data-act="build">레이어 빌드</button></div>
  <a id="reference-download" hidden>최신 생성 기준 묶음 ↓</a>
@@ -21,6 +27,14 @@
  <h2 id="pose-title">포즈를 선택하세요</h2><p id="pose-status" class="muted"></p>
  <div class="comparison"><figure><img id="reference-image" alt="이 후보가 생성될 때 사용한 참조"><figcaption id="reference-caption">생성 당시 참조</figcaption></figure><figure><img id="part-image" alt="선택한 후보의 독립 원본 파츠"><figcaption>독립 원본 파츠</figcaption></figure></div>
  <p class="muted">녹색: 덮어야 할 곳 · 빨강: 보호 · 파랑: 허용 · 보라: 앞에서 가림</p>
+ <section id="position-editor">
+  <h2>이 파츠 · 현재 프레임 위치 교정</h2>
+  <img id="position-image" alt="드래그하여 파츠 위치 교정" draggable="false">
+  <p class="muted">그림을 드래그하거나 방향 버튼으로 이동합니다. 좌표는 원본 픽셀 기준입니다.</p>
+  <div class="toolbar"><label>X <input id="position-x" aria-label="파츠 X 교정" type="number" value="0" step="1"></label><label>Y <input id="position-y" aria-label="파츠 Y 교정" type="number" value="0" step="1"></label><label>간격 <input id="position-step" aria-label="교정 이동 간격" type="number" value="1" min="1" step="1"></label></div>
+  <div class="toolbar"><button data-nudge="-1,0" aria-label="파츠 왼쪽 이동">←</button><button data-nudge="0,-1" aria-label="파츠 위로 이동">↑</button><button data-nudge="0,1" aria-label="파츠 아래로 이동">↓</button><button data-nudge="1,0" aria-label="파츠 오른쪽 이동">→</button><button id="position-reset">초기화</button></div>
+  <button id="position-save">위치 교정 후보 저장</button><p id="position-status" class="muted" role="status"></p>
+ </section>
  <details id="pixel-editor"><summary>프로그램으로 원본 수정</summary>
  <p class="muted">새 그림 생성 없이 수정 후보를 만듭니다. 범위는 원본 캔버스의 픽셀 좌표입니다.</p>
  <select id="edit-type" aria-label="수정 방식"><option value="translate">위치 이동</option><option value="fit-alpha-box">기준 영역에 비율 유지 맞춤</option><option value="fill-small-holes">작은 내부 구멍 복원</option><option value="erase">영역 지우기</option><option value="restore-source">생성 원본에서 복원</option><option value="recolor">정확한 색 교체</option></select>

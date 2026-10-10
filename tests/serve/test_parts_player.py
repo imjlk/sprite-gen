@@ -66,6 +66,26 @@ def test_optional_overlay_can_be_removed_without_resetting_or_masking_head(sessi
     assert len(hat["evidence"]["draw"])==len(bare["evidence"]["draw"])+1
 
 
+def test_http_reload_reads_the_new_outfit_without_restarting_the_player(session,tmp_path):
+    player,assembly=session
+    server=ThreadingHTTPServer(('127.0.0.1',0),serve_parts.handler_for(player))
+    thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+    base=f'http://127.0.0.1:{server.server_port}'
+    try:
+        old=json.loads(urlopen(base+'/api/metadata').read())
+        index,registry=workspace.read_workspace(assembly)
+        spec=tmp_path/'updated-outfit.json'
+        spec.write_bytes(workspace.json_bytes({'kind':'parts-appearance-selection','schema_version':1,'id':index['appearance']['id'],'selections':{'hair':contract.reference(registry['hair.a'])}}))
+        parts_appearance.create(assembly,spec)
+        before=tree_hashes(assembly.parent)
+        new=json.loads(urlopen(base+'/api/metadata').read())
+        assert new!=old and new['motion']==old['motion']
+        assert next(s for s in new['slots'] if s['id']=='hair')['selected']=='hair.a'
+        assert tree_hashes(assembly.parent)==before
+    finally:
+        server.shutdown();server.server_close();thread.join()
+
+
 def test_layer_api_keeps_separate_textures_and_tweens_without_cpu_composition(session,monkeypatch):
     player,assembly=session
     before=tree_hashes(assembly.parent)

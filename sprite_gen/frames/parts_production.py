@@ -774,6 +774,7 @@ def adopt(assembly, part, pack=None, *, piece=None, track=None, labels=None):
         raise contract.PartsContractError(f"{document['id']} has no piece {piece}")
     pieces.sort(key=lambda p: (parts_resolve.rank({"node": p["node"], "provides": p["provides"]}, ranks), p["id"]))
     same_motion = binding["motion"] == index["motion"]
+    body_frames, _ = _render_alone(root, index, registry, None, _states(production, index))
 
     def placement_of(p, pose):
         clip_id, sample = first[pose]
@@ -813,13 +814,13 @@ def adopt(assembly, part, pack=None, *, piece=None, track=None, labels=None):
                     guards["render_mask"] = Image.fromarray(np.where(np.asarray(guard)>0,0,255).astype(np.uint8))
         record = {"kind": "parts-production-candidate", "schema_version": 1, "policy": POLICY, "part": part,
                   "track": track or MAIN, "pose_id": pose, "clip": clip_id, "sample": sample["id"], "motion": index["motion"],
-                  "body_sha256": sample["image"]["sha256"], "under_sha256": None, "wearing": [],
+                  "body_sha256": sample["image"]["sha256"], "under_sha256": assets.sha256(assets.png_bytes(body_frames[pose])), "wearing": [],
                   "method": {"adopted": contract.reference(document), "piece": piece}, "source": None,
                   "placement": {"format": "full-canvas", "pivot": list(sample["sockets"][config["socket"]]["position"]),
                                 "target_socket": config["socket"], "offset": [0, 0]},
                   "alignment": None, "holes_filled": 0, "pixels": int(alpha.sum())}
         record, location = _publish_candidate(root, part, record, {
-            "mask": Image.fromarray((alpha*255).astype(np.uint8), "L"), "part": full, **guards})
+            "mask": Image.fromarray((alpha*255).astype(np.uint8), "L"), "part": full, "under": body_frames[pose], **guards})
         _select(rows, order if config["mode"] == "held" else [pose], location)
         made.append(pose)
     _save(root, production)
@@ -922,6 +923,8 @@ def _measure(root, config, settings, location, context):
     # later mutable config. Matching the body's RGB is not a new garment's gate.
     for name in ("required", "protected", "allowed"):
         ref = record["images"].get(f"qa_{name}")
+        if ref is None and config["pose_checks"].get(record["pose_id"], {}).get(name) is not None:
+            findings.append(("error", f"{name}: current criterion was not captured by this candidate; adopt with the current guides before approving"))
         if ref is not None:
             encoded = assets.read_file(base, ref["file"])
             if assets.sha256(encoded) != ref["sha256"]:
@@ -1264,6 +1267,11 @@ def review(assembly, part, *, reviewer=None, approve=(), reject=(), note=None, c
     if (approved or rejected) and not reviewer:
         raise contract.PartsContractError("a decision needs --reviewer")
     for pose in approved:
+        record = candidate_record(root, production, pose, rows[pose]["selected"], track=track)
+        if config["role"] == "part" and any(
+                config["pose_checks"].get(pose, {}).get(name) is not None
+                and f"qa_{name}" not in record["images"] for name in ("required", "protected", "allowed")):
+            raise contract.PartsContractError(f"{pose}: candidate lacks current criteria; adopt with the current guides and check first")
         if rows[pose].get("rework", {}).get("status") in ("requested", "failed"):
             raise contract.PartsContractError(f"{pose}: finish the requested rework before approving")
         if (rows[pose].get("check") or {}).get("status") in (None, "error"):

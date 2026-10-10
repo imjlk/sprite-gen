@@ -293,6 +293,12 @@ def test_an_explicit_mask_and_adopting_a_pack(tmp_path):
     production.init(assembly, other)
     adopted = production.adopt(assembly, "test.copy", assembly.parent / index["documents"]["test.badge"])
     assert adopted["adopted"] == 2 and adopted["missing"] == []
+    from sprite_gen.serve.serve_parts_review import ReviewDesk
+    desk = ReviewDesk(assembly)
+    candidates = desk.candidates("test.copy", "walk.01")["candidates"]
+    assert "under" in candidates[0]["images"]
+    assert desk.render("test.copy", "walk.01", "body-raw")
+    assert desk.render("test.copy", "walk.01", "interfaces")
 
 
 def test_a_part_review_survives_other_parts_and_goes_with_its_own_pack(tmp_path):
@@ -403,6 +409,72 @@ def test_config_changes_apply_to_new_drawings_and_identity_stays_fixed(tmp_path)
     (tmp_path / "v3.json").write_text(json.dumps(value))
     with pytest.raises(contract.PartsContractError, match="fixed"):
         production.configure(assembly, "test.badge", tmp_path / "v3.json")
+
+
+def test_position_preview_matches_saved_build_without_mutating_or_editing_other_poses(tmp_path):
+    from io import BytesIO
+    from parts_helpers import tree_hashes
+    from sprite_gen.serve.serve_parts_review import ReviewDesk
+    assembly = setup(tmp_path)
+    draw_batch(assembly, production.sheet(assembly, "test.badge"))
+    production.slice_batch(assembly, "test.badge")
+    production.check(assembly, "test.badge")
+    production.build(assembly, "test.badge")
+    desk = ReviewDesk(assembly)
+    from sprite_gen.curate import parts_appearance
+    from parts_helpers import part_spec
+    index,registry=workspace.read_workspace(assembly)
+    support=tmp_path/'outfit-support';support.mkdir();Image.new('RGBA',(1,1)).save(support/'piece.png')
+    selected={'hair':contract.reference(registry['test.badge'])}
+    for slot,node,socket in [('expression','head','face'),('upper','arm_l','shoulder_l'),('lower','leg_l','waist'),('footwear','foot_l','foot_l')]:
+        spec=part_spec(tmp_path/f'{slot}-support.json',assembly,support,identity='support.'+slot,slot=slot,node=node,socket=socket,pivot=(0,0))
+        imported=parts_import.import_pack(assembly,spec,support);selected[slot]=imported['part']
+    index, registry = workspace.read_workspace(assembly)
+    outfit=tmp_path/'outfit.json'
+    outfit.write_text(json.dumps({'kind':'parts-appearance-selection','schema_version':1,'id':'test.position-outfit','selections':selected}))
+    parts_appearance.create(assembly,outfit)
+    meta = desk.part("test.badge")
+    assert meta["canvas"] == {"width": 128, "height": 128}
+    _, registry = workspace.read_workspace(assembly)
+    clip = registry[workspace.read_workspace(assembly)[0]["motion"]["id"]]["clips"][0]
+    assert meta["clips"][0]["samples"] == [
+        {"pose": s["pose_id"], "duration_ms": s["duration_ticks"] * 1000 / clip["timebase"]}
+        for s in clip["samples"]]
+    before = tree_hashes(assembly.parent)
+    other = desk.render("test.badge", "walk.02", "body")
+    preview = desk.render("test.badge", "walk.01", "position", dx=3, dy=-2)
+    assert tree_hashes(assembly.parent) == before
+    with pytest.raises(contract.PartsContractError, match="clips source"):
+        desk.render("test.badge", "walk.01", "position", dx=-128)
+    assert tree_hashes(assembly.parent) == before
+    edited = desk.act("test.badge", "edit", {"pose": "walk.01", "operations": [{"type": "translate", "dx": 3, "dy": -2}]})
+    assert not edited["selected"] and edited["provider_calls"] == 0
+    desk.act("test.badge", "apply", {"pose": "walk.01", "candidate": edited["preview_candidate"]})
+    built = desk.render("test.badge", "walk.01", "body")
+    assert Image.open(BytesIO(preview)).tobytes() == Image.open(BytesIO(built)).tobytes()
+    assert desk.render("test.badge", "walk.02", "body") == other
+    assert desk.part("test.badge")["poses"][0]["decision"] != "approved"
+    index,registry=workspace.read_workspace(assembly)
+    assert index['appearance']['id']=='test.position-outfit'
+    assert registry['test.position-outfit']['selections']['hair']==contract.reference(registry['test.badge'])
+
+
+def test_new_required_criterion_cannot_be_bypassed_with_an_older_candidate(tmp_path):
+    assembly = setup(tmp_path)
+    draw_batch(assembly, production.sheet(assembly, "test.badge"))
+    production.slice_batch(assembly, "test.badge")
+    production.check(assembly, "test.badge")
+    production.build(assembly, "test.badge")
+    config=json.loads((tmp_path/'badge.json').read_text())
+    Image.new('L',(128,128),0).save(assembly.parent/'required.png')
+    config['pose_checks']={'walk.01':{'required':'required.png'}}
+    (tmp_path/'current-criteria.json').write_text(json.dumps(config))
+    production.configure(assembly,'test.badge',tmp_path/'current-criteria.json')
+    # Even a cached passing result cannot bypass the newly declared criterion.
+    with pytest.raises(contract.PartsContractError,match='lacks current criteria'):
+        production.review(assembly,'test.badge',reviewer='tester',approve=['walk.01'])
+    checked=production.check(assembly,'test.badge')
+    assert checked['summary']['error']==1
 
 
 def test_a_held_part_with_a_covered_variant_is_drawn_once_per_track(tmp_path):

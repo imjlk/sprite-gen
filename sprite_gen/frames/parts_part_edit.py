@@ -42,6 +42,33 @@ _OP = contract._record(
 )
 
 
+def translate_image(image, dx, dy, bounds=None):
+    """Preview and saved edits share exact native-pixel translation and clipping gates."""
+    dx = contract._integer(dx, "dx")
+    dy = contract._integer(dy, "dy")
+    raw = np.asarray(image.convert("RGBA")).copy()
+    height, width = raw.shape[:2]
+    if abs(dx) > width or abs(dy) > height:
+        raise contract.PartsContractError("translation exceeds native canvas")
+    yy, xx = np.indices((height, width))
+    region = np.ones((height, width), dtype=bool)
+    if bounds:
+        a, b, c, d = contract._rectangle(bounds, "bounds")
+        if not 0 <= a < c <= width or not 0 <= b < d <= height:
+            raise contract.PartsContractError("edit region must be inside the native canvas")
+        region = (xx >= a) & (xx < c) & (yy >= b) & (yy < d)
+    ink = region & (raw[..., 3] > 0)
+    if np.any(ink & ((xx + dx < 0) | (xx + dx >= width) | (yy + dy < 0) | (yy + dy >= height))):
+        raise contract.PartsContractError("edit clips source pixels")
+    moved = np.zeros_like(raw)
+    ys, xs = np.nonzero(ink)
+    moved[ys + dy, xs + dx] = raw[ys, xs]
+    raw[ink] = 0
+    layer = Image.fromarray(raw)
+    layer.alpha_composite(Image.fromarray(moved))
+    return layer
+
+
 def edit(assembly, part, pose, operations, *, candidate=None, track=None):
     root, index, registry, _ = parts_motion._active(assembly)
     state = p._load(root, part)
@@ -135,27 +162,7 @@ def edit(assembly, part, pose, operations, *, candidate=None, track=None):
             raw[b:d, a:c] = np.asarray(repaired)
             filled_holes += count
         elif op["type"] == "translate":
-            dx, dy = op["dx"], op["dy"]
-            if abs(dx) > width or abs(dy) > height:
-                raise contract.PartsContractError("translation exceeds native canvas")
-            ink = region & (raw[..., 3] > 0)
-            if np.any(
-                ink
-                & (
-                    (xx + dx < 0)
-                    | (xx + dx >= width)
-                    | (yy + dy < 0)
-                    | (yy + dy >= height)
-                )
-            ):
-                raise contract.PartsContractError("edit clips source pixels")
-            moved = np.zeros_like(raw)
-            ys, xs = np.nonzero(ink)
-            moved[ys + dy, xs + dx] = raw[ys, xs]
-            raw[ink] = 0
-            layer = Image.fromarray(raw)
-            layer.alpha_composite(Image.fromarray(moved))
-            raw = np.asarray(layer).copy()
+            raw = np.asarray(translate_image(Image.fromarray(raw), op["dx"], op["dy"], bounds)).copy()
         elif op["type"] == "recolor":
             if not op["from_color"] or not op["to_color"]:
                 raise contract.PartsContractError("recolor needs exact from/to colors")
