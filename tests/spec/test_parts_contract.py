@@ -292,3 +292,13 @@ def test_bundle_order_does_not_change_validation_or_hide_bad_catalog_slots():
 def test_legacy_adapter_checks_custom_landmark_names(name):
     with pytest.raises(parts.PartsContractError, match="landmark"):
         parts.legacy_topology("humanoid_biped", landmarks=[name])
+
+
+def test_sampling_is_opt_in_and_legacy_rig_digest_remains_unchanged():
+    rig = declarations()[1]
+    assert "sampling" not in rig
+    assert parts.parse(rig) == rig
+    smooth = reseal(rig, lambda d: d.update(sampling="smooth"))
+    assert smooth["sampling"] == "smooth" and smooth["digest"] != rig["digest"]
+    with pytest.raises(parts.PartsContractError, match="sampling"):
+        reseal(rig, lambda d: d.update(sampling="bilinear-auto"))

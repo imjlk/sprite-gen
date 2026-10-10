@@ -56,6 +56,7 @@ class PartsSession:
         resolved = contract.resolve_selections(self.appearance, catalog)
         self.metadata = {"id": self.appearance["id"], "canvas": registry[index["rig"]["id"]]["canvas"],
             "title": self.title,
+            "sampling": rig.get("sampling", "nearest"),
             "motion": index["motion"], "states": [], "slots": [], "release_ready": False,
             "mode": "independent-layers", "appearance_clips_baked": 0,
             "interpolation": interpolation}

@@ -4,8 +4,8 @@
 The first browser adapter supports one body (flat, or segmented into node pieces),
 one choice per slot, ordering (explicit constraints and the topology's draw table),
 cover rules (a hat showing the capped hair), palette regions, masks (on the piece's
-own node or across layers) and explicit mirroring. Unsupported replacement and slot
-precedence fail visibly rather than being flattened.
+own node or across layers), explicit replacement of segmented body nodes, and mirroring.
+Unsupported slot precedence fails visibly rather than being flattened.
 Exports are inspection drafts; geometry is not visual release approval.
 """
 from __future__ import annotations
@@ -59,6 +59,10 @@ def pack(root, index, registry, *, title=None, interpolation="frame"):
 
     identities = {r["id"] for r in appearance["body"]}
     identities.update(r["id"] for slot in catalog["slots"] for r in slot["options"])
+    body_source = registry[appearance["body"][0]["id"]]
+    body_binding = parts_resolve._binding(body_source, appearance, rig)
+    body_providers = [set(piece["provides"]) for piece in body_binding["pieces"]]
+    body_nodes = set().union(*body_providers)
     packs = {}
     for identity in sorted(identities):
         source = registry[identity]
@@ -69,10 +73,18 @@ def pack(root, index, registry, *, title=None, interpolation="frame"):
                  "binding": binding["id"], "occupies": binding["occupies"],
                  "requires": binding["requires"], "excludes": binding["excludes"],
                  "covers": binding.get("covers", []), "pieces": []}
+        if source["role"] == "body":
+            value["body_mode"] = source["body_mode"]
         for piece in binding["pieces"]:
             if piece["replaces"]:
-                raise contract.PartsContractError("portable overlay adapter does not support body replacement")
-            output = {key: deepcopy(piece[key]) for key in ("id", "slot", "node", "mode", "provides")}
+                targets = set(piece["replaces"])
+                if body_source["body_mode"] == "flat":
+                    raise contract.PartsContractError("portable body replacement requires a segmented body")
+                if not targets <= body_nodes:
+                    raise contract.PartsContractError("portable replacement has no body interface")
+                if any(provides & targets and not provides <= targets for provides in body_providers):
+                    raise contract.PartsContractError("portable replacement cannot erase part of an indivisible body raster")
+            output = {key: deepcopy(piece[key]) for key in ("id", "slot", "node", "mode", "provides", "replaces")}
             output["cover_rule"] = deepcopy(piece.get("cover_rule"))
             output["palette_regions"] = {name: texture(source, ref) for name, ref in piece["palette_regions"].items()}
             output["sample_map"] = {}
@@ -133,8 +145,10 @@ def pack(root, index, registry, *, title=None, interpolation="frame"):
         for clip in clips]
     manifest = {"kind": "parts-layer-library", "schema_version": 1, "export_policy": EXPORT_POLICY,
         "appearance": index["appearance"], "motion": index["motion"], "canvas": rig["canvas"],
+        "sampling": rig.get("sampling", "nearest"),
         "title": title or appearance["id"], "interpolation": interpolation, "mirror": appearance["mirror"],
         "body": [ref["id"] for ref in appearance["body"]], "nodes": [n["id"] for n in topology["nodes"]],
+        "required_nodes": [n["id"] for n in topology["nodes"] if n["required"]],
         "layers": topology.get("layers", []),
         "palette": plan["palette"], "defaults": default_ids, "slots": metadata_slots, "clips": runtime_clips,
         "packs": packs, "textures": textures, "fitting": fit_results,
@@ -144,7 +158,7 @@ def pack(root, index, registry, *, title=None, interpolation="frame"):
         "toolchain": qa["toolchain"], "export_code_sha256": assets.sha256(Path(__file__).read_bytes()),
         "adapter_sha256": assets.sha256(b"\0".join((name.encode() + b"\0" + (STATIC / name).read_bytes())
             for name in ("index.html", "player.css", "player.js", "runtime.js"))),
-        "capabilities": ["flat-body", "segmented-body", "overlay", "shared-clock", "variable-duration", "ordering",
+        "capabilities": ["flat-body", "segmented-body", "body-replacement", "overlay", "shared-clock", "variable-duration", "ordering",
                          "draw-table", "cover-rules", "palette", "self-mask", "mirror"],
         "fit_scope": "authored per-part geometry; visual quality and combination art approval remain pending"}
     manifest["digest"] = contract.content_digest(manifest)

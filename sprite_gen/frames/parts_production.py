@@ -30,7 +30,6 @@ anything.
 """
 from __future__ import annotations
 
-import argparse
 from io import BytesIO
 from copy import deepcopy
 from fractions import Fraction
@@ -50,9 +49,10 @@ from sprite_gen.spec.runio import atomic_write_text, publish_guard
 POLICY = "parts.production.v1"
 MAIN = "main"
 _SHEET = contract._record({"crop": contract._nullable(contract._rectangle), "scale": contract._positive,
+                           "gutter": contract._integer,
                            "page_size": contract._nullable(contract._positive), "aspect": contract._nullable(contract._string),
                            "columns": contract._nullable(contract._positive)},
-                          {"crop": None, "scale": 4, "page_size": 12, "aspect": "1:1", "columns": None})
+                          {"crop": None, "scale": 4, "gutter": 8, "page_size": 12, "aspect": "1:1", "columns": None})
 _CUT = contract._record({"method": contract._enum(*sheets.METHODS), "body_threshold": contract._nullable(contract._integer),
                          "tolerance": contract._integer, "near_body": contract._nullable(contract._integer),
                          "min_island": contract._integer, "outline": contract._boolean, "fill_holes": contract._integer,
@@ -66,7 +66,7 @@ _CUT = contract._record({"method": contract._enum(*sheets.METHODS), "body_thresh
                         {"method": "difference", "body_threshold": 40, "tolerance": 80, "near_body": 2, "min_island": 12,
                          "outline": True, "fill_holes": 6, "close_body": 5, "region": None, "palette": None,
                          "keep_palette": None, "prune": 0, "rim": 0, "inset": 0, "specks": 0, "rescue": None, "against": [], "exclude": [], "largest": None})
-_PIECE = contract._record({"id": contract._id, "node": contract._id, "segments": contract._list(contract._string, nonempty=True)})
+_PIECE = contract._record({"id": contract._id, "node": contract._id, "segments": contract._list(contract._string, nonempty=True), "replaces": contract._ids}, optional=("replaces",))
 _PROMPT = contract._record({"text": contract._string, "refs": contract._list(contract._relative_file)}, {"refs": []})
 _DRAW = contract._record({"provider": contract._id, "model": contract._nullable(contract._string)},
                          {"provider": "codex", "model": None})
@@ -249,6 +249,8 @@ def init(assembly, config):
     root, index, registry, _ = parts_motion._active(assembly)
     path = Path(config).absolute()
     value = _CONFIG(workspace.read_json(path.parent, path.name), "config")
+    topology = registry[registry[index["rig"]["id"]]["topology"]["id"]]
+    contract._members([node for piece in value["pieces"] for node in piece.get("replaces", [])], [node["id"] for node in topology["nodes"]], "piece replacement nodes")
     if value["schema_version"] != 1:
         raise contract.PartsContractError("only schema_version 1 is supported")
     _validate_qa(value, index, registry)
@@ -296,6 +298,8 @@ def configure(assembly, part, config):
     path = Path(config).absolute()
     value = _CONFIG(workspace.read_json(path.parent, path.name), "config")
     _validate_qa(value, index, registry)
+    topology = registry[registry[index["rig"]["id"]]["topology"]["id"]]
+    contract._members([node for piece in value["pieces"] for node in piece.get("replaces", [])], [node["id"] for node in topology["nodes"]], "piece replacement nodes")
     if value["role"] == "body":
         value.update(slot=None, node=value["node"] or production["config"]["node"],
                      socket=value["socket"] or production["config"]["socket"], mode="raster")
@@ -345,6 +349,7 @@ def sheet(assembly, part, *, poses=None, track=None):
     look = config["sheet"]
     crop = ",".join(map(str, look["crop"])) if look["crop"] else None
     made = sheets.build_sheet(assembly, folder, by_pose=True, poses=wanted, crop=crop, scale=look["scale"],
+                              gutter=look["gutter"],
                               page_size=look["page_size"], aspect=look["aspect"], columns=look["columns"],
                               part=part, wearing=settings["wearing"] or None)
     prompt = None
@@ -797,6 +802,15 @@ def adopt(assembly, part, pack=None, *, piece=None, track=None, labels=None):
             layer.paste(assets.load_image(reader, placement["image"]), tuple(offset))
             full.alpha_composite(layer)
         alpha = np.asarray(full)[..., 3] > 0
+        guards = {}
+        for name, file in config["pose_checks"].get(pose, {}).items():
+            if file is not None:
+                guard = Image.open(BytesIO(assets.read_file(root, file))).convert("L")
+                if guard.size != canvas:
+                    raise contract.PartsContractError(f"{pose}: {name} mask must match the rig canvas")
+                guards[f"qa_{name}"] = guard
+                if name == "occluded":
+                    guards["render_mask"] = Image.fromarray(np.where(np.asarray(guard)>0,0,255).astype(np.uint8))
         record = {"kind": "parts-production-candidate", "schema_version": 1, "policy": POLICY, "part": part,
                   "track": track or MAIN, "pose_id": pose, "clip": clip_id, "sample": sample["id"], "motion": index["motion"],
                   "body_sha256": sample["image"]["sha256"], "under_sha256": None, "wearing": [],
@@ -805,7 +819,7 @@ def adopt(assembly, part, pack=None, *, piece=None, track=None, labels=None):
                                 "target_socket": config["socket"], "offset": [0, 0]},
                   "alignment": None, "holes_filled": 0, "pixels": int(alpha.sum())}
         record, location = _publish_candidate(root, part, record, {
-            "mask": Image.fromarray((alpha*255).astype(np.uint8), "L"), "part": full})
+            "mask": Image.fromarray((alpha*255).astype(np.uint8), "L"), "part": full, **guards})
         _select(rows, order if config["mode"] == "held" else [pose], location)
         made.append(pose)
     _save(root, production)
@@ -880,8 +894,12 @@ def _measure(root, config, settings, location, context):
         mask &= visible
     elif config["visibility"] == "zmap" and config["segments"] and context[3]["layers"]:
         from sprite_gen.frames import parts_candidate_scene
+        required = None
+        if ref := record["images"].get("qa_required"):
+            encoded = assets.SourceReader(base).read(ref["file"], ref["sha256"])
+            required = np.asarray(Image.open(BytesIO(encoded)).convert("L")) > 0
         visible = parts_candidate_scene.visibility(context[4].root, context[1], context[2], config,
-            record["pose_id"], Image.fromarray(image), record["placement"])
+            record["pose_id"], Image.fromarray(image), record["placement"], required=required)
         metrics["occluded_pixels"] = int((mask & ~visible).sum())
         mask &= visible
     metrics["inspection_space"] = "zmap-visible" if config["visibility"] == "zmap" and config["segments"] and context[3]["layers"] else "mask-visible" if config["visibility"] == "mask" else "raw-source"
@@ -920,7 +938,11 @@ def _measure(root, config, settings, location, context):
     if colors is not None and mask.any():
         pixels = image[mask][:, :3]
         metrics["off_palette"] = int((np.abs(pixels[:, None, :].astype(int) - colors[None].astype(int)).max(-1).min(-1) > 0).sum())
-    if "drawn" in record["images"] and "under" in record["images"]:
+    edit = record["method"].get("programmatic_edit", {})
+    registered = edit.get("registered_geometry", False) or any(op["type"] in ("translate", "fit-alpha-box") for op in edit.get("operations", []))
+    if registered:
+        metrics["source_comparison"] = "original retained; spatial cut comparison skipped after registration"
+    if not registered and "drawn" in record["images"] and "under" in record["images"]:
         # What the drawing changed but the part left out: a cut too tight (a hood off the back).
         drawn = Image.open(base / "drawn.png").convert("RGBA")
         under = Image.open(base / "under.png").convert("RGBA")
@@ -1119,6 +1141,13 @@ def build(assembly, part, *, allow_incomplete=False):
                                                into=[(p["id"], p["node"], p["segments"]) for p in config["pieces"]],
                                                source_root=source, by_component=config["by_component"])
             spec_file, source = Path(split["spec"]), Path(split["source_root"])
+            if any(piece.get("replaces") for piece in config["pieces"]):
+                split_spec = workspace.decode_json(spec_file.read_bytes())
+                configured = {piece["id"]: piece for piece in config["pieces"]}
+                for piece in split_spec["pieces"]:
+                    piece["replaces"] = configured[piece["id"]].get("replaces", [])
+                    piece["provides"] = list(piece["replaces"])
+                atomic_write_text(spec_file, workspace.json_bytes(split_spec).decode())
         imported = parts_import.import_pack(assembly, spec_file, source, allow_incomplete=allow_incomplete)
     production = _load(root, part)
     production["built"] = {"part": imported["part"], "visibility": config["visibility"], "selection": {

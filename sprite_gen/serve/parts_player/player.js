@@ -1,10 +1,10 @@
 const $ = id => document.getElementById(id);
-const names = {hair:'헤어',expression:'표정',upper:'상의',lower:'하의',footwear:'신발',headwear:'모자',gloves:'장갑',back_accessory:'등 장비',neckwear:'목 장식',eyewear:'안경',bangs:'앞머리',eyes:'눈',brows:'눈썹',mouth:'입',sleeve_l:'왼쪽 소매',sleeve_r:'오른쪽 소매',footwear_l:'왼쪽 신발',footwear_r:'오른쪽 신발'};
+const names = {socks:'양말',hair:'헤어',expression:'표정',upper:'상의',lower:'하의',footwear:'신발',headwear:'모자',gloves:'장갑',back_accessory:'등 장비',neckwear:'목 장식',eyewear:'안경',bangs:'앞머리',eyes:'눈',brows:'눈썹',mouth:'입',sleeve_l:'왼쪽 소매',sleeve_r:'오른쪽 소매',footwear_l:'왼쪽 신발',footwear_r:'오른쪽 신발'};
 const labels = {hair:['숏 헤어','보브 헤어'],expression:['기본','미소'],upper:['틸 재킷','사파리 재킷'],lower:['반바지','긴바지'],footwear:['운동화','앵클 부츠'],bangs:['숏 앞머리','보브 앞머리'],eyes:['기본 눈','미소 눈'],brows:['기본 눈썹','편안한 눈썹'],mouth:['중립','미소'],sleeve_l:['틸 소매','사파리 소매'],sleeve_r:['틸 소매','사파리 소매'],footwear_l:['운동화','앵클 부츠'],footwear_r:['운동화','앵클 부츠']};
-const optionLabels = {'sd.simple.shirt':'탱크탑','sd.simple.shirt.b':'포켓 베스트','sd.simple.hair.b':'단발','sd.simple.eyes.b':'웃는 눈'};
+const optionLabels = {'illustration.socks.crew':'크루 양말','illustration.hair.bob':'보브 헤어','illustration.eyes.open':'눈','illustration.upper.cream':'크림 셔츠','illustration.lower.navy':'네이비 반바지','illustration.footwear.sneakers':'스니커즈','sd.simple.shirt':'탱크탑','sd.simple.shirt.b':'포켓 베스트','sd.simple.hair.b':'단발','sd.simple.eyes.b':'웃는 눈'};
 Object.assign(optionLabels, {'sd.wardrobe.hair.a':'숏 헤어','sd.wardrobe.hair.b':'단발','sd.wardrobe.expression.a':'기본','sd.wardrobe.expression.b':'눈 미소','sd.wardrobe.upper.a':'탱크탑','sd.wardrobe.upper.b':'포켓 베스트','sd.wardrobe.lower.a':'카고 반바지','sd.wardrobe.lower.b':'긴바지','sd.wardrobe.footwear.a':'운동화','sd.wardrobe.footwear.b':'앵클 부츠'});
 Object.assign(optionLabels, {'sd.equipment.headwear':'사파리 모자','sd.equipment.gloves':'가죽 장갑','sd.equipment.back_accessory':'탐험 백팩'});
-const stateNames = {idle:'아이들',walk:'걷기',run:'뛰기'};
+const stateNames = {idle:'아이들',walk:'걷기',run:'뛰기',fit:'정적 피팅'};
 let metadata, state, selected={}, playing=true, origin=performance.now(), held=0, dirty=true, revision=0, busy=false, lastSent=0, runtime=null, lastScene=null;
 const layerNodes=new Map(), textureCache=new Map();
 let scale=4;
@@ -28,6 +28,7 @@ function coverage(asset,index,channel='luma'){
 async function draw(scene,snapshot){
   lastScene=scene;
   const bodyOnly=$('body-only').checked;
+  if(bodyOnly&&runtime)scene=runtime.scene(scene.state,Math.round(number(scene.elapsed_seconds)*1000),{}, {bodyOnly:true});
   if(bodyOnly){const layers=scene.layers.filter(layer=>layer.slot===null),ids=new Set(layers.map(layer=>layer.id));scene={...scene,layers,masks:scene.masks.filter(mask=>ids.has(mask.issuer))};}
   const refs=scene.layers.flatMap(layer=>[layer.texture,...Object.values(layer.regions)]).concat(scene.masks.map(mask=>mask.texture));
   const loaded=new Map(await Promise.all(refs.map(async ref=>[ref.id,await texture(ref)])));
@@ -94,7 +95,7 @@ async function draw(scene,snapshot){
   const terms={coverage:'피복',silhouette:'윤곽',occlusion:'가림',position:'위치',size:'크기',gap:'빈틈',clipping:'잘림','missing-interface':'검사 기준'};
   $('fit-status').textContent=bodyOnly?'몸만 표시 · 파츠 선택과 재생 시점 유지':errors.length?
     errors.map(row=>`${names[row.slot]||row.slot}: ${row.checks.filter(check=>check.status==='error').map(check=>terms[check.id]||check.id).join('·')}`).join(' / '):
-    fit.status==='passed'?`현재 포즈 ${fit.checked}파츠 기하 검사 통과 · 시각 검수 대기`:'기하 검사 기준 미등록 · 시각 검수 대기';
+    fit.status==='passed'?`현재 포즈 ${fit.checked}파츠 기하 검사 통과 · 시각 검수 대기`:'현재 조합 검사 기준 미등록 · 파츠별 제작 검수와 시각 승인 대기';
   const sourceRows=(runtime?.data.stability?.results||[]).filter(row=>row.clip===scene.clip_id&&row.sample===scene.sample_id);
   const sourceErrors=sourceRows.filter(row=>row.status==='error');
   $('source-status').dataset.status=sourceErrors.length?'error':sourceRows.length?'passed':'unverified';
@@ -151,7 +152,7 @@ $('find-source-issue').addEventListener('click',()=>{
   const clip=runtime.data.clips.find(item=>item.id===issue.clip),index=clip.samples.findIndex(sample=>sample.id===issue.sample);
   held=Math.ceil(number(metadata.states.find(item=>item.id===state).boundaries_ms[index]));invalidate();
 });
-$('shuffle').addEventListener('click',()=>{for(const slot of metadata.slots){selected[slot.id]=slot.options[Math.floor(Math.random()*slot.options.length)].id;}showSelection();$('selection-status').textContent='파츠 교체 · 재생 시점 유지';invalidate();});
+$('shuffle').addEventListener('click',()=>{for(const slot of metadata.slots){selected[slot.id]=slot.options[Math.floor(Math.random()*slot.options.length)].id;}showSelection();$('selection-status').textContent=metadata.states.every(item=>item.samples===1)?'정적 파츠 피팅 · 동작 검증 전':'파츠 교체 · 재생 시점 유지';invalidate();});
 async function boot(){
   try{
     const embedded=document.getElementById('parts-data');
@@ -161,7 +162,7 @@ async function boot(){
       if(library.ok)runtime=new LayerRuntime(await library.json());
     }
     if(runtime){metadata=runtime.metadata;$('playback-mode').textContent='브라우저 직접 재생';
-      const summary=metadata.fit_summary;$('library-status').textContent=summary.status==='unverified'?'검사 기준 미등록':`전체 파츠 ${summary.checked}건 · 오류 ${summary.failed}건`;
+      const summary=metadata.fit_summary;$('library-status').textContent=summary.status==='unverified'?'코디 검사 기준 미등록':`전체 파츠 ${summary.checked}건 · 오류 ${summary.failed}건`;
       $('find-issue').disabled=summary.failed===0;
       $('find-source-issue').disabled=!runtime.data.stability?.failed;
     }else{
@@ -169,10 +170,12 @@ async function boot(){
       $('export').hidden=true;$('standalone').hidden=true;$('playback-mode').textContent='서버 레이어 재생';
     }
     state=metadata.states[0].id;$('brand').textContent=metadata.title||metadata.id;document.title=`${metadata.title||metadata.id} · Parts Lab`;
+    document.documentElement.dataset.sampling=metadata.sampling||'nearest';
+    if(metadata.states.every(item=>item.samples===1)){document.querySelector('.aside-note').textContent='기준 포즈에서 파츠별 착용 상태를 비교합니다.';playing=false;$('play').textContent='▶';$('play').setAttribute('aria-label','재생');$('selection-status').textContent='정적 파츠 피팅 · 동작 검증 전';}
     $('shared-states').textContent=`공통 ${metadata.states.map(item=>stateNames[item.id]||item.id).join(' / ')}`;
     document.querySelector('.stage-caption span').textContent=`${metadata.canvas.width} × ${metadata.canvas.height}`;
     const stage=document.querySelector('.stage');
-    new ResizeObserver(()=>{scale=Math.max(1,Math.floor(Math.min(stage.clientWidth/metadata.canvas.width,stage.clientHeight/metadata.canvas.height)));$('character').style.width=`${metadata.canvas.width*scale}px`;$('character').style.height=`${metadata.canvas.height*scale}px`;invalidate();}).observe(stage);
+    new ResizeObserver(()=>{const fit=Math.min(stage.clientWidth/metadata.canvas.width,stage.clientHeight/metadata.canvas.height);scale=metadata.sampling==='smooth'?Math.max(.01,fit):Math.max(1,Math.floor(fit));$('character').style.width=`${metadata.canvas.width*scale}px`;$('character').style.height=`${metadata.canvas.height*scale}px`;invalidate();}).observe(stage);
     for(const slot of metadata.slots){
       selected[slot.id]=slot.selected;
       const section=document.createElement('section');section.className='slot';
@@ -182,8 +185,8 @@ async function boot(){
         const button=document.createElement('button');button.type='button';button.dataset.slot=slot.id;button.dataset.option=option.id;
         const index=slot.options.filter(o=>o.id!=='').findIndex(o=>o.id===option.id);
         button.textContent=slot.options.length===2&&slot.options.some(o=>o.id==='')?(option.id?'켜기':'끄기'):option.id===''?option.label:optionLabels[option.id]||option.label;
-        button.addEventListener('click',()=>{selected[slot.id]=option.id;showSelection();$('selection-status').textContent='파츠 교체 · 재생 시점 유지';invalidate();});choices.append(button);
-      });section.append(choices);(['hair','expression','eyes','upper','lower','footwear'].includes(slot.id)?$('wardrobe'):$('extras')).append(section);
+        button.addEventListener('click',()=>{selected[slot.id]=option.id;showSelection();$('selection-status').textContent=metadata.states.every(item=>item.samples===1)?'정적 파츠 피팅 · 동작 검증 전':'파츠 교체 · 재생 시점 유지';invalidate();});choices.append(button);
+      });section.append(choices);(['hair','expression','eyes','upper','lower','footwear','socks'].includes(slot.id)?$('wardrobe'):$('extras')).append(section);
     }
     $('advanced').hidden=$('extras').children.length===0;
     for(const item of metadata.states){

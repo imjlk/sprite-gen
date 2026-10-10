@@ -14,14 +14,31 @@ from sprite_gen.spec import (
 
 _OP = contract._record(
     {
-        "type": contract._enum("translate", "recolor", "erase", "restore-source"),
+        "type": contract._enum(
+            "translate",
+            "recolor",
+            "erase",
+            "restore-source",
+            "fit-alpha-box",
+            "fill-small-holes",
+        ),
         "bounds": contract._nullable(contract._rectangle),
+        "source_bounds": contract._nullable(contract._rectangle),
+        "max_pixels": contract._positive,
         "dx": contract._integer,
         "dy": contract._integer,
         "from_color": contract._nullable(contract._string),
         "to_color": contract._nullable(contract._string),
     },
-    {"bounds": None, "dx": 0, "dy": 0, "from_color": None, "to_color": None},
+    {
+        "bounds": None,
+        "source_bounds": None,
+        "max_pixels": 12,
+        "dx": 0,
+        "dy": 0,
+        "from_color": None,
+        "to_color": None,
+    },
 )
 
 
@@ -49,8 +66,13 @@ def edit(assembly, part, pose, operations, *, candidate=None, track=None):
     raw = np.asarray(images["part"].convert("RGBA")).copy()
     height, width = raw.shape[:2]
     original = raw.copy()
+    filled_holes = 0
     yy, xx = np.indices((height, width))
     for op in operations:
+        if op["source_bounds"] is not None and op["type"] != "fit-alpha-box":
+            raise contract.PartsContractError(
+                "source_bounds is only supported for fit-alpha-box"
+            )
         bounds = op["bounds"]
         region = np.ones((height, width), dtype=bool)
         if bounds:
@@ -60,7 +82,59 @@ def edit(assembly, part, pose, operations, *, candidate=None, track=None):
                     "edit region must be inside the native canvas"
                 )
             region = (xx >= a) & (xx < c) & (yy >= b) & (yy < d)
-        if op["type"] == "translate":
+        if op["type"] == "fit-alpha-box":
+            if not bounds:
+                raise contract.PartsContractError(
+                    "fitting requires an explicit target region"
+                )
+            raster = Image.fromarray(raw)
+            selected = np.ones((height, width), dtype=bool)
+            if op["source_bounds"]:
+                left, top, right, bottom = op["source_bounds"]
+                if not 0 <= left < right <= width or not 0 <= top < bottom <= height:
+                    raise contract.PartsContractError(
+                        "source region must be inside the native canvas"
+                    )
+                selected = (xx >= left) & (xx < right) & (yy >= top) & (yy < bottom)
+                source = raw.copy()
+                source[~selected] = 0
+                raster = Image.fromarray(source)
+            source_bounds = raster.getbbox()
+            if source_bounds is None:
+                raise contract.PartsContractError("cannot fit an empty part")
+            cropped = raster.crop(source_bounds)
+            factor = min((c - a) / cropped.width, (d - b) / cropped.height)
+            size = (
+                max(1, min(c - a, round(cropped.width * factor))),
+                max(1, min(d - b, round(cropped.height * factor))),
+            )
+            sampling = registry[index["rig"]["id"]].get("sampling", "nearest")
+            cropped = cropped.resize(
+                size,
+                Image.Resampling.LANCZOS
+                if sampling == "smooth"
+                else Image.Resampling.NEAREST,
+            )
+            remainder = raw.copy()
+            remainder[selected] = 0
+            fitted = Image.fromarray(remainder)
+            fitted.alpha_composite(
+                cropped, (a + (c - a - size[0]) // 2, b + (d - b - size[1]) // 2)
+            )
+            raw = np.asarray(fitted).copy()
+        elif op["type"] == "fill-small-holes":
+            if not bounds or op["max_pixels"] > 64:
+                raise contract.PartsContractError(
+                    "hole repair requires a bounded region and max_pixels 1..64"
+                )
+            from sprite_gen.frames import pixel_grid
+
+            repaired, count = pixel_grid.fill_small_holes(
+                Image.fromarray(raw).crop(tuple(bounds)), op["max_pixels"]
+            )
+            raw[b:d, a:c] = np.asarray(repaired)
+            filled_holes += count
+        elif op["type"] == "translate":
             dx, dy = op["dx"], op["dy"]
             if abs(dx) > width or abs(dy) > height:
                 raise contract.PartsContractError("translation exceeds native canvas")
@@ -124,9 +198,22 @@ def edit(assembly, part, pose, operations, *, candidate=None, track=None):
             "operations": operations,
             "changed_pixels": changed,
             "provider_calls": 0,
+            "registered_geometry": record["method"]
+            .get("programmatic_edit", {})
+            .get("registered_geometry", False)
+            or any(
+                op["type"] in ("translate", "fit-alpha-box")
+                for op in record["method"]
+                .get("programmatic_edit", {})
+                .get("operations", [])
+            )
+            or any(op["type"] in ("translate", "fit-alpha-box") for op in operations),
         },
     }
-    new.update(pixels=int((raw[..., 3] > 0).sum()), holes_filled=0)
+    new.update(
+        pixels=int((raw[..., 3] > 0).sum()),
+        holes_filled=record.get("holes_filled", 0) + filled_holes,
+    )
     saved, location = p._publish_candidate(root, part, new, images)
     if location not in row["candidates"]:
         row["candidates"].append(location)

@@ -37,7 +37,8 @@ _GUIDE = contract._record({
     "columns": contract._positive, "size": contract._point, "key": contract._rgb,
     "sheet": contract._asset, "cells": contract._list(_CELL, nonempty=True), "prompt_hint": contract._string,
     "wearing": contract._list(contract._ref, unique=True),
-}, optional=("wearing",))
+    "art_mode": contract._enum("pixel", "illustration"),
+}, optional=("wearing", "art_mode"))
 
 
 _MEMBER = contract._record({"clip": contract._id, "sample": contract._id})
@@ -210,6 +211,8 @@ def build_sheet(assembly, out, *, clips=None, scale=4, crop=None, key="#ff00ff",
         raise contract.PartsContractError("pose sheet requires a frozen motion")
     rig = registry[index["rig"]["id"]]
     canvas = [rig["canvas"]["width"], rig["canvas"]["height"]]
+    if rig.get("sampling", "nearest") == "smooth" and scale != 1:
+        raise contract.PartsContractError("illustration pose sheets require native scale 1")
     samples = _samples(motion, index, clips)
     if by_pose and classes is not None:
         raise contract.PartsContractError("--by-pose and --classes are two ways to share drawings; choose one")
@@ -254,6 +257,7 @@ def build_sheet(assembly, out, *, clips=None, scale=4, crop=None, key="#ff00ff",
         folder = out if len(pages) == 1 else out / f"page-{number}"
         written.append(_page(folder, chunk, motion, index, body_of, canvas=canvas, crop=crop, scale=scale, key=key,
                              gutter=gutter, columns=columns, part=part, aspect=aspect, rows=rows,
+                             smooth=rig.get("sampling", "nearest") == "smooth",
                              wearing=[contract.reference(pack) for pack in packs]))
     first = written[0]
     return {"policy": SHEET_POLICY, "sheet": first["sheet"], "guide": first["guide"], "pages": written,
@@ -262,7 +266,7 @@ def build_sheet(assembly, out, *, clips=None, scale=4, crop=None, key="#ff00ff",
 
 
 def _page(out, samples, motion, index, body_of, *, canvas, crop, scale, key, gutter, columns, part, aspect=None, rows=None,
-          wearing=()):
+          wearing=(), smooth=False):
     columns = columns or math.ceil(math.sqrt(len(samples)))
     cell = [(crop[2]-crop[0])*scale, (crop[3]-crop[1])*scale]
     rows = max(rows or 0, math.ceil(len(samples)/columns))
@@ -290,8 +294,11 @@ def _page(out, samples, motion, index, body_of, *, canvas, crop, scale, key, gut
         "canvas": canvas, "crop": crop, "scale": scale, "gutter": gutter, "columns": columns, "size": size,
         "key": key, "sheet": {"file": "pose-sheet.png", "sha256": assets.sha256(data)}, "cells": cells,
         **({"wearing": list(wearing)} if wearing else {}),
+        **({"art_mode": "illustration"} if smooth else {}),
         "prompt_hint": (f"Keep this {size[0]}x{size[1]} image and its {len(cells)}-cell grid exactly. In every cell, "
-            f"draw only the {part} worn by that exact pose, at the same scale and position, as {scale}x{scale} pixel blocks. "
+            f"draw only the {part} worn by that exact pose, at the same scale and position, "
+            + ("as a smooth high-resolution illustration with antialiased alpha edges. " if smooth else f"as {scale}x{scale} pixel blocks. ")
+            +
             f"Erase the body: every other pixel stays flat {hex_key}. Do not move, mirror or resize any cell."),
     }, "guide")
     atomic_write_text(out/"pose-sheet.json", workspace.json_bytes(guide).decode("utf-8"))
@@ -432,8 +439,18 @@ def drawn_cells(pairs, index, clips, tolerance):
                 raise contract.PartsContractError(f"pose sheet cell is stale: {entry['clip']}/{entry['sample']}")
             x, y = entry["origin"]
             box = tuple(int(round(v*ratio)) for v in (x, y, x+cell[0], y+cell[1]))
-            yield entry, sample, reduce_cell(drawn.crop(box), scale*ratio, sheet["key"], tolerance,
-                                             size=(cell[0]//scale, cell[1]//scale)), sheet
+            if sheet.get("art_mode") == "illustration":
+                if scale != 1 or drawn.size != tuple(sheet["size"]):
+                    raise contract.PartsContractError("illustration art must match the native guide size at scale 1; no implicit resizing")
+                native = drawn.crop(box)
+                if np.all(np.asarray(native)[..., 3] == 255):
+                    # Reuse the engine's soft-alpha chroma extraction, not the
+                    # pixel lattice or a binary alpha threshold.
+                    native = extract.remove_chroma_background(native, tuple(sheet["key"]), 96, 180, 18)
+                yield entry, sample, native, sheet
+            else:
+                yield entry, sample, reduce_cell(drawn.crop(box), scale*ratio, sheet["key"], tolerance,
+                                                 size=(cell[0]//scale, cell[1]//scale)), sheet
 
 
 def _under(sheet, entry, sample, motion, index, registry, topology, load, *, sheet_image=None):

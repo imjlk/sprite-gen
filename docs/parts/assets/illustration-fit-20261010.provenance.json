@@ -1,0 +1,92 @@
+{
+  "kind": "illustration-experiment",
+  "schema_version": 1,
+  "provider": "Codex built-in image_gen",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "pixel_upscale": false,
+  "art_approved": false,
+  "animation_validated": false,
+  "release_ready": false,
+  "body_source_rgba_sha256": "b19173216301d1d1db52cff2cb70239aa0fccf357a719fb593160e3374b26cd4",
+  "shared_reference_samples": 1,
+  "appearance_clips_baked": 0,
+  "runtime_masks": 0,
+  "combinations_rendered": 64,
+  "unique_composite_hashes": 64,
+  "independent_slots": [
+    "hair",
+    "eyes",
+    "upper",
+    "lower",
+    "footwear",
+    "socks"
+  ],
+  "socks_foot_replacement": "explicit foot_front/foot_back only; calf-only designs can omit replaces",
+  "source_files": {
+    "art/body_magenta.png": "a6a038a71fb7b2ea8013422972a734bdaed59b32de133bf8dbb098d70f21dcc8",
+    "art/hair.bob.png": "9ac5b2dac6f77729f5ff3ea99e0e69f270247f7a3d99c0ebc5182145de1e7b7e",
+    "art/body.png": "4d264e3285be1d33dd6e5140c9e3b0e88e4be1a7e6c38cb12369f50c037efb62",
+    "art/lower.navy.png": "f8ae28b9c7874179b0ae1ca0ae50be7f14296c3ffdcad20147563afdf44082d1",
+    "art/body_yellow.png": "bf137019b36c789c6629d95ff6a0e6521a8cb06424eca6dd9acdaf48bc78d906",
+    "art/eyes.open.png": "fc72222ed19fe3fbfdbe5de3eca4845dd06fcf4af0a31bb0e94660c2522f4905",
+    "art/socks.crew.png": "d80dfa0cbc738ea90a43a577b94e55aa4ddb4c89d2e54b959cd6ef51be6b3ac2",
+    "art/footwear.sneakers.png": "60f2f85002b8656800ed5b2c34ee9ce783a713914e373c1b857942431173e0ba",
+    "art/body_cyan.png": "189c107ec0202e71564da19442c72cb5603afdfaa76ea69a512bf52e1b0490df",
+    "art/upper.cream.png": "d5348007de7346a6c3f4c18ff980f92d6cdca23a84cdc6975e742dd8e24f304a",
+    "raw/hair.bob.png": "1454e68d40043101423e921203dcfc1c672d06e86b5b247981339e8e3eedb07e",
+    "raw/lower.navy.png": "0ff56ed6af45a2d4db0dc429b53fba07ca13cb3cd9a06082587440940890785c",
+    "raw/eyes.open.png": "59d63996e2faf1d39e653d67c68e5db7075dca7c768dbc8eb5fb0c0f7860f8dd",
+    "raw/body-magenta.png": "2739fa3b2da86ed1299bb8a7c7766c4ffb1554c72b37528f0840a0308e6bd4db",
+    "raw/socks.crew.png": "e89e7baa4721a3e2afff8e0a3527a5eb639c67130b303c6b46c1f572be2262c4",
+    "raw/footwear.sneakers.png": "479c453553b513ee3fd8e5cedbd7c33e78d39d2c7e471058141c2a7b06cdbfbe",
+    "raw/socks.crew.draft1.png": "c4473296eedb5dab3320630dc0353b552e790d96a9b938e0a3535c87b655c078",
+    "raw/upper.cream.png": "acef45eb4a683a48091b021ae723a86baf2b6cb8c1079357b50ee5d9c175f818"
+  },
+  "checks": [
+    {
+      "part": "illustration.eyes.open",
+      "errors": 0,
+      "warnings": 1,
+      "approved": 0,
+      "built_current": true
+    },
+    {
+      "part": "illustration.footwear.sneakers",
+      "errors": 0,
+      "warnings": 1,
+      "approved": 0,
+      "built_current": true
+    },
+    {
+      "part": "illustration.hair.bob",
+      "errors": 1,
+      "warnings": 0,
+      "approved": 0,
+      "built_current": true
+    },
+    {
+      "part": "illustration.lower.navy",
+      "errors": 0,
+      "warnings": 1,
+      "approved": 0,
+      "built_current": true
+    },
+    {
+      "part": "illustration.socks.crew",
+      "errors": 0,
+      "warnings": 0,
+      "approved": 0,
+      "built_current": true
+    },
+    {
+      "part": "illustration.upper.cream",
+      "errors": 0,
+      "warnings": 1,
+      "approved": 0,
+      "built_current": true
+    }
+  ]
+}

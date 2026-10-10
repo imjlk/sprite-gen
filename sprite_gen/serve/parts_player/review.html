@@ -23,7 +23,8 @@
  <p class="muted">녹색: 덮어야 할 곳 · 빨강: 보호 · 파랑: 허용 · 보라: 앞에서 가림</p>
  <details id="pixel-editor"><summary>프로그램으로 원본 수정</summary>
  <p class="muted">새 그림 생성 없이 수정 후보를 만듭니다. 범위는 원본 캔버스의 픽셀 좌표입니다.</p>
- <select id="edit-type" aria-label="수정 방식"><option value="translate">위치 이동</option><option value="erase">영역 지우기</option><option value="restore-source">생성 원본에서 복원</option><option value="recolor">정확한 색 교체</option></select>
+ <select id="edit-type" aria-label="수정 방식"><option value="translate">위치 이동</option><option value="fit-alpha-box">기준 영역에 비율 유지 맞춤</option><option value="fill-small-holes">작은 내부 구멍 복원</option><option value="erase">영역 지우기</option><option value="restore-source">생성 원본에서 복원</option><option value="recolor">정확한 색 교체</option></select>
+ <div class="toolbar"><label>최대 구멍 크기 <input id="edit-max-pixels" aria-label="최대 구멍 픽셀 수" type="number" value="12" min="1" max="64" step="1"></label></div>
  <div class="toolbar"><label>가로 <input id="edit-dx" aria-label="가로 이동" type="number" value="0" step="1"></label><label>세로 <input id="edit-dy" aria-label="세로 이동" type="number" value="0" step="1"></label></div>
  <div class="toolbar"><label>왼쪽 <input id="edit-left" aria-label="수정 왼쪽" type="number" step="1"></label><label>위 <input id="edit-top" aria-label="수정 위" type="number" step="1"></label><label>오른쪽 <input id="edit-right" aria-label="수정 오른쪽" type="number" step="1"></label><label>아래 <input id="edit-bottom" aria-label="수정 아래" type="number" step="1"></label></div>
  <div class="toolbar"><input id="edit-from" aria-label="교체할 색" placeholder="#원래색"><input id="edit-to" aria-label="바꿀 색" placeholder="#새색"></div>

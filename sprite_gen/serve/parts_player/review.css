@@ -22,3 +22,4 @@ details{margin-top:18px}summary{cursor:pointer;color:var(--muted)}pre{white-spac
 @media(prefers-reduced-motion:reduce){button{transition:none}}
 
 #pixel-editor input[type=number]{width:65px}#pixel-editor .toolbar{margin:8px 0}#pixel-editor label{font-size:11px}#pixel-editor input:not([type=number]){width:140px}
+html[data-sampling=smooth] .pose img,html[data-sampling=smooth] .comparison img,html[data-sampling=smooth] .candidate img{image-rendering:auto}

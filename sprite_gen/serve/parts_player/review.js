@@ -15,7 +15,7 @@ async function act(action, body={}){
 }
 function controls(){
  document.querySelectorAll('[data-act],#select-candidate,#approve,#reject,#redo,#redo-marked,#edit-candidate,#apply-visibility').forEach(b=>b.disabled=state.busy || !token || !state.data);
- $('part').disabled=state.busy;$('visibility').disabled=state.busy||!token;
+ $('part').disabled=state.busy;$('visibility').disabled=state.busy||!token||!state.data;
  const row=state.data?.poses.find(p=>p.pose===state.pose);
  const c=state.candidate;
  $('select-candidate').disabled ||= !c || c.selected || c.compatible===false;$('edit-candidate').disabled ||= !c || c.compatible===false;
@@ -62,16 +62,23 @@ function showCandidate(c){
  $('part-image').hidden=false;
  $('findings').replaceChildren(...c.findings.map(f=>node('li',f)));
  const tbody=$('criteria').querySelector('tbody');tbody.replaceChildren(...(c.criteria||[]).map(r=>{const tr=document.createElement('tr');tr.append(node('td',r.label),node('td',r.value==null?r.status:r.id==='area_jump'?(r.value*100).toFixed(1)+'% / '+r.limit*100+'%':r.value+'px / '+(r.limit==null?'참고':r.limit+'px')),node('td',statusName(r.status)));return tr;}));
- const missing=['qa_required','qa_protected','qa_allowed'].filter(n=>!c.images.includes(n));
- $('candidate-note').textContent=(missing.length?'검사 지도가 없는 후보입니다. 수치만으로 새 후보와 우열을 정하지 마세요. ':'')+(!c.selected?' 이전 후보의 프레임 전체 검사는 선택 후 전체 검사로 확인하세요. ':'')+(c.reference?'생성 기준 묶음이 고정된 후보입니다.':'이전 버전 후보: 원본과 출처는 보존됐지만 생성 전 기준 묶음은 없습니다.');
+ const missing=[['qa_required','필수 덮임'],['qa_protected','보호 영역'],['qa_allowed','허용 영역']].filter(([n])=>!c.images.includes(n)).map(([,label])=>label);
+ $('candidate-note').textContent=(missing.length===3?'검사 지도가 없는 후보입니다. 수치만으로 새 후보와 우열을 정하지 마세요. ':missing.length?'미지정 검사 항목: '+missing.join(' · ')+'. 시각 검수가 필요합니다. ':'')+(!c.selected?' 이전 후보의 프레임 전체 검사는 선택 후 전체 검사로 확인하세요. ':'')+(c.reference?'생성 기준 묶음이 고정된 후보입니다.':'이전 버전 후보: 원본과 출처는 보존됐지만 생성 전 기준 묶음은 없습니다.');
  $('evidence').textContent=JSON.stringify({placement:c.placement,method:c.method,metrics:c.metrics,source:c.source,generation_reference:c.reference},null,2);
  $('note').value=state.drafts.get(draftKey())??row.rework?.note??row.note??'';if(!state.busy&&row.rework?.status==='failed')$('job-status').textContent='재작업 실패: '+row.rework.error;
  $('candidates').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.id===c.id));
  controls();
 }
+function clearInspector(message){
+ state.candidate=null;state.candidates=[];
+ $('candidates').replaceChildren();$('findings').replaceChildren();$('criteria').querySelector('tbody').replaceChildren();
+ for(const id of ['part-image','reference-image']){const image=$(id);image.hidden=true;image.removeAttribute('src');}
+ $('pose-status').textContent=message;$('candidate-note').textContent='';$('evidence').textContent='';
+ controls();
+}
 async function inspect(pose){
  const revision=++state.revision, part=state.part;
- state.pose=pose;if(!state.busy)$('job-status').textContent='';grid();
+ state.pose=pose;clearInspector('후보 불러오는 중…');if(!state.busy)$('job-status').textContent='';grid();
  const data=await get('/api/candidates/'+encodeURIComponent(part)+'/'+encodeURIComponent(pose));
  if(revision!==state.revision || part!==state.part) return;
  state.candidates=data.candidates;$('candidates').replaceChildren();
@@ -84,7 +91,10 @@ async function inspect(pose){
  else{state.candidate=null;$('pose-title').textContent=pose+' · 그림 없음';$('pose-status').textContent='이 포즈의 참조 시트를 만들고 독립 파츠를 생성하세요.';$('part-image').removeAttribute('src');$('part-image').hidden=true;$('reference-image').removeAttribute('src');$('reference-image').hidden=true;$('findings').replaceChildren();$('evidence').textContent='';$('candidate-note').textContent='등록된 후보가 없습니다.';$('note').value=state.drafts.get(draftKey())??'';$('criteria').querySelector('tbody').replaceChildren();controls();}
 }
 async function loadPart(){
- state.data=await get('/api/part/'+encodeURIComponent(state.part));
+ const part=state.part,revision=++state.revision;state.data=null;clearInspector('파츠 불러오는 중…');$('grid').replaceChildren();
+ const data=await get('/api/part/'+encodeURIComponent(part));
+ if(part!==state.part||revision!==state.revision)return;state.data=data;
+ document.documentElement.dataset.sampling=state.data.sampling||'nearest';
  if(!state.data.poses.some(p=>p.pose===state.pose)) state.pose=state.data.poses.find(p=>p.check?.status==='error')?.pose||state.data.poses[0]?.pose;
  grid();if(state.pose) await inspect(state.pose);else controls();
 }
@@ -136,6 +146,7 @@ $('edit-candidate').onclick=()=>{
  const type=$('edit-type').value,op={type};
  const ids=['left','top','right','bottom'],values=ids.map(id=>$('edit-'+id).value);
  if(values.some(Boolean)){if(values.some(v=>v==='')){log('영역 네 좌표를 모두 입력하세요.');return;}op.bounds=values.map(Number);}
+ if(type==='fill-small-holes')op.max_pixels=Number($('edit-max-pixels').value);
  if(type==='translate'){op.dx=Number($('edit-dx').value);op.dy=Number($('edit-dy').value);}
  if(type==='recolor'){op.from_color=$('edit-from').value;op.to_color=$('edit-to').value;}
  run('edit',{pose:state.pose,candidate:state.candidate.path,operations:[op]});

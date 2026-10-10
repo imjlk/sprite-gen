@@ -106,6 +106,11 @@ and requires a current appearance approval for release. See the
 The production path now [refines body layers and edits retained source art](docs/parts/14-body-zmap-source-edit.md),
 builds original parts with zmap by default, and reserves render masks for explicit designs.
 
+A [native illustration experiment](docs/parts/15-illustration-experiment.md) adds smooth sampling,
+recorded fitting edits, independent socks and shoes, and explicit segmented body-node replacement
+in production and the portable player. Its 1254px body and six part slots share one static reference
+pose; 64 on/off selections render without appearance clip baking. Walk/run and visual approval remain pending.
+
 ## What you actually get
 
 - **A transparent sprite atlas** (`sprite-sheet-alpha.png`) — real alpha, no leftover chroma fringe, verified against white backgrounds ([why the extractor unmixes instead of peeling](docs/chroma-alpha.md)).

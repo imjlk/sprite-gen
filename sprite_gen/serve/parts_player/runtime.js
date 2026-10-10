@@ -5,6 +5,7 @@ class LayerRuntime {
     if (this.data.kind !== 'parts-layer-library' || this.data.schema_version !== 1) throw new Error('지원하지 않는 파츠 패키지입니다.');
     this.textures = Object.fromEntries(Object.entries(this.data.textures).map(([id,ref]) => [id,{...ref,url:bundle.textures[id]}]));
     this.metadata = {id:this.data.appearance.id,title:this.data.title,canvas:this.data.canvas,slots:this.data.slots,
+      sampling:this.data.sampling||'nearest',
       interpolation:this.data.interpolation,fit_summary:this.data.fit_summary,mode:'independent-layers',release_ready:false,
       states:this.data.clips.map(clip=>({id:clip.state,samples:clip.samples.length,loop:clip.loop,
         duration_ms:clip.samples.reduce((n,s)=>n+s.duration_ticks,0)*1000/clip.timebase,
@@ -14,12 +15,12 @@ class LayerRuntime {
     const gcd=(a,b)=>b===0n?a:gcd(b,a%b), g=gcd(n<0n?-n:n,d);
     n/=g;d/=g;return d===1n?String(n):`${n}/${d}`;
   }
-  scene(state,timeMs,selections={}) {
+  scene(state,timeMs,selections={},options={}) {
     if(!Number.isSafeInteger(timeMs)||timeMs<0)throw new Error('재생 시간이 올바르지 않습니다.');
     const data=this.data,clip=data.clips.find(c=>c.state===state);
     if(!clip)throw new Error('지원하지 않는 동작입니다.');
     const chosen={...data.defaults,...selections}, ids=new Set(data.body), occupied=new Map();
-    for(const slot of data.slots){
+    for(const slot of options.bodyOnly?[]:data.slots){
       const id=chosen[slot.id];
       if(!slot.options.some(option=>option.id===id))throw new Error(`선택할 수 없는 파츠: ${slot.label}`);
       if(id){ids.add(id);for(const name of data.packs[id].occupies){if(occupied.has(name)&&occupied.get(name)!==id)throw new Error('함께 착용할 수 없는 파츠입니다.');occupied.set(name,id);}}
@@ -34,9 +35,31 @@ class LayerRuntime {
     const denominator=BigInt(sample.duration_ticks)*1000n, numerator=data.interpolation==='linear'?position-start:0n;
     const known=[],active=[],hidden=[],covered=[],tags=new Set();
     for(const id of ids)for(const tag of data.packs[id].covers||[])tags.add(tag);
+    // Node replacement is declared by a selected design, before pose visibility,
+    // matching parts_resolve. Never erase only part of an indivisible body raster.
+    const eligible=[];
+    for(const id of [...ids].sort())for(const piece of data.packs[id].pieces){
+      const rule=piece.cover_rule;
+      if(!rule||tags.has(rule.tag)===(rule.show==='covered'))eligible.push({pack:data.packs[id],piece});
+    }
+    const targetsToReplace=new Set(eligible.filter(e=>e.pack.role!=='body').flatMap(e=>e.piece.replaces||[]));
+    const bodyNodes=new Set(eligible.filter(e=>e.pack.role==='body').flatMap(e=>e.piece.provides));
+    for(const target of targetsToReplace)if(!bodyNodes.has(target))throw new Error('교체할 바디 영역이 없습니다.');
+    if(targetsToReplace.size&&data.body.some(id=>data.packs[id].body_mode==='flat'))throw new Error('바디 영역 교체는 분리된 바디가 필요합니다.');
+    const replaced=new Set(),providers=new Map();
+    for(const e of eligible){
+      const affected=e.pack.role==='body'?e.piece.provides.filter(n=>targetsToReplace.has(n)):[];
+      if(affected.length){
+        if(affected.length!==e.piece.provides.length)throw new Error('분리되지 않은 바디의 일부만 숨길 수 없습니다.');
+        replaced.add(`${e.pack.id}.${e.piece.id}`);continue;
+      }
+      for(const node of e.piece.provides){const previous=providers.get(node);if(previous&&previous!==e.pack.id)throw new Error('바디 영역을 제공하는 파츠가 겹칩니다.');providers.set(node,e.pack.id);}
+    }
+    if(!data.body.some(id=>data.packs[id].body_mode==='flat'))for(const node of data.required_nodes||[])if(!providers.has(node))throw new Error('필수 바디 영역이 누락됐습니다.');
     for(const id of [...ids].sort())for(const piece of data.packs[id].pieces){
       const placement=piece.sample_map[clip.id][sample.id],socket=sample.sockets[placement.target_socket];
       const entry={id:`${id}.${piece.id}`,pack:data.packs[id],piece,placement};known.push(entry);
+      if(replaced.has(entry.id))continue;
       const rule=piece.cover_rule;
       if(rule&&tags.has(rule.tag)!==(rule.show==='covered')){covered.push(entry.id);continue;}
       if(!placement.visible||socket&&!socket.visible){hidden.push(entry.id);continue;}
@@ -86,7 +109,7 @@ class LayerRuntime {
     });
     return {state,clip_id:clip.id,sample_id:sample.id,sample_index:index,sample_tick:this.fraction(position-start,1000n),
       clip_tick:this.fraction(position,1000n),elapsed_seconds:this.fraction(BigInt(timeMs),1000n),timebase:clip.timebase,loop:clip.loop,
-      motion:data.motion,canvas:data.canvas,palette:data.palette,mirror:data.mirror,layers,masks,hidden,covered:covered.sort(),
+      motion:data.motion,canvas:data.canvas,palette:data.palette,mirror:data.mirror,layers,masks,hidden,covered:covered.sort(),replaced:[...replaced].sort(),
       sample_fraction:this.fraction(numerator,denominator),next_sample_id:following.id,
       fit_summary:{status:fits.some(f=>f.status==='error')?'error':Object.keys(data.fitting).length?'passed':'unverified',
         checked:fits.length,failed:fits.filter(f=>f.status==='error').length,art_approved:false},fits,release_ready:false};

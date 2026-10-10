@@ -15,7 +15,18 @@ from sprite_gen.spec import (
 )
 
 
-def scene(root, index, registry, config, pose, image, placement, *, virtual=False):
+def scene(
+    root,
+    index,
+    registry,
+    config,
+    pose,
+    image,
+    placement,
+    *,
+    virtual=False,
+    required=None,
+):
     motion = registry[index["motion"]["id"]]
     rig = registry[index["rig"]["id"]]
     found = next(
@@ -23,6 +34,13 @@ def scene(root, index, registry, config, pose, image, placement, *, virtual=Fals
     )
     clip, sample = found
     raster = Image.new("RGBA", image.size, (255, 255, 255, 255)) if virtual else image
+    if virtual:
+        # Candidate ink AND missing required pixels need independent ownership.
+        # Do not propagate labels through an unrelated empty 1K+ canvas.
+        region = np.asarray(image.convert("RGBA"))[..., 3] > 0
+        if required is not None:
+            region |= required
+        raster.putalpha(Image.fromarray(region.astype("uint8") * 255))
     images = {config["slot"]: raster}
     nodes = {config["slot"]: config["node"]}
     if config["pieces"]:
@@ -69,6 +87,7 @@ def scene(root, index, registry, config, pose, image, placement, *, virtual=Fals
             nodes = {p["id"]: p["node"] for p in document["pieces"]}
     pieces = []
     references = {}
+    configured = {piece["id"]: piece for piece in config["pieces"]}
     for name, raster in images.items():
         ref = {
             "file": f"candidate/{name}.png",
@@ -98,6 +117,8 @@ def scene(root, index, registry, config, pose, image, placement, *, virtual=Fals
                 "slot": config["slot"],
                 "node": nodes[name],
                 "mode": config["mode"],
+                "replaces": configured.get(name, {}).get("replaces", []),
+                "provides": configured.get(name, {}).get("replaces", []),
                 "sample_map": mapping,
             }
         )
@@ -178,9 +199,17 @@ def scene(root, index, registry, config, pose, image, placement, *, virtual=Fals
     return plan, frame, load
 
 
-def visibility(root, index, registry, config, pose, image, placement):
+def visibility(root, index, registry, config, pose, image, placement, *, required=None):
     plan, frame, load = scene(
-        root, index, registry, config, pose, image, placement, virtual=True
+        root,
+        index,
+        registry,
+        config,
+        pose,
+        image,
+        placement,
+        virtual=True,
+        required=required,
     )
     visible = np.zeros((image.height, image.width), dtype=bool)
     for entry in frame["draw"]:

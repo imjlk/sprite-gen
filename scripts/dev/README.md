@@ -18,3 +18,9 @@ measurement or a proof that fed a rule now living in the package or its docs:
 | `parts_first_result.py` | copies an existing frozen SD library, authors fixture-specific interfaces, produces two independent tops through public part production APIs, and exports their unchanged shared walk with review contact sheets; drafts keep failed QA and never receive automatic art approval ([first result](../../docs/parts/11-part-only-production.md)) |
 
 Run them with the project interpreter (`.venv/bin/python scripts/dev/<name>.py`).
+
+
+`parts_illustration_demo.py` builds and verifies the [native illustration fitting experiment](../../docs/parts/15-illustration-experiment.md)
+through the public parts APIs. Its authored ownership profile is bound to one source RGBA hash;
+other bodies need their own authored profile. Stages are prepare, import, reference, slice, refit,
+extend-socks, finish and verify. It does not generate walk/run, auto-approve art, or call an image provider.

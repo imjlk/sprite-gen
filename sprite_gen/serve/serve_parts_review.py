@@ -107,6 +107,7 @@ class ReviewDesk:
                           "note": row.get("note"), "reviewer": row.get("reviewer"), "check": row.get("check"),
                           "rework": row.get("rework")})
         return {"part": name, "config": state["config"], "track": track or production.MAIN, "poses": poses,
+                "sampling": registry[index["rig"]["id"]].get("sampling", "nearest"),
                 "built": state["built"]["part"] if state["built"] else None,
                 "built_current": production._current(state, registry, order),
                 "batches": production._track(state, track)["batches"][-3:]}
@@ -124,10 +125,11 @@ class ReviewDesk:
         result = []
         for candidate in reversed(row["candidates"]):
             record = production.candidate_record(root, state, pose, candidate, track=track)
-            metrics, findings = production._measure(root, state["config"], production._settings(state["config"], track), candidate, context)
             if candidate == row["selected"] and row.get("check"):
                 metrics = row["check"]["metrics"]
                 findings = [("warning", f) for f in row["check"]["findings"]]
+            else:
+                metrics, findings = production._measure(root, state["config"], production._settings(state["config"], track), candidate, context)
             result.append({"id": record["digest"], "path": candidate, "selected": candidate == row["selected"],
                            "images": list(record["images"]), "placement": record["placement"], "source": record.get("source"),
                            "method": record["method"], "reference": record.get("generation_reference"),
@@ -218,7 +220,11 @@ class ReviewDesk:
                 ink = np.asarray(raw)[..., 3] > 0
                 if state["config"]["visibility"] == "zmap" and state["config"]["segments"]:
                     from sprite_gen.frames import parts_candidate_scene
-                    allowed_pixels = parts_candidate_scene.visibility(root,index,registry,state["config"],pose,raw,record["placement"])
+                    required = None
+                    if ref := record["images"].get("qa_required"):
+                        encoded = assets.SourceReader(base).read(ref["file"],ref["sha256"])
+                        required = np.asarray(Image.open(BytesIO(encoded)).convert("L")) > 0
+                    allowed_pixels = parts_candidate_scene.visibility(root,index,registry,state["config"],pose,raw,record["placement"],required=required)
                 else:
                     allowed_pixels = np.asarray(Image.open(base / "render_mask.png").convert("L")) > 0 if state["config"]["visibility"] == "mask" and "render_mask" in record["images"] else np.ones_like(ink)
                 ink &= allowed_pixels
@@ -230,8 +236,10 @@ class ReviewDesk:
             image = Image.open(base / "under.png").convert("RGBA")
             ref = record["images"]["part"] if kind == "body-raw" else record["images"].get("render_part", record["images"]["part"])
             image.alpha_composite(Image.open(base / ref["file"]).convert("RGBA"))
-        scale = 4
-        large = image.resize((image.width*scale, image.height*scale), Image.Resampling.NEAREST)
+        smooth = registry[index["rig"]["id"]].get("sampling", "nearest") == "smooth"
+        scale = min(1, 768/max(image.size)) if smooth else 4
+        large = image.resize((max(1, round(image.width*scale)), max(1, round(image.height*scale))),
+                             Image.Resampling.LANCZOS if smooth else Image.Resampling.NEAREST)
         out = BytesIO()
         large.save(out, "PNG")
         return out.getvalue()
