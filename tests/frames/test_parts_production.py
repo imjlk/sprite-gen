@@ -397,6 +397,30 @@ def test_review_views_show_independent_parts_and_do_not_show_a_stale_build(tmp_p
         desk.render("test.badge", "walk.01", "part", "../../outside")
 
 
+def test_review_render_cache_refreshes_for_body_context_without_part_digest_change(tmp_path, monkeypatch):
+    from copy import deepcopy
+    from sprite_gen.serve.serve_parts_review import ReviewDesk
+    assembly = setup(tmp_path)
+    draw_batch(assembly, production.sheet(assembly, 'test.badge'))
+    production.slice_batch(assembly, 'test.badge')
+    production.check(assembly, 'test.badge'); production.build(assembly, 'test.badge')
+    desk = ReviewDesk(assembly)
+    calls = []
+    def frames(*args, **kwargs):
+        calls.append(1)
+        color = 'red' if len(calls)==1 else 'blue'
+        return {pose:Image.new('RGBA',(128,128),color) for pose in ('walk.01','walk.02')},None
+    monkeypatch.setattr(production, '_render_alone', frames)
+    first = desk.render('test.badge','walk.01','body')
+    assert desk.render('test.badge','walk.01','body')==first and len(calls)==1
+    # Only ownership/body revision changes, exactly the native-foot failure.
+    root,index,registry,sha = desk._state()
+    changed = deepcopy(index)
+    changed['body'][0]['digest'] = '1'*64
+    monkeypatch.setattr(desk, '_state', lambda:(root,changed,registry,sha))
+    assert desk.render('test.badge','walk.01','body')!=first and len(calls)==2
+
+
 def test_config_changes_apply_to_new_drawings_and_identity_stays_fixed(tmp_path):
     assembly = setup(tmp_path)
     draw_batch(assembly, production.sheet(assembly, "test.badge"))

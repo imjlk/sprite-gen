@@ -8,6 +8,12 @@ const stateNames = {idle:'아이들',walk:'걷기',run:'뛰기',fit:'정적 피�
 let metadata, state, selected={}, playing=true, origin=performance.now(), held=0, dirty=true, revision=0, busy=false, lastSent=0, runtime=null, lastScene=null;
 const layerNodes=new Map(), textureCache=new Map();
 let scale=4;
+let focusWindow=null, playbackSpeed=1;
+const requestQuery=new URLSearchParams(location.search);
+Object.assign(optionLabels, {'illustration.motion.footwear.ai-pilot':'AI 신발 · 8프레임', 'illustration.motion.footwear.sneakers':'정지 그림 변형 후보'});
+const activeWindow=()=>focusWindow?.state===state?focusWindow:null;
+function showWindow(){const window=activeWindow();$('window-note').hidden=!window;$('clear-window').hidden=!window;
+  $('window-note').textContent=window?`검수 구간 ${window.first+1}–${window.last+1} · 공통 모션의 일부 구간 · 전체 동작 검증 전`:'';}
 const number=value=>{const [a,b]=String(value).split('/').map(Number);return b===undefined?a:a/b;};
 async function texture(ref){
   if(!textureCache.has(ref.id))textureCache.set(ref.id,(async()=>{
@@ -87,7 +93,8 @@ async function draw(scene,snapshot){
   const current=metadata.states.find(s=>s.id===state);
   $('frame-position').textContent=`${scene.sample_index+1} / ${current.samples}`;
   $('sample-name').textContent=`${scene.clip_id} · ${scene.sample_id}`;
-  const position=current.loop?elapsed()%duration():Math.min(elapsed(),duration());
+  const window=activeWindow(),offset=window?.start||0;
+  const position=window?elapsed()-offset:current.loop?elapsed()%duration():Math.min(elapsed(),duration());
   $('seek').value=String(Math.floor(position/duration()*999));
   const fit=scene.fit_summary||{status:'unverified',checked:0,failed:0};
   $('fit-status').dataset.status=bodyOnly?'unverified':fit.status;
@@ -102,8 +109,9 @@ async function draw(scene,snapshot){
   $('source-status').textContent=sourceRows.length?sourceRows.map(row=>`${row.label}: 윤곽 ${row.alpha_pixels??'—'}px · 색 변화 ${row.rgb_pixels??'—'}px${row.status==='error'?' · 기준 초과':''}`).join(' / '):'원본 안정 영역 검사 기준 미등록';
   return true;
 }
-const elapsed=()=>held+(playing?performance.now()-origin:0);
-const duration=()=>number(metadata.states.find(s=>s.id===state).duration_ms);
+const elapsed=()=>{const raw=held+(playing?(performance.now()-origin)*playbackSpeed:0),window=activeWindow();
+  return window?window.start+((raw-window.start)%(window.end-window.start)+(window.end-window.start))%(window.end-window.start):raw;};
+const duration=()=>{const window=activeWindow();return window?window.end-window.start:number(metadata.states.find(s=>s.id===state).duration_ms);};
 function invalidate(){revision++;dirty=true;}
 function showSelection(){
   document.querySelectorAll('[data-slot]').forEach(b=>b.setAttribute('aria-pressed',String(selected[b.dataset.slot]===b.dataset.option)));
@@ -127,27 +135,30 @@ async function render(now){
 }
 function setPlaying(value){held=elapsed();origin=performance.now();playing=value;$('play').textContent=playing?'Ⅱ':'▶';$('play').setAttribute('aria-label',playing?'일시정지':'재생');invalidate();}
 $('play').addEventListener('click',()=>setPlaying(!playing));
-$('seek').addEventListener('input',()=>{setPlaying(false);held=Number($('seek').value)/999*duration();invalidate();});
+$('seek').addEventListener('input',()=>{setPlaying(false);const window=activeWindow();held=(window?.start||0)+Number($('seek').value)/999*(window?duration()-1:duration());invalidate();});
+$('speed').addEventListener('change',()=>{held=elapsed();origin=performance.now();playbackSpeed=Number($('speed').value);invalidate();});
+$('clear-window').addEventListener('click',()=>{held=elapsed();origin=performance.now();focusWindow=null;showWindow();invalidate();});
 $('sockets').addEventListener('change',invalidate);
 $('body-only').addEventListener('change',invalidate);
 function step(direction){
   setPlaying(false);
   const clip=metadata.states.find(item=>item.id===state),current=lastScene?.sample_index||0;
-  const index=clip.loop?(current+direction+clip.samples)%clip.samples:Math.max(0,Math.min(clip.samples-1,current+direction));
+  const window=activeWindow(),first=window?.first||0,last=window?.last??clip.samples-1,count=last-first+1;
+  const index=window||clip.loop?first+((current-first+direction)%count+count)%count:Math.max(first,Math.min(last,current+direction));
   held=Math.ceil(number(clip.boundaries_ms[index]));invalidate();
 }
 $('previous').addEventListener('click',()=>step(-1));$('next').addEventListener('click',()=>step(1));
 $('find-issue').addEventListener('click',()=>{
   if(!runtime)return;
   const issue=Object.values(runtime.data.fitting).find(row=>row.status==='error');if(!issue)return;
-  setPlaying(false);state=issue.state;selected[issue.slot]=issue.part.id;showSelection();
+  setPlaying(false);focusWindow=null;state=issue.state;showWindow();selected[issue.slot]=issue.part.id;showSelection();
   document.querySelectorAll('[data-state]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.state===state)));
   const clip=runtime.data.clips.find(item=>item.id===issue.clip),index=clip.samples.findIndex(sample=>sample.id===issue.sample);
   held=Math.ceil(number(metadata.states.find(item=>item.id===state).boundaries_ms[index]));invalidate();
 });
 $('find-source-issue').addEventListener('click',()=>{
   const issue=(runtime?.data.stability?.results||[]).find(row=>row.status==='error');if(!issue)return;
-  setPlaying(false);state=issue.state;$('body-only').checked=true;
+  setPlaying(false);focusWindow=null;state=issue.state;showWindow();$('body-only').checked=true;
   document.querySelectorAll('[data-state]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.state===state)));
   const clip=runtime.data.clips.find(item=>item.id===issue.clip),index=clip.samples.findIndex(sample=>sample.id===issue.sample);
   held=Math.ceil(number(metadata.states.find(item=>item.id===state).boundaries_ms[index]));invalidate();
@@ -169,7 +180,11 @@ async function boot(){
       const response=await fetch('/api/metadata');if(!response.ok)throw new Error('파츠 정보를 가져오지 못했습니다.');metadata=await response.json();
       $('export').hidden=true;$('standalone').hidden=true;$('playback-mode').textContent='서버 레이어 재생';
     }
-    state=metadata.states[0].id;$('brand').textContent=metadata.title||metadata.id;document.title=`${metadata.title||metadata.id} · Parts Lab`;
+    state=metadata.states.some(item=>item.id===requestQuery.get('state'))?requestQuery.get('state'):metadata.states[0].id;
+    if(runtime&&(requestQuery.has('from')||requestQuery.has('to'))){focusWindow=runtime.sampleWindow(state,Number(requestQuery.get('from')),Number(requestQuery.get('to')));held=focusWindow.start;}
+    const speed=requestQuery.get('speed');if(['0.25','0.5','1','2'].includes(speed)){playbackSpeed=Number(speed);$('speed').value=speed;}
+    showWindow();$('brand').textContent=metadata.title||metadata.id;document.title=`${metadata.title||metadata.id} · Parts Lab`;
+    $('standalone').href='/standalone'+location.search;
     document.documentElement.dataset.sampling=metadata.sampling||'nearest';
     if(metadata.states.every(item=>item.samples===1)){document.querySelector('.aside-note').textContent='기준 포즈에서 파츠별 착용 상태를 비교합니다.';playing=false;$('play').textContent='▶';$('play').setAttribute('aria-label','재생');$('selection-status').textContent='정적 파츠 피팅 · 동작 검증 전';}
     $('shared-states').textContent=`공통 ${metadata.states.map(item=>stateNames[item.id]||item.id).join(' / ')}`;
@@ -192,7 +207,7 @@ async function boot(){
     for(const item of metadata.states){
       const button=document.createElement('button');button.type='button';button.textContent=stateNames[item.id]||item.id;button.dataset.state=item.id;
       button.setAttribute('aria-pressed',String(item.id===state));
-      button.addEventListener('click',()=>{state=item.id;held=0;origin=performance.now();document.querySelectorAll('[data-state]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.state===state)));invalidate();});$('states').append(button);
+      button.addEventListener('click',()=>{state=item.id;held=activeWindow()?.start||0;origin=performance.now();showWindow();document.querySelectorAll('[data-state]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.state===state)));invalidate();});$('states').append(button);
     }
     showSelection();
     if(runtime){$('sample-name').textContent='파츠 이미지 준비 중…';await Promise.all(Object.values(runtime.textures).map(texture));}

@@ -189,12 +189,21 @@ class ReviewDesk:
         base = root / location
         built = state["built"]
         box = None
+        render_key = None
+        cached_body_image = None
         motion = registry[index["motion"]["id"]]
         order, _ = production._poses(motion, production._states(state, index))
         if kind in ("body", "body-zraw") and location == row["selected"] and production._current(state, registry, order):
-            digest = built["part"]["digest"]
+            digest = contract.content_digest({"part": built["part"], "body": index["body"],
+                "rig": index["rig"], "motion": index["motion"],
+                "states": production._states(state, index)})
+            render_key = (digest, pose)
             with self.lock:
-                if (digest, pose) not in self._renders:
+                if render_key not in self._renders:
+                    # A body ownership revision changes z-order even when its
+                    # pixels and the selected part's digest remain identical.
+                    # Keep one context, bounding native-frame cache memory.
+                    self._renders.clear()
                     body = state["config"]["role"] == "body"
                     frames, _ = production._render_alone(root, index, registry, None if body else built["part"],
                                                          production._states(state, index))
@@ -205,6 +214,7 @@ class ReviewDesk:
                     self._renders[(digest, "box")] = (min(b[0] for b in boxes)-2, min(b[1] for b in boxes)-2,
                                                       max(b[2] for b in boxes)+2, max(b[3] for b in boxes)+2) if boxes else None
                 box = self._renders[(digest, "box")]
+                cached_body_image = self._renders[render_key]
         if kind == "position":
             from sprite_gen.frames import parts_candidate_scene
             if record["motion"] != index["motion"] or state["config"]["role"] != "part":
@@ -220,7 +230,7 @@ class ReviewDesk:
                 raise contract.PartsContractError("zmap-only preview needs the selected main-track part and a current build")
             image = self.raw_zmap(root, index, registry, state, pose, record, base, motion)
         elif kind == "body" and box is not None and track is None:
-            image = self._renders[(built["part"]["digest"], pose)]
+            image = cached_body_image
         elif kind in ("part", "cut", "visible", "drawn", "reference"):
             key = {"cut": "part", "visible": "render_part", "reference": "under"}.get(kind, kind)
             if key not in record["images"]:

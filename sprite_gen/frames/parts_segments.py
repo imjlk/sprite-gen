@@ -379,6 +379,11 @@ def split_piece(spec, segments, out, *, piece, into, source_root=None, part_id=N
                 votes = np.bincount(owner[voters][owner[voters] >= 0], minlength=len(names))
                 if votes.any() and votes.max() >= COMPONENT_MAJORITY * votes.sum():
                     owner[component] = int(votes.argmax())
+        unassigned = ink & (owner < 0)
+        if unassigned.any():
+            raise contract.PartsContractError(
+                f"{where}: ownership labels do not cover {int(unassigned.sum())} drawn pixels; "
+                "author labels for this pose before building (art was not discarded)")
         result = {}
         for number, name in enumerate(names):
             part = np.where((owner == number)[..., None], pixels, 0).astype(np.uint8)

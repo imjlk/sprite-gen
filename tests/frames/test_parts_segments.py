@@ -76,7 +76,8 @@ def test_segment_body_refuses_missing_and_unknown_labels(tmp_path):
         parts_segments.segment_body(assembly, tmp_path / "body", colors=bad, labels=labels, body_id="b")
 
 
-def test_split_piece_follows_the_body_segment_under_each_pixel(tmp_path):
+@pytest.mark.parametrize('missing_labels', [False, True])
+def test_split_piece_follows_the_body_segment_under_each_pixel(tmp_path, missing_labels):
     assembly, _ = posed_workspace(tmp_path)
     labels = tmp_path / "labels"
     for pose in ("walk.01", "walk.02"):
@@ -101,6 +102,16 @@ def test_split_piece_follows_the_body_segment_under_each_pixel(tmp_path):
                 "mask": {"image": mask_ref, "space": "rig-canvas", "target_node": "torso", "channel": "luma"}}
                 for s in motion["clips"][0]["samples"]}}}]}
     (garment / "import.json").write_bytes(workspace.json_bytes(spec))
+    if missing_labels:
+        for file in Path(body['labels']).rglob('*.png'):
+            Image.new('RGBA', (128,128)).save(file)
+        for components in (False, True):
+            target = tmp_path / ('unowned-whole' if components else 'unowned-pixel')
+            with pytest.raises(contract.PartsContractError, match='ownership labels do not cover'):
+                parts_segments.split_piece(garment/'import.json', body['segments'], target, piece='shirt',
+                    into=[('body','torso',['root']),('sleeve','arm_l',['*'])], by_component=components)
+            assert not (target/'import.json').exists()
+        return
     with pytest.raises(contract.PartsContractError, match="no piece takes"):
         parts_segments.split_piece(garment / "import.json", body["segments"], tmp_path / "x", piece="shirt",
                                    into=[("body", "torso", ["root"])])

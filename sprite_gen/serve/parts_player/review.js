@@ -36,7 +36,7 @@ function controls(){
 function grid(){
  const data=state.data; if(!data) return;$('visibility').value=data.config.visibility;
  const selected=state.pose, filter=$('filter').value, view=$('view').value;
- $('summary').textContent=data.poses.length+'포즈 · 오류 '+data.poses.filter(p=>p.check?.status==='error').length+' · 승인 '+data.poses.filter(p=>p.decision==='approved').length+' · '+(data.built_current?'빌드 최신':'선택 변경 · 빌드 필요');
+ $('summary').textContent=data.poses.length+'포즈 · 오류 '+data.poses.filter(p=>p.check?.status==='error').length+' · 승인 '+data.poses.filter(p=>p.decision==='approved').length+' · 반려 '+data.poses.filter(p=>p.decision==='rejected').length+' · '+(data.built_current?'빌드 최신':'선택 변경 · 빌드 필요');
  $('view-note').textContent=view==='body' ? (data.built_current?'실제 빌드 · ' + (data.config.visibility==='mask'?'지정 마스크 + zmap':'zmap 기본 · 원본 파츠') + '':'선택 후보를 참조 위에 놓은 배치 미리보기입니다. 레이어 검수는 빌드 후 진행하세요.') : view==='body-raw' ? '생성 당시 참조 위에 원본 part.png를 그대로 덮습니다. 가림 마스크와 zmap을 적용하지 않습니다. 비교용이며 현재 빌드를 바꾸지 않습니다.' : view==='body-zraw' ? '현재 선택의 원본을 같은 조각으로 분리하고 실제 빌드의 zmap 순서로 그립니다. occluded 마스크를 적용하지 않습니다. 현재 선택·빌드가 필요하며, 수치 판정과 승인은 현재 빌드 기준입니다.' : view==='visible' ? 'occluded 마스크로 알파가 지워진 파생 파츠입니다. zmap 순서와는 별개의 처리입니다.' : view==='errors' ? '덮임 누락(녹색) · 보호 침범(빨강) · 허용 영역 밖(파랑). 오류 위치만 표시합니다.' : '모든 후보는 같은 캔버스 좌표와 배율로 비교합니다.';
  $('grid').replaceChildren();
  for(const p of data.poses){
@@ -44,7 +44,7 @@ function grid(){
   const b=node('button','','pose'+(p.pose===selected?' active':'')); b.setAttribute('aria-label',p.pose+' 포즈');
   if(p.selected){ const img=document.createElement('img');img.alt=p.pose;img.loading='lazy';img.src=url(p.pose,view);img.onerror=()=>{img.hidden=true;b.prepend(node('span','그림을 읽지 못했습니다','muted'));}; b.append(img); }
   else b.append(node('p','그림 없음'));
-  const row=node('div','','row');row.append(node('b',p.pose),node('span',statusName(p.check?.status||'unchecked',p.check?.metrics),'status '+(p.check?.status||'')));b.append(row,node('small',['requested','failed'].includes(p.rework?.status)?(p.rework.status==='failed'?'재작업 실패 · 재시도 가능':'재작업 요청됨'):p.decision==='approved'?'시각 승인됨':'시각 미승인','muted'));
+  const row=node('div','','row');row.append(node('b',p.pose),node('span',statusName(p.check?.status||'unchecked',p.check?.metrics),'status '+(p.check?.status||'')));b.append(row,node('small',['requested','failed'].includes(p.rework?.status)?(p.rework.status==='failed'?'재작업 실패 · 재시도 가능':'재작업 요청됨'):p.decision==='approved'?'시각 승인됨':p.decision==='rejected'?'시각 반려됨':'시각 미승인','muted'));if(p.note)b.title=p.note;
   b.onclick=()=>inspect(p.pose).catch(e=>log(e.message));
   const cell=node('div','','pose-cell'),label=node('label',' 재작업 대상','muted'),check=document.createElement('input');check.type='checkbox';check.checked=state.marked.has(p.pose);check.setAttribute('aria-label','재작업 대상 '+p.pose);check.onchange=()=>{if(check.checked)state.marked.add(p.pose);else state.marked.delete(p.pose);controls();};label.prepend(check);cell.append(b,label);$('grid').append(cell);
  }

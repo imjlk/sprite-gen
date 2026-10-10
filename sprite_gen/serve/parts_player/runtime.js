@@ -11,6 +11,16 @@ class LayerRuntime {
         duration_ms:clip.samples.reduce((n,s)=>n+s.duration_ticks,0)*1000/clip.timebase,
         boundaries_ms:clip.samples.map((_,i)=>clip.samples.slice(0,i).reduce((n,s)=>n+s.duration_ticks,0)*1000/clip.timebase)}))};
   }
+  sampleWindow(state, first, last) {
+    const clip=this.metadata.states.find(item=>item.id===state);
+    if(!clip||!Number.isInteger(first)||!Number.isInteger(last)||first<1||last<first||last>clip.samples)
+      throw new Error('검수 구간의 프레임 번호가 올바르지 않습니다.');
+    // Sampling accepts integer milliseconds. Ceil exact boundaries so the
+    // last integer before `end` belongs to the selected last sample.
+    const start=Math.ceil(clip.boundaries_ms[first-1]),end=Math.ceil(last===clip.samples?clip.duration_ms:clip.boundaries_ms[last]);
+    if(end<=start)throw new Error('정수 밀리초로 재생할 수 없는 검수 구간입니다.');
+    return {state,first:first-1,last:last-1,start,end};
+  }
   fraction(n,d=1n) {
     const gcd=(a,b)=>b===0n?a:gcd(b,a%b), g=gcd(n<0n?-n:n,d);
     n/=g;d/=g;return d===1n?String(n):`${n}/${d}`;
