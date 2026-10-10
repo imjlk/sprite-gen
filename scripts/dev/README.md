@@ -19,6 +19,18 @@ measurement or a proof that fed a rule now living in the package or its docs:
 
 Run them with the project interpreter (`.venv/bin/python scripts/dev/<name>.py`).
 
+The [independent part production example](../../docs/parts/19-independent-part-production.md)
+uses `parts_qualified_demo.py` to prepare four native body reference poses,
+`parts_qualified_refine.py` for explicit ownership annotations, and public core
+commands for all image generation, edits, inspections and approval.
+`parts_independent_verify.py --require-approval` checks the unchanged body,
+current actual vision evidence, curator decisions and Python/JavaScript layers.
+`parts_workspace_snapshot.py` saves/restores the deduplicated source workspace.
+`parts_qualified_templates.py` authors pose-specific sole-view drafts for image
+conditioning; those drafts are neither finished art nor rendering masks.
+`parts_qualified_body_fix.py` transfers the demonstrated orphan heel from torso
+to foot ownership and asserts that all four bare-body frames remain identical.
+
 
 `parts_illustration_demo.py` builds and verifies the [native illustration fitting experiment](../../docs/parts/15-illustration-experiment.md)
 through the public parts APIs. Its authored ownership profile is bound to one source RGBA hash;

@@ -26,6 +26,7 @@ def scene(
     *,
     virtual=False,
     required=None,
+    independent_layers=None,
 ):
     motion = registry[index["motion"]["id"]]
     rig = registry[index["rig"]["id"]]
@@ -43,6 +44,26 @@ def scene(
         raster.putalpha(Image.fromarray(region.astype("uint8") * 255))
     images = {config["slot"]: raster}
     nodes = {config["slot"]: config["node"]}
+    if independent_layers:
+        images = {}
+        nodes = {}
+        owned_required = np.zeros((image.height, image.width), dtype=bool)
+        for layer in independent_layers:
+            part = layer['image'].copy()
+            if virtual:
+                region = np.asarray(part)[..., 3] > 0
+                if required is not None:
+                    a,b,x,y = layer['target']
+                    inside = np.zeros(region.shape, dtype=bool)
+                    inside[b:y,a:x] = True
+                    region |= required & inside
+                    owned_required |= required & inside
+                part = Image.new('RGBA', image.size, (255,255,255,255))
+                part.putalpha(Image.fromarray(region.astype('uint8')*255))
+            images[layer['id']] = part
+            nodes[layer['id']] = layer['node']
+        if virtual and required is not None and (required & ~owned_required).any():
+            raise contract.PartsContractError('required pixels have no independent target owner; correct the authored targets')
     if config["pieces"]:
         with tempfile.TemporaryDirectory(prefix="parts-candidate-scene-") as temporary:
             base = Path(temporary)
@@ -199,7 +220,7 @@ def scene(
     return plan, frame, load
 
 
-def visibility(root, index, registry, config, pose, image, placement, *, required=None):
+def visibility(root, index, registry, config, pose, image, placement, *, required=None, independent_layers=None):
     plan, frame, load = scene(
         root,
         index,
@@ -210,6 +231,7 @@ def visibility(root, index, registry, config, pose, image, placement, *, require
         placement,
         virtual=True,
         required=required,
+        independent_layers=independent_layers,
     )
     visible = np.zeros((image.height, image.width), dtype=bool)
     for entry in frame["draw"]:

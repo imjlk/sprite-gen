@@ -102,7 +102,7 @@ async function draw(scene,snapshot){
   const terms={coverage:'피복',silhouette:'윤곽',occlusion:'가림',position:'위치',size:'크기',gap:'빈틈',clipping:'잘림','missing-interface':'검사 기준'};
   $('fit-status').textContent=bodyOnly?'몸만 표시 · 파츠 선택과 재생 시점 유지':errors.length?
     errors.map(row=>`${names[row.slot]||row.slot}: ${row.checks.filter(check=>check.status==='error').map(check=>terms[check.id]||check.id).join('·')}`).join(' / '):
-    fit.status==='passed'?`현재 포즈 ${fit.checked}파츠 기하 검사 통과 · 시각 검수 대기`:'현재 조합 검사 기준 미등록 · 파츠별 제작 검수와 시각 승인 대기';
+    fit.status==='passed'?`현재 포즈 ${fit.checked}파츠 기하 검사 통과 · 승인 결과는 파츠 검수에서 확인`:'현재 조합 검사 기준 미등록 · 파츠 승인 결과는 제작 검수에서 확인';
   const sourceRows=(runtime?.data.stability?.results||[]).filter(row=>row.clip===scene.clip_id&&row.sample===scene.sample_id);
   const sourceErrors=sourceRows.filter(row=>row.status==='error');
   $('source-status').dataset.status=sourceErrors.length?'error':sourceRows.length?'passed':'unverified';

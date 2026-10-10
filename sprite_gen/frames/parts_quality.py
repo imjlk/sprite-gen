@@ -12,9 +12,11 @@ def criteria(metrics, *, mode="raster"):
              ("holes", "작은 내부 구멍", 0, "warning"),
              ("specks", "4px 미만 잔조각", 0, "warning"),
              ("area_jump", "인접 포즈 면적 변화", .45, "warning")]
+    if "body_reference_mismatches" in metrics:
+        specs.insert(0,("body_reference_mismatches", "바디 레이어 소유 불일치", 0, "error"))
     rows = [{"id": key, "label": label, "value": metrics.get(key), "limit": limit,
              "status": ("미계산" if key == "area_jump" else "미설정") if key not in metrics else level if metrics[key] > limit else "범위 내",
-             "basis": "authored interface" if key.endswith("_pixels") else "inspection heuristic"}
+             "basis": "authored body ownership" if key == "body_reference_mismatches" else "authored interface" if key.endswith("_pixels") else "inspection heuristic"}
             for key, label, limit, level in specs]
     if mode == "held":
         for row in rows:

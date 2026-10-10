@@ -7,7 +7,7 @@ import zipfile
 from PIL import Image
 from sprite_gen._deps import np
 from sprite_gen.curate import parts_motion
-from sprite_gen.frames import parts_production as production, parts_candidate_scene, parts_part_edit
+from sprite_gen.frames import parts_production as production, parts_candidate_scene, parts_part_edit, parts_independent
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 from sprite_gen.spec.runio import atomic_write_text
 
@@ -23,6 +23,9 @@ def _input_paths(root, config):
         segments = workspace.decode_json(assets.SourceReader(root).read(config["segments"]))
         base = Path(config["segments"]).parent / "labels"
         paths.extend((base / clip / (sample + ".png")).as_posix() for clip, sample in segments.get("poses", {}).values())
+    if config.get("independent"):
+        paths.extend(path for layer in config['independent']['layers']
+                     for guides in layer.get('guides', {}).values() for path in guides)
     return sorted(set(p for p in paths if p))
 
 
@@ -93,9 +96,10 @@ def _regions(root, index, registry, config, pose, image, record, base):
         return {}, {}
     ink = np.asarray(image)[..., 3] > 0
     visible = np.ones(ink.shape, dtype=bool)
-    if config["visibility"] == "zmap" and config["segments"]:
+    if config["visibility"] == "zmap" and (config["segments"] or config['independent']):
         visible = parts_candidate_scene.visibility(root, index, registry, config, pose, image,
-                                                   record["placement"], required=regions.get("required"))
+                                                   record["placement"], required=regions.get("required"),
+                                                   independent_layers=parts_independent.candidate_layers(record,base) or None)
     elif config["visibility"] == "mask" and "render_mask" in record["images"]:
         ref = record["images"]["render_mask"]
         visible = np.asarray(Image.open(BytesIO(reader.read(ref["file"], ref["sha256"]))).convert("L")) > 0

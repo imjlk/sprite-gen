@@ -40,7 +40,7 @@ def response_text(status: int, reply) -> tuple[str, dict]:
                   "response_status": reply.get("status")}
 
 
-def codex_inspect(path: Path, workdir: Path) -> tuple[str, dict]:
+def codex_inspect(path: Path, workdir: Path, *, prompt: str = INSPECTION_PROMPT) -> tuple[str, dict]:
     # Isolated cwd and ephemeral session: no project instructions, no stale
     # output reuse and no persistent vision rollouts. Uses the existing login.
     with tempfile.TemporaryDirectory(prefix="facing-", dir=workdir) as directory:
@@ -48,7 +48,7 @@ def codex_inspect(path: Path, workdir: Path) -> tuple[str, dict]:
         command = [provider_binary("codex"), "exec", "--sandbox", "read-only",
                    "--skip-git-repo-check", "--ephemeral", "--color", "never",
                    "-C", directory, "-i", str(path.resolve()), "-o", str(output), "-"]
-        completed = subprocess.run(command, input=INSPECTION_PROMPT, capture_output=True,
+        completed = subprocess.run(command, input=prompt, capture_output=True,
                                    text=True, encoding="utf-8", env=provider_subprocess_env(),
                                    timeout=GEN_TIMEOUT_SECONDS)
         if completed.returncode:

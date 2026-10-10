@@ -31,6 +31,7 @@ from sprite_gen.frames import parts_quality
 from sprite_gen.frames import parts_segments
 from sprite_gen.frames import parts_part_edit
 from sprite_gen.frames import parts_revalidation
+from sprite_gen.frames import parts_independent, parts_vision
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 from sprite_gen.spec.runio import atomic_write_text
 
@@ -59,7 +60,7 @@ class ReviewDesk:
                     state = production._load(root, part)
                     for pose in job["poses"]:
                         row = production._track(state, track)["poses"].get(pose, {})
-                        if row.get("rework"):
+                        if row.get("rework") and job.get('type') != 'vision':
                             row["rework"].update(status="failed", error=job["error"])
                     production._save(root, state)
                 self.jobs[job["id"]] = job
@@ -107,6 +108,7 @@ class ReviewDesk:
                           "candidates": len(row.get("candidates", [])), "decision": row.get("decision"),
                           "note": row.get("note"), "reviewer": row.get("reviewer"), "check": row.get("check"),
                           "rework": row.get("rework")})
+            poses[-1]['vision'] = parts_vision.current(root,index,state,pose,track=track)
         return {"part": name, "config": state["config"], "track": track or production.MAIN, "poses": poses,
                 "revalidation": parts_revalidation.latest(self.assembly, part, track=track),
                 "canvas": registry[index["rig"]["id"]]["canvas"],
@@ -139,8 +141,9 @@ class ReviewDesk:
                 metrics, findings = production._measure(root, state["config"], production._settings(state["config"], track), candidate, context)
             result.append({"id": record["digest"], "path": candidate, "selected": candidate == row["selected"],
                            "images": list(record["images"]), "placement": record["placement"], "source": record.get("source"),
-                           "method": record["method"], "reference": record.get("generation_reference"),
+                           "method": record["method"], "reference": record.get("generation_reference") or record.get('independent_reference'),
                            "compatible": record["motion"] == index["motion"],
+                           "layers": [item['id'] for item in record.get('independent_layers',[])],
                            "metrics": metrics, "findings": [message for _, message in findings],
                            "criteria": parts_quality.criteria(metrics, mode=state["config"]["mode"]),
                            "status": row["check"]["status"] if candidate == row["selected"] and row.get("check") else
@@ -154,9 +157,15 @@ class ReviewDesk:
         entry = production._batch(production._track(state, track), batch)
         if not entry.get("reference"):
             raise contract.PartsContractError("this legacy batch has no frozen generation reference")
-        document, base = parts_reference.read(root, entry["reference"])
+        if entry.get('layout') == 'independent':
+            document, base = parts_independent.read_reference(root,entry['reference'])
+            refs = document['files'].values()
+            reader = assets.SourceReader(root/base)
+        else:
+            document, base = parts_reference.read(root, entry["reference"])
+            refs = parts_reference.files(document)
+            reader = parts_reference.verify(root, document, base)
         data = BytesIO()
-        reader = parts_reference.verify(root, document, base)
         seen = set()
         with zipfile.ZipFile(data, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             def put(file, encoded):
@@ -164,13 +173,13 @@ class ReviewDesk:
                 info.compress_type = zipfile.ZIP_DEFLATED
                 archive.writestr(info, encoded)
             put("reference.json", assets.read_file(root, entry["reference"]["file"]))
-            for ref in parts_reference.files(document):
+            for ref in refs:
                 if ref["file"] not in seen:
                     put(ref["file"], reader.read(ref["file"], ref["sha256"]))
                     seen.add(ref["file"])
         return data.getvalue()
 
-    def render(self, name, pose, kind, candidate=None, *, dx=0, dy=0):
+    def render(self, name, pose, kind, candidate=None, *, dx=0, dy=0, piece=None):
         """PNG of one pose: the part on the body alone (built), or the drawn cell / cut on what it was drawn over."""
         part, track = self._split(name)
         root, index, registry, _ = self._state()
@@ -223,7 +232,13 @@ class ReviewDesk:
             raw = parts_part_edit.translate_image(raw, dx, dy)
             if state["config"]["visibility"] == "mask" and "render_mask" in record["images"]:
                 raw = production._visible_part(raw, Image.open(base / record["images"]["render_mask"]["file"]))
-            plan, sample, load = parts_candidate_scene.scene(root, index, registry, state["config"], pose, raw, record["placement"])
+            layers = parts_independent.candidate_layers(record,base) or None
+            if piece is not None and (not layers or piece not in {item['id'] for item in layers}):
+                raise contract.PartsContractError('unknown independent position layer')
+            if layers:
+                for layer in layers:
+                    if piece is None or layer['id']==piece:layer['image'] = parts_part_edit.translate_image(layer['image'],dx,dy)
+            plan, sample, load = parts_candidate_scene.scene(root, index, registry, state["config"], pose, raw, record["placement"], independent_layers=layers)
             image = production.compose_parts.render_sample(plan, sample, load)[0]
         elif kind == "body-zraw":
             if box is None or track is not None or state["config"]["role"] != "part":
@@ -245,13 +260,14 @@ class ReviewDesk:
             if kind == "errors":
                 raw = Image.open(base / record["images"]["part"]["file"]).convert("RGBA")
                 ink = np.asarray(raw)[..., 3] > 0
-                if state["config"]["visibility"] == "zmap" and state["config"]["segments"]:
+                if state["config"]["visibility"] == "zmap" and (state["config"]["segments"] or state['config']['independent']):
                     from sprite_gen.frames import parts_candidate_scene
                     required = None
                     if ref := record["images"].get("qa_required"):
                         encoded = assets.SourceReader(base).read(ref["file"],ref["sha256"])
                         required = np.asarray(Image.open(BytesIO(encoded)).convert("L")) > 0
-                    allowed_pixels = parts_candidate_scene.visibility(root,index,registry,state["config"],pose,raw,record["placement"],required=required)
+                    allowed_pixels = parts_candidate_scene.visibility(root,index,registry,state["config"],pose,raw,record["placement"],required=required,
+                        independent_layers=parts_independent.candidate_layers(record,base) or None)
                 else:
                     allowed_pixels = np.asarray(Image.open(base / "render_mask.png").convert("L")) > 0 if state["config"]["visibility"] == "mask" and "render_mask" in record["images"] else np.ones_like(ink)
                 ink &= allowed_pixels
@@ -278,6 +294,12 @@ class ReviewDesk:
         preview files never activate packs, replace source images or change QC.
         """
         config = state["config"]
+        if record.get('independent_layers'):
+            from sprite_gen.frames import parts_candidate_scene
+            raw=Image.open(base/record['images']['part']['file']).convert('RGBA')
+            plan,sample,load=parts_candidate_scene.scene(root,index,registry,config,pose,raw,record['placement'],
+                independent_layers=parts_independent.candidate_layers(record,base))
+            return production.compose_parts.render_sample(plan,sample,load)[0]
         _, first = production._poses(motion, production._states(state, index))
         clip_id, sample = first[pose]
         raw = Image.open(base / record["images"]["part"]["file"]).convert("RGBA")
@@ -344,7 +366,7 @@ class ReviewDesk:
                                          approve=body.get("approve", []), reject=body.get("reject", []),
                                          note=body.get("note") or None)
             if action == "sheet":
-                return production.sheet(self.assembly, part, poses=body.get("poses") or None, track=track)
+                return production.sheet(self.assembly, part, poses=body.get("poses") or None, track=track,layers=body.get('layers'))
             if action == "draw":
                 return production.draw(self.assembly, part, provider=body.get("provider"), track=track,
                                        model=body.get("model"), dry_run=bool(body.get("dry_run")))
@@ -405,7 +427,14 @@ class ReviewDesk:
         with self.jobs_lock:
             if identity not in self.jobs:
                 raise contract.PartsContractError("unknown rework job")
-            return deepcopy(self.jobs[identity])
+            job = deepcopy(self.jobs[identity])
+        if job['state'] == 'running' and job['step'] == 'draw' and job.get('batch'):
+            part, track = self._split(job['part'])
+            state = production._load(self.assembly.parent, part)
+            batch = production._batch(production._track(state, track), job['batch'])
+            pages = batch['pages']
+            job['progress'] = {'completed': sum(bool(page.get('reuse')) or (self.assembly.parent/page['art']).is_file() for page in pages), 'total': len(pages)}
+        return job
 
     def start_rework(self, name, body):
         part, track = self._split(name)
@@ -421,11 +450,14 @@ class ReviewDesk:
             def execute():
                 try:
                     batch = None
-                    stages = [("sheet", lambda: production.sheet(self.assembly, part, poses=request["draw_poses"], track=track)),
+                    stages = [("sheet", lambda: production.sheet(self.assembly, part, poses=request["draw_poses"], track=track,layers=body.get('layers'))),
                               ("draw", lambda: production.draw(self.assembly, part, batch=batch, track=track)),
                               ("slice", lambda: production.slice_batch(self.assembly, part, batch=batch, track=track)),
                               ("check", lambda: production.check(self.assembly, part, track=track)),
                               ("build", lambda: self.build_preserving_appearance(part))]
+                    config = production._load(self.assembly.parent,part)['config']
+                    if config['independent'] and config['independent']['require_vision']:
+                        stages.append(('vision',lambda: {'poses':[parts_vision.inspect(self.assembly,part,pose,track=track) for pose in request['poses']]}))
                     for step, operation in stages:
                         self.update_job(identity, step=step)
                         result = operation()
@@ -456,6 +488,30 @@ class ReviewDesk:
         except Exception:
             self.actions.release()
             raise
+
+
+    def start_vision(self,name,body):
+        part,track=self._split(name)
+        if not self.actions.acquire(blocking=False):raise contract.PartsContractError('another production action is running')
+        try:
+            root,_,_,_=self._state();state=production._load(root,part);pose=body.get('pose')
+            if not production._track(state,track)['poses'].get(pose,{}).get('selected'):
+                raise contract.PartsContractError('select a produced candidate before vision inspection')
+            identity=secrets.token_hex(8)
+            with self.jobs_lock:
+                self.jobs[identity]={'id':identity,'part':name,'poses':[pose],'type':'vision','state':'running','step':'vision','started':time.time(),'results':{}}
+            self.update_job(identity)
+            def execute():
+                try:
+                    result=parts_vision.inspect(self.assembly,part,pose,provider=body.get('provider','codex'),track=track)
+                    self.update_job(identity,state='completed',step='completed',results={'vision':result},finished=time.time())
+                except BaseException as exc:
+                    self.update_job(identity,state='failed',error=str(exc),finished=time.time())
+                finally:self.actions.release()
+            threading.Thread(target=execute,daemon=True).start()
+            return self.job(identity)
+        except BaseException:
+            self.actions.release();raise
 
 
 def handler_for(desk):
@@ -516,7 +572,7 @@ def handler_for(desk):
                     query = parse_qs(urlsplit(self.path).query)
                     candidate = query.get("candidate", [None])[0]
                     dx, dy = (int(query.get(axis, ["0"])[0]) for axis in ("dx", "dy"))
-                    self.reply(200, desk.render(name, pose, kind, candidate, dx=dx, dy=dy), "image/png")
+                    self.reply(200, desk.render(name, pose, kind, candidate, dx=dx, dy=dy, piece=query.get('piece',[None])[0]), "image/png")
                 else:
                     self.json({"error": "not found"}, 404)
             except (contract.PartsContractError, ValueError, OSError) as exc:
@@ -542,7 +598,7 @@ def handler_for(desk):
                 if not path.startswith("/api/act/") or not isinstance(body, dict):
                     raise ValueError("expected POST /api/act/<part>/<action> with a JSON object")
                 name, action = unquote(path.removeprefix("/api/act/")).rsplit("/", 1)
-                self.json(desk.start_rework(name, body) if action == "rework" else desk.act(name, action, body))
+                self.json(desk.start_rework(name, body) if action == "rework" else desk.start_vision(name,body) if action=='vision' else desk.act(name, action, body))
             except (contract.PartsContractError, ValueError, OSError) as exc:
                 self.json({"error": str(exc)}, 400)
     return Handler

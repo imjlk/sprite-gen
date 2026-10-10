@@ -89,6 +89,17 @@ _STABLE = contract._record({"id": contract._id, "socket": contract._id, "bounds"
                            "max_rgb_pixels": contract._integer, "rgb_threshold": contract._integer},
                           {"reference_pose": None, "max_alpha_pixels": 0, "max_rgb_pixels": 0, "rgb_threshold": 24})
 _QA = contract._record({"stable_regions": contract._records(_STABLE)}, {"stable_regions": []})
+_INDEPENDENT_LAYER = contract._record({
+    "id": contract._id, "node": contract._id,
+    "targets": contract._mapping(contract._rectangle),
+    "source_bounds": contract._mapping(contract._rectangle),
+    "body_nodes": contract._ids,
+    "landmarks": contract._mapping(contract._mapping(contract._point)),
+    "guides": contract._mapping(contract._list(contract._relative_file)),
+    "fit": contract._enum("contain", "cover"), "margin": contract._string,
+}, {"source_bounds": {}, "body_nodes": [], "landmarks": {}, "guides": {}, "fit": "contain", "margin": "1"})
+_INDEPENDENT = contract._record({"layers": contract._records(_INDEPENDENT_LAYER),
+    "require_vision": contract._boolean, "reference_previous": contract._boolean}, {"require_vision": True, "reference_previous": False})
 _CONFIG = contract._record({
     "kind": contract._enum("parts-production-config"), "schema_version": contract._positive,
     "part_id": contract._id, "design_id": contract._id, "role": contract._enum("part", "body"),
@@ -102,10 +113,11 @@ _CONFIG = contract._record({
     "pose_checks": contract._mapping(_POSE_CHECK),
     "qa": _QA,
     "visibility": contract._enum("zmap", "mask"),
+    "independent": contract._nullable(_INDEPENDENT),
 }, {"role": "part", "slot": None, "node": None, "socket": None, "mode": "raster", "draw": {}, "states": [],
     "reference_pose": None, "sheet": {}, "cut": {}, "wearing": [], "pieces": [], "by_component": False, "segments": None,
     "prompt": None, "follow": None, "trail": None, "cover_rule": None, "covers": [], "variants": [], "body": None,
-    "pose_checks": {}, "qa": {}, "visibility": "zmap"})
+    "pose_checks": {}, "qa": {}, "visibility": "zmap", "independent": None})
 DECISIONS = ("unverified", "approved", "rejected")
 FIXED = ("part_id", "design_id", "role", "slot", "node", "socket", "mode")
 # Check bounds, judged on the SD demo (docs/parts/10-production.md).
@@ -254,6 +266,9 @@ def init(assembly, config):
     if value["schema_version"] != 1:
         raise contract.PartsContractError("only schema_version 1 is supported")
     _validate_qa(value, index, registry)
+    if value["independent"]:
+        from sprite_gen.frames.parts_independent import validate
+        validate(value, index, registry)
     rig = registry[index["rig"]["id"]]
     topology = registry[rig["topology"]["id"]]
     if value["role"] == "body":
@@ -298,6 +313,9 @@ def configure(assembly, part, config):
     path = Path(config).absolute()
     value = _CONFIG(workspace.read_json(path.parent, path.name), "config")
     _validate_qa(value, index, registry)
+    if value["independent"]:
+        from sprite_gen.frames.parts_independent import validate
+        validate(value, index, registry)
     topology = registry[registry[index["rig"]["id"]]["topology"]["id"]]
     contract._members([node for piece in value["pieces"] for node in piece.get("replaces", [])], [node["id"] for node in topology["nodes"]], "piece replacement nodes")
     if value["role"] == "body":
@@ -310,7 +328,7 @@ def configure(assembly, part, config):
     if value["pieces"] and value["segments"] is None:
         raise contract.PartsContractError("pieces are cut by body segments: give config.segments")
     previous = production["config"]
-    if any(previous[k] != value[k] for k in ("qa", "visibility", "pieces", "segments")):
+    if any(previous[k] != value[k] for k in ("qa", "visibility", "pieces", "segments", "independent")):
         for track in production["tracks"].values():
             for row in track["poses"].values():
                 row.update(check=None, decision="unverified", reviewer=None, note=None)
@@ -322,7 +340,7 @@ def configure(assembly, part, config):
     return {"part": part, "changed": sorted(k for k in value if value[k] != previous.get(k)), "release_ready": False}
 
 
-def sheet(assembly, part, *, poses=None, track=None):
+def sheet(assembly, part, *, poses=None, track=None, layers=None):
     """Pose sheets of the poses still to draw: never drawn, or rejected at review."""
     root, index, registry, _ = parts_motion._active(assembly)
     production = _load(root, part)
@@ -335,6 +353,11 @@ def sheet(assembly, part, *, poses=None, track=None):
     if not wanted:
         raise contract.PartsContractError(f"{part}: every pose has a selected drawing that is not rejected")
     contract._members(wanted, order, "poses")
+    if config["independent"]:
+        from sprite_gen.frames.parts_independent import prepare
+        return prepare(assembly, part, wanted, track=track, layers=layers)
+    if layers:
+        raise contract.PartsContractError('layer-specific redraw requires independent generation')
     # A redo is a new batch: what it replaces, the worn parts as they are now and the prompt are in its ID.
     batch = "b" + contract.content_digest({
         "motion": index["motion"], "poses": wanted, "track": track or MAIN,
@@ -390,6 +413,9 @@ def draw(assembly, part, *, batch=None, provider=None, model=None, dry_run=False
     settings = production["config"]["draw"]
     provider, model = provider or settings["provider"], model or settings["model"]
     entry = _batch(_track(production, track), batch)
+    if entry.get("layout") == "independent":
+        from sprite_gen.frames.parts_independent import draw as draw_independent
+        return draw_independent(assembly, part, entry, provider=provider, model=model, dry_run=dry_run, track=track)
     if entry["prompt"] is None:
         raise contract.PartsContractError(f"{part}: config has no prompt; draw the pages by hand")
     frozen, frozen_base = parts_reference.read(root, entry["reference"]) if entry.get("reference") else (None, None)
@@ -463,7 +489,7 @@ def _select(rows, poses, candidate, *, keep_approved=True):
         if candidate not in row["candidates"]:
             row["candidates"].append(candidate)
         if not (keep_approved and row["decision"] == "approved"):
-            row.update(selected=candidate, decision="unverified", note=None, reviewer=None, check=None)
+            row.update(selected=candidate, decision="unverified", note=None, reviewer=None, check=None, vision=None)
             if row.get("rework"):
                 row["rework"].update(status="candidate-ready", result=candidate)
 
@@ -544,6 +570,10 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
     config = production["config"]
     rows = _track(production, track)
     settings = _settings(config, track)
+    entry = _batch(rows, batch)
+    if entry.get("layout") == "independent":
+        from sprite_gen.frames.parts_independent import slice_batch as slice_independent
+        return slice_independent(assembly, part, entry, pages=pages, track=track)
     motion = registry[index["motion"]["id"]]
     rig = registry[index["rig"]["id"]]
     topology = registry[rig["topology"]["id"]]
@@ -835,7 +865,7 @@ def _neighbours(motion, states):
             continue
         ids = [s["pose_id"] for s in clip["samples"]]
         for n, pose in enumerate(ids):
-            near.setdefault(pose, set()).update({ids[n-1], ids[(n+1) % len(ids)]} - {pose})
+            near.setdefault(pose, set()).update({ids[i % len(ids)] for i in (n-1,n+1) if 0<=i<len(ids) or clip['loop']} - {pose})
     return near
 
 
@@ -881,10 +911,12 @@ def _measure(root, config, settings, location, context):
         parts_reference.verify(root, reference, reference_base)
     settings = {**settings, "cut": record.get("method", {}).get("cut", settings["cut"])}
     image = np.asarray(Image.open(base / "part.png").convert("RGBA"))
-    mask = image[..., 3] > 0
+    mask = image[..., 3] >= (16 if config['independent'] else 1)
     raw_mask = mask.copy()
     visible = np.ones(mask.shape, dtype=bool)
     metrics = {"pixels": int(mask.sum()), "alignment": record["alignment"], "coverage": None}
+    if config['independent']:
+        metrics['visible_alpha_min'] = 16
     if config["visibility"] == "mask" and "render_mask" in record["images"]:
         ref = record["images"]["render_mask"]
         encoded = assets.read_file(base, ref["file"])
@@ -893,17 +925,18 @@ def _measure(root, config, settings, location, context):
         visible = np.asarray(Image.open(BytesIO(encoded)).convert("L")) > 0
         metrics["occluded_pixels"] = int((mask & ~visible).sum())
         mask &= visible
-    elif config["visibility"] == "zmap" and config["segments"] and context[3]["layers"]:
-        from sprite_gen.frames import parts_candidate_scene
+    elif config["visibility"] == "zmap" and (config["segments"] or config["independent"]) and context[3].get("layers"):
+        from sprite_gen.frames import parts_candidate_scene, parts_independent
         required = None
         if ref := record["images"].get("qa_required"):
             encoded = assets.SourceReader(base).read(ref["file"], ref["sha256"])
-            required = np.asarray(Image.open(BytesIO(encoded)).convert("L")) > 0
+            required = np.asarray(Image.open(BytesIO(encoded)).convert("L")) >= (16 if config['independent'] else 1)
         visible = parts_candidate_scene.visibility(context[4].root, context[1], context[2], config,
-            record["pose_id"], Image.fromarray(image), record["placement"], required=required)
+            record["pose_id"], Image.fromarray(image), record["placement"], required=required,
+            independent_layers=parts_independent.candidate_layers(record,base) if config['independent'] else None)
         metrics["occluded_pixels"] = int((mask & ~visible).sum())
         mask &= visible
-    metrics["inspection_space"] = "zmap-visible" if config["visibility"] == "zmap" and config["segments"] and context[3]["layers"] else "mask-visible" if config["visibility"] == "mask" else "raw-source"
+    metrics["inspection_space"] = "zmap-visible" if config["visibility"] == "zmap" and (config["segments"] or config["independent"]) and context[3].get("layers") else "mask-visible" if config["visibility"] == "mask" else "raw-source"
     if record["alignment"] is not None and "drawn" in record["images"] and "under" in record["images"]:
         crop = record.get("crop", config["sheet"]["crop"])
         drawn, under = (Image.open(base / f"{n}.png").convert("RGBA") for n in ("drawn", "under"))
@@ -911,6 +944,13 @@ def _measure(root, config, settings, location, context):
             drawn, under = drawn.crop(tuple(crop)), under.crop(tuple(crop))
         metrics["coverage"] = sheets.overlap(drawn, under)[1]
     findings = []
+    if config['independent']:
+        from sprite_gen.frames import parts_independent
+        ownership = parts_independent.body_ownership_errors(root,context[1],context[2],config,
+            record['pose_id'],layers=record.get('independent_layers'))
+        metrics['body_reference_mismatches'] = sum(ownership.values())
+        if ownership:
+            findings.append(('error',f'body ownership differs from required reference nodes: {ownership}; repair body layers'))
     if config["role"] == "body":
         metrics.update(painted_share=record.get("painted_share"), swapped=record.get("swapped", []))
         if metrics["painted_share"] is not None and metrics["painted_share"] < LIMITS["painted_share"]:
@@ -929,10 +969,22 @@ def _measure(root, config, settings, location, context):
             encoded = assets.read_file(base, ref["file"])
             if assets.sha256(encoded) != ref["sha256"]:
                 raise contract.PartsContractError(f"{record['pose_id']}: changed {name} mask")
-            region = np.asarray(Image.open(BytesIO(encoded)).convert("L")) > 0
+            region = np.asarray(Image.open(BytesIO(encoded)).convert("L")) >= (16 if config['independent'] else 1)
+            if config['independent'] and (path := config['pose_checks'].get(record['pose_id'],{}).get(name)):
+                current_guard = np.asarray(Image.open(BytesIO(assets.SourceReader(root).read(path))).convert('L'))
+                if not np.array_equal(current_guard,np.asarray(Image.open(BytesIO(encoded)).convert('L'))):
+                    findings.append(('error',f'{name}: authored criterion changed; freeze updated guides in a new edit candidate before approving'))
             if name == "required":
                 region &= visible
-            count = int((region & ~mask).sum() if name == "required" else
+            # A faint alpha fringe must not count as covering bare scalp/toes.
+            # Direct guides encode coverage strength: white requests >=230 alpha.
+            coverage = mask
+            if name == 'required' and config['independent']:
+                strength = np.asarray(Image.open(BytesIO(encoded)).convert('L')).astype(np.uint16)
+                minimum = np.maximum(1,(strength*230+254)//255)
+                coverage = image[...,3] >= minimum
+                metrics['required_alpha_for_white'] = 230
+            count = int((region & ~coverage).sum() if name == "required" else
                         (region & mask).sum() if name == "protected" else (~region & mask).sum())
             metrics[f"{name}_pixels"] = count
             if count:
@@ -1128,9 +1180,13 @@ def build(assembly, part, *, allow_incomplete=False):
     else:
         folder = _folder(root, part) / "build"
         pieces = []
-        for name, track in production["tracks"].items():
-            piece, _ = _track_piece(root, part, config, motion, states, name, track, order, first)
-            pieces.append(piece)
+        if config["independent"]:
+            from sprite_gen.frames.parts_independent import build_pieces
+            pieces = build_pieces(root, part, production, order)
+        else:
+            for name, track in production["tracks"].items():
+                piece, _ = _track_piece(root, part, config, motion, states, name, track, order, first)
+                pieces.append(piece)
         spec = {"kind": "parts-pack-import", "schema_version": 1, "id": part, "design_id": config["design_id"], "role": "part",
                 "style": rig["style"], "rig": index["rig"], "motion": index["motion"], "view": rig["view"],
                 "binding_id": part + ".binding", "occupies": [config["slot"]], "states": states, "pieces": pieces}
@@ -1268,6 +1324,11 @@ def review(assembly, part, *, reviewer=None, approve=(), reject=(), note=None, c
         raise contract.PartsContractError("a decision needs --reviewer")
     for pose in approved:
         record = candidate_record(root, production, pose, rows[pose]["selected"], track=track)
+        if config['independent'] and config['independent']['require_vision']:
+            from sprite_gen.frames import parts_vision
+            observation = parts_vision.current(root,index,production,pose,track=track)
+            if not observation or not observation['current'] or observation['status'] != 'pass':
+                raise contract.PartsContractError(f'{pose}: current image-based vision inspection must pass before curator approval')
         if config["role"] == "part" and any(
                 config["pose_checks"].get(pose, {}).get(name) is not None
                 and f"qa_{name}" not in record["images"] for name in ("required", "protected", "allowed")):
@@ -1422,6 +1483,7 @@ def add_sheet_arguments(parser):
     parser.add_argument("--part", required=True)
     parser.add_argument("--poses", type=_poses_arg, help="comma-separated poses (default: missing and rejected ones)")
     _with_track(parser)
+    parser.add_argument('--layer',action='append',dest='layers',help='redraw only this independent layer; preserve the other selected layers')
 
 
 def add_draw_arguments(parser):
@@ -1439,7 +1501,7 @@ def add_slice_arguments(parser):
     parser.add_argument("--part", required=True)
     parser.add_argument("--batch")
     parser.add_argument("--page", action="append", default=[], dest="pages", type=sheets._page_pair,
-                        help="GUIDE=ART instead of the batch's own pages (repeatable)")
+                        help="GUIDE=ART, or INDEX=PATH for independent layers (repeatable)")
     _with_track(parser)
 
 

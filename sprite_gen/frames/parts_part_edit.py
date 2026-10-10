@@ -20,22 +20,27 @@ _OP = contract._record(
             "erase",
             "restore-source",
             "fit-alpha-box",
+            "rotate",
             "fill-small-holes",
         ),
         "bounds": contract._nullable(contract._rectangle),
         "source_bounds": contract._nullable(contract._rectangle),
+        "piece": contract._nullable(contract._id),
         "max_pixels": contract._positive,
         "dx": contract._integer,
         "dy": contract._integer,
+        "angle": contract._integer,
         "from_color": contract._nullable(contract._string),
         "to_color": contract._nullable(contract._string),
     },
     {
         "bounds": None,
         "source_bounds": None,
+        "piece": None,
         "max_pixels": 12,
         "dx": 0,
         "dy": 0,
+        "angle": 0,
         "from_color": None,
         "to_color": None,
     },
@@ -55,10 +60,14 @@ def translate_image(image, dx, dy, bounds=None):
     if bounds:
         a, b, c, d = contract._rectangle(bounds, "bounds")
         if not 0 <= a < c <= width or not 0 <= b < d <= height:
-            raise contract.PartsContractError("edit region must be inside the native canvas")
+            raise contract.PartsContractError(
+                "edit region must be inside the native canvas"
+            )
         region = (xx >= a) & (xx < c) & (yy >= b) & (yy < d)
     ink = region & (raw[..., 3] > 0)
-    if np.any(ink & ((xx + dx < 0) | (xx + dx >= width) | (yy + dy < 0) | (yy + dy >= height))):
+    if np.any(
+        ink & ((xx + dx < 0) | (xx + dx >= width) | (yy + dy < 0) | (yy + dy >= height))
+    ):
         raise contract.PartsContractError("edit clips source pixels")
     moved = np.zeros_like(raw)
     ys, xs = np.nonzero(ink)
@@ -69,27 +78,10 @@ def translate_image(image, dx, dy, bounds=None):
     return layer
 
 
-def edit(assembly, part, pose, operations, *, candidate=None, track=None):
-    root, index, registry, _ = parts_motion._active(assembly)
-    state = p._load(root, part)
-    rows = p._track(state, track)
-    row = rows["poses"].get(pose)
-    if not row or not row.get("selected"):
-        raise contract.PartsContractError("choose a source candidate")
-    location = candidate or row["selected"]
-    record = p.candidate_record(root, state, pose, location, track=track)
-    if record["motion"] != index["motion"]:
-        raise contract.PartsContractError(
-            "source belongs to a different motion revision"
-        )
-    operations = contract._list(_OP, nonempty=True)(operations, "operations")
-    if len(operations) > 16:
-        raise contract.PartsContractError("at most 16 operations per edit")
-    base = root / location
-    images = {
-        name: Image.open(base / ref["file"]).copy()
-        for name, ref in record["images"].items()
-    }
+def apply_operations(
+    images, record, operations, *, sampling="nearest", allow_noop=False
+):
+    """Apply the same bounded edits to a single retained native raster."""
     raw = np.asarray(images["part"].convert("RGBA")).copy()
     height, width = raw.shape[:2]
     original = raw.copy()
@@ -135,12 +127,15 @@ def edit(assembly, part, pose, operations, *, candidate=None, track=None):
                 max(1, min(c - a, round(cropped.width * factor))),
                 max(1, min(d - b, round(cropped.height * factor))),
             )
-            sampling = registry[index["rig"]["id"]].get("sampling", "nearest")
-            cropped = cropped.resize(
-                size,
-                Image.Resampling.LANCZOS
-                if sampling == "smooth"
-                else Image.Resampling.NEAREST,
+            cropped = (
+                cropped.convert("RGBa")
+                .resize(
+                    size,
+                    Image.Resampling.BILINEAR
+                    if sampling == "smooth"
+                    else Image.Resampling.NEAREST,
+                )
+                .convert("RGBA")
             )
             remainder = raw.copy()
             remainder[selected] = 0
@@ -161,8 +156,43 @@ def edit(assembly, part, pose, operations, *, candidate=None, track=None):
             )
             raw[b:d, a:c] = np.asarray(repaired)
             filled_holes += count
+        elif op["type"] == "rotate":
+            if bounds or abs(op["angle"]) > 30:
+                raise contract.PartsContractError(
+                    "rotate a whole piece by at most 30 degrees"
+                )
+            raster = Image.fromarray(raw)
+            box = raster.getbbox()
+            if box is None:
+                raise contract.PartsContractError("cannot rotate an empty part")
+            rotated = (
+                raster.crop(box)
+                .convert("RGBa")
+                .rotate(
+                    op["angle"],
+                    expand=True,
+                    resample=Image.Resampling.BILINEAR
+                    if sampling == "smooth"
+                    else Image.Resampling.NEAREST,
+                )
+                .convert("RGBA")
+            )
+            x = round((box[0] + box[2] - rotated.width) / 2) + op["dx"]
+            y = round((box[1] + box[3] - rotated.height) / 2) + op["dy"]
+            if (
+                x < 0
+                or y < 0
+                or x + rotated.width > width
+                or y + rotated.height > height
+            ):
+                raise contract.PartsContractError("rotation clips source pixels")
+            fitted = Image.new("RGBA", raster.size)
+            fitted.alpha_composite(rotated, (x, y))
+            raw = np.asarray(fitted).copy()
         elif op["type"] == "translate":
-            raw = np.asarray(translate_image(Image.fromarray(raw), op["dx"], op["dy"], bounds)).copy()
+            raw = np.asarray(
+                translate_image(Image.fromarray(raw), op["dx"], op["dy"], bounds)
+            ).copy()
         elif op["type"] == "recolor":
             if not op["from_color"] or not op["to_color"]:
                 raise contract.PartsContractError("recolor needs exact from/to colors")
@@ -194,8 +224,55 @@ def edit(assembly, part, pose, operations, *, candidate=None, track=None):
     if "render_mask" in images:
         images["render_part"] = p._visible_part(images["part"], images["render_mask"])
     changed = int(np.any(raw != original, axis=-1).sum())
-    if not changed:
+    if not changed and not allow_noop:
         raise contract.PartsContractError("operations do not change any source pixels")
+    return images, changed, filled_holes
+
+
+def edit(assembly, part, pose, operations, *, candidate=None, track=None):
+    root, index, registry, _ = parts_motion._active(assembly)
+    state = p._load(root, part)
+    rows = p._track(state, track)
+    row = rows["poses"].get(pose)
+    if not row or not row.get("selected"):
+        raise contract.PartsContractError("choose a source candidate")
+    location = candidate or row["selected"]
+    record = p.candidate_record(root, state, pose, location, track=track)
+    if record["motion"] != index["motion"]:
+        raise contract.PartsContractError(
+            "source belongs to a different motion revision"
+        )
+    operations = contract._list(_OP, nonempty=True)(operations, "operations")
+    if len(operations) > 16:
+        raise contract.PartsContractError("at most 16 operations per edit")
+    base = root / location
+    images = {
+        name: Image.open(base / ref["file"]).copy()
+        for name, ref in record["images"].items()
+    }
+    if record.get("independent_layers"):
+        from sprite_gen.frames.parts_independent import edit_layers
+
+        return edit_layers(
+            root,
+            state,
+            row,
+            location,
+            record,
+            images,
+            operations,
+            sampling=registry[index["rig"]["id"]].get("sampling", "nearest"),
+        )
+    if any(op["piece"] is not None for op in operations):
+        raise contract.PartsContractError(
+            "piece selection needs an independent-layer candidate"
+        )
+    images, changed, filled_holes = apply_operations(
+        images,
+        record,
+        operations,
+        sampling=registry[index["rig"]["id"]].get("sampling", "nearest"),
+    )
     new = {k: deepcopy(v) for k, v in record.items() if k not in ("digest", "images")}
     new["method"] = {
         **new["method"],
@@ -218,7 +295,7 @@ def edit(assembly, part, pose, operations, *, candidate=None, track=None):
         },
     }
     new.update(
-        pixels=int((raw[..., 3] > 0).sum()),
+        pixels=int((np.asarray(images["part"])[..., 3] > 0).sum()),
         holes_filled=record.get("holes_filled", 0) + filled_holes,
     )
     saved, location = p._publish_candidate(root, part, new, images)

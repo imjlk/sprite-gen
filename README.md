@@ -47,6 +47,8 @@ Ask for **sprites** or **an image**. The agent checks access, asks only for miss
 
 ## Pipelines, independent tools and scenes
 
+For customizable avatars, the fork's [independent part production workflow](docs/parts/19-independent-part-production.md) generates each part layer against a frozen body/motion, retains native sources, and connects edits, vision inspection, curator approval and zmap export. The reproducible art example uses four run reference poses; it is not a finished animation cycle.
+
 The two sprite pipelines are ordered generation flows. Tool groups contain independent commands; scene creation is an optional workflow that consumes finished assets. `sprite-gen --help` prints this map and groups commands by the code domain that owns them.
 
 ```mermaid

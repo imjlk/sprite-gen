@@ -15,7 +15,7 @@ async function act(action, body={}){
  const j=await r.json(); if(!r.ok) throw new Error(j.error); return j;
 }
 function controls(){
- document.querySelectorAll('[data-act],#select-candidate,#approve,#reject,#redo,#redo-marked,#edit-candidate,#apply-visibility,#position-hint').forEach(b=>b.disabled=state.busy || !token || !state.data);
+ document.querySelectorAll('[data-act],#select-candidate,#approve,#reject,#redo,#redo-marked,#edit-candidate,#apply-visibility,#position-hint,#vision').forEach(b=>b.disabled=state.busy || !token || !state.data);
  document.querySelector('[data-act="revalidate"]').disabled ||= state.data?.config.mode!=='raster'||state.data?.config.role!=='part';
  $('part').disabled=state.busy;$('visibility').disabled=state.busy||!token||!state.data;
  const row=state.data?.poses.find(p=>p.pose===state.pose);
@@ -26,6 +26,8 @@ function controls(){
  $('redo-marked').textContent='표시한 '+state.marked.size+'포즈 새 이미지 생성';
  $('approve').disabled ||= !c?.selected || !state.data?.built_current || !['passed','warning'].includes(row?.check?.status);
  $('approve').disabled ||= ['requested','failed'].includes(row?.rework?.status);
+ $('vision').disabled ||= !c?.selected;
+ if(state.data?.config.independent?.require_vision) $('approve').disabled ||= !row?.vision?.current || row.vision.status!=='pass';
  $('approve').disabled ||= ['body-raw','body-zraw'].includes($('view').value);
  $('approve').disabled ||= !!(position.dx||position.dy);
  $('select-candidate').disabled ||= !!(position.dx||position.dy);
@@ -93,6 +95,11 @@ function showCandidate(c){
  const tbody=$('criteria').querySelector('tbody');tbody.replaceChildren(...(c.criteria||[]).map(r=>{const tr=document.createElement('tr');tr.append(node('td',r.label),node('td',r.value==null?r.status:r.id==='area_jump'?(r.value*100).toFixed(1)+'% / '+r.limit*100+'%':r.value+'px / '+(r.limit==null?'참고':r.limit+'px')),node('td',statusName(r.status)));return tr;}));
  const missing=[['qa_required','필수 덮임'],['qa_protected','보호 영역'],['qa_allowed','허용 영역']].filter(([n])=>!c.images.includes(n)).map(([,label])=>label);
  $('candidate-note').textContent=(missing.length===3?'검사 지도가 없는 후보입니다. 수치만으로 새 후보와 우열을 정하지 마세요. ':missing.length?'미지정 검사 항목: '+missing.join(' · ')+'. 시각 검수가 필요합니다. ':'')+(!c.selected?' 이전 후보의 프레임 전체 검사는 선택 후 전체 검사로 확인하세요. ':'')+(c.reference?'생성 기준 묶음이 고정된 후보입니다.':'이전 버전 후보: 원본과 출처는 보존됐지만 생성 전 기준 묶음은 없습니다.');
+ for(const id of ['edit-piece','position-piece']){const select=$(id);select.replaceChildren(node('option','전체 파츠'));select.firstChild.value='';for(const name of c.layers||[]){const option=node('option',name);option.value=name;select.append(option);}}
+ const vision=c.selected?row.vision:null;
+ $('vision-summary').textContent=!vision?'미실행 · 실제 이미지 검사가 필요합니다.':(!vision.current?'이전 후보/바디의 판정 · 재검사 필요 · ':'')+({pass:'비전 관찰 범위 내 통과',rework:'비전 재작업 필요',uncertain:'비전 판단 보류',failed:'비전 호출 실패'}[vision.status]||vision.status)+' · '+(vision.answer?.summary||vision.error||'');
+ $('vision-checks').replaceChildren();
+ for(const [category,item] of Object.entries(vision?.answer?.checks||{})) $('vision-checks').append(node('li',category+' · '+item.result+' · '+item.reason));
  $('evidence').textContent=JSON.stringify({placement:c.placement,method:c.method,metrics:c.metrics,source:c.source,generation_reference:c.reference},null,2);
  $('note').value=state.drafts.get(draftKey())??row.rework?.note??row.note??'';if(!state.busy&&row.rework?.status==='failed')$('job-status').textContent='재작업 실패: '+row.rework.error;
  $('candidates').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.id===c.id));
@@ -102,6 +109,7 @@ function showCandidate(c){
 }
 function clearInspector(message){
  state.candidate=null;state.candidates=[];
+ $('vision-summary').textContent='미실행 · 검사할 후보를 선택하세요.';$('vision-checks').replaceChildren();
  $('candidates').replaceChildren();$('findings').replaceChildren();$('criteria').querySelector('tbody').replaceChildren();
  for(const id of ['part-image','reference-image']){const image=$(id);image.hidden=true;image.removeAttribute('src');}
  $('pose-status').textContent=message;$('candidate-note').textContent='';$('evidence').textContent='';
@@ -148,15 +156,15 @@ async function run(action,body={}){
 $('part').onchange=()=>{state.part=$('part').value;state.pose=null;state.marked.clear();state.revision++;loadPart().catch(e=>log(e.message));};
 $('view').onchange=()=>{grid();if(state.candidate)showCandidate(state.candidate);};$('filter').onchange=grid;
 $('select-candidate').onclick=()=>run('apply',{pose:state.pose,candidate:state.candidate.path});
-const stageNames={requested:'요청 저장',sheet:'참조 시트 준비',draw:'독립 파츠 생성',slice:'원본 분리',check:'검사',build:'레이어 빌드',completed:'완료'};
+const stageNames={requested:'요청 저장',sheet:'참조 시트 준비',draw:'독립 파츠 생성',slice:'파츠 좌표 등록',check:'검사',build:'레이어 빌드',vision:'실제 이미지 비전 검사',completed:'완료'};
 async function followJob(job){
  state.busy=true;controls();
  try{
   while(job.state==='running'){
-   $('job-status').textContent=(stageNames[job.step]||job.step)+' · 대상 '+job.poses.join(', ');
+   $('job-status').textContent=(stageNames[job.step]||job.step)+(job.progress?' · '+job.progress.completed+'/'+job.progress.total+' 레이어 완료':'')+' · 대상 '+job.poses.join(', ');
    await new Promise(resolve=>setTimeout(resolve,1500));job=await get('/api/jobs/'+job.id);
   }
-  $('job-status').textContent=job.state==='completed'?'새 후보 생성·검사·빌드 완료 · 시각 검수 대기':'재작업 실패: '+job.error;
+  $('job-status').textContent=job.state==='completed'?(job.type==='vision'?'비전 검사 완료 · 결과를 확인하세요':'새 후보 생성·검사·빌드 완료 · 시각 검수 대기'):'재작업 실패: '+job.error;
   log(JSON.stringify(job,null,2));localStorage.removeItem('parts-rework-job');await loadList();
  }catch(e){$('job-status').textContent='작업 상태 확인 실패: '+e.message;log(e.message);}
  finally{state.busy=false;controls();}
@@ -164,10 +172,15 @@ async function followJob(job){
 async function rework(poses){
  const note=$('note').value.trim();if(!note){$('job-status').textContent='수정할 내용을 구체적으로 적어 주세요. 검사 통과 포즈도 재작업할 수 있습니다.';$('note').focus();return;}
  state.busy=true;controls();
- try{const job=await act('rework',{poses,note});localStorage.setItem('parts-rework-job',job.id);await followJob(job);}
+ try{const layer=$('position-piece').value;const layers=poses.length===1&&poses[0]===state.pose&&layer?[layer]:undefined;const job=await act('rework',{poses,note,layers});localStorage.setItem('parts-rework-job',job.id);await followJob(job);}
  catch(e){$('job-status').textContent='재작업 요청 실패: '+e.message;state.busy=false;controls();}
 }
 $('note').oninput=()=>state.drafts.set(draftKey(),$('note').value);
+$('vision').onclick=async()=>{
+ state.busy=true;controls();
+ try{const job=await act('vision',{pose:state.pose,provider:'codex'});localStorage.setItem('parts-rework-job',job.id);await followJob(job);}
+ catch(e){$('job-status').textContent='비전 검사 시작 실패: '+e.message;state.busy=false;controls();}
+};
 $('redo').onclick=()=>rework([state.pose]);
 $('redo-marked').onclick=()=>rework([...state.marked]);
 for(const [id,key] of [['approve','approve'],['reject','reject']]) $(id).onclick=()=>{
@@ -178,11 +191,12 @@ document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>run(b.dataset.a
 window.addEventListener('hashchange',()=>{if(!readonly)token=document.querySelector('meta[name=review-token]')?.content||new URLSearchParams(location.hash.slice(1)).get('token')||'';controls();});
 
 $('edit-candidate').onclick=()=>{
- const type=$('edit-type').value,op={type};
+ const type=$('edit-type').value,op={type};if($('edit-piece').value)op.piece=$('edit-piece').value;
  const ids=['left','top','right','bottom'],values=ids.map(id=>$('edit-'+id).value);
- if(values.some(Boolean)){if(values.some(v=>v==='')){log('영역 네 좌표를 모두 입력하세요.');return;}op.bounds=values.map(Number);}
+ if(type!=='rotate'&&values.some(Boolean)){if(values.some(v=>v==='')){log('영역 네 좌표를 모두 입력하세요.');return;}op.bounds=values.map(Number);}
  if(type==='fill-small-holes')op.max_pixels=Number($('edit-max-pixels').value);
  if(type==='translate'){op.dx=Number($('edit-dx').value);op.dy=Number($('edit-dy').value);}
+ if(type==='rotate'){op.angle=Number($('edit-angle').value);op.dx=Number($('edit-dx').value);op.dy=Number($('edit-dy').value);}
  if(type==='recolor'){op.from_color=$('edit-from').value;op.to_color=$('edit-to').value;}
  run('edit',{pose:state.pose,candidate:state.candidate.path,operations:[op]});
 };
@@ -192,7 +206,7 @@ $('apply-visibility').onclick=()=>run('visibility',{visibility:$('visibility').v
 const position={dx:0,dy:0,revision:0,timer:null,drag:null,ready:false};
 function positionControls(){
  const disabled=state.busy||!token||!state.candidate||state.candidate.compatible===false||state.data?.config.role==='body';
- $('position-editor').querySelectorAll('button,input').forEach(b=>b.disabled=disabled);
+ $('position-editor').querySelectorAll('button,input,select').forEach(b=>b.disabled=disabled);
  $('position-save').disabled=disabled||!position.ready||!(position.dx||position.dy);
 }
 function resetPosition(){
@@ -209,7 +223,7 @@ function setPosition(dx,dy){
 async function previewPosition(){
  const revision=++position.revision,c=state.candidate;if(!c)return;
  position.ready=false;positionControls();$('position-status').textContent='레이어 배치 확인 중…';
- const path=url(state.pose,'position',c.id)+'&dx='+position.dx+'&dy='+position.dy;
+ const path=url(state.pose,'position',c.id)+'&dx='+position.dx+'&dy='+position.dy+($('position-piece').value?'&piece='+encodeURIComponent($('position-piece').value):'');
  try{
   const r=await fetch(path);if(!r.ok){const error=await r.json();throw new Error(error.error);}
   const blob=await r.blob();if(revision!==position.revision)return;
@@ -221,6 +235,7 @@ async function previewPosition(){
  }catch(e){if(revision===position.revision)$('position-status').textContent='교정 불가: '+e.message;}
  finally{if(revision===position.revision)positionControls();}
 }
+$('position-piece').onchange=()=>setPosition(0,0);
 for(const id of ['position-x','position-y'])$(id).oninput=()=>{
  const dx=Number($('position-x').value),dy=Number($('position-y').value);
  if(Number.isSafeInteger(dx)&&Number.isSafeInteger(dy))setPosition(dx,dy);
@@ -231,7 +246,7 @@ document.querySelectorAll('[data-nudge]').forEach(b=>b.onclick=()=>{
  const [dx,dy]=b.dataset.nudge.split(',').map(Number);setPosition(position.dx+dx*step,position.dy+dy*step);
 });
 $('position-reset').onclick=resetPosition;
-$('position-save').onclick=()=>run('edit',{pose:state.pose,candidate:state.candidate.path,operations:[{type:'translate',dx:position.dx,dy:position.dy}]});
+$('position-save').onclick=()=>run('edit',{pose:state.pose,candidate:state.candidate.path,operations:[{type:'translate',dx:position.dx,dy:position.dy,piece:$('position-piece').value||null}]});
 $('position-image').onpointerdown=e=>{
  if(state.busy||!token||!position.ready||e.button!==0)return;
  e.preventDefault();const box=e.currentTarget.getBoundingClientRect();

@@ -35,7 +35,7 @@ from sprite_gen.spec import migrate_breathe, migrate_request, parts_workspace
 from sprite_gen.curate import parts_motion, parts_appearance, parts_poses, parts_review, parts_sockets
 from sprite_gen.qa import inspect_parts, parts_fit, parts_stability
 from sprite_gen.compose import compose_parts, parts_build, export_parts
-from sprite_gen.frames import parts_body_refine, parts_import, parts_interfaces, parts_loop_native, parts_part_edit, parts_pose_sheet, parts_production, parts_rebind, parts_segments
+from sprite_gen.frames import parts_body_refine, parts_import, parts_interfaces, parts_loop_native, parts_part_edit, parts_pose_sheet, parts_production, parts_rebind, parts_segments, parts_vision, parts_scaffold
 from sprite_gen.gen.prepare import BODY_PLAN_HELP, STYLE_DEFAULT, _outline_config
 from sprite_gen.spec.subject import SUBJECTS
 from sprite_gen.workflow import guide, preferences
@@ -500,6 +500,11 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         parts_production.add_init_arguments,
         parts_production.run_init,
     ),
+    "parts-part-scaffold": (
+        "Draft per-pose independent layer targets from explicit body-node ownership.",
+        parts_scaffold.add_arguments,
+        parts_scaffold.run,
+    ),
     "parts-part-config": (
         "Change a production's prompt, sheet, cut, wearing or pieces for the drawings still to come.",
         parts_production.add_config_arguments,
@@ -559,6 +564,11 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         "Check each selected drawing per pose: alignment, cut loss, specks, holes, palette, jumps between poses.",
         parts_production.add_check_arguments,
         parts_production.run_check,
+    ),
+    "parts-part-vision": (
+        "Inspect actual part/body/zmap/neighbour images through the configured Codex vision model.",
+        parts_vision.add_arguments,
+        parts_vision.run,
     ),
     "parts-part-build": (
         "Build a production's selected drawings into pieces and import the part pack.",
