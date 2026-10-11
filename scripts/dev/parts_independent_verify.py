@@ -49,6 +49,10 @@ def verify(out, *, require_approval=False):
     )
     draw = ImageDraw.Draw(contact)
     bare_count, tick, masks = 0, 0, 0
+    covered_suppressed, uncovered_restored = 0, 0
+    replaced = {node for binding in registry[ids['footwear']]['bindings'] for piece in binding['pieces'] for node in piece['replaces']}
+    foot_ids = {body['id']+'.'+piece['id'] for body in index['body'] for binding in registry[body['id']]['bindings']
+                for piece in binding['pieces'] if set(piece['provides']) & replaced}
     art_checks = []
     for n, sample in enumerate(clip["samples"]):
         pose = sample["pose_id"]
@@ -57,7 +61,7 @@ def verify(out, *, require_approval=False):
             row = state["tracks"]["main"]["poses"][pose]
             metrics = row["check"]["metrics"]
             art_checks.append({"part": identity, "pose": pose,
-                               "decision": row["decision"], "check": row["check"]["status"],
+                               "decision": p.effective_decision(root,index,state,pose), "stored_decision": row['decision'], "check": row["check"]["status"],
                                "missing": metrics["required_pixels"]})
             if require_approval:
                 assert row["check"]["status"] != "error", (identity, pose, metrics)
@@ -84,6 +88,14 @@ def verify(out, *, require_approval=False):
                 }
             )
             scene = player.layers(interpolate=False)
+            if foot_ids:
+                visible_ids = {layer['render_id'] for layer in scene['layers']}
+                if shoes:
+                    assert not visible_ids & foot_ids, (pose, 'covered foot still rendered')
+                    covered_suppressed += 1
+                else:
+                    assert foot_ids <= visible_ids, (pose, 'bare foot failed to return')
+                    uncovered_restored += 1
             assert scene["sample_id"] == sample["id"]
             masks += len(scene["masks"])
             clocks.append(tuple(scene[k] for k in keys))
@@ -137,6 +149,8 @@ return {...Object.fromEntries(keys.map(k=>[k,s[k]])),layers:s.layers.map(l=>Obje
     proof = {
         "body_pixel_identical": bare_count,
         "python_js_cases_identical": len(cases),
+        "covered_foot_layers_suppressed_cases": covered_suppressed,
+        "bare_foot_layers_restored_cases": uncovered_restored,
         "motion": index["motion"],
         "parts": ids,
         "masks": masks,

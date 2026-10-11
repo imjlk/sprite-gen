@@ -1,0 +1,230 @@
+{
+  "alignment": null,
+  "body_sha256": "cfa201eef7d177e1b1b5b8dd30710ec64490c48b41c28a6c438f0b4d8451a9f2",
+  "clip": "run.reference",
+  "digest": "ba00400b6e0b0edda996a220fdcab0a119c6b992f7d2d257c4f85f1cba0c7183",
+  "holes_filled": 0,
+  "images": {
+    "mask": {
+      "file": "mask.png",
+      "sha256": "587ce25e26b2639f0475f97391432cdf4313d8730faefe207d5b0ede63ee75a2"
+    },
+    "part": {
+      "file": "part.png",
+      "sha256": "cdb242f8104dfe7fea80fd0dd19a246ea479d14de45e94e1dab902c5830d06eb"
+    },
+    "piece.shoe_back": {
+      "file": "piece.shoe_back.png",
+      "sha256": "40d3009300aa99eb64aacc7a24ae1e1470468066df2db74ca93230c55ec8552a"
+    },
+    "piece.shoe_front": {
+      "file": "piece.shoe_front.png",
+      "sha256": "a5d8a9595e5358386dad7bf5e13473369d412898b52ba2a3339a09507769d4bd"
+    },
+    "qa_allowed": {
+      "file": "qa_allowed.png",
+      "sha256": "97e976339b3d8a615adf4a78e27515454615b628cc2f702cc7ab2236c3a886fe"
+    },
+    "qa_protected": {
+      "file": "qa_protected.png",
+      "sha256": "48d89b91e3da919b960da9770f4106cc5a8baa802dde6b34b2d0019057646672"
+    },
+    "qa_required": {
+      "file": "qa_required.png",
+      "sha256": "8aee1de773cd26a3bab8ff9e1f7e29aa113fa3086877c186b55850089afc014b"
+    },
+    "raw.shoe_back": {
+      "file": "raw.shoe_back.png",
+      "sha256": "dc811a1177e0cfb96b7f10d2bf089a0bb24333606fd9f6d0b1450697de4e2ca5"
+    },
+    "raw.shoe_front": {
+      "file": "raw.shoe_front.png",
+      "sha256": "eada342a2857b01b69b0eb6c508f89ac84fd47600d4b30d9788ce3f2ff3d9577"
+    },
+    "under": {
+      "file": "under.png",
+      "sha256": "cfa201eef7d177e1b1b5b8dd30710ec64490c48b41c28a6c438f0b4d8451a9f2"
+    }
+  },
+  "independent_layers": [
+    {
+      "id": "shoe_back",
+      "image_key": "piece.shoe_back",
+      "node": "shoe_back",
+      "replaces": [
+        "foot_back"
+      ],
+      "straight_edges": [
+        {
+          "end": [
+            136,
+            647
+          ],
+          "id": "outsole",
+          "max_deviation": "2",
+          "side": "positive",
+          "span": [
+            "3/20",
+            "4/5"
+          ],
+          "start": [
+            136,
+            554
+          ]
+        }
+      ],
+      "target": [
+        131,
+        548,
+        179,
+        659
+      ]
+    },
+    {
+      "id": "shoe_front",
+      "image_key": "piece.shoe_front",
+      "node": "shoe_front",
+      "replaces": [
+        "foot_front"
+      ],
+      "straight_edges": [
+        {
+          "end": [
+            543,
+            633
+          ],
+          "id": "outsole",
+          "max_deviation": "2",
+          "side": "positive",
+          "span": [
+            "3/20",
+            "4/5"
+          ],
+          "start": [
+            450,
+            663
+          ]
+        }
+      ],
+      "target": [
+        439,
+        606,
+        553,
+        667
+      ]
+    }
+  ],
+  "independent_reference": {
+    "file": "productions/qualified.sneakers/independent-inputs/inputs/836645d39460ce57e48d27febf404346f80e2db3e1bdab40858eb83ff68d4751/reference.json",
+    "sha256": "754f8b9d1cdbb09c315296c3724a2ee1c30c4747c2401e36434325bd52a68373"
+  },
+  "kind": "parts-production-candidate",
+  "method": {
+    "independent": true,
+    "registration": {
+      "shoe_back": {
+        "fit": "contain",
+        "margin": "1",
+        "position": [
+          131,
+          548
+        ],
+        "sampling": "premultiplied-bilinear",
+        "source_bounds": [
+          0,
+          0,
+          768,
+          768
+        ],
+        "target": [
+          131,
+          548,
+          179,
+          659
+        ],
+        "uniform_scale": 1.0,
+        "visible_bounds": [
+          131,
+          548,
+          179,
+          659
+        ]
+      },
+      "shoe_front": {
+        "fit": "contain",
+        "margin": "1",
+        "position": [
+          439,
+          606
+        ],
+        "sampling": "premultiplied-bilinear",
+        "source_bounds": [
+          0,
+          0,
+          768,
+          768
+        ],
+        "target": [
+          439,
+          606,
+          553,
+          667
+        ],
+        "uniform_scale": 1.0,
+        "visible_bounds": [
+          439,
+          606,
+          553,
+          667
+        ]
+      }
+    }
+  },
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "part": "qualified.sneakers",
+  "pixels": 6504,
+  "placement": {
+    "format": "full-canvas",
+    "offset": [
+      0,
+      0
+    ],
+    "pivot": [
+      0,
+      0
+    ],
+    "target_socket": "root"
+  },
+  "policy": "parts.production.v1",
+  "pose_id": "run.0",
+  "sample": "sample.0",
+  "schema_version": 1,
+  "source": [
+    {
+      "artifact": {
+        "file": "productions/qualified.sneakers/native-art/source/b46feb49605511d2082ae247a4f921cdf8f29c606405b00a0eadf8feeb67d944/source.image",
+        "sha256": "b46feb49605511d2082ae247a4f921cdf8f29c606405b00a0eadf8feeb67d944"
+      },
+      "file": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/library/inputs/shoe-replacement-r12/run.0.shoe_back.png",
+      "layer": "shoe_back",
+      "provider_report": null,
+      "sha256": "b46feb49605511d2082ae247a4f921cdf8f29c606405b00a0eadf8feeb67d944"
+    },
+    {
+      "artifact": {
+        "file": "productions/qualified.sneakers/native-art/source/72a183ad2419eacf8527287dadb9e8be543cba5578c39ce098d7d3a37efd012e/source.image",
+        "sha256": "72a183ad2419eacf8527287dadb9e8be543cba5578c39ce098d7d3a37efd012e"
+      },
+      "file": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/library/inputs/shoe-replacement-r12/run.0.shoe_front.png",
+      "layer": "shoe_front",
+      "provider_report": null,
+      "sha256": "72a183ad2419eacf8527287dadb9e8be543cba5578c39ce098d7d3a37efd012e"
+    }
+  ],
+  "track": "main",
+  "under_sha256": "cfa201eef7d177e1b1b5b8dd30710ec64490c48b41c28a6c438f0b4d8451a9f2",
+  "wearing": []
+}

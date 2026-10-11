@@ -105,7 +105,8 @@ class ReviewDesk:
         for pose in order:
             row = rows.get(pose) or {}
             poses.append({"pose": pose, "clip": first[pose][0], "selected": row.get("selected"),
-                          "candidates": len(row.get("candidates", [])), "decision": row.get("decision"),
+                          "candidates": len(row.get("candidates", [])), "decision": production.effective_decision(root,index,state,pose,track=track),
+                          "stored_decision": row.get('decision'),
                           "note": row.get("note"), "reviewer": row.get("reviewer"), "check": row.get("check"),
                           "rework": row.get("rework")})
             poses[-1]['vision'] = parts_vision.current(root,index,state,pose,track=track)
@@ -134,19 +135,39 @@ class ReviewDesk:
         result = []
         for candidate in reversed(row["candidates"]):
             record = production.candidate_record(root, state, pose, candidate, track=track)
-            if candidate == row["selected"] and row.get("check"):
+            compatible = record['motion'] == index['motion']
+            reason = None
+            if record.get('independent_reference'):
+                frozen, _ = parts_independent.read_reference(root, record['independent_reference'], verify_files=False)
+                if frozen['context'] != {key:index[key] for key in ('rig','motion','body')}:
+                    compatible, reason = False, '이전 바디·리그 기준 후보입니다. 현재 참조로 재작업하세요.'
+                authored = {layer['id']:layer for layer in (state['config'].get('independent') or {}).get('layers', [])}
+                for layer in record.get('independent_layers', []):
+                    current = authored.get(layer['id'], {})
+                    if (layer.get('replaces',[]) != current.get('replaces',[]) or
+                        layer.get('straight_edges',[]) != current.get('straight_edges',{}).get(pose,[])):
+                        compatible, reason = False, '부위 교체·구조 검사 기준이 바뀐 이전 후보입니다.'
+            if not compatible:
+                metrics, findings = {}, [('error', reason or '이전 모션 기준 후보입니다.')]
+            elif candidate == row["selected"] and row.get("check"):
                 metrics = row["check"]["metrics"]
                 findings = [("warning", f) for f in row["check"]["findings"]]
             else:
-                metrics, findings = production._measure(root, state["config"], production._settings(state["config"], track), candidate, context)
+                try:
+                    metrics, findings = production._measure(root, state["config"], production._settings(state["config"], track), candidate, context)
+                except contract.PartsContractError as exc:
+                    # A stale history entry must not strand the entire inspector
+                    # in its loading state or hide the current candidate.
+                    metrics, findings = {}, [('error', str(exc))]
+                    compatible = False
             result.append({"id": record["digest"], "path": candidate, "selected": candidate == row["selected"],
                            "images": list(record["images"]), "placement": record["placement"], "source": record.get("source"),
                            "method": record["method"], "reference": record.get("generation_reference") or record.get('independent_reference'),
-                           "compatible": record["motion"] == index["motion"],
+                           "compatible": compatible,
                            "layers": [item['id'] for item in record.get('independent_layers',[])],
                            "metrics": metrics, "findings": [message for _, message in findings],
                            "criteria": parts_quality.criteria(metrics, mode=state["config"]["mode"]),
-                           "status": row["check"]["status"] if candidate == row["selected"] and row.get("check") else
+                           "status": 'stale' if not compatible else row["check"]["status"] if candidate == row["selected"] and row.get("check") else
                            "error" if any(level == "error" for level, _ in findings) else "warning" if findings else "partial"})
         return {"part": name, "pose": pose, "candidates": result}
 
@@ -187,7 +208,7 @@ class ReviewDesk:
         row = production._track(state, track)["poses"].get(pose)
         if row is None or row.get("selected") is None:
             raise contract.PartsContractError(f"{pose} has no drawing yet")
-        allowed = ("attachment-body", "attachment-part", "attachment-composite", "position", "body", "body-raw", "body-zraw", "cut", "part", "visible", "drawn", "reference", "interfaces", "errors")
+        allowed = ("attachment-body", "attachment-retained", "attachment-part", "attachment-composite", "position", "body", "body-raw", "body-zraw", "cut", "part", "visible", "drawn", "reference", "interfaces", "errors")
         if kind not in allowed:
             raise contract.PartsContractError("unknown render view")
         location = row["selected"] if candidate is None else next(
@@ -204,6 +225,10 @@ class ReviewDesk:
             images = {key: Image.open(BytesIO(reader.read(ref["file"], ref["sha256"]))).convert("RGBA")
                       for key, ref in record["images"].items() if key == "under" or key.startswith("piece.")}
             actual = parts_vision._render(root, index, registry, state["config"], pose, record, base)
+            if kind == 'attachment-retained':
+                remaining = parts_vision._render(root, index, registry, state["config"], pose, record, base, body_only=True)
+                _, crops = parts_vision.layer_closeups(images, actual, [item for item in layers if item['id'] == piece])
+                return assets.png_bytes(remaining.crop(crops[piece]))
             panels, _ = parts_vision.layer_closeups(images, actual, [item for item in layers if item["id"] == piece])
             image = panels[{"attachment-body": 0, "attachment-part": 1, "attachment-composite": 2}[kind]][1]
             return assets.png_bytes(image)

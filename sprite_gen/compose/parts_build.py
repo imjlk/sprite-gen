@@ -96,7 +96,7 @@ def _release_evidence(root, index, registry):
         or review["reviewer"] is None):
         raise contract.PartsContractError("release review lacks explicit visual/motion/contact approval checks")
     from sprite_gen.frames import parts_production
-    parts = parts_production.release_reviews(root, registry, registry[index["appearance"]["id"]])
+    parts = parts_production.release_reviews(root, registry, registry[index["appearance"]["id"]], index=index)
     return parts_review.verify(root, index, registry, review), [contract.reference(review), *parts]
 
 

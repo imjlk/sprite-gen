@@ -254,13 +254,13 @@ def test_a_rejected_pose_is_the_only_one_drawn_again(tmp_path):
     assert not (assembly.parent / again["pages"][0]["art"]).exists()
 
 
-def test_a_pose_failing_a_check_is_drawn_again_unless_someone_approved_it():
+def test_current_check_failure_is_redrawn_even_with_a_recorded_old_approval():
     error = {"status": "error", "findings": ["alignment 0.4: the drawn figure does not sit on the body; redraw"]}
     rows = {"walk.01": {"selected": "a", "decision": "unverified", "check": error},
             "walk.02": {"selected": "b", "decision": "approved", "check": error},
             "walk.03": {"selected": "c", "decision": "unverified", "check": {"status": "warning"}}}
     raster = {"config": {"mode": "raster"}, "tracks": {"main": {"poses": rows}}}
-    assert production._todo(raster, None, list(rows)) == ["walk.01"]
+    assert production._todo(raster, None, list(rows)) == ["walk.01", "walk.02"]
     held = {"config": {"mode": "held", "reference_pose": "walk.01"}, "tracks": {"main": {"poses": rows}}}
     assert production._todo(held, None, list(rows)) == ["walk.01"]
 

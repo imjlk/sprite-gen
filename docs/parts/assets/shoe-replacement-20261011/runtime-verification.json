@@ -1,0 +1,86 @@
+{
+  "appearance_clips_baked": 0,
+  "approved": false,
+  "art_checks": [
+    {
+      "check": "warning",
+      "decision": "unverified",
+      "missing": 0,
+      "part": "qualified.hair",
+      "pose": "run.0",
+      "stored_decision": "approved"
+    },
+    {
+      "check": "passed",
+      "decision": "unverified",
+      "missing": 0,
+      "part": "qualified.sneakers",
+      "pose": "run.0",
+      "stored_decision": "unverified"
+    },
+    {
+      "check": "warning",
+      "decision": "unverified",
+      "missing": 0,
+      "part": "qualified.hair",
+      "pose": "run.1",
+      "stored_decision": "approved"
+    },
+    {
+      "check": "passed",
+      "decision": "unverified",
+      "missing": 0,
+      "part": "qualified.sneakers",
+      "pose": "run.1",
+      "stored_decision": "unverified"
+    },
+    {
+      "check": "warning",
+      "decision": "unverified",
+      "missing": 0,
+      "part": "qualified.hair",
+      "pose": "run.2",
+      "stored_decision": "approved"
+    },
+    {
+      "check": "passed",
+      "decision": "unverified",
+      "missing": 0,
+      "part": "qualified.sneakers",
+      "pose": "run.2",
+      "stored_decision": "unverified"
+    },
+    {
+      "check": "passed",
+      "decision": "unverified",
+      "missing": 0,
+      "part": "qualified.hair",
+      "pose": "run.3",
+      "stored_decision": "approved"
+    },
+    {
+      "check": "passed",
+      "decision": "unverified",
+      "missing": 0,
+      "part": "qualified.sneakers",
+      "pose": "run.3",
+      "stored_decision": "unverified"
+    }
+  ],
+  "bare_foot_layers_restored_cases": 8,
+  "body_pixel_identical": 4,
+  "covered_foot_layers_suppressed_cases": 8,
+  "loop": false,
+  "masks": 0,
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "parts": {
+    "footwear": "qualified.sneakers",
+    "hair": "qualified.hair"
+  },
+  "python_js_cases_identical": 16,
+  "release_ready": false,
+  "verification_scope": "runtime invariants; artwork quality is separate"
+}

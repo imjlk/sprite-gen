@@ -30,6 +30,11 @@ def criteria(metrics, *, mode="raster"):
             rows.append({"id": region["id"]+"."+key, "label": region["id"]+" · "+key,
                          "value": region.get(key), "limit": region[maximum],
                          "status": region["status"], "basis": "authored stable region"})
+    for identity, edge in metrics.get('straight_edges', {}).items():
+        rows.append({'id': identity, 'label': identity + ' · 직선 윤곽 편차',
+                     'value': round(edge['max_deviation'], 3) if edge['max_deviation'] is not None else None,
+                     'limit': edge['limit'], 'status': '범위 내' if edge['status'] == 'pass' else 'error',
+                     'basis': 'explicitly authored rigid edge; not general art approval'})
     return rows
 
 

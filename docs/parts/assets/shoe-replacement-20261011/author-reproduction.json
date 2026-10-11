@@ -1,0 +1,9 @@
+{
+  "isolated_copy": true,
+  "body_piece_images_identical": 48,
+  "shoe_reference_images_identical": 8,
+  "qa_maps_identical": 12,
+  "bare_body_pixel_identical": 4,
+  "current_workspace_mutated": false,
+  "art_approved": false
+}

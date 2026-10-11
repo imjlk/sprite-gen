@@ -74,6 +74,159 @@ def produce(assembly, order, tmp_path):
     return batch
 
 
+def test_independent_replacement_uses_same_body_suppression_in_preview_and_build(tmp_path):
+    from copy import deepcopy
+    from sprite_gen.curate import parts_motion
+    from sprite_gen.compose import compose_parts
+    from sprite_gen.frames import parts_candidate_scene, parts_independent
+    from sprite_gen.spec import parts_assets as assets
+
+    assembly, order = setup(tmp_path)
+    root, index, registry, _ = parts_motion._active(assembly)
+    body = parts_rebind.body_spec(assembly, tmp_path / "segmented.json", body_id="test.body")
+    spec = json.loads((tmp_path / "segmented.json").read_text())
+    spec["body_mode"] = "segmented"
+    topology = registry[registry[index["rig"]["id"]]["topology"]["id"]]
+    spec["pieces"][0]["provides"] = [node["id"] for node in topology["nodes"] if node["required"] and node["id"] != "head"]
+    head = deepcopy(spec["pieces"][0])
+    head.update(id="head", node="head", provides=["head"])
+    image = Image.new("RGBA", (128, 128))
+    ImageDraw.Draw(image).rectangle((20, 10, 29, 19), fill="green")
+    file = Path(body["source_root"]) / "head.png"
+    image.save(file)
+    for samples in head["sample_map"].values():
+        for placement in samples.values():
+            placement["image"] = {"file": file.name, "sha256": assets.sha256(file.read_bytes())}
+    spec["pieces"].append(head)
+    (tmp_path / "segmented.json").write_bytes(w.json_bytes(spec))
+    parts_import.import_pack(assembly, tmp_path / "segmented.json", Path(body["source_root"]))
+    state = p._load(root, "test.direct")
+    cfg = state["config"]
+    cfg["independent"]["layers"][1]["replaces"] = ["head"]
+    path = tmp_path / "replace.json"
+    path.write_bytes(w.json_bytes(cfg))
+    p.configure(assembly, "test.direct", path)
+    batch = produce(assembly, order, tmp_path)
+    document, _ = parts_independent.read_reference(root, batch["reference"])
+    assert all(job["replaces"] == (["head"] if job["layer"] == "front" else []) for job in document["jobs"])
+    p.check(assembly, "test.direct")
+    p.build(assembly, "test.direct")
+    root, index, registry, _ = parts_motion._active(assembly)
+    state = p._load(root, "test.direct")
+    row = state["tracks"]["main"]["poses"][order[0]]
+    record = p.candidate_record(root, state, order[0], row["selected"])
+    part = Image.open(root / row["selected"] / record["images"]["part"]["file"]).convert("RGBA")
+    plan, sample, load = parts_candidate_scene.scene(root, index, registry, state["config"], order[0], part,
+        record["placement"], independent_layers=parts_independent.candidate_layers(record, root / row["selected"]))
+    preview, _ = compose_parts.render_sample(plan, sample, load)
+    built, built_plan = p._render_alone(root, index, registry, c.reference(registry["test.direct"]), index["states"])
+    bare, bare_plan = p._render_alone(root, index, registry, None, index["states"])
+    assert np.array_equal(np.asarray(preview), np.asarray(built[order[0]]))
+    assert preview.getpixel((25, 15))[3] == 0 and bare[order[0]].getpixel((25, 15)) == (0, 128, 0, 255)
+    assert "test.body.head" in sample["suppressed"]
+    assert "test.body.head" not in bare_plan["clips"][0]["samples"][0]["suppressed"]
+    assert not any(draw["placement"]["mask"] for draw in sample["draw"])
+    pieces = registry["test.direct"]["bindings"][0]["pieces"]
+    assert next(piece for piece in pieces if piece["id"] == "front")["replaces"] == ["head"]
+
+    # A later config must not silently reinterpret an already frozen candidate.
+    cfg["independent"]["layers"][1]["replaces"] = []
+    path.write_bytes(w.json_bytes(cfg))
+    p.configure(assembly, "test.direct", path)
+    from sprite_gen.serve.serve_parts_review import ReviewDesk
+    stale = ReviewDesk(assembly).candidates('test.direct', order[0])['candidates'][0]
+    assert stale['status'] == 'stale' and stale['compatible'] is False
+    with pytest.raises(c.PartsContractError, match="independent layers changed"):
+        p.build(assembly, "test.direct")
+
+
+def test_independent_replacement_refuses_a_flat_body_and_missing_nodes(tmp_path):
+    assembly, _ = setup(tmp_path)
+    cfg = p._load(assembly.parent, "test.direct")["config"]
+    cfg["independent"]["layers"][0]["replaces"] = ["root"]
+    path = tmp_path / "replace.json"
+    path.write_bytes(w.json_bytes(cfg))
+    with pytest.raises(c.PartsContractError, match="segmented body"):
+        p.configure(assembly, "test.direct", path)
+    cfg["independent"]["layers"][0]["replaces"] = ["head"]
+    path.write_bytes(w.json_bytes(cfg))
+    with pytest.raises(c.PartsContractError, match="replacement body nodes"):
+        p.configure(assembly, "test.direct", path)
+
+
+def test_authored_rigid_edge_rejects_a_bowed_sole_and_missing_art(tmp_path):
+    from sprite_gen.frames import parts_independent
+    from sprite_gen.spec import parts_assets as assets
+
+    edge = {'id': 'sole', 'start': [10,40], 'end': [100,40], 'side': 'positive',
+            'span': ['3/20','4/5'], 'max_deviation': '1'}
+    for shape, expected in [('straight','pass'), ('bowed','fail'), ('missing','fail')]:
+        image = Image.new('RGBA',(128,64))
+        if shape != 'missing':
+            for x in range(10,101):
+                bottom = 40 if shape == 'straight' else 40+round(7*np.sin((x-10)*np.pi/90))
+                ImageDraw.Draw(image).line((x,10,x,bottom),fill='navy')
+        file = tmp_path / (shape+'.png')
+        image.save(file)
+        record = {'images': {'piece.shoe': {'file': file.name, 'sha256': assets.sha256(file.read_bytes())}},
+                  'independent_layers': [{'id':'shoe','node':'shoe_front','image_key':'piece.shoe',
+                                          'target':[10,10,101,50],'straight_edges':[edge]}]}
+        metric = parts_independent.straight_edge_metrics(record,tmp_path)['shoe.sole']
+        assert metric['status'] == expected
+        if shape == 'missing':
+            assert metric['max_deviation'] is None
+
+
+def test_registered_canvas_import_preserves_curated_coordinates(tmp_path):
+    assembly, order = setup(tmp_path)
+    produce(assembly,order,tmp_path)
+    batch = p.sheet(assembly,'test.direct',poses=[order[0]],layers=['front'])
+    image = Image.new('RGBA',(128,128))
+    ImageDraw.Draw(image).rectangle((44,31,53,40),fill='blue')
+    file = tmp_path/'registered.png'
+    image.save(file)
+    p.slice_batch(assembly,'test.direct',batch=batch['batch'],pages=[(Path('1'),file)],registered_canvas=True)
+    state = p._load(assembly.parent,'test.direct')
+    row = state['tracks']['main']['poses'][order[0]]
+    record = p.candidate_record(assembly.parent,state,order[0],row['selected'])
+    actual = Image.open(assembly.parent/row['selected']/record['images']['piece.front']['file'])
+    assert np.array_equal(np.asarray(actual),np.asarray(image))
+    assert record['method']['registration']['front']['fit'] == 'native-canvas'
+    for size,box in [((64,64),(44,31,53,40)),((128,128),(100,100,110,110))]:
+        invalid = Image.new('RGBA',size)
+        ImageDraw.Draw(invalid).rectangle(box,fill='blue')
+        invalid.save(file)
+        with pytest.raises(c.PartsContractError,match='native rig canvas|exceeds its authored target'):
+            p.slice_batch(assembly,'test.direct',batch=batch['batch'],pages=[(Path('1'),file)],registered_canvas=True)
+        assert p._load(assembly.parent,'test.direct')['tracks']['main']['poses'][order[0]]['selected'] == row['selected']
+
+
+def test_next_generation_uses_selected_position_correction_without_forcing_unknown_shape(tmp_path):
+    from sprite_gen.frames import parts_independent
+
+    assembly,order = setup(tmp_path)
+    produce(assembly,order,tmp_path)
+    corrected = parts_part_edit.edit(assembly,'test.direct',order[0],[{'type':'translate','piece':'front','dx':2}])
+    p.select_candidate(assembly,'test.direct',order[0],corrected['preview_candidate'])
+    p.check(assembly,'test.direct')
+    batch = p.sheet(assembly,'test.direct',poses=[order[0]],layers=['front'])
+    doc,folder = parts_independent.read_reference(assembly.parent,batch['reference'])
+    job = next(job for job in doc['jobs'] if job['layer']=='front')
+    assert job['geometry_candidate'] == corrected['digest']
+    assert any(ref.endswith('.selected-geometry.view.png') for ref in job['refs'])
+    assert Image.open(assembly.parent/folder/job['guide']).size == Image.open(assembly.parent/folder/f"{order[0]}/front.selected-geometry.view.png").size
+    # Model uncertainty must not promote an unverified viewing plane as a template.
+    uncertain = json.loads(answer())
+    uncertain.update(status='uncertain',summary='visible plane needs review')
+    uncertain['checks']['shape'] = {'result':'unknown','reason':'the source foot projection is ambiguous'}
+    parts_vision.inspect(assembly,'test.direct',order[0],transport=lambda *args,**kwargs:(json.dumps(uncertain),{'transport':'test-double'}))
+    batch = p.sheet(assembly,'test.direct',poses=[order[0]],layers=['front'])
+    doc,_ = parts_independent.read_reference(assembly.parent,batch['reference'])
+    job = next(job for job in doc['jobs'] if job['layer']=='front')
+    assert job['geometry_candidate'] == corrected['digest'] and job['shape_review']
+    assert not any('.selected-geometry.view.png' in ref or '.shape-' in ref for ref in job['refs'])
+
+
 def answer(status="pass"):
     return json.dumps(
         {
@@ -629,15 +782,19 @@ def test_pose_template_is_frozen_and_same_path_edits_stale_vision(tmp_path):
     p.configure(assembly, "test.direct", file)
     batch = produce(assembly, order, tmp_path)
     assert any(".shape-0.view.png" in path for path in batch["pages"][0]["refs"])
-    parts_vision.inspect(
-        assembly,
-        "test.direct",
-        pose,
-        transport=lambda *args, **kwargs: (answer(), {"transport": "test-double"}),
-    )
+    p.check(assembly,'test.direct')
+    p.build(assembly,'test.direct')
+    for target in order:
+        parts_vision.inspect(assembly,'test.direct',target,
+            transport=lambda *args, **kwargs: (answer(), {"transport": "test-double"}))
+    p.review(assembly,'test.direct',approve=['all'],reviewer='tester')
     from sprite_gen.curate import parts_motion
 
-    _, index, _, _ = parts_motion._active(assembly)
+    _, index, registry, _ = parts_motion._active(assembly)
+    appearance = c.seal({'kind':'parts-appearance','schema_version':1,'id':'test.appearance',
+        **{key:index[key] for key in ('rig','motion','catalog','body','states')},
+        'selections':{'hair':c.reference(registry['test.direct'])}})
+    assert p.release_reviews(root,registry,appearance,index=index)
     assert parts_vision.current(root, index, p._load(root, "test.direct"), pose)[
         "current"
     ]
@@ -645,10 +802,40 @@ def test_pose_template_is_frozen_and_same_path_edits_stale_vision(tmp_path):
     assert not parts_vision.current(root, index, p._load(root, "test.direct"), pose)[
         "current"
     ]
+    assert p.status(assembly,'test.direct')['productions'][0]['approved'] == 0
+    assert p._load(root,'test.direct')['tracks']['main']['poses'][pose]['decision'] == 'approved'
+    from sprite_gen.serve.serve_parts_review import ReviewDesk
+    assert ReviewDesk(assembly).part('test.direct')['poses'][0]['decision'] == 'unverified'
+    with pytest.raises(c.PartsContractError,match='current approved production'):
+        p.release_reviews(root,registry,appearance,index=index)
     from sprite_gen.frames import parts_independent
 
     # Original generation inputs remain immutable despite changing the source guide.
     parts_independent.read_reference(root, batch["reference"])
+
+
+def test_completed_rework_is_not_reissued_and_pose_criteria_invalidate_votes(tmp_path):
+    assembly,order = setup(tmp_path)
+    produce(assembly,order,tmp_path)
+    p.request_rework(assembly,'test.direct',[order[0]],'move this failed attachment')
+    batch = produce(assembly,[order[0]],tmp_path)
+    from sprite_gen.frames import parts_independent
+    doc,folder = parts_independent.read_reference(assembly.parent,batch['reference'])
+    assert 'move this failed attachment' in (assembly.parent/folder/doc['jobs'][0]['prompt']).read_text()
+    done = p.sheet(assembly,'test.direct',poses=[order[0]])
+    doc,folder = parts_independent.read_reference(assembly.parent,done['reference'])
+    assert 'move this failed attachment' not in (assembly.parent/folder/doc['jobs'][0]['prompt']).read_text()
+    p.check(assembly,'test.direct')
+    p.build(assembly,'test.direct')
+    parts_vision.inspect(assembly,'test.direct',order[0],transport=lambda *a,**k:(answer(),{'transport':'test-double'}))
+    p.review(assembly,'test.direct',approve=[order[0]],reviewer='tester')
+    cfg = p._load(assembly.parent,'test.direct')['config']
+    Image.new('L',(128,128)).save(assembly.parent/'new-allowed.png')
+    cfg['pose_checks'] = {order[0]:{'allowed':'new-allowed.png'}}
+    file = tmp_path/'new-criteria.json'
+    file.write_bytes(w.json_bytes(cfg))
+    p.configure(assembly,'test.direct',file)
+    assert p._load(assembly.parent,'test.direct')['tracks']['main']['poses'][order[0]]['decision'] == 'unverified'
 
 
 def test_wrong_body_ownership_is_blocked_before_generation(tmp_path):

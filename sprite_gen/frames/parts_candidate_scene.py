@@ -109,6 +109,9 @@ def scene(
     pieces = []
     references = {}
     configured = {piece["id"]: piece for piece in config["pieces"]}
+    # Independent candidates freeze their replacement semantics. Inspection and
+    # pack construction must remove the same body nodes, without a paint mask.
+    configured.update({layer["id"]: layer for layer in independent_layers or []})
     for name, raster in images.items():
         ref = {
             "file": f"candidate/{name}.png",

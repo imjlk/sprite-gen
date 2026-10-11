@@ -1,0 +1,246 @@
+{
+  "alignment": null,
+  "body_sha256": "42aa503e396e99765f5a3e9533fd94a2d5cfb16bd09676c8b869f2c88dd880fa",
+  "clip": "run.reference",
+  "digest": "50914207b3918896ba63571f7502d1a6adbf573cd5b36a665fcd0cd3e8534aba",
+  "holes_filled": 0,
+  "images": {
+    "mask": {
+      "file": "mask.png",
+      "sha256": "170c29e1145f0fc354f26a66126255b3ef0cb8bafa397daf1f565c814f46c9cd"
+    },
+    "original.shoe_back": {
+      "file": "original.shoe_back.png",
+      "sha256": "e8e9b9a73197c52c3ac3ecc9e7f94a638cc9880ded6084c93b3295ddf7399266"
+    },
+    "part": {
+      "file": "part.png",
+      "sha256": "aefcc741c0d5cebd0749ed1214ce8bfad15c7e881ff4adfb86e8447c717d1808"
+    },
+    "piece.shoe_back": {
+      "file": "piece.shoe_back.png",
+      "sha256": "e8e9b9a73197c52c3ac3ecc9e7f94a638cc9880ded6084c93b3295ddf7399266"
+    },
+    "piece.shoe_front": {
+      "file": "piece.shoe_front.png",
+      "sha256": "ab912b1a4d76c92cc6f7dfe17ffb7aa6caaf81e861b74ac0034549bde6410ea3"
+    },
+    "qa_allowed": {
+      "file": "qa_allowed.png",
+      "sha256": "f0343d17c11e84deaf96a17db40d01f287635cea4667ea3745cfc904f8775cbd"
+    },
+    "qa_protected": {
+      "file": "qa_protected.png",
+      "sha256": "4097d1b68a9ae7fde9d3babe7d1a3b9f971e7bab4ea6668dba21a762da351018"
+    },
+    "qa_required": {
+      "file": "qa_required.png",
+      "sha256": "a8e6793aeb76da9856d8e1d3b0abf67dd70c20b757533dc4d432f708e1f74ce6"
+    },
+    "raw.shoe_back": {
+      "file": "raw.shoe_back.png",
+      "sha256": "e8e9b9a73197c52c3ac3ecc9e7f94a638cc9880ded6084c93b3295ddf7399266"
+    },
+    "raw.shoe_front": {
+      "file": "raw.shoe_front.png",
+      "sha256": "901ee6f61060e22b77193987ab67e86e86b76efd5796303d0c2ea9cafd88d888"
+    },
+    "under": {
+      "file": "under.png",
+      "sha256": "42aa503e396e99765f5a3e9533fd94a2d5cfb16bd09676c8b869f2c88dd880fa"
+    }
+  },
+  "independent_layers": [
+    {
+      "id": "shoe_back",
+      "image_key": "piece.shoe_back",
+      "node": "shoe_back",
+      "replaces": [
+        "foot_back"
+      ],
+      "straight_edges": [
+        {
+          "end": [
+            168,
+            565
+          ],
+          "id": "outsole",
+          "max_deviation": "2",
+          "side": "positive",
+          "span": [
+            "3/20",
+            "4/5"
+          ],
+          "start": [
+            198,
+            481
+          ]
+        }
+      ],
+      "target": [
+        165,
+        473,
+        232,
+        575
+      ]
+    },
+    {
+      "id": "shoe_front",
+      "image_key": "piece.shoe_front",
+      "node": "shoe_front",
+      "replaces": [
+        "foot_front"
+      ],
+      "straight_edges": [
+        {
+          "end": [
+            546,
+            623
+          ],
+          "id": "outsole",
+          "max_deviation": "2",
+          "side": "positive",
+          "span": [
+            "3/20",
+            "4/5"
+          ],
+          "start": [
+            462,
+            654
+          ]
+        }
+      ],
+      "target": [
+        450,
+        600,
+        555,
+        658
+      ]
+    }
+  ],
+  "independent_reference": {
+    "file": "productions/qualified.sneakers/independent-inputs/inputs/9acb463896a2aeed1adb392e1075ad98b7538b8e714c0873fe2cafe3aabf80bd/reference.json",
+    "sha256": "1b0ec48a22ac84d9d1e68241c1b2df132b1a5289f942520940850c2b65ff032d"
+  },
+  "kind": "parts-production-candidate",
+  "method": {
+    "independent": true,
+    "programmatic_edit": {
+      "changed_pixels": 0,
+      "operations": [
+        {
+          "angle": 0,
+          "bounds": null,
+          "dx": 0,
+          "dy": 0,
+          "from_color": null,
+          "max_pixels": 12,
+          "piece": "shoe_back",
+          "source_bounds": null,
+          "to_color": null,
+          "type": "translate"
+        }
+      ],
+      "parent": "a57b38b9bb6e829cd83aecb67a66b191fb79ee858e9ac2a48fd39f03a531a79f",
+      "provider_calls": 0,
+      "qa_revalidated": true,
+      "registered_geometry": true,
+      "review_bounds_updated": false,
+      "source_candidate": "productions/qualified.sneakers/candidates/run.3/a57b38b9bb6e829cd83aecb67a66b191fb79ee858e9ac2a48fd39f03a531a79f"
+    },
+    "registration": {
+      "shoe_back": {
+        "fit": "native-canvas",
+        "position": [
+          0,
+          0
+        ],
+        "sampling": "unchanged",
+        "source_bounds": null,
+        "target": [
+          165,
+          473,
+          232,
+          575
+        ],
+        "uniform_scale": 1
+      },
+      "shoe_front": {
+        "fit": "contain",
+        "margin": "1",
+        "position": [
+          450,
+          600
+        ],
+        "preserved_from": "9d3b661118d44296fa3d582c20052ba7e212b4bfb8f8c76904e5ad460c27e477",
+        "sampling": "premultiplied-bilinear",
+        "source_bounds": [
+          0,
+          0,
+          768,
+          768
+        ],
+        "target": [
+          450,
+          600,
+          555,
+          658
+        ],
+        "uniform_scale": 1.0,
+        "visible_bounds": [
+          450,
+          600,
+          555,
+          658
+        ]
+      }
+    }
+  },
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "part": "qualified.sneakers",
+  "pixels": 6251,
+  "placement": {
+    "format": "full-canvas",
+    "offset": [
+      0,
+      0
+    ],
+    "pivot": [
+      0,
+      0
+    ],
+    "target_socket": "root"
+  },
+  "policy": "parts.production.v1",
+  "pose_id": "run.3",
+  "sample": "sample.3",
+  "schema_version": 1,
+  "source": [
+    {
+      "artifact": {
+        "file": "productions/qualified.sneakers/native-art/source/ec88d823ae31fdeac413c81f3b3261d5ef41755be60e99def39e006d23596915/source.image",
+        "sha256": "ec88d823ae31fdeac413c81f3b3261d5ef41755be60e99def39e006d23596915"
+      },
+      "file": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/shoe-repair/run.3-angle-rework/registered-inside-angle-r2.png",
+      "layer": "shoe_back",
+      "provider_report": null,
+      "sha256": "ec88d823ae31fdeac413c81f3b3261d5ef41755be60e99def39e006d23596915"
+    },
+    {
+      "artifact": {
+        "file": "productions/qualified.sneakers/native-art/source/ab912b1a4d76c92cc6f7dfe17ffb7aa6caaf81e861b74ac0034549bde6410ea3/source.image",
+        "sha256": "ab912b1a4d76c92cc6f7dfe17ffb7aa6caaf81e861b74ac0034549bde6410ea3"
+      },
+      "file": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/library/productions/qualified.sneakers/batches/i9acb463896a2/run.3.shoe_front.png",
+      "layer": "shoe_front",
+      "provider_report": null,
+      "sha256": "ab912b1a4d76c92cc6f7dfe17ffb7aa6caaf81e861b74ac0034549bde6410ea3"
+    }
+  ],
+  "track": "main",
+  "under_sha256": "42aa503e396e99765f5a3e9533fd94a2d5cfb16bd09676c8b869f2c88dd880fa",
+  "wearing": []
+}

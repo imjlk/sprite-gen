@@ -1,0 +1,95 @@
+{
+  "answer": {
+    "checks": {
+      "alpha": {
+        "reason": "개별 레이어와 실제 부착 경계에 눈에 띄는 알파 구멍이나 색 테두리 번짐이 보이지 않음.",
+        "result": "pass"
+      },
+      "attachment": {
+        "reason": "앞·뒤 칼라가 잔존 발목과 자연스럽게 연결되며 접합부에 틈이나 맨발 조각이 보이지 않음.",
+        "result": "pass"
+      },
+      "design": {
+        "reason": "네이비 로우톱 갑피, 크림 앞코·끈, 얇은 크림 밑창과 한 줄의 네이비 웰트가 확인됨.",
+        "result": "pass"
+      },
+      "occlusion": {
+        "reason": "칼라와 갑피가 발목 경계를 적절히 가리며, 교체된 발가락이 신발 밖으로 드러나지 않음.",
+        "result": "pass"
+      },
+      "shape": {
+        "reason": "앞코와 뒤꿈치 방향이 맨발 해부와 맞고, 밑창 중앙선이 거의 직선임. 뒤꿈치 쐐기나 과도한 앞코 연장이 보이지 않음.",
+        "result": "pass"
+      },
+      "temporal": {
+        "reason": "표시된 run.2와 칼라 높이, 앞코 비율, 네이비 패널과 얇은 밑창 구성이 일관됨.",
+        "result": "pass"
+      }
+    },
+    "status": "pass",
+    "summary": "두 신발의 발목 연결, 밑창 형상과 제품 특징이 적합하며 run.2와도 일관됨. 최종 승인은 별도 큐레이터 판단이 필요함."
+  },
+  "art_approved": false,
+  "board": {
+    "file": "productions/qualified.sneakers/vision-inputs/run.3/8f34f5ae2f33244491a75f7757a8849b9b4b27b0f31ba6286b198504bdc6c264/board.png",
+    "sha256": "f623f4544b47402537d57b8748335b1c46c62083b7aeaa7d4234e5c609ca2bec"
+  },
+  "context": {
+    "body": [
+      {
+        "digest": "2b3d2b0c4ae5e0f78e1e1a84978a8047fd1fa0b2d2aab24f512705a4ed274f63",
+        "id": "qualified.body"
+      }
+    ],
+    "candidate": "50914207b3918896ba63571f7502d1a6adbf573cd5b36a665fcd0cd3e8534aba",
+    "config_digest": "1994efd40fc4b8b3409fe1485606adc5a900214a0627f955dd7b94e1aa99de7f",
+    "inputs": {
+      "inputs/shoe-replacement-r12/native-master.png": "a0c98572c76cf40ac2d0b987ec20f0e8b5bd85804d74fe2c38a862d5fbe3d130",
+      "inputs/shoe-replacement-r12/run.0.allowed.png": "eedec31ff07cd9a3d22b1adafae88f5059dfb602af95657d6d6abeb0b10f72f5",
+      "inputs/shoe-replacement-r12/run.0.protected.png": "7033ae13af26a074964cb5cba554b11184be6db124b853e4849b03f9ee6f6d65",
+      "inputs/shoe-replacement-r12/run.0.required.png": "35d0a4df94abae21cfc9b44ccc934050f0f9bc260fc7574a9a35b37abfba0bdf",
+      "inputs/shoe-replacement-r12/run.0.shoe_back.png": "b46feb49605511d2082ae247a4f921cdf8f29c606405b00a0eadf8feeb67d944",
+      "inputs/shoe-replacement-r12/run.0.shoe_front.png": "72a183ad2419eacf8527287dadb9e8be543cba5578c39ce098d7d3a37efd012e",
+      "inputs/shoe-replacement-r12/run.1.allowed.png": "a8d567b671e0a6bcc53b59f6946f021f736bb3579e50b79d824417342ac87b6a",
+      "inputs/shoe-replacement-r12/run.1.protected.png": "923b2d10a0982851b849f112537a2aa76697872ddd79bf2d145c3d9faef01c34",
+      "inputs/shoe-replacement-r12/run.1.required.png": "891e64d38334c35e6627b2b6779f63c08ef155fbbbceb49271a9782c00d9e6ff",
+      "inputs/shoe-replacement-r12/run.1.shoe_back.png": "6d68e55e08d56a02107c9e78dde4cfd164d5ec7fee336be582a7644e916613c0",
+      "inputs/shoe-replacement-r12/run.1.shoe_front.png": "a7784cab23782bf295a812adf98b43bbe297fbcfcb751069392347661e1ab463",
+      "inputs/shoe-replacement-r12/run.2.allowed.png": "5f741ff877a570ec12503d200ad2cabefae94f4d5f1afc6feae7fd84a447aafa",
+      "inputs/shoe-replacement-r12/run.2.protected.png": "7ca7b8a454b80a6df6be0f52b1e5bc743864fa43bbc1ba6e6eea01031bfc1034",
+      "inputs/shoe-replacement-r12/run.2.required.png": "d2405722995ee3ff35d5ebfd0d24f7679c863db1825183387608687f7176f9a0",
+      "inputs/shoe-replacement-r12/run.2.shoe_back.png": "17a0cb12e771963d8412250dc9dbf9b92290085eaa54b195d32a5c3448a72d99",
+      "inputs/shoe-replacement-r12/run.2.shoe_front.png": "7ba86cd3818e64a91079b5bc192e65d04767eb02b45fae2fd32dc3923120d749",
+      "inputs/shoe-replacement-r12/run.3.protected.png": "e4a7d70e4a68ff8e99376e076eb5352fc79092f0ad3f33af1de83c8153c766c2",
+      "inputs/shoe-replacement-r12/run.3.required.png": "2838c1aad396797ee961130095f2346a1ff582af64a4dc3bd220662b6916d293",
+      "inputs/shoe-replacement-r12/run.3.shoe_back.png": "f1de34f63f3477b3317ba8eb43c62cccb0c9d1bbdaa43d450c826ee61bef8daa",
+      "inputs/shoe-replacement-r12/run.3.shoe_front.png": "09ec41740c41111e0af8d78be84f489bf88eddb1b4e035dddd234445a8c07fb0",
+      "inputs/shoe-volume-reference-r2/run.3.allowed.png": "60e2355801e678263d0ba348acca2c152e4889066e48c51865c1c88c6b6233df"
+    },
+    "inspection_policy": "parts.vision.replacement-structure.v6",
+    "motion": {
+      "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+      "id": "qualified.run.reference"
+    },
+    "neighbours": {
+      "run.2": "07de08119aa789f801e4c03748683e4a735a84e00050b8dec00b3a535a04d26f"
+    },
+    "rig": {
+      "digest": "cab21d2659f1e430b22221d291bb282b7b0e2f15a85d4fd2bb3fd50c8838873b",
+      "id": "illustration.motion.rig"
+    }
+  },
+  "error": null,
+  "input": "productions/qualified.sneakers/vision-inputs/run.3/8f34f5ae2f33244491a75f7757a8849b9b4b27b0f31ba6286b198504bdc6c264/input.json",
+  "kind": "parts-vision-inspection",
+  "neighbours": [
+    "run.2"
+  ],
+  "provider": "codex",
+  "schema_version": 1,
+  "status": "pass",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

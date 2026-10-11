@@ -1,0 +1,29 @@
+{
+  "provider": "Codex native image generation",
+  "record_kind": "generation instruction summary reconstructed after the calls; not a verbatim provider payload",
+  "transparent_background": true,
+  "grok_used": false,
+  "calls": [
+    {
+      "output": "native-master.png",
+      "purpose": "Edit the existing independent shoe into a rigid product master. Preserve navy canvas, cream toe cap, cream laces and one navy welt stripe. Make the thin rubber outsole central edge level and straight; remove the bowed/bulging sole. One complete isolated side-view sneaker, genuine transparent alpha. No body, skin, background, labels or grid.",
+      "status": "authoring master; not approved art"
+    },
+    {
+      "output": "native-run.3-rejected-view.png",
+      "purpose": "Generate a pose-specific shoe using the body/foot and product master references. This first attempt assumed upper-right ankle entry.",
+      "status": "discarded before candidate import: wrong ankle entry and visible sole side"
+    },
+    {
+      "output": "native-run.3-view.png",
+      "purpose": "Edit the run.3 shoe view using its corrected direction guide, bare-foot crop, full body pose and rigid product master. Toe axis is down-left (about 110 degrees); the ankle enters from the lower right. The cream sole edge is on the left, lace upper on the right; show a modest toe underside consistent with the foot pad. Preserve the navy low-top product and a nearly straight central sole. Output one complete independent shoe on transparent alpha; no skin or body pixels.",
+      "status": "imported and checked; curator approval pending"
+    }
+  ],
+  "postprocessing": "Master-derived pose references use one uniform scale/rotation/translation and anti-alias prefiltering during authoring. run.3 is a new native view, uniformly registered to its authored target and imported with registered_canvas=True. No row-wise contour warp, body pixel copying or runtime rigging.",
+  "files": {
+    "native-master.png": "a0c98572c76cf40ac2d0b987ec20f0e8b5bd85804d74fe2c38a862d5fbe3d130",
+    "native-run.3-rejected-view.png": "e48d0bd37ade025efeeeb3e1cfa8d02e700fae00f686d40bc9a264c837c2ff5c",
+    "native-run.3-view.png": "a8418aa9091d026546510e7a9bcd5f3a624e97e2fba43a53e16fbbadcfc12756"
+  }
+}

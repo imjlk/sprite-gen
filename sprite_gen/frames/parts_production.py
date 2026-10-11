@@ -89,15 +89,21 @@ _STABLE = contract._record({"id": contract._id, "socket": contract._id, "bounds"
                            "max_rgb_pixels": contract._integer, "rgb_threshold": contract._integer},
                           {"reference_pose": None, "max_alpha_pixels": 0, "max_rgb_pixels": 0, "rgb_threshold": 24})
 _QA = contract._record({"stable_regions": contract._records(_STABLE)}, {"stable_regions": []})
+_STRAIGHT_EDGE = contract._record({
+    "id": contract._id, "start": contract._point, "end": contract._point,
+    "side": contract._enum("positive", "negative"), "max_deviation": contract._string,
+    "span": contract._list(contract._string),
+}, {"span": ["3/20", "4/5"]})
 _INDEPENDENT_LAYER = contract._record({
     "id": contract._id, "node": contract._id,
     "targets": contract._mapping(contract._rectangle),
     "source_bounds": contract._mapping(contract._rectangle),
-    "body_nodes": contract._ids,
+    "body_nodes": contract._ids, "replaces": contract._ids,
     "landmarks": contract._mapping(contract._mapping(contract._point)),
     "guides": contract._mapping(contract._list(contract._relative_file)),
+    "straight_edges": contract._mapping(contract._records(_STRAIGHT_EDGE)),
     "fit": contract._enum("contain", "cover"), "margin": contract._string,
-}, {"source_bounds": {}, "body_nodes": [], "landmarks": {}, "guides": {}, "fit": "contain", "margin": "1"})
+}, {"source_bounds": {}, "body_nodes": [], "replaces": [], "landmarks": {}, "guides": {}, "straight_edges": {}, "fit": "contain", "margin": "1"})
 _INDEPENDENT = contract._record({"layers": contract._records(_INDEPENDENT_LAYER),
     "require_vision": contract._boolean, "reference_previous": contract._boolean}, {"require_vision": True, "reference_previous": False})
 _CONFIG = contract._record({
@@ -195,10 +201,10 @@ def _reference(config, order):
 
 
 def _redo(row):
-    """Missing, rejected, or failing a check with an error nobody approved anyway."""
+    """Missing, rejected, requested, or invalid under the current checks."""
     return (row.get("selected") is None or row.get("decision") == "rejected"
             or row.get("rework", {}).get("status") in ("requested", "failed")
-            or ((row.get("check") or {}).get("status") == "error" and row.get("decision") != "approved"))
+            or (row.get("check") or {}).get("status") == "error")
 
 
 def _redo_notes(production, rows, wanted, order):
@@ -207,7 +213,7 @@ def _redo_notes(production, rows, wanted, order):
     notes, failures, misaligned = [], [], False
     for pose in looked:
         row = rows["poses"].get(pose, {})
-        if row.get("rework", {}).get("note") and row["rework"]["note"] not in notes:
+        if row.get("rework", {}).get("status") in ('requested','failed') and row["rework"].get("note") and row["rework"]["note"] not in notes:
             notes.append(row["rework"]["note"])
         if row.get("decision") == "rejected" and row.get("note") and row["note"] not in notes:
             notes.append(row["note"])
@@ -328,7 +334,7 @@ def configure(assembly, part, config):
     if value["pieces"] and value["segments"] is None:
         raise contract.PartsContractError("pieces are cut by body segments: give config.segments")
     previous = production["config"]
-    if any(previous[k] != value[k] for k in ("qa", "visibility", "pieces", "segments", "independent")):
+    if any(previous[k] != value[k] for k in ("qa", "pose_checks", "visibility", "pieces", "segments", "independent")):
         for track in production["tracks"].values():
             for row in track["poses"].values():
                 row.update(check=None, decision="unverified", reviewer=None, note=None)
@@ -563,7 +569,7 @@ def request_rework(assembly, part, poses, note, *, track=None):
             "note": note.strip(), "art_approved": False}
 
 
-def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
+def slice_batch(assembly, part, *, batch=None, pages=(), track=None, registered_canvas=False):
     """Cut every drawn cell of a batch into a candidate and select it for its pose."""
     root, index, registry, _ = parts_motion._active(assembly)
     production = _load(root, part)
@@ -573,7 +579,9 @@ def slice_batch(assembly, part, *, batch=None, pages=(), track=None):
     entry = _batch(rows, batch)
     if entry.get("layout") == "independent":
         from sprite_gen.frames.parts_independent import slice_batch as slice_independent
-        return slice_independent(assembly, part, entry, pages=pages, track=track)
+        return slice_independent(assembly, part, entry, pages=pages, track=track, registered_canvas=registered_canvas)
+    if registered_canvas:
+        raise contract.PartsContractError('registered canvas imports require independent layers')
     motion = registry[index["motion"]["id"]]
     rig = registry[index["rig"]["id"]]
     topology = registry[rig["topology"]["id"]]
@@ -946,6 +954,16 @@ def _measure(root, config, settings, location, context):
     findings = []
     if config['independent']:
         from sprite_gen.frames import parts_independent
+        metrics['straight_edges'] = parts_independent.straight_edge_metrics(record, base)
+        for identity, edge in metrics['straight_edges'].items():
+            if edge['status'] != 'pass':
+                findings.append(('error', f"{identity}: authored straight edge failed ({edge['reason']})"))
+        frozen = {layer['id']: layer for layer in record.get('independent_layers', [])}
+        for layer in config['independent']['layers']:
+            old = frozen.get(layer['id'], {})
+            if (old.get('replaces', []) != layer.get('replaces', []) or
+                old.get('straight_edges', []) != layer.get('straight_edges', {}).get(record['pose_id'], [])):
+                findings.append(('error', f"{layer['id']}: replacement or structural criteria changed; prepare a new candidate"))
         ownership = parts_independent.body_ownership_errors(root,context[1],context[2],config,
             record['pose_id'],layers=record.get('independent_layers'))
         metrics['body_reference_mismatches'] = sum(ownership.values())
@@ -1386,6 +1404,22 @@ def review(assembly, part, *, reviewer=None, approve=(), reject=(), note=None, c
             "next": "parts-part-sheet draws the rejected poses again" if rejected else None, "release_ready": False}
 
 
+def effective_decision(root, index, state, pose, *, track=None):
+    """Keep recorded votes, but do not present stale evidence as current approval."""
+    row = _track(state, track)['poses'].get(pose, {})
+    decision = row.get('decision', 'unverified')
+    if decision != 'approved':
+        return decision
+    if (row.get('check') or {}).get('status') not in ('passed','warning'):
+        return 'unverified'
+    if state['config'].get('independent') and state['config']['independent']['require_vision']:
+        from sprite_gen.frames import parts_vision
+        observation = parts_vision.current(root,index,state,pose,track=track)
+        if not observation or not observation['current'] or observation['status'] != 'pass':
+            return 'unverified'
+    return decision
+
+
 def status(assembly, part=None):
     """Every production's tracks: poses drawn, checked, decided; and the next step for each."""
     root, index, registry, _ = parts_motion._active(assembly)
@@ -1412,7 +1446,7 @@ def status(assembly, part=None):
                 counts["unchecked"] += check_status is None
                 counts["errors"] += check_status == "error"
                 counts["warnings"] += check_status == "warning"
-                counts[row["decision"]] += 1
+                counts[effective_decision(root,index,production,pose,track=track_name)] += 1
             todo = _todo(production, track_name, order)
             steps = []
             if todo:
@@ -1433,13 +1467,15 @@ def status(assembly, part=None):
     return {"motion": index["motion"], "productions": report, "release_ready": False}
 
 
-def release_reviews(root, registry, appearance):
+def release_reviews(root, registry, appearance, *, index=None):
     """Approved part reviews for every selected pack and body that has a production; raises when one is missing.
 
     A part made through a production is released only once it is approved on the body alone,
     pose by pose; the appearance review still judges the combination.
     """
     catalog = registry[appearance["catalog"]["id"]]
+    if index is None:
+        index = workspace.read_json(root, 'assembly.json')
     selected = contract.resolve_selections(appearance, catalog)
     candidates = [ref for value in selected.values() for ref in contract._selected_refs(value)] + list(appearance["body"])
     refs = []
@@ -1449,8 +1485,8 @@ def release_reviews(root, registry, appearance):
         state = _load(root, ref["id"])
         order, _ = _poses(registry[appearance["motion"]["id"]], _states(state, appearance))
         if (not _current(state, registry, order) or
-                any(track["poses"].get(p, {}).get("decision") != "approved"
-                    for track in state["tracks"].values() for p in order)):
+                any(effective_decision(root,index,state,p,track=name) != "approved"
+                    for name in state["tracks"] for p in order)):
             raise contract.PartsContractError(f"release requires current approved production selections for {ref['id']}")
         review = registry.get("review.part." + ref["id"])
         if review is None or review["status"] != "approved" or review["subject_digest"] != ref["digest"]:
@@ -1502,6 +1538,7 @@ def add_slice_arguments(parser):
     parser.add_argument("--batch")
     parser.add_argument("--page", action="append", default=[], dest="pages", type=sheets._page_pair,
                         help="GUIDE=ART, or INDEX=PATH for independent layers (repeatable)")
+    parser.add_argument('--registered-canvas', action='store_true', help='independent INDEX=PATH images already use native rig coordinates; preserve their pixels and position')
     _with_track(parser)
 
 

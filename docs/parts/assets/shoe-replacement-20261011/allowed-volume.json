@@ -1,0 +1,56 @@
+{
+  "art_approved": false,
+  "basis": "rigid product dimensions plus an explicit per-frame perspective/registration allowance; not the generated candidate alpha",
+  "native_canvas_allowance_pixels": 7,
+  "opaque_master_bounds": [
+    17,
+    223,
+    1527,
+    801
+  ],
+  "polygons": {
+    "shoe_back": [
+      [
+        243.8438240029114,
+        485.32971633297507
+      ],
+      [
+        206.0027153453594,
+        589.297307896728
+      ],
+      [
+        158.08590922624435,
+        571.8570167482654
+      ],
+      [
+        195.92701788379634,
+        467.88942518451256
+      ]
+    ],
+    "shoe_front": [
+      [
+        440.0414828254019,
+        615.5872250769593
+      ],
+      [
+        544.0090743891549,
+        577.7461164194074
+      ],
+      [
+        561.4493655376173,
+        625.6629225385224
+      ],
+      [
+        457.4817739738644,
+        663.5040311960744
+      ]
+    ]
+  },
+  "pose": "run.3",
+  "required_and_protected_unchanged": true,
+  "runtime_mask": false,
+  "source_geometry": "inputs/shoe-replacement-r12/geometry.json",
+  "source_master": "inputs/shoe-replacement-r12/native-master.png",
+  "source_master_sha256": "a0c98572c76cf40ac2d0b987ec20f0e8b5bd85804d74fe2c38a862d5fbe3d130",
+  "status": "authored-product-envelope"
+}

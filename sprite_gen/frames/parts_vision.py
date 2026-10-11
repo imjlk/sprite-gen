@@ -24,10 +24,10 @@ from sprite_gen.spec import (
 )
 
 CATEGORIES = ("attachment", "shape", "occlusion", "design", "alpha", "temporal")
-INSPECTION_POLICY = "parts.vision.layer-closeups.v5"
+INSPECTION_POLICY = "parts.vision.replacement-structure.v6"
 
 
-def layer_closeups(images, actual, layers):
+def layer_closeups(images, actual, layers, *, remaining_body=None):
     """Inspect each attachment separately; distant pieces must not shrink it."""
     panels, crops = [], {}
     for layer in layers:
@@ -48,6 +48,8 @@ def layer_closeups(images, actual, layers):
             ("ACTUAL attachment", actual),
         ):
             panels.append((f"{layer['id']} / {label}", image.crop(roi)))
+        if remaining_body is not None and layer.get('replaces'):
+            panels.append((f"{layer['id']} / RETAINED body after node replacement", remaining_body.crop(roi)))
     return panels, crops
 
 
@@ -147,7 +149,7 @@ def validate_answer(text):
     return value
 
 
-def _render(root, index, registry, config, pose, record, base):
+def _render(root, index, registry, config, pose, record, base, *, body_only=False):
     raster = Image.open(
         BytesIO(
             assets.SourceReader(base).read(
@@ -165,7 +167,8 @@ def _render(root, index, registry, config, pose, record, base):
         record["placement"],
         independent_layers=parts_independent.candidate_layers(record, base) or None,
     )
-    return p.compose_parts.render_sample(plan, sample, load)[0]
+    only = [entry['id'] for entry in sample['draw'] if entry['role'] == 'body'] if body_only else None
+    return p.compose_parts.render_sample(plan, sample, load, only_ids=only)[0]
 
 
 def inspect(assembly, part, pose, *, provider="codex", track=None, transport=None):
@@ -194,6 +197,7 @@ def inspect(assembly, part, pose, *, provider="codex", track=None, transport=Non
         for key, ref in record["images"].items()
     }
     actual = _render(root, index, registry, config, pose, record, base)
+    remaining = _render(root, index, registry, config, pose, record, base, body_only=True)
     panels = [
         ("Body reference", images["under"]),
         ("Independent artwork", images["part"]),
@@ -264,7 +268,7 @@ def inspect(assembly, part, pose, *, provider="codex", track=None, transport=Non
     while len(panels) % 3:
         panels.append(("", Image.new("RGBA", (1, 1))))
     closeups, crops = layer_closeups(
-        images, actual, record.get("independent_layers", [])
+        images, actual, record.get("independent_layers", []), remaining_body=remaining
     )
     panels.extend(closeups)
     board = Image.new("RGB", (1152, 432 * ((len(panels) + 2) // 3)), (231, 231, 231))
@@ -292,7 +296,13 @@ def inspect(assembly, part, pose, *, provider="codex", track=None, transport=Non
         "The body is fixed. Judge the part's attachment to it, silhouette/perspective, actual occlusion order, requested design, "
         "These are close-up crops. Inspect small exposed scalp/foot slivers at boundaries, and use bare toe anatomy to distinguish sole, heel and upper views. "
         "alpha holes/fringes and temporal consistency with the displayed neighbours. Distinguish part defects from defects already visible in the unchanged body. "
-        "Use the individual layer closeups to check collar/ankle entry, heel and toe directions, shoe length/volume and visible viewing planes. "
+        + ("Use the individual layer closeups to check collar/ankle entry, heel and toe directions, shoe length/volume and visible viewing planes. "
+           if config['slot'] == 'footwear' else "Use the individual layer closeups to check its anatomical attachment, size, silhouette and visible viewing planes. ")
+        +
+        "When a layer explicitly replaces a body node, the RETAINED body panel shows what actually remains: the deleted bare foot need not be covered pixel for pixel. "
+        + ("Check attachment to the retained ankle, not conformity to deleted flexible toes. A rigid rubber outsole must have a plausible nearly straight central edge; bowed, wavy, bulging soles, a heel wedge or an excessively long toe are shape failures even if coverage metrics pass. "
+           if config['slot'] == 'footwear' else "Check the connection to the retained body and the requested material structure, rather than copying the deleted body's outline. ")
+        +
         "Do not presume a sole-facing view is correct merely because a leg is bent. Determine the view from the bare body; if its projection is ambiguous, shape is unknown. "
         "Design references and authored guides may themselves be generated drafts. They are requests, not independent proof of correct anatomy or perspective. "
         "For temporal consistency compare the same product's proportions, collar, toe cap, panels and sole across neighbours. Only explain a view change when visible anatomy supports it; otherwise record unknown. "

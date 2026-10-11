@@ -1,0 +1,141 @@
+{
+  "body_source": "inputs/body-pieces-r4",
+  "layers": {
+    "shoe_back": {
+      "run.0": {
+        "angle": 90,
+        "body_region": [
+          100,
+          540,
+          200,
+          675
+        ],
+        "collar": [
+          160,
+          580
+        ],
+        "scale": 0.067
+      },
+      "run.1": {
+        "angle": 0,
+        "body_region": [
+          285,
+          632,
+          410,
+          705
+        ],
+        "collar": [
+          325,
+          657
+        ],
+        "scale": 0.067
+      },
+      "run.2": {
+        "angle": 130,
+        "body_region": [
+          110,
+          425,
+          224,
+          529
+        ],
+        "collar": [
+          196,
+          475
+        ],
+        "scale": 0.067
+      },
+      "run.3": {
+        "angle": 110,
+        "body_region": [
+          140,
+          470,
+          240,
+          580
+        ],
+        "collar": [
+          211,
+          513
+        ],
+        "scale": 0.064
+      }
+    },
+    "shoe_front": {
+      "run.0": {
+        "angle": -18,
+        "body_region": [
+          434,
+          600,
+          565,
+          697
+        ],
+        "collar": [
+          469,
+          631
+        ],
+        "scale": 0.07
+      },
+      "run.1": {
+        "angle": 30,
+        "body_region": [
+          393,
+          533,
+          500,
+          630
+        ],
+        "collar": [
+          422,
+          555
+        ],
+        "scale": 0.061
+      },
+      "run.2": {
+        "angle": -18,
+        "body_region": [
+          455,
+          505,
+          601,
+          597
+        ],
+        "collar": [
+          505,
+          537
+        ],
+        "scale": 0.073
+      },
+      "run.3": {
+        "angle": -20,
+        "body_region": [
+          447,
+          587,
+          571,
+          688
+        ],
+        "collar": [
+          478,
+          624
+        ],
+        "scale": 0.064
+      }
+    }
+  },
+  "source_collar": [
+    420,
+    440
+  ],
+  "source_cut_y": 460,
+  "source_distal_cut": [
+    650,
+    350
+  ],
+  "source_guard_y": 160,
+  "source_sole_axis": [
+    [
+      25,
+      795
+    ],
+    [
+      1420,
+      795
+    ]
+  ]
+}

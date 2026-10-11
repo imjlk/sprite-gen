@@ -4,13 +4,13 @@ let token = readonly ? '' : document.querySelector('meta[name=review-token]')?.c
 const reviewParams=new URLSearchParams(location.search);
 const state = {part:reviewParams.get('part'), data:null, pose:reviewParams.get('pose'), candidates:[], candidate:null, busy:false, revision:0,marked:new Set(),drafts:new Map(),activeJob:null};
 const draftKey=()=>state.part+'/'+state.pose;
-const statusName=(s,m)=>m&&['passed','warning'].includes(s)&&['required_pixels','protected_pixels','allowed_pixels'].every(k=>m[k]==null)?'기본 검사 · 배치 기준 미등록'+(s==='warning'?' · 경고':''):({passed:'기계 검사 범위 내 통과',warning:'검사 경고',error:'검사 오류',unchecked:'미검사',partial:'기본 검사만 완료'}[s]||s);
+const statusName=(s,m)=>m&&['passed','warning'].includes(s)&&['required_pixels','protected_pixels','allowed_pixels'].every(k=>m[k]==null)?'기본 검사 · 배치 기준 미등록'+(s==='warning'?' · 경고':''):({passed:'기계 검사 범위 내 통과',warning:'검사 경고',error:'검사 오류',stale:'이전 기준 · 재작업 필요',unchecked:'미검사',partial:'기본 검사만 완료'}[s]||s);
 const log = text => { $('log').textContent = text + '\n' + $('log').textContent; };
 const node = (tag, text, className='') => { const el=document.createElement(tag); el.textContent=text; el.className=className; return el; };
 const url = (pose, kind, candidate) => '/api/render/' + encodeURIComponent(state.part) + '/' + encodeURIComponent(pose) + '/' + kind + '.png' + (candidate ? '?candidate='+encodeURIComponent(candidate) : '');
 function attachmentImages(){
  if(!state.candidate?.layers?.length)return;
- for(const id of ['attachment-body','attachment-part','attachment-composite'])$(id).src=url(state.pose,id,state.candidate.id)+'&piece='+encodeURIComponent($('attachment-piece').value);
+ for(const id of ['attachment-body','attachment-retained','attachment-part','attachment-composite'])$(id).src=url(state.pose,id,state.candidate.id)+'&piece='+encodeURIComponent($('attachment-piece').value);
 }
 $('attachment-piece').onchange=attachmentImages;
 async function get(path){ const r=await fetch(path); const j=await r.json(); if(!r.ok) throw new Error(j.error); return j; }
@@ -111,7 +111,7 @@ function showCandidate(c){
  $('vision-checks').replaceChildren();
  for(const [category,item] of Object.entries(vision?.answer?.checks||{})) $('vision-checks').append(node('li',category+' · '+item.result+' · '+item.reason));
  $('evidence').textContent=JSON.stringify({placement:c.placement,method:c.method,metrics:c.metrics,source:c.source,generation_reference:c.reference},null,2);
- $('note').value=state.drafts.get(draftKey())??row.rework?.note??row.note??'';if(!state.busy&&row.rework?.status==='failed')$('job-status').textContent='재작업 실패: '+row.rework.error;
+ $('note').value=state.drafts.get(draftKey())??(['requested','failed'].includes(row.rework?.status)?row.rework.note:null)??(row.decision==='rejected'?row.note:null)??'';if(!state.busy&&row.rework?.status==='failed')$('job-status').textContent='재작업 실패: '+row.rework.error;
  $('candidates').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.id===c.id));
  controls();
  resetPosition();

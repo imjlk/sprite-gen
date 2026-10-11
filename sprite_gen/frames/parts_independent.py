@@ -115,12 +115,29 @@ def validate(config, index, registry):
     ids = [layer["id"] for layer in direct["layers"]]
     if len(ids) != len(set(ids)):
         raise c.PartsContractError("independent layer IDs must be unique")
+    bodies = [registry[ref["id"]] for ref in index["body"]]
+    body_pieces = [piece for body in bodies for binding in body["bindings"]
+                   if binding["rig"] == index["rig"] and binding["motion"] == index["motion"]
+                   for piece in binding["pieces"]]
+    provided = {node for piece in body_pieces for node in piece["provides"]}
+    replaced = set()
     order, _ = p._poses(
         registry[index["motion"]["id"]], config["states"] or index["states"]
     )
     canvas = registry[index["rig"]["id"]]["canvas"]
     width, height = canvas["width"], canvas["height"]
     for layer in direct["layers"]:
+        targets = set(layer.get("replaces", []))
+        c._members(targets, provided, "replacement body nodes")
+        if targets and any(body["body_mode"] == "flat" for body in bodies):
+            raise c.PartsContractError("independent replacement needs segmented body artwork")
+        if targets & replaced:
+            raise c.PartsContractError("independent layers cannot replace the same body node twice")
+        for piece in body_pieces:
+            owned = set(piece["provides"])
+            if targets & owned and not owned <= targets:
+                raise c.PartsContractError("partial replacement of indivisible body raster; split its provided nodes")
+        replaced |= targets
         c._members(
             layer["body_nodes"],
             {n["id"] for n in topology["nodes"]},
@@ -135,6 +152,20 @@ def validate(config, index, registry):
         c._members(layer["source_bounds"], layer["targets"], "source bounds poses")
         c._members(layer["landmarks"], layer["targets"], "landmark poses")
         c._members(layer["guides"], layer["targets"], "guide poses")
+        c._members(layer.get("straight_edges", {}), layer["targets"], "straight edge poses")
+        for edges in layer.get("straight_edges", {}).values():
+            if len({edge['id'] for edge in edges}) != len(edges):
+                raise c.PartsContractError("straight edge IDs must be unique per layer/pose")
+            for edge in edges:
+                try:
+                    span = [Fraction(value) for value in edge['span']]
+                    limit = Fraction(edge['max_deviation'])
+                except (ValueError, ZeroDivisionError) as exc:
+                    raise c.PartsContractError("straight edge limits must be rational numbers") from exc
+                if len(span) != 2 or not 0 <= span[0] < span[1] <= 1 or limit <= 0:
+                    raise c.PartsContractError("straight edge needs a positive limit and a span within 0..1")
+                if sum((float(b)-float(a))**2 for a,b in zip(edge['start'],edge['end'])) < 64:
+                    raise c.PartsContractError("straight edge axis must span at least 8 native pixels")
         for points in layer["landmarks"].values():
             for name, point in points.items():
                 c._id(name, "landmark name")
@@ -159,7 +190,7 @@ def validate(config, index, registry):
                 )
 
 
-def read_reference(root, ref):
+def read_reference(root, ref, *, verify_files=True):
     data = assets.SourceReader(root).read(ref["file"], ref["sha256"])
     doc = w.decode_json(data)
     if (
@@ -170,8 +201,9 @@ def read_reference(root, ref):
         raise c.PartsContractError("changed independent generation reference")
     base = Path(ref["file"]).parent
     reader = assets.SourceReader(root / base)
-    for file in doc["files"].values():
-        reader.read(file["file"], file["sha256"])
+    if verify_files:
+        for file in doc["files"].values():
+            reader.read(file["file"], file["sha256"])
     return doc, base
 
 
@@ -235,8 +267,34 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                         f"{pose}: {name} must match the native canvas"
                     )
                 checks[name] = keep(f"{pose}/qa_{name}.png", assets.png_bytes(mask))
+        shape_unresolved = False
+        shape_review_file = None
+        if rows['poses'].get(pose, {}).get('vision'):
+            from sprite_gen.frames import parts_vision
+            observation = parts_vision.current(root, index, state, pose, track=track)
+            shape_unresolved = bool(observation and observation['current'] and
+                ((observation.get('answer') or {}).get('checks', {}).get('shape', {}).get('result') in ('fail','unknown')))
+            if shape_unresolved:
+                review = rows['poses'][pose]['vision']
+                shape_review_file = keep(f'{pose}/shape-review.json',assets.SourceReader(root).read(review['file'],review['sha256']))
         for layer in config["independent"]["layers"]:
             target = layer["targets"][pose]
+            corrected = None
+            selected = rows['poses'].get(pose, {}).get('selected')
+            row = rows['poses'].get(pose, {})
+            if selected and row.get('decision') != 'rejected' and (row.get('check') or {}).get('status') == 'passed':
+                prior = p.candidate_record(root, state, pose, selected, track=track)
+                ops = prior.get('method', {}).get('programmatic_edit', {}).get('operations', [])
+                if any(op['type'] in ('translate','rotate','fit-alpha-box') and op.get('piece') in (None,layer['id']) for op in ops):
+                    frozen, _ = read_reference(root, prior['independent_reference'], verify_files=False)
+                    if frozen['context'] == context:
+                        ref = prior['images']['piece.' + layer['id']]
+                        corrected = Image.open(BytesIO(assets.SourceReader(root/selected).read(ref['file'],ref['sha256']))).convert('RGBA')
+                        yy,xx = np.nonzero(np.asarray(corrected)[...,3] >= 16)
+                        if len(xx):
+                            target = [max(0,int(xx.min())-4),max(0,int(yy.min())-4),min(body.width,int(xx.max())+5),min(body.height,int(yy.max())+5)]
+                        else:
+                            corrected = None
             a, b, x, y = target
             pad = max(16, round(max(x - a, y - b) * 0.25))
             roi = (
@@ -324,10 +382,16 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                 keep(f"{pose}/{layer['id']}.anatomy.png", assets.png_bytes(anatomy))
                 ownership.append(keep(f"{pose}/{layer['id']}.anatomy.view.png", assets.png_bytes(reference_view(anatomy))))
             shape_guides = []
-            for n, path in enumerate(layer["guides"].get(pose, [])):
-                encoded = assets.SourceReader(root).read(path)
-                keep(f"{pose}/{layer['id']}.shape-{n}.png", encoded)
-                shape_guides.append(keep(f"{pose}/{layer['id']}.shape-{n}.view.png", assets.png_bytes(reference_view(Image.open(BytesIO(encoded))))))
+            if corrected is not None:
+                keep(f"{pose}/{layer['id']}.selected-geometry.png", assets.png_bytes(corrected))
+                if not shape_unresolved:
+                    zoom = corrected.crop(roi).convert('RGBa').resize(guide.size, Image.Resampling.BILINEAR).convert('RGBA')
+                    shape_guides.append(keep(f"{pose}/{layer['id']}.selected-geometry.view.png", assets.png_bytes(reference_view(zoom))))
+            elif not shape_unresolved:
+                for n, path in enumerate(layer["guides"].get(pose, [])):
+                    encoded = assets.SourceReader(root).read(path)
+                    keep(f"{pose}/{layer['id']}.shape-{n}.png", encoded)
+                    shape_guides.append(keep(f"{pose}/{layer['id']}.shape-{n}.view.png", assets.png_bytes(reference_view(Image.open(BytesIO(encoded))))))
             previous = []
             selected = rows["poses"].get(pose, {}).get("selected")
             if selected and config["independent"]["reference_previous"]:
@@ -363,7 +427,13 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                     else ""
                 )
                 + "Do not paint a character, skin, face, body, limbs, other garments, labels, guides or a background. "
-                "Return one clean isolated asset on genuine transparent alpha, with the whole silhouette visible. "
+                + (
+                    f"This layer REPLACES the segmented body nodes {layer['replaces']}; those bare body pixels are removed when worn. "
+                    "Preserve the attachment to the remaining body, but do not copy every bare-body contour into a rigid garment or shoe sole. "
+                    "Keep the product's structural shape; the required guide marks the authored attachment interface, not the deleted bare-foot silhouette. "
+                    if layer.get("replaces") else ""
+                )
+                + "Return one clean isolated asset on genuine transparent alpha, with the whole silhouette visible. "
                 "Do not draw a sheet or a grid. Preserve the design from the attached design reference. "
                 "Output framing is free; registration uses a single uniform scale and translation. "
                 "Provider references use a neutral gray background to expose the actual alpha silhouette; gray is never output artwork. "
@@ -382,6 +452,8 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                     else ""
                 )
                 + notes
+                + (" The current visual review could not validate shape/viewing planes. Prior part templates are not supplied as shape authority. Use the exact body pose and design reference to propose a corrected plane while retaining the required ankle interface. " if shape_unresolved else "")
+                + (" The selected programmatically corrected layer supplies the new attachment position and scale. This is a curation draft, not an art approval. Do not undo that registered placement or copy body pixels; address the requested design/shape defects within the body interface. " if corrected is not None else "")
                 + (
                     " The attached authored PART TEMPLATE defines this pose's silhouette, collar opening and visible material planes. Preserve that geometry; apply the requested finished illustration style. Template colours and labels are guidance, not output text. Do not substitute a generic shoe viewing angle."
                     if shape_guides
@@ -484,6 +556,10 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                     "pose": pose,
                     "layer": layer["id"],
                     "node": layer["node"],
+                    "replaces": layer.get("replaces", []),
+                    "geometry_candidate": prior['digest'] if corrected is not None else None,
+                    "shape_review": shape_review_file,
+                    "straight_edges": layer.get("straight_edges", {}).get(pose, []),
                     "target": target,
                     "source_bounds": layer["source_bounds"].get(pose),
                     "fit": layer["fit"],
@@ -677,7 +753,7 @@ def register(
     )
 
 
-def slice_batch(assembly, part, entry, *, pages=(), track=None):
+def slice_batch(assembly, part, entry, *, pages=(), track=None, registered_canvas=False):
     root, index, registry, _ = parts_motion._active(assembly)
     state = p._load(root, part)
     rows = p._track(state, track)
@@ -693,6 +769,8 @@ def slice_batch(assembly, part, entry, *, pages=(), track=None):
     if any(not str(n).isdigit() for n, _ in pages):
         raise c.PartsContractError("independent image pages use INDEX=PATH")
     supplied = {int(str(n)): path for n, path in pages}
+    if registered_canvas and not supplied:
+        raise c.PartsContractError('registered canvas imports need explicit INDEX=PATH inputs')
     if set(supplied) - set(range(len(entry["pages"]))):
         raise c.PartsContractError("unknown independent image index")
     preserved = [n for n in supplied if entry["pages"][n].get("reuse")]
@@ -733,6 +811,16 @@ def slice_batch(assembly, part, entry, *, pages=(), track=None):
                 else path.read_bytes()
             )
             raw = Image.open(BytesIO(encoded)).convert("RGBA")
+            registered = registered_canvas and n in supplied
+            if registered:
+                alpha = np.asarray(raw)[...,3]
+                if raw.size != canvas or not (alpha == 0).any() or not (alpha >= 16).any() or (alpha > 0).mean() > .95:
+                    raise c.PartsContractError('registered independent image must be a nonempty transparent native rig canvas')
+                a,b,x,y = job['target']
+                outside = alpha >= 16
+                outside[b:y,a:x] = False
+                if outside.any():
+                    raise c.PartsContractError('registered image exceeds its authored target; correct the placement/reference first')
             native = assets.publish_object(
                 p._folder(root, part),
                 "native-art",
@@ -750,6 +838,8 @@ def slice_batch(assembly, part, entry, *, pages=(), track=None):
                     },
                 )
                 if job.get("reuse")
+                else (raw, [0,0], {'fit':'native-canvas','uniform_scale':1,'position':[0,0],'target':job['target'],'source_bounds':None,'sampling':'unchanged'})
+                if registered
                 else register(
                     raw,
                     job["target"],
@@ -794,6 +884,8 @@ def slice_batch(assembly, part, entry, *, pages=(), track=None):
                 {
                     "id": job["layer"],
                     "node": job["node"],
+                    "replaces": job.get("replaces", []),
+                    "straight_edges": job.get("straight_edges", []),
                     "image_key": key,
                     "target": job["target"],
                 }
@@ -908,6 +1000,8 @@ def build_pieces(root, part, state, order):
             record = p.candidate_record(root, state, pose, row["selected"])
             if not any(
                 item["id"] == layer["id"] and item["node"] == layer["node"]
+                and item.get("replaces", []) == layer.get("replaces", [])
+                and item.get("straight_edges", []) == layer.get("straight_edges", {}).get(pose, [])
                 for item in record.get("independent_layers", [])
             ):
                 raise c.PartsContractError(
@@ -930,10 +1024,54 @@ def build_pieces(root, part, state, order):
                 "slot": state["config"]["slot"],
                 "node": layer["node"],
                 "mode": "raster",
+                "provides": layer.get("replaces", []),
+                "replaces": layer.get("replaces", []),
                 "pose_map": mapping,
             }
         )
     return specs
+
+
+def straight_edge_metrics(record, base):
+    """Measure an explicitly authored rigid silhouette edge, not overall art quality.
+
+    The axis identifies the material side and central span. We fit its outward
+    alpha envelope; rigid rotation/translation does not change the conclusion.
+    Curved products need no such criterion. Missing evidence fails closed.
+    """
+    result = {}
+    for layer in candidate_layers(record, base):
+        ys, xs = np.nonzero(np.asarray(layer['image'])[..., 3] >= 128)
+        for edge in layer.get('straight_edges', []):
+            start, end = np.array(edge['start'], dtype=float), np.array(edge['end'], dtype=float)
+            length = np.linalg.norm(end-start)
+            unit = (end-start)/length
+            normal = np.array([-unit[1], unit[0]])
+            if edge['side'] == 'negative':
+                normal *= -1
+            points = np.column_stack([xs, ys])-start
+            along, outward = points@unit, points@normal
+            lo, hi = [float(Fraction(value))*length for value in edge['span']]
+            positions, envelope = [], []
+            # Ignore a final fractional bin that contains no native pixel center.
+            bins = np.arange(lo, hi-2+1e-8, 2.0)
+            for position in bins:
+                inside = (along >= position) & (along < min(position+2, hi))
+                if inside.any():
+                    positions.append(position+1)
+                    envelope.append(float(outward[inside].max()))
+            limit = float(Fraction(edge['max_deviation']))
+            metric = {'status': 'fail', 'reason': 'insufficient visible edge evidence',
+                      'max_deviation': None, 'rms_deviation': None, 'limit': limit,
+                      'samples': len(positions), 'expected_samples': len(bins)}
+            if len(positions) >= 4 and len(positions) == len(bins):
+                residual = np.array(envelope)-np.polyval(np.polyfit(positions, envelope, 1), positions)
+                maximum = float(np.abs(residual).max())
+                metric.update(status='pass' if maximum <= limit else 'fail',
+                              reason=f'maximum deviation {maximum:.3f}px; limit {limit:g}px',
+                              max_deviation=maximum, rms_deviation=float(np.sqrt((residual**2).mean())))
+            result[layer['id']+'.'+edge['id']] = metric
+    return result
 
 
 def edit_layers(root, state, row, location, record, images, operations, *, sampling):

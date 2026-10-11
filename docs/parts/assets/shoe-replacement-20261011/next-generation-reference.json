@@ -1,0 +1,39 @@
+{
+  "batch": "idc8a11469fc4",
+  "jobs": 8,
+  "provider": "codex",
+  "live_generation_started": false,
+  "selected_candidates_unchanged": true,
+  "current_vision_preserved": 4,
+  "corrected_geometry_jobs": [
+    {
+      "pose": "run.1",
+      "layer": "shoe_back",
+      "candidate": "7d787e5bd55034683929424584b3482db69e2f232fb7caacde518f43e200be7b",
+      "target": [
+        293,
+        637,
+        404,
+        685
+      ]
+    },
+    {
+      "pose": "run.3",
+      "layer": "shoe_back",
+      "candidate": "50914207b3918896ba63571f7502d1a6adbf573cd5b36a665fcd0cd3e8534aba",
+      "target": [
+        164,
+        469,
+        233,
+        579
+      ]
+    }
+  ],
+  "max_provider_references": 3,
+  "reference": {
+    "file": "productions/qualified.sneakers/independent-inputs/inputs/dc8a11469fc423478752c87645d784efb0fd69c7463cada548254212763a30a1/reference.json",
+    "sha256": "94e30bcc0077104519cfdb46fe480c6f0cef23aa43cd826d5e11cc25663ec852"
+  },
+  "art_approved": false,
+  "release_ready": false
+}

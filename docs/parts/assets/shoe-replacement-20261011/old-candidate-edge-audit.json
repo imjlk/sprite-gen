@@ -1,0 +1,98 @@
+{
+  "run.0": {
+    "candidate": "707aed0ff501b3ca0b5d68044deaeed4706735f2cb57cf2114ef9babb7d47c42",
+    "edges": {
+      "shoe_back.outsole": {
+        "expected_samples": 30,
+        "limit": 2.0,
+        "max_deviation": 2.529328883945123,
+        "reason": "maximum deviation 2.529px; limit 2px",
+        "rms_deviation": 1.3231591802537233,
+        "samples": 30,
+        "status": "fail"
+      },
+      "shoe_front.outsole": {
+        "expected_samples": 31,
+        "limit": 2.0,
+        "max_deviation": 0.7858157043030936,
+        "reason": "maximum deviation 0.786px; limit 2px",
+        "rms_deviation": 0.32536722826404785,
+        "samples": 31,
+        "status": "pass"
+      }
+    },
+    "measurement_scope": "retrospective raw silhouette under the current authored rigid-edge criterion; not a new historical approval"
+  },
+  "run.1": {
+    "candidate": "4631c6f633ef980ebc09ef470d6a15fe09a84ef0308ab91ddf6876180256640e",
+    "edges": {
+      "shoe_back.outsole": {
+        "expected_samples": 30,
+        "limit": 2.0,
+        "max_deviation": 1.027808676307008,
+        "reason": "maximum deviation 1.028px; limit 2px",
+        "rms_deviation": 0.4730324862382155,
+        "samples": 30,
+        "status": "pass"
+      },
+      "shoe_front.outsole": {
+        "expected_samples": 27,
+        "limit": 2.0,
+        "max_deviation": 2.1643947197585334,
+        "reason": "maximum deviation 2.164px; limit 2px",
+        "rms_deviation": 1.010042363152445,
+        "samples": 27,
+        "status": "fail"
+      }
+    },
+    "measurement_scope": "retrospective raw silhouette under the current authored rigid-edge criterion; not a new historical approval"
+  },
+  "run.2": {
+    "candidate": "db7c6e53919055f742cf80fa46bdf3119f1dc22b47d61a735c9c4d926b3c8d6a",
+    "edges": {
+      "shoe_back.outsole": {
+        "expected_samples": 30,
+        "limit": 2.0,
+        "max_deviation": 2.376529700431881,
+        "reason": "maximum deviation 2.377px; limit 2px",
+        "rms_deviation": 1.038188616589217,
+        "samples": 30,
+        "status": "fail"
+      },
+      "shoe_front.outsole": {
+        "expected_samples": 32,
+        "limit": 2.0,
+        "max_deviation": 1.1121874270705874,
+        "reason": "maximum deviation 1.112px; limit 2px",
+        "rms_deviation": 0.43927752122376157,
+        "samples": 32,
+        "status": "pass"
+      }
+    },
+    "measurement_scope": "retrospective raw silhouette under the current authored rigid-edge criterion; not a new historical approval"
+  },
+  "run.3": {
+    "candidate": "e747e4a69e3d62c5d64c20b8b40e9431bab66ff108dd226b861be5ec39c3bdf0",
+    "edges": {
+      "shoe_back.outsole": {
+        "expected_samples": 28,
+        "limit": 2.0,
+        "max_deviation": 2.221642732683872,
+        "reason": "maximum deviation 2.222px; limit 2px",
+        "rms_deviation": 1.3396219365613573,
+        "samples": 28,
+        "status": "fail"
+      },
+      "shoe_front.outsole": {
+        "expected_samples": 29,
+        "limit": 2.0,
+        "max_deviation": 0.9172237721857073,
+        "reason": "maximum deviation 0.917px; limit 2px",
+        "rms_deviation": 0.5515183252988277,
+        "samples": 29,
+        "status": "pass"
+      }
+    },
+    "measurement_scope": "retrospective raw silhouette under the current authored rigid-edge criterion; not a new historical approval"
+  }
+}
