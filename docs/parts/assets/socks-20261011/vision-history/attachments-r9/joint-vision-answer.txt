@@ -1,0 +1,43 @@
+{
+  "poses": {
+    "run.0": {
+      "hair": "pass",
+      "socks_shoes": "pass",
+      "issues": [
+        "No clear clipping of the ear's outer arc or lower tip is visible. The curved inner ear line also appears in the bare-body reference.",
+        "Both socks meet their calves along aligned cuff edges; no visible background gap separates either sock from its shoe collar."
+      ]
+    },
+    "run.1": {
+      "hair": "pass",
+      "socks_shoes": "pass",
+      "issues": [
+        "The exposed ear contour follows the reference, including its lower opening. No obvious empty skin halo or smeared strand surrounds it.",
+        "The cuffs follow the differently angled calves. The pale collar rims remain connected around the socks without an obvious open seam."
+      ]
+    },
+    "run.2": {
+      "hair": "pass",
+      "socks_shoes": "pass",
+      "issues": [
+        "The upper ear arc and lower tip remain visible in their reference positions; the adjacent hair tips show no obvious hard cut seam.",
+        "The diagonal back cuff and front cuff meet their calves continuously. Neither shoe visibly floats away from its sock."
+      ]
+    },
+    "run.3": {
+      "hair": "pass",
+      "socks_shoes": "pass",
+      "issues": [
+        "The lower ear curve is present in the bare-body reference; the neighboring hair curl does not visibly truncate it.",
+        "Both calf-to-cuff boundaries appear continuous, and no clear break is visible at either shoe collar."
+      ]
+    }
+  },
+  "overall": "pass",
+  "limits": [
+    "Pass means no definite attachment defect is visible at the supplied contact-sheet resolution.",
+    "Fine edge pixels and collar regions obscured by laces cannot be fully assessed.",
+    "These are four independently authored still poses; no animation or motion quality is inferred.",
+    "This is an observational attachment audit, not curator approval or release-readiness assessment."
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "appearance": {
+    "digest": "f43df41e90cde07cf3cdc4f111da4fc0fe0bacbf0e14aa14ec1d921c620e0075",
+    "id": "qualified.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "2b3d2b0c4ae5e0f78e1e1a84978a8047fd1fa0b2d2aab24f512705a4ed274f63",
+      "id": "qualified.body"
+    }
+  ],
+  "input_sha256": "c9b068b62221e6fb1d8ecd2bb5a93d0fefd3aa10d89fed5b2bcf17313723e754",
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "observation": {
+    "limits": [
+      "The ear's inner curved mark and open lower-right contour endpoint are present in the bare-body references and are not themselves mask defects.",
+      "Contact-sheet resolution limits assessment of very narrow edge fringes; source alpha and mask geometry are not established by this image.",
+      "These are four independently authored still poses. They provide no evidence of animation or motion quality.",
+      "This is an observational attachment audit only, not curator approval or release readiness."
+    ],
+    "overall": "rework",
+    "poses": {
+      "run.0": {
+        "hair": "rework",
+        "issues": [
+          "A thin, uneven pale fringe follows the upper and left ear aperture against the hair. The corresponding bare-body contour is smoother and darker.",
+          "Both sock cuffs meet the calves, and both shoes remain visibly connected through their collars."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.1": {
+        "hair": "rework",
+        "issues": [
+          "The left and lower ear aperture have a hard, lightly fringed boundary; portions of the outer ear stroke appear thinner than in the bare-body reference.",
+          "No visible gap interrupts either calf-to-sock or sock-to-shoe attachment."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.2": {
+        "hair": "rework",
+        "issues": [
+          "A small pale, uneven rim remains along the upper-left ear aperture. It is subtler here but still visible against the brown hair.",
+          "The angled back cuff and front cuff follow their respective calves, with continuous collar attachments."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.3": {
+        "hair": "rework",
+        "issues": [
+          "The upper and left ear boundary show a conspicuous thin light fringe and an abrupt cut against the hair, compared with the smooth bare-body outline.",
+          "Neither shoe visibly floats; the socks bridge the calves and shoe collars without an open seam."
+        ],
+        "socks_shoes": "pass"
+      }
+    }
+  },
+  "parts": {
+    "qualified.hair": {
+      "digest": "5df97ed018d73ac905d4c02691d450bf276576fa38f42f58ad8154a63b38eb5f",
+      "id": "qualified.hair"
+    },
+    "qualified.sneakers": {
+      "digest": "024715317975a3c0db0ebcd86a1e950d5f7afe15a96685fccdb2655da63ae0ec",
+      "id": "qualified.sneakers"
+    },
+    "qualified.socks": {
+      "digest": "68406dc2a6c70661a0155f28ae3e8b00dc059b9b4f76a4cc4f03431012786ec6",
+      "id": "qualified.socks"
+    }
+  },
+  "prompt_sha256": "2b4d85acd7644a4bdf28fd28641d884d874b00b7d973a2686ac81c92ae59e2ab",
+  "release_ready": false,
+  "response_sha256": "139ae60ab6c64fd1e75cc97abd6b66f4c6c6d413d29b088f4429fb52812aff8f",
+  "scope": "attachment contact audit only; not part approval or full motion QC",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

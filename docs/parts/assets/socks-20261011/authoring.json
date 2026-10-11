@@ -1,0 +1,195 @@
+{
+  "appearance_clips_generated": 0,
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "2b3d2b0c4ae5e0f78e1e1a84978a8047fd1fa0b2d2aab24f512705a4ed274f63",
+      "id": "qualified.body"
+    }
+  ],
+  "body_modified": false,
+  "body_rgb_copied": false,
+  "checks": {
+    "checked": 4,
+    "findings": {},
+    "part": "qualified.socks",
+    "release_ready": false,
+    "summary": {
+      "error": 0,
+      "passed": 4,
+      "warning": 0
+    }
+  },
+  "cuff_length_px": 32,
+  "kind": "procedural-sock-reference-authoring",
+  "layers": [
+    {
+      "calf_axis": [
+        0.872166542669737,
+        -0.4892090778465969
+      ],
+      "calf_samples": [
+        [
+          161.02051282051283,
+          575.9948717948718
+        ],
+        [
+          188.44019138755982,
+          560.6148325358852
+        ]
+      ],
+      "cuff_pixels": 1319,
+      "foot_pixels": 2951,
+      "pose": "run.0",
+      "side": "back"
+    },
+    {
+      "calf_axis": [
+        0.34004316400074613,
+        -0.9404098290726025
+      ],
+      "calf_samples": [
+        [
+          323.49411764705883,
+          656.0235294117647
+        ],
+        [
+          332.0,
+          632.5
+        ]
+      ],
+      "cuff_pixels": 1308,
+      "foot_pixels": 2204,
+      "pose": "run.1",
+      "side": "back"
+    },
+    {
+      "calf_axis": [
+        0.6564745042979441,
+        0.7543482121717852
+      ],
+      "calf_samples": [
+        [
+          198.8978494623656,
+          473.3279569892473
+        ],
+        [
+          216.83582089552237,
+          493.94029850746267
+        ]
+      ],
+      "cuff_pixels": 1448,
+      "foot_pixels": 2841,
+      "pose": "run.2",
+      "side": "back"
+    },
+    {
+      "calf_axis": [
+        0.7786112737301536,
+        0.6275065612567791
+      ],
+      "calf_samples": [
+        [
+          214.08374384236453,
+          508.00985221674875
+        ],
+        [
+          235.80213903743316,
+          525.5133689839572
+        ]
+      ],
+      "cuff_pixels": 1504,
+      "foot_pixels": 2758,
+      "pose": "run.3",
+      "side": "back"
+    },
+    {
+      "calf_axis": [
+        -0.5252776636980673,
+        -0.8509308879221038
+      ],
+      "calf_samples": [
+        [
+          467.8362573099415,
+          630.1988304093567
+        ],
+        [
+          453.24619289340103,
+          606.5634517766498
+        ]
+      ],
+      "cuff_pixels": 1503,
+      "foot_pixels": 3715,
+      "pose": "run.0",
+      "side": "front"
+    },
+    {
+      "calf_axis": [
+        0.7712827156375633,
+        -0.636492712101832
+      ],
+      "calf_samples": [
+        [
+          421.2692307692308,
+          553.1025641025641
+        ],
+        [
+          442.6521739130435,
+          535.4565217391304
+        ]
+      ],
+      "cuff_pixels": 1446,
+      "foot_pixels": 2296,
+      "pose": "run.1",
+      "side": "front"
+    },
+    {
+      "calf_axis": [
+        -0.5148970044606315,
+        -0.8572520485816691
+      ],
+      "calf_samples": [
+        [
+          504.22093023255815,
+          536.1337209302326
+        ],
+        [
+          489.81113801452784,
+          512.1428571428571
+        ]
+      ],
+      "cuff_pixels": 1437,
+      "foot_pixels": 3182,
+      "pose": "run.2",
+      "side": "front"
+    },
+    {
+      "calf_axis": [
+        -0.3902019183672929,
+        -0.9207293103309379
+      ],
+      "calf_samples": [
+        [
+          473.73262032085563,
+          624.2513368983957
+        ],
+        [
+          463.05413105413106,
+          599.0541310541311
+        ]
+      ],
+      "cuff_pixels": 1472,
+      "foot_pixels": 2982,
+      "pose": "run.3",
+      "side": "front"
+    }
+  ],
+  "material_sha256": "4e8e7a278ae1b74a832155a3295edd52cc353eb68b5ee0a7e7786ba1e5f81014",
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "runtime_masks": 0,
+  "runtime_rigging": false,
+  "sock_source_images": 16
+}

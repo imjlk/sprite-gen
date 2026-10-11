@@ -1,0 +1,44 @@
+{
+  "body": [
+    {
+      "digest": "2b3d2b0c4ae5e0f78e1e1a84978a8047fd1fa0b2d2aab24f512705a4ed274f63",
+      "id": "qualified.body"
+    }
+  ],
+  "catalog": {
+    "digest": "f41116e77fd58e157834fa0702f0a2f379783f4c47deef6ec8f60a829352a9e5",
+    "id": "illustration.motion.catalog"
+  },
+  "digest": "7e6b17efcbbdc55f96f041ad043189ebe0fc1e7802ec8ee599cb38c88140438a",
+  "id": "qualified.example",
+  "kind": "parts-appearance",
+  "mirror": false,
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "palette": {},
+  "presets": [],
+  "rig": {
+    "digest": "cab21d2659f1e430b22221d291bb282b7b0e2f15a85d4fd2bb3fd50c8838873b",
+    "id": "illustration.motion.rig"
+  },
+  "schema_version": 1,
+  "selections": {
+    "footwear": {
+      "digest": "b67e30ff51d2778c45dba17385949050231026b4365a4812307a551c8630c95a",
+      "id": "qualified.sneakers"
+    },
+    "hair": {
+      "digest": "5df3f5be12a8428e086a69e0ba980d07f1b1945e0e414e8f940c958e7aac8394",
+      "id": "qualified.hair"
+    },
+    "socks": {
+      "digest": "5a4202c77edfb3f35a1807a76fcfba652118b4b648a9150bca90bbd39db0292f",
+      "id": "qualified.socks"
+    }
+  },
+  "states": [
+    "run"
+  ]
+}

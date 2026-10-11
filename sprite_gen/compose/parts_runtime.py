@@ -151,7 +151,7 @@ class PartsPlayer:
                 "palette_regions":{**entry["palette_regions"],**placement["palette_regions"]}}
             layers.append(layer)
             mask = placement["mask"]
-            if mask is not None:
+            if mask is not None and (not mask.get('optional_target',False) or any(mask['target_node'] in e['provides'] for e in sample['draw'])):
                 masks.append({**deepcopy(mask),"pack":entry["pack"],"issuer":layer["id"],
                     "origin":[str(v) for v in position] if mask["space"]=="part-local" else ["0","0"]})
         return deepcopy({**clock,"appearance":contract.reference(self.appearance),"motion":self.appearance["motion"],

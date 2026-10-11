@@ -199,8 +199,9 @@ _clip = _record({"id": _id, "state": _id, "view": _id, "timebase": _positive,
                  "loop": _boolean, "samples": _records(_sample, nonempty=True),
                  "source": _nullable(_motion_source)}, {"source": None})
 _mask = _record({"image": _asset, "target_node": _id,
-                 "space": _enum("part-local", "rig-canvas"), "channel": _enum("luma", "alpha")},
-                {"channel": "luma"})
+                 "space": _enum("part-local", "rig-canvas"), "channel": _enum("luma", "alpha"),
+                 "optional_target": _boolean},
+                {"channel": "luma"}, optional=("optional_target",))
 _part_source = _record({"image": _asset, "format": _enum("full-canvas", "cropped", "local"),
                        "crop_offset": _point, "pivot": _point})
 _placement = _record({"image": _asset, "pivot": _point, "target_socket": _id,

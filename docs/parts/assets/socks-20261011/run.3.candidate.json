@@ -1,0 +1,286 @@
+{
+  "alignment": null,
+  "body_sha256": "42aa503e396e99765f5a3e9533fd94a2d5cfb16bd09676c8b869f2c88dd880fa",
+  "clip": "run.reference",
+  "digest": "742eb06bc1e813ff3540853aae9b3cb5680440cce725f7ebea88385d2859213b",
+  "holes_filled": 0,
+  "images": {
+    "mask": {
+      "file": "mask.png",
+      "sha256": "816a234c5947890058a6b4d67596866198ddb067e06bf2991f83e8492d6b5777"
+    },
+    "part": {
+      "file": "part.png",
+      "sha256": "2d7074eda62d1340ac7d96f73c26d0d459db7b104d431487f8a47141c8518b46"
+    },
+    "piece.sock_back_cuff": {
+      "file": "piece.sock_back_cuff.png",
+      "sha256": "b4a75d15fa1717a252d2825b8cfac77392ceb1956c11b0508dfcd4f59d7c3152"
+    },
+    "piece.sock_back_foot": {
+      "file": "piece.sock_back_foot.png",
+      "sha256": "cf1983a8c3ea0c66fcc5ffa25156a34ba3c7daa0df6c950d003f7709518d27e9"
+    },
+    "piece.sock_front_cuff": {
+      "file": "piece.sock_front_cuff.png",
+      "sha256": "4309149010994e56f8f5b5096210c8f434c96adac05e1012e25a6d3923b0a074"
+    },
+    "piece.sock_front_foot": {
+      "file": "piece.sock_front_foot.png",
+      "sha256": "f18183bb009748026f566434e5949891e7727aef98d861c22f3eed7b39c23f90"
+    },
+    "qa_allowed": {
+      "file": "qa_allowed.png",
+      "sha256": "55b7d9494dec2ee9ab934b60f4533db8f088cfe748ba9e82d8b66e87b5fce038"
+    },
+    "qa_protected": {
+      "file": "qa_protected.png",
+      "sha256": "d3fcec5bf1ddb86ffa90b30209391fcbaeb1666666df4199cfccfcbce1d78ef6"
+    },
+    "qa_required": {
+      "file": "qa_required.png",
+      "sha256": "ae17ecef7d07fcd773a9983f1f0cb9a15b34c9b972351c3d2cf101db1ebd294a"
+    },
+    "raw.sock_back_cuff": {
+      "file": "raw.sock_back_cuff.png",
+      "sha256": "b4a75d15fa1717a252d2825b8cfac77392ceb1956c11b0508dfcd4f59d7c3152"
+    },
+    "raw.sock_back_foot": {
+      "file": "raw.sock_back_foot.png",
+      "sha256": "cf1983a8c3ea0c66fcc5ffa25156a34ba3c7daa0df6c950d003f7709518d27e9"
+    },
+    "raw.sock_front_cuff": {
+      "file": "raw.sock_front_cuff.png",
+      "sha256": "4309149010994e56f8f5b5096210c8f434c96adac05e1012e25a6d3923b0a074"
+    },
+    "raw.sock_front_foot": {
+      "file": "raw.sock_front_foot.png",
+      "sha256": "f18183bb009748026f566434e5949891e7727aef98d861c22f3eed7b39c23f90"
+    },
+    "under": {
+      "file": "under.png",
+      "sha256": "42aa503e396e99765f5a3e9533fd94a2d5cfb16bd09676c8b869f2c88dd880fa"
+    }
+  },
+  "independent_layers": [
+    {
+      "cover_rule": null,
+      "id": "sock_back_cuff",
+      "image_key": "piece.sock_back_cuff",
+      "node": "sock_back",
+      "provides": [
+        "sock_back"
+      ],
+      "replaces": [],
+      "straight_edges": [],
+      "target": [
+        201,
+        483,
+        267,
+        541
+      ]
+    },
+    {
+      "cover_rule": {
+        "show": "uncovered",
+        "tag": "footwear.closed-foot"
+      },
+      "id": "sock_back_foot",
+      "image_key": "piece.sock_back_foot",
+      "node": "sock_back",
+      "provides": [
+        "foot_back"
+      ],
+      "replaces": [
+        "foot_back"
+      ],
+      "straight_edges": [],
+      "target": [
+        155,
+        475,
+        224,
+        570
+      ]
+    },
+    {
+      "cover_rule": null,
+      "id": "sock_front_cuff",
+      "image_key": "piece.sock_front_cuff",
+      "node": "sock_front",
+      "provides": [
+        "sock_front"
+      ],
+      "replaces": [],
+      "straight_edges": [],
+      "target": [
+        432,
+        585,
+        499,
+        638
+      ]
+    },
+    {
+      "cover_rule": {
+        "show": "uncovered",
+        "tag": "footwear.closed-foot"
+      },
+      "id": "sock_front_foot",
+      "image_key": "piece.sock_front_foot",
+      "node": "sock_front",
+      "provides": [
+        "foot_front"
+      ],
+      "replaces": [
+        "foot_front"
+      ],
+      "straight_edges": [],
+      "target": [
+        453,
+        600,
+        553,
+        667
+      ]
+    }
+  ],
+  "independent_reference": {
+    "file": "productions/qualified.socks/independent-inputs/inputs/a4b69dcfc7d801a39304005130707d835edaccbbb70d39f1f2323133fbd3cb5f/reference.json",
+    "sha256": "6541b8a2c6c1d45f36a27ebebfbd73c8dd047066446be80ff0a140ed7a056a58"
+  },
+  "kind": "parts-production-candidate",
+  "method": {
+    "independent": true,
+    "registration": {
+      "sock_back_cuff": {
+        "fit": "native-canvas",
+        "position": [
+          0,
+          0
+        ],
+        "sampling": "unchanged",
+        "source_bounds": null,
+        "target": [
+          201,
+          483,
+          267,
+          541
+        ],
+        "uniform_scale": 1
+      },
+      "sock_back_foot": {
+        "fit": "native-canvas",
+        "position": [
+          0,
+          0
+        ],
+        "sampling": "unchanged",
+        "source_bounds": null,
+        "target": [
+          155,
+          475,
+          224,
+          570
+        ],
+        "uniform_scale": 1
+      },
+      "sock_front_cuff": {
+        "fit": "native-canvas",
+        "position": [
+          0,
+          0
+        ],
+        "sampling": "unchanged",
+        "source_bounds": null,
+        "target": [
+          432,
+          585,
+          499,
+          638
+        ],
+        "uniform_scale": 1
+      },
+      "sock_front_foot": {
+        "fit": "native-canvas",
+        "position": [
+          0,
+          0
+        ],
+        "sampling": "unchanged",
+        "source_bounds": null,
+        "target": [
+          453,
+          600,
+          553,
+          667
+        ],
+        "uniform_scale": 1
+      }
+    }
+  },
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "part": "qualified.socks",
+  "pixels": 9635,
+  "placement": {
+    "format": "full-canvas",
+    "offset": [
+      0,
+      0
+    ],
+    "pivot": [
+      0,
+      0
+    ],
+    "target_socket": "root"
+  },
+  "policy": "parts.production.v1",
+  "pose_id": "run.3",
+  "sample": "sample.3",
+  "schema_version": 1,
+  "source": [
+    {
+      "artifact": {
+        "file": "productions/qualified.socks/native-art/source/aeb8e65bf0f12e661f633cf3ef1acfe3e97c4a25e0ed9e708707204b17f67c09/source.image",
+        "sha256": "aeb8e65bf0f12e661f633cf3ef1acfe3e97c4a25e0ed9e708707204b17f67c09"
+      },
+      "file": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/library/inputs/socks-r4/run.3.sock_back_cuff.png",
+      "layer": "sock_back_cuff",
+      "provider_report": null,
+      "sha256": "aeb8e65bf0f12e661f633cf3ef1acfe3e97c4a25e0ed9e708707204b17f67c09"
+    },
+    {
+      "artifact": {
+        "file": "productions/qualified.socks/native-art/source/26c6a1dca5c926a6bec1a154d109c152258ad8452b78226e836294438998bba3/source.image",
+        "sha256": "26c6a1dca5c926a6bec1a154d109c152258ad8452b78226e836294438998bba3"
+      },
+      "file": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/library/inputs/socks-r4/run.3.sock_back_foot.png",
+      "layer": "sock_back_foot",
+      "provider_report": null,
+      "sha256": "26c6a1dca5c926a6bec1a154d109c152258ad8452b78226e836294438998bba3"
+    },
+    {
+      "artifact": {
+        "file": "productions/qualified.socks/native-art/source/aed78604d2b8443b8c094247b82081200435d1166dfe1ef20e6d13a72c9226d0/source.image",
+        "sha256": "aed78604d2b8443b8c094247b82081200435d1166dfe1ef20e6d13a72c9226d0"
+      },
+      "file": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/library/inputs/socks-r4/run.3.sock_front_cuff.png",
+      "layer": "sock_front_cuff",
+      "provider_report": null,
+      "sha256": "aed78604d2b8443b8c094247b82081200435d1166dfe1ef20e6d13a72c9226d0"
+    },
+    {
+      "artifact": {
+        "file": "productions/qualified.socks/native-art/source/4c1e20b6129a874a06b453c108947d96a74cf38cdb83afa1dcf7d9a3f59f101f/source.image",
+        "sha256": "4c1e20b6129a874a06b453c108947d96a74cf38cdb83afa1dcf7d9a3f59f101f"
+      },
+      "file": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/library/inputs/socks-r4/run.3.sock_front_foot.png",
+      "layer": "sock_front_foot",
+      "provider_report": null,
+      "sha256": "4c1e20b6129a874a06b453c108947d96a74cf38cdb83afa1dcf7d9a3f59f101f"
+    }
+  ],
+  "track": "main",
+  "under_sha256": "42aa503e396e99765f5a3e9533fd94a2d5cfb16bd09676c8b869f2c88dd880fa",
+  "wearing": []
+}

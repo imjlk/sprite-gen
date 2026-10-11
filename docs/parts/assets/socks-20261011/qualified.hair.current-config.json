@@ -1,0 +1,182 @@
+{
+  "body": null,
+  "by_component": false,
+  "cover_rule": null,
+  "covers": [],
+  "cut": {
+    "against": [],
+    "body_threshold": 40,
+    "close_body": 5,
+    "exclude": [],
+    "fill_holes": 6,
+    "inset": 0,
+    "keep_palette": null,
+    "largest": null,
+    "method": "difference",
+    "min_island": 12,
+    "near_body": 2,
+    "outline": true,
+    "palette": null,
+    "prune": 0,
+    "region": null,
+    "rescue": null,
+    "rim": 0,
+    "specks": 0,
+    "tolerance": 80
+  },
+  "design_id": "qualified.hair",
+  "draw": {
+    "model": null,
+    "provider": "codex"
+  },
+  "follow": null,
+  "independent": {
+    "layers": [
+      {
+        "body_nodes": [
+          "head"
+        ],
+        "fit": "contain",
+        "guides": {
+          "run.0": [
+            "inputs/attachments-r9/run.0.hair.png"
+          ],
+          "run.1": [
+            "inputs/attachments-r9/run.1.hair.png"
+          ],
+          "run.2": [
+            "inputs/attachments-r9/run.2.hair.png"
+          ],
+          "run.3": [
+            "inputs/attachments-r9/run.3.hair.png"
+          ]
+        },
+        "id": "hair",
+        "landmarks": {},
+        "margin": "1",
+        "masks": {},
+        "node": "hair",
+        "provides": [
+          "hair"
+        ],
+        "replaces": [],
+        "source_bounds": {
+          "run.0": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.1": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.2": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.3": [
+            0,
+            0,
+            768,
+            768
+          ]
+        },
+        "straight_edges": {},
+        "targets": {
+          "run.0": [
+            231,
+            84,
+            512,
+            336
+          ],
+          "run.1": [
+            232,
+            79,
+            524,
+            341
+          ],
+          "run.2": [
+            232,
+            55,
+            523,
+            315
+          ],
+          "run.3": [
+            236,
+            63,
+            535,
+            328
+          ]
+        }
+      }
+    ],
+    "reference_previous": false,
+    "require_vision": true
+  },
+  "kind": "parts-production-config",
+  "mode": "raster",
+  "node": "hair",
+  "part_id": "qualified.hair",
+  "pieces": [],
+  "pose_checks": {
+    "run.0": {
+      "allowed": "inputs/criteria-r3/hair.run.0.allowed.png",
+      "occluded": null,
+      "protected": "inputs/criteria-r3/hair.run.0.protected.png",
+      "required": "inputs/criteria-r3/hair.run.0.required.png"
+    },
+    "run.1": {
+      "allowed": "inputs/criteria-r3/hair.run.1.allowed.png",
+      "occluded": null,
+      "protected": "inputs/criteria-r3/hair.run.1.protected.png",
+      "required": "inputs/criteria-r3/hair.run.1.required.png"
+    },
+    "run.2": {
+      "allowed": "inputs/criteria-r3/hair.run.2.allowed.png",
+      "occluded": null,
+      "protected": "inputs/criteria-r3/hair.run.2.protected.png",
+      "required": "inputs/criteria-r3/hair.run.2.required.png"
+    },
+    "run.3": {
+      "allowed": "inputs/criteria-r3/hair.run.3.allowed.png",
+      "occluded": null,
+      "protected": "inputs/criteria-r3/hair.run.3.protected.png",
+      "required": "inputs/criteria-r3/hair.run.3.required.png"
+    }
+  },
+  "prompt": {
+    "refs": [
+      "inputs/design/hair-r2.png"
+    ],
+    "text": "The selected canonical style is a full short layered chestnut side-profile cap, covering the crown and back scalp down toward the nape. Curved side-swept fringe, warm cream highlights, brown outline. The inner ear must remain visible; layered locks may overlap its rear rim. Forehead bangs are allowed; eyes/lower face must remain open. Hair-only transparent artwork without skin, face or ear pixels. Match this body and keep construction consistent between poses."
+  },
+  "qa": {
+    "stable_regions": []
+  },
+  "reference_pose": null,
+  "role": "part",
+  "schema_version": 1,
+  "segments": null,
+  "sheet": {
+    "aspect": "1:1",
+    "columns": null,
+    "crop": null,
+    "gutter": 8,
+    "page_size": 12,
+    "scale": 4
+  },
+  "slot": "hair",
+  "socket": "root",
+  "states": [
+    "run"
+  ],
+  "trail": null,
+  "variants": [],
+  "visibility": "zmap",
+  "wearing": []
+}

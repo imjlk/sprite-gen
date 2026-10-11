@@ -1,0 +1,83 @@
+{
+  "appearance": {
+    "digest": "b16f59a6ed899f092ddd1a91f6b8901bd7c5413a54d30dd0922c19e9ffb7ffc6",
+    "id": "qualified.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "2b3d2b0c4ae5e0f78e1e1a84978a8047fd1fa0b2d2aab24f512705a4ed274f63",
+      "id": "qualified.body"
+    }
+  ],
+  "input_sha256": "7ba92067fb2cd35910c9c9411d561d88a76bdc9306cbc8af73885c2a34075421",
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "observation": {
+    "limits": [
+      "Only current columns 3–5 were reviewed; the bare-body column was used to distinguish the original ear contour from added aperture artifacts.",
+      "No clear floating shoe, open collar gap, or smeared strand is visible at this contact-sheet resolution.",
+      "Four independently authored still poses do not establish animation continuity or motion quality.",
+      "Crops and contact-sheet resolution limit assessment of fine edge pixels and complete attachment geometry.",
+      "This is an observational attachment audit, not curator approval or release readiness."
+    ],
+    "overall": "rework",
+    "poses": {
+      "run.0": {
+        "hair": "rework",
+        "issues": [
+          "An extra narrow, speckled tan rim follows the rear and lower ear aperture, producing a hard cut seam beside the body's smooth ear outline. The ear's open contour endpoints are also present in the reference and are not themselves defects."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.1": {
+        "hair": "rework",
+        "issues": [
+          "The aperture has a conspicuous tan-and-dark double edge around the upper-left and lower ear contour. This additional border is absent from the bare-body reference."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.2": {
+        "hair": "rework",
+        "issues": [
+          "A thin speckled border remains around the rear and bottom of the ear aperture, making the mask boundary visible despite preserving the main ear shape.",
+          "The back sock's calf-facing cuff boundary runs vertically, then turns sharply diagonally at its lower corner. This creates an angular, kinked attachment across the sloping calf."
+        ],
+        "socks_shoes": "rework"
+      },
+      "run.3": {
+        "hair": "rework",
+        "issues": [
+          "The rear and lower ear aperture show an additional light rim beside the dark body contour, leaving a visible cut seam.",
+          "The back cuff repeats the sharply bent calf-facing boundary: a vertical segment ends in a diagonal corner, making the sock-to-calf join look cut into a polygon."
+        ],
+        "socks_shoes": "rework"
+      }
+    }
+  },
+  "parts": {
+    "qualified.hair": {
+      "digest": "5c272c6bc9904f1f9f090757c990807a0924fe60fe0ec65a30ff78b3f71d0f6b",
+      "id": "qualified.hair"
+    },
+    "qualified.sneakers": {
+      "digest": "82deb1eb0a3b975473f8b5a1a9753b9587784c7413f96913366500fb63d9c037",
+      "id": "qualified.sneakers"
+    },
+    "qualified.socks": {
+      "digest": "68406dc2a6c70661a0155f28ae3e8b00dc059b9b4f76a4cc4f03431012786ec6",
+      "id": "qualified.socks"
+    }
+  },
+  "prompt_sha256": "2b4d85acd7644a4bdf28fd28641d884d874b00b7d973a2686ac81c92ae59e2ab",
+  "release_ready": false,
+  "response_sha256": "05e4f63afd32d5cc74b3d803eb284b2750e249bec76f0332dc0563aa148b5c94",
+  "scope": "attachment contact audit only; not part approval or full motion QC",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

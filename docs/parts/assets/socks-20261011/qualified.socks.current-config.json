@@ -1,0 +1,434 @@
+{
+  "body": null,
+  "by_component": false,
+  "cover_rule": null,
+  "covers": [],
+  "cut": {
+    "against": [],
+    "body_threshold": 40,
+    "close_body": 5,
+    "exclude": [],
+    "fill_holes": 6,
+    "inset": 0,
+    "keep_palette": null,
+    "largest": null,
+    "method": "difference",
+    "min_island": 12,
+    "near_body": 2,
+    "outline": true,
+    "palette": null,
+    "prune": 0,
+    "region": null,
+    "rescue": null,
+    "rim": 0,
+    "specks": 0,
+    "tolerance": 80
+  },
+  "design_id": "cream-rib-knit-socks",
+  "draw": {
+    "model": null,
+    "provider": "codex"
+  },
+  "follow": null,
+  "independent": {
+    "layers": [
+      {
+        "body_nodes": [
+          "leg_back",
+          "foot_back"
+        ],
+        "fit": "contain",
+        "guides": {
+          "run.0": [
+            "inputs/socks-r4/run.0.sock_back_cuff.png"
+          ],
+          "run.1": [
+            "inputs/socks-r4/run.1.sock_back_cuff.png"
+          ],
+          "run.2": [
+            "inputs/socks-r4/run.2.sock_back_cuff.png"
+          ],
+          "run.3": [
+            "inputs/socks-r4/run.3.sock_back_cuff.png"
+          ]
+        },
+        "id": "sock_back_cuff",
+        "landmarks": {},
+        "margin": "1",
+        "node": "sock_back",
+        "provides": [
+          "sock_back"
+        ],
+        "replaces": [],
+        "source_bounds": {
+          "run.0": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.1": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.2": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.3": [
+            0,
+            0,
+            768,
+            768
+          ]
+        },
+        "straight_edges": {},
+        "targets": {
+          "run.0": [
+            155,
+            540,
+            204,
+            603
+          ],
+          "run.1": [
+            301,
+            615,
+            363,
+            663
+          ],
+          "run.2": [
+            182,
+            454,
+            252,
+            508
+          ],
+          "run.3": [
+            201,
+            483,
+            267,
+            541
+          ]
+        }
+      },
+      {
+        "body_nodes": [
+          "leg_back",
+          "foot_back"
+        ],
+        "cover_rule": {
+          "show": "uncovered",
+          "tag": "footwear.closed-foot"
+        },
+        "fit": "contain",
+        "guides": {
+          "run.0": [
+            "inputs/socks-r4/run.0.sock_back_foot.png"
+          ],
+          "run.1": [
+            "inputs/socks-r4/run.1.sock_back_foot.png"
+          ],
+          "run.2": [
+            "inputs/socks-r4/run.2.sock_back_foot.png"
+          ],
+          "run.3": [
+            "inputs/socks-r4/run.3.sock_back_foot.png"
+          ]
+        },
+        "id": "sock_back_foot",
+        "landmarks": {},
+        "margin": "1",
+        "node": "sock_back",
+        "replaces": [
+          "foot_back"
+        ],
+        "source_bounds": {
+          "run.0": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.1": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.2": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.3": [
+            0,
+            0,
+            768,
+            768
+          ]
+        },
+        "straight_edges": {},
+        "targets": {
+          "run.0": [
+            117,
+            553,
+            171,
+            660
+          ],
+          "run.1": [
+            300,
+            647,
+            399,
+            690
+          ],
+          "run.2": [
+            123,
+            436,
+            213,
+            513
+          ],
+          "run.3": [
+            155,
+            475,
+            224,
+            570
+          ]
+        }
+      },
+      {
+        "body_nodes": [
+          "leg_front",
+          "foot_front"
+        ],
+        "fit": "contain",
+        "guides": {
+          "run.0": [
+            "inputs/socks-r4/run.0.sock_front_cuff.png"
+          ],
+          "run.1": [
+            "inputs/socks-r4/run.1.sock_front_cuff.png"
+          ],
+          "run.2": [
+            "inputs/socks-r4/run.2.sock_front_cuff.png"
+          ],
+          "run.3": [
+            "inputs/socks-r4/run.3.sock_front_cuff.png"
+          ]
+        },
+        "id": "sock_front_cuff",
+        "landmarks": {},
+        "margin": "1",
+        "node": "sock_front",
+        "provides": [
+          "sock_front"
+        ],
+        "replaces": [],
+        "source_bounds": {
+          "run.0": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.1": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.2": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.3": [
+            0,
+            0,
+            768,
+            768
+          ]
+        },
+        "straight_edges": {},
+        "targets": {
+          "run.0": [
+            429,
+            586,
+            493,
+            642
+          ],
+          "run.1": [
+            402,
+            496,
+            454,
+            567
+          ],
+          "run.2": [
+            467,
+            492,
+            528,
+            548
+          ],
+          "run.3": [
+            432,
+            585,
+            499,
+            638
+          ]
+        }
+      },
+      {
+        "body_nodes": [
+          "leg_front",
+          "foot_front"
+        ],
+        "cover_rule": {
+          "show": "uncovered",
+          "tag": "footwear.closed-foot"
+        },
+        "fit": "contain",
+        "guides": {
+          "run.0": [
+            "inputs/socks-r4/run.0.sock_front_foot.png"
+          ],
+          "run.1": [
+            "inputs/socks-r4/run.1.sock_front_foot.png"
+          ],
+          "run.2": [
+            "inputs/socks-r4/run.2.sock_front_foot.png"
+          ],
+          "run.3": [
+            "inputs/socks-r4/run.3.sock_front_foot.png"
+          ]
+        },
+        "id": "sock_front_foot",
+        "landmarks": {},
+        "margin": "1",
+        "node": "sock_front",
+        "replaces": [
+          "foot_front"
+        ],
+        "source_bounds": {
+          "run.0": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.1": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.2": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.3": [
+            0,
+            0,
+            768,
+            768
+          ]
+        },
+        "straight_edges": {},
+        "targets": {
+          "run.0": [
+            449,
+            610,
+            553,
+            683
+          ],
+          "run.1": [
+            391,
+            544,
+            471,
+            612
+          ],
+          "run.2": [
+            485,
+            513,
+            583,
+            583
+          ],
+          "run.3": [
+            453,
+            600,
+            553,
+            667
+          ]
+        }
+      }
+    ],
+    "reference_previous": false,
+    "require_vision": true
+  },
+  "kind": "parts-production-config",
+  "mode": "raster",
+  "node": "sock_front",
+  "part_id": "qualified.socks",
+  "pieces": [],
+  "pose_checks": {
+    "run.0": {
+      "allowed": "inputs/socks-r4/run.0.allowed.png",
+      "occluded": null,
+      "protected": "inputs/socks-r4/run.0.protected.png",
+      "required": "inputs/socks-r4/run.0.required.png"
+    },
+    "run.1": {
+      "allowed": "inputs/socks-r4/run.1.allowed.png",
+      "occluded": null,
+      "protected": "inputs/socks-r4/run.1.protected.png",
+      "required": "inputs/socks-r4/run.1.required.png"
+    },
+    "run.2": {
+      "allowed": "inputs/socks-r4/run.2.allowed.png",
+      "occluded": null,
+      "protected": "inputs/socks-r4/run.2.protected.png",
+      "required": "inputs/socks-r4/run.2.required.png"
+    },
+    "run.3": {
+      "allowed": "inputs/socks-r4/run.3.allowed.png",
+      "occluded": null,
+      "protected": "inputs/socks-r4/run.3.protected.png",
+      "required": "inputs/socks-r4/run.3.required.png"
+    }
+  },
+  "prompt": {
+    "refs": [
+      "inputs/socks-r4/native-material.png"
+    ],
+    "text": "Short pale cream cotton socks, tightly fitted to the exact calf, ankle and foot silhouette. The plain foot has soft thin fabric; only the cuff has restrained fine ribs following the calf length. A clearly drawn thin cuff hem follows the calf cross-section, not the bent foot axis. No heavy stripes, skin pixels, logos or shoe. Cuff and foot are separate layer pieces; footwear hides only the foot piece. Procedural pose images are construction drafts, not final visual approvals."
+  },
+  "qa": {
+    "stable_regions": []
+  },
+  "reference_pose": null,
+  "role": "part",
+  "schema_version": 1,
+  "segments": null,
+  "sheet": {
+    "aspect": "1:1",
+    "columns": null,
+    "crop": null,
+    "gutter": 8,
+    "page_size": 12,
+    "scale": 4
+  },
+  "slot": "socks",
+  "socket": "root",
+  "states": [
+    "run"
+  ],
+  "trail": null,
+  "variants": [],
+  "visibility": "zmap",
+  "wearing": []
+}

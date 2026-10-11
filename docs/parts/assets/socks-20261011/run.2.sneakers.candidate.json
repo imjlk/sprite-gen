@@ -1,0 +1,236 @@
+{
+  "alignment": null,
+  "body_sha256": "670c266a3ccd98a455787efa00ce70275e244be21c1d4582bd51410fc66aae31",
+  "clip": "run.reference",
+  "digest": "070b53aa360d5567b2a15c8edbb25b8a88781c16a4424dd2ba06f2d580004e95",
+  "holes_filled": 0,
+  "images": {
+    "mask": {
+      "file": "mask.png",
+      "sha256": "d54bbabf084715d01ae8f5bbcb733502889cb0af1eeb7adf6551849160e82d42"
+    },
+    "mask.shoe_back": {
+      "file": "mask.shoe_back.png",
+      "sha256": "2613d09368f8a87cc0524e470160dc63d481d03fa25a02657c2b4c75f4570716"
+    },
+    "mask.shoe_front": {
+      "file": "mask.shoe_front.png",
+      "sha256": "ec84a7aa888d7de09aae11669e618de0cc2628cd696a95ab2d05ed0219b0ceb0"
+    },
+    "part": {
+      "file": "part.png",
+      "sha256": "98c4d2dbc67513fb4793961e76e1798e77b46c0dd64793bf7a847c987ff1a4cc"
+    },
+    "piece.shoe_back": {
+      "file": "piece.shoe_back.png",
+      "sha256": "494cf6dd77fc527e96db31bbd39c189214b1e2d4639d3bf47c3732424790c678"
+    },
+    "piece.shoe_front": {
+      "file": "piece.shoe_front.png",
+      "sha256": "fee7917e756cd82d27897b65590c67d94c0bc5972e92ad7c2fd2a20b1d038939"
+    },
+    "qa_allowed": {
+      "file": "qa_allowed.png",
+      "sha256": "0231e8b5f0d25b177d49ce77126064cb7155346adb5d8b80dd66a859e0a63f09"
+    },
+    "qa_protected": {
+      "file": "qa_protected.png",
+      "sha256": "6809a08844114b0af3610d02cd2b7594548b4f85264a40c0541fba7c486e545a"
+    },
+    "qa_required": {
+      "file": "qa_required.png",
+      "sha256": "f4b1d4bdd6554fe27b13b8c08c293622990d1d5b64d1fc034de245501ac11581"
+    },
+    "raw.shoe_back": {
+      "file": "raw.shoe_back.png",
+      "sha256": "494cf6dd77fc527e96db31bbd39c189214b1e2d4639d3bf47c3732424790c678"
+    },
+    "raw.shoe_front": {
+      "file": "raw.shoe_front.png",
+      "sha256": "fee7917e756cd82d27897b65590c67d94c0bc5972e92ad7c2fd2a20b1d038939"
+    },
+    "under": {
+      "file": "under.png",
+      "sha256": "670c266a3ccd98a455787efa00ce70275e244be21c1d4582bd51410fc66aae31"
+    }
+  },
+  "independent_layers": [
+    {
+      "cover_rule": null,
+      "id": "shoe_back",
+      "image_key": "piece.shoe_back",
+      "mask": {
+        "channel": "luma",
+        "image_key": "mask.shoe_back",
+        "source_sha256": "8a419123c088db12ff18a42a82f7b56aa977ee6c3bfe68bf4d6ccdbfd4e02b6f",
+        "space": "rig-canvas",
+        "target_node": "foot_back"
+      },
+      "node": "shoe_back",
+      "provides": [
+        "foot_back"
+      ],
+      "replaces": [
+        "foot_back"
+      ],
+      "straight_edges": [
+        {
+          "end": [
+            135,
+            511
+          ],
+          "id": "outsole",
+          "max_deviation": "2",
+          "side": "positive",
+          "span": [
+            "3/20",
+            "4/5"
+          ],
+          "start": [
+            195,
+            439
+          ]
+        }
+      ],
+      "target": [
+        129,
+        435,
+        221,
+        528
+      ]
+    },
+    {
+      "cover_rule": null,
+      "id": "shoe_front",
+      "image_key": "piece.shoe_front",
+      "mask": {
+        "channel": "luma",
+        "image_key": "mask.shoe_front",
+        "source_sha256": "c624de2739d454ca4aa356c325759f29a34291c94e5c42e2b2d435f52165cb53",
+        "space": "rig-canvas",
+        "target_node": "foot_front"
+      },
+      "node": "shoe_front",
+      "provides": [
+        "foot_front"
+      ],
+      "replaces": [
+        "foot_front"
+      ],
+      "straight_edges": [
+        {
+          "end": [
+            582,
+            539
+          ],
+          "id": "outsole",
+          "max_deviation": "2",
+          "side": "positive",
+          "span": [
+            "3/20",
+            "4/5"
+          ],
+          "start": [
+            486,
+            571
+          ]
+        }
+      ],
+      "target": [
+        474,
+        511,
+        592,
+        575
+      ]
+    }
+  ],
+  "independent_reference": {
+    "file": "productions/qualified.sneakers/independent-inputs/inputs/727d1b299d987f028be2d7fdf4176d8127c5abbfe187a78bf335e6fbc2d4a0f7/reference.json",
+    "sha256": "8f66044730a5a22ae0c26e414cfb3b127900b9a44dcf416a1305a088dd40a4bb"
+  },
+  "kind": "parts-production-candidate",
+  "method": {
+    "independent": true,
+    "registration": {
+      "shoe_back": {
+        "fit": "native-canvas",
+        "position": [
+          0,
+          0
+        ],
+        "sampling": "unchanged",
+        "source_bounds": null,
+        "target": [
+          129,
+          435,
+          221,
+          528
+        ],
+        "uniform_scale": 1
+      },
+      "shoe_front": {
+        "fit": "native-canvas",
+        "position": [
+          0,
+          0
+        ],
+        "sampling": "unchanged",
+        "source_bounds": null,
+        "target": [
+          474,
+          511,
+          592,
+          575
+        ],
+        "uniform_scale": 1
+      }
+    }
+  },
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "part": "qualified.sneakers",
+  "pixels": 6744,
+  "placement": {
+    "format": "full-canvas",
+    "offset": [
+      0,
+      0
+    ],
+    "pivot": [
+      0,
+      0
+    ],
+    "target_socket": "root"
+  },
+  "policy": "parts.production.v1",
+  "pose_id": "run.2",
+  "sample": "sample.2",
+  "schema_version": 1,
+  "source": [
+    {
+      "artifact": {
+        "file": "productions/qualified.sneakers/native-art/source/1c50df301774f61eedb39c341fa34657492d2d7d8731de03536ac4d68a8d1c18/source.image",
+        "sha256": "8a419123c088db12ff18a42a82f7b56aa977ee6c3bfe68bf4d6ccdbfd4e02b6f"
+      },
+      "file": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/library/inputs/attachments-r9/run.2.shoe_back.png",
+      "layer": "shoe_back",
+      "provider_report": null,
+      "sha256": "8a419123c088db12ff18a42a82f7b56aa977ee6c3bfe68bf4d6ccdbfd4e02b6f"
+    },
+    {
+      "artifact": {
+        "file": "productions/qualified.sneakers/native-art/source/f2ac52b7ca6c265501a77d49dd9c57ce41bf54c89e6d80cbb50c85c7e164a356/source.image",
+        "sha256": "c624de2739d454ca4aa356c325759f29a34291c94e5c42e2b2d435f52165cb53"
+      },
+      "file": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/library/inputs/attachments-r9/run.2.shoe_front.png",
+      "layer": "shoe_front",
+      "provider_report": null,
+      "sha256": "c624de2739d454ca4aa356c325759f29a34291c94e5c42e2b2d435f52165cb53"
+    }
+  ],
+  "track": "main",
+  "under_sha256": "670c266a3ccd98a455787efa00ce70275e244be21c1d4582bd51410fc66aae31",
+  "wearing": []
+}

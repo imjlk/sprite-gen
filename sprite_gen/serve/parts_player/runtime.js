@@ -107,7 +107,7 @@ class LayerRuntime {
       }else{for(let i=0;i<2;i++){anchor[i]*=denominator;local[i]*=denominator;}}
       const position=anchor.map((v,i)=>this.fraction(v+local[i],denominator));
       const stable=`${e.pack.role==='body'?'body':e.piece.slot}.${e.piece.id}`,id=names.get(stable)===1?stable:e.id;
-      if(p.mask)masks.push({...p.mask,texture:this.textures[p.mask.texture],issuer:id,
+      if(p.mask&&(!p.mask.optional_target||ordered.some(other=>other.piece.provides.includes(p.mask.target_node))))masks.push({...p.mask,texture:this.textures[p.mask.texture],issuer:id,
         origin:p.mask.space==='part-local'?position:['0','0']});
       if(e.pack.role!=='body'){
         const fit=data.fitting[[e.pack.id,e.piece.id,clip.id,sample.id].join('|')];if(fit)fits.push(fit);

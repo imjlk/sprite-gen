@@ -1,0 +1,43 @@
+{
+  "poses": {
+    "run.0": {
+      "hair": "rework",
+      "socks_shoes": "pass",
+      "issues": [
+        "A thin, uneven pale fringe follows the upper and left ear aperture against the hair. The corresponding bare-body contour is smoother and darker.",
+        "Both sock cuffs meet the calves, and both shoes remain visibly connected through their collars."
+      ]
+    },
+    "run.1": {
+      "hair": "rework",
+      "socks_shoes": "pass",
+      "issues": [
+        "The left and lower ear aperture have a hard, lightly fringed boundary; portions of the outer ear stroke appear thinner than in the bare-body reference.",
+        "No visible gap interrupts either calf-to-sock or sock-to-shoe attachment."
+      ]
+    },
+    "run.2": {
+      "hair": "rework",
+      "socks_shoes": "pass",
+      "issues": [
+        "A small pale, uneven rim remains along the upper-left ear aperture. It is subtler here but still visible against the brown hair.",
+        "The angled back cuff and front cuff follow their respective calves, with continuous collar attachments."
+      ]
+    },
+    "run.3": {
+      "hair": "rework",
+      "socks_shoes": "pass",
+      "issues": [
+        "The upper and left ear boundary show a conspicuous thin light fringe and an abrupt cut against the hair, compared with the smooth bare-body outline.",
+        "Neither shoe visibly floats; the socks bridge the calves and shoe collars without an open seam."
+      ]
+    }
+  },
+  "overall": "rework",
+  "limits": [
+    "The ear's inner curved mark and open lower-right contour endpoint are present in the bare-body references and are not themselves mask defects.",
+    "Contact-sheet resolution limits assessment of very narrow edge fringes; source alpha and mask geometry are not established by this image.",
+    "These are four independently authored still poses. They provide no evidence of animation or motion quality.",
+    "This is an observational attachment audit only, not curator approval or release readiness."
+  ]
+}

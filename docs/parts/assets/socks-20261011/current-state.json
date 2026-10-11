@@ -1,0 +1,1530 @@
+{
+  "appearance": {
+    "digest": "7e6b17efcbbdc55f96f041ad043189ebe0fc1e7802ec8ee599cb38c88140438a",
+    "id": "qualified.example"
+  },
+  "art_approved": false,
+  "bare_body_pixels_identical": 4,
+  "body": [
+    {
+      "digest": "2b3d2b0c4ae5e0f78e1e1a84978a8047fd1fa0b2d2aab24f512705a4ed274f63",
+      "id": "qualified.body"
+    }
+  ],
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "parts": {
+    "qualified.hair": {
+      "digest": "5df3f5be12a8428e086a69e0ba980d07f1b1945e0e414e8f940c958e7aac8394",
+      "id": "qualified.hair"
+    },
+    "qualified.sneakers": {
+      "digest": "b67e30ff51d2778c45dba17385949050231026b4365a4812307a551c8630c95a",
+      "id": "qualified.sneakers"
+    },
+    "qualified.socks": {
+      "digest": "5a4202c77edfb3f35a1807a76fcfba652118b4b648a9150bca90bbd39db0292f",
+      "id": "qualified.socks"
+    }
+  },
+  "poses": {
+    "run.0": {
+      "candidate": "productions/qualified.socks/candidates/run.0/5e8cc89452283ad9097a4c5225ca81878d860d2c494186b4c20a299561d23b80",
+      "cuff_seams": [
+        {
+          "cuff_outside_anatomy_pixels": 0,
+          "cuff_shoe_overlap_pixels": 261,
+          "raw_shoe_pixels_unchanged": true,
+          "side": "back",
+          "sock_foot_alpha_matches_body": true
+        },
+        {
+          "cuff_outside_anatomy_pixels": 0,
+          "cuff_shoe_overlap_pixels": 319,
+          "raw_shoe_pixels_unchanged": true,
+          "side": "front",
+          "sock_foot_alpha_matches_body": true
+        }
+      ],
+      "reviews": {
+        "qualified.hair": {
+          "check": {
+            "art_approved": false,
+            "criteria": [
+              {
+                "basis": "authored body ownership",
+                "id": "body_reference_mismatches",
+                "label": "바디 레이어 소유 불일치",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "required_pixels",
+                "label": "필수 덮임 누락",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "protected_pixels",
+                "label": "보호 영역 침범",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "allowed_pixels",
+                "label": "허용 영역 밖",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "off_palette",
+                "label": "지정 팔레트 밖",
+                "limit": 0,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "holes",
+                "label": "작은 내부 구멍",
+                "limit": 0,
+                "status": "warning",
+                "value": 4
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "specks",
+                "label": "4px 미만 잔조각",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "area_jump",
+                "label": "인접 포즈 면적 변화",
+                "limit": 0.45,
+                "status": "범위 내",
+                "value": 0.046
+              },
+              {
+                "basis": "authored stable region",
+                "id": "stable_regions",
+                "label": "고정 영역 프레임 일관성",
+                "limit": null,
+                "status": "미설정",
+                "value": null
+              }
+            ],
+            "findings": [
+              "4 px of pinholes (gaps of 12 px or less inside the part)"
+            ],
+            "metrics": {
+              "alignment": null,
+              "allowed_pixels": 0,
+              "area_jump": 0.046,
+              "body_reference_mismatches": 0,
+              "coverage": null,
+              "holes": 4,
+              "inspection_space": "zmap-visible",
+              "occluded_pixels": 0,
+              "pixels": 37461,
+              "protected_pixels": 0,
+              "required_alpha_for_white": 230,
+              "required_pixels": 0,
+              "specks": 0,
+              "straight_edges": {},
+              "visible_alpha_min": 16,
+              "visible_pixels": 37461
+            },
+            "qa_policy": {
+              "stable_regions": []
+            },
+            "status": "warning"
+          },
+          "decision": "unverified",
+          "vision_current": false,
+          "vision_status": null
+        },
+        "qualified.sneakers": {
+          "check": {
+            "art_approved": false,
+            "criteria": [
+              {
+                "basis": "authored body ownership",
+                "id": "body_reference_mismatches",
+                "label": "바디 레이어 소유 불일치",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "required_pixels",
+                "label": "필수 덮임 누락",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "protected_pixels",
+                "label": "보호 영역 침범",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "allowed_pixels",
+                "label": "허용 영역 밖",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "off_palette",
+                "label": "지정 팔레트 밖",
+                "limit": 0,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "holes",
+                "label": "작은 내부 구멍",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "specks",
+                "label": "4px 미만 잔조각",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "area_jump",
+                "label": "인접 포즈 면적 변화",
+                "limit": 0.45,
+                "status": "범위 내",
+                "value": 0.139
+              },
+              {
+                "basis": "authored stable region",
+                "id": "stable_regions",
+                "label": "고정 영역 프레임 일관성",
+                "limit": null,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "explicitly authored rigid edge; not general art approval",
+                "id": "shoe_back.outsole",
+                "label": "shoe_back.outsole · 직선 윤곽 편차",
+                "limit": 2.0,
+                "status": "범위 내",
+                "value": 0.0
+              },
+              {
+                "basis": "explicitly authored rigid edge; not general art approval",
+                "id": "shoe_front.outsole",
+                "label": "shoe_front.outsole · 직선 윤곽 편차",
+                "limit": 2.0,
+                "status": "범위 내",
+                "value": 0.608
+              }
+            ],
+            "findings": [],
+            "metrics": {
+              "alignment": null,
+              "allowed_pixels": 0,
+              "area_jump": 0.139,
+              "body_reference_mismatches": 0,
+              "coverage": null,
+              "holes": 0,
+              "inspection_space": "zmap-visible",
+              "occluded_pixels": 151,
+              "pixels": 5910,
+              "protected_pixels": 0,
+              "required_alpha_for_white": 230,
+              "required_pixels": 0,
+              "specks": 0,
+              "straight_edges": {
+                "shoe_back.outsole": {
+                  "expected_samples": 30,
+                  "limit": 2.0,
+                  "max_deviation": 0.0,
+                  "reason": "maximum deviation 0.000px; limit 2px",
+                  "rms_deviation": 0.0,
+                  "samples": 30,
+                  "status": "pass"
+                },
+                "shoe_front.outsole": {
+                  "expected_samples": 31,
+                  "limit": 2.0,
+                  "max_deviation": 0.6082616368663164,
+                  "reason": "maximum deviation 0.608px; limit 2px",
+                  "rms_deviation": 0.2280907921011965,
+                  "samples": 31,
+                  "status": "pass"
+                }
+              },
+              "visible_alpha_min": 16,
+              "visible_pixels": 5759
+            },
+            "qa_policy": {
+              "stable_regions": []
+            },
+            "status": "passed"
+          },
+          "decision": "unverified",
+          "vision_current": false,
+          "vision_status": null
+        },
+        "qualified.socks": {
+          "check": {
+            "art_approved": false,
+            "criteria": [
+              {
+                "basis": "authored body ownership",
+                "id": "body_reference_mismatches",
+                "label": "바디 레이어 소유 불일치",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "required_pixels",
+                "label": "필수 덮임 누락",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "protected_pixels",
+                "label": "보호 영역 침범",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "allowed_pixels",
+                "label": "허용 영역 밖",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "off_palette",
+                "label": "지정 팔레트 밖",
+                "limit": 0,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "holes",
+                "label": "작은 내부 구멍",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "specks",
+                "label": "4px 미만 잔조각",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "area_jump",
+                "label": "인접 포즈 면적 변화",
+                "limit": 0.45,
+                "status": "범위 내",
+                "value": 0.308
+              },
+              {
+                "basis": "authored stable region",
+                "id": "stable_regions",
+                "label": "고정 영역 프레임 일관성",
+                "limit": null,
+                "status": "미설정",
+                "value": null
+              }
+            ],
+            "findings": [],
+            "metrics": {
+              "alignment": null,
+              "allowed_pixels": 0,
+              "area_jump": 0.308,
+              "body_reference_mismatches": 0,
+              "coverage": null,
+              "holes": 0,
+              "inspection_space": "zmap-visible",
+              "occluded_pixels": 0,
+              "pixels": 9488,
+              "protected_pixels": 0,
+              "required_alpha_for_white": 230,
+              "required_pixels": 0,
+              "specks": 0,
+              "straight_edges": {},
+              "visible_alpha_min": 16,
+              "visible_pixels": 9488
+            },
+            "qa_policy": {
+              "stable_regions": []
+            },
+            "status": "passed"
+          },
+          "decision": "unverified",
+          "vision_current": false,
+          "vision_status": null
+        }
+      }
+    },
+    "run.1": {
+      "candidate": "productions/qualified.socks/candidates/run.1/adb37a2a0e81631daff78fb54fe39d81da0f3e086f649ec86389e2be19f8e3dd",
+      "cuff_seams": [
+        {
+          "cuff_outside_anatomy_pixels": 0,
+          "cuff_shoe_overlap_pixels": 381,
+          "raw_shoe_pixels_unchanged": true,
+          "side": "back",
+          "sock_foot_alpha_matches_body": true
+        },
+        {
+          "cuff_outside_anatomy_pixels": 0,
+          "cuff_shoe_overlap_pixels": 229,
+          "raw_shoe_pixels_unchanged": true,
+          "side": "front",
+          "sock_foot_alpha_matches_body": true
+        }
+      ],
+      "reviews": {
+        "qualified.hair": {
+          "check": {
+            "art_approved": false,
+            "criteria": [
+              {
+                "basis": "authored body ownership",
+                "id": "body_reference_mismatches",
+                "label": "바디 레이어 소유 불일치",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "required_pixels",
+                "label": "필수 덮임 누락",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "protected_pixels",
+                "label": "보호 영역 침범",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "allowed_pixels",
+                "label": "허용 영역 밖",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "off_palette",
+                "label": "지정 팔레트 밖",
+                "limit": 0,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "holes",
+                "label": "작은 내부 구멍",
+                "limit": 0,
+                "status": "warning",
+                "value": 7
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "specks",
+                "label": "4px 미만 잔조각",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "area_jump",
+                "label": "인접 포즈 면적 변화",
+                "limit": 0.45,
+                "status": "범위 내",
+                "value": 0.008
+              },
+              {
+                "basis": "authored stable region",
+                "id": "stable_regions",
+                "label": "고정 영역 프레임 일관성",
+                "limit": null,
+                "status": "미설정",
+                "value": null
+              }
+            ],
+            "findings": [
+              "7 px of pinholes (gaps of 12 px or less inside the part)"
+            ],
+            "metrics": {
+              "alignment": null,
+              "allowed_pixels": 0,
+              "area_jump": 0.008,
+              "body_reference_mismatches": 0,
+              "coverage": null,
+              "holes": 7,
+              "inspection_space": "zmap-visible",
+              "occluded_pixels": 0,
+              "pixels": 39258,
+              "protected_pixels": 0,
+              "required_alpha_for_white": 230,
+              "required_pixels": 0,
+              "specks": 0,
+              "straight_edges": {},
+              "visible_alpha_min": 16,
+              "visible_pixels": 39258
+            },
+            "qa_policy": {
+              "stable_regions": []
+            },
+            "status": "warning"
+          },
+          "decision": "unverified",
+          "vision_current": false,
+          "vision_status": null
+        },
+        "qualified.sneakers": {
+          "check": {
+            "art_approved": false,
+            "criteria": [
+              {
+                "basis": "authored body ownership",
+                "id": "body_reference_mismatches",
+                "label": "바디 레이어 소유 불일치",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "required_pixels",
+                "label": "필수 덮임 누락",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "protected_pixels",
+                "label": "보호 영역 침범",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "allowed_pixels",
+                "label": "허용 영역 밖",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "off_palette",
+                "label": "지정 팔레트 밖",
+                "limit": 0,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "holes",
+                "label": "작은 내부 구멍",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "specks",
+                "label": "4px 미만 잔조각",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "area_jump",
+                "label": "인접 포즈 면적 변화",
+                "limit": 0.45,
+                "status": "범위 내",
+                "value": 0.139
+              },
+              {
+                "basis": "authored stable region",
+                "id": "stable_regions",
+                "label": "고정 영역 프레임 일관성",
+                "limit": null,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "explicitly authored rigid edge; not general art approval",
+                "id": "shoe_back.outsole",
+                "label": "shoe_back.outsole · 직선 윤곽 편차",
+                "limit": 2.0,
+                "status": "범위 내",
+                "value": 0.0
+              },
+              {
+                "basis": "explicitly authored rigid edge; not general art approval",
+                "id": "shoe_front.outsole",
+                "label": "shoe_front.outsole · 직선 윤곽 편차",
+                "limit": 2.0,
+                "status": "범위 내",
+                "value": 0.364
+              }
+            ],
+            "findings": [],
+            "metrics": {
+              "alignment": null,
+              "allowed_pixels": 0,
+              "area_jump": 0.139,
+              "body_reference_mismatches": 0,
+              "coverage": null,
+              "holes": 0,
+              "inspection_space": "zmap-visible",
+              "occluded_pixels": 108,
+              "pixels": 5188,
+              "protected_pixels": 0,
+              "required_alpha_for_white": 230,
+              "required_pixels": 0,
+              "specks": 0,
+              "straight_edges": {
+                "shoe_back.outsole": {
+                  "expected_samples": 30,
+                  "limit": 2.0,
+                  "max_deviation": 8.881784197001252e-16,
+                  "reason": "maximum deviation 0.000px; limit 2px",
+                  "rms_deviation": 5.513983501552499e-16,
+                  "samples": 30,
+                  "status": "pass"
+                },
+                "shoe_front.outsole": {
+                  "expected_samples": 27,
+                  "limit": 2.0,
+                  "max_deviation": 0.36360560853488044,
+                  "reason": "maximum deviation 0.364px; limit 2px",
+                  "rms_deviation": 0.2083704403957593,
+                  "samples": 27,
+                  "status": "pass"
+                }
+              },
+              "visible_alpha_min": 16,
+              "visible_pixels": 5080
+            },
+            "qa_policy": {
+              "stable_regions": []
+            },
+            "status": "passed"
+          },
+          "decision": "unverified",
+          "vision_current": false,
+          "vision_status": null
+        },
+        "qualified.socks": {
+          "check": {
+            "art_approved": false,
+            "criteria": [
+              {
+                "basis": "authored body ownership",
+                "id": "body_reference_mismatches",
+                "label": "바디 레이어 소유 불일치",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "required_pixels",
+                "label": "필수 덮임 누락",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "protected_pixels",
+                "label": "보호 영역 침범",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "allowed_pixels",
+                "label": "허용 영역 밖",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "off_palette",
+                "label": "지정 팔레트 밖",
+                "limit": 0,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "holes",
+                "label": "작은 내부 구멍",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "specks",
+                "label": "4px 미만 잔조각",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "area_jump",
+                "label": "인접 포즈 면적 변화",
+                "limit": 0.45,
+                "status": "범위 내",
+                "value": 0.211
+              },
+              {
+                "basis": "authored stable region",
+                "id": "stable_regions",
+                "label": "고정 영역 프레임 일관성",
+                "limit": null,
+                "status": "미설정",
+                "value": null
+              }
+            ],
+            "findings": [],
+            "metrics": {
+              "alignment": null,
+              "allowed_pixels": 0,
+              "area_jump": 0.211,
+              "body_reference_mismatches": 0,
+              "coverage": null,
+              "holes": 0,
+              "inspection_space": "zmap-visible",
+              "occluded_pixels": 0,
+              "pixels": 7254,
+              "protected_pixels": 0,
+              "required_alpha_for_white": 230,
+              "required_pixels": 0,
+              "specks": 0,
+              "straight_edges": {},
+              "visible_alpha_min": 16,
+              "visible_pixels": 7254
+            },
+            "qa_policy": {
+              "stable_regions": []
+            },
+            "status": "passed"
+          },
+          "decision": "unverified",
+          "vision_current": false,
+          "vision_status": null
+        }
+      }
+    },
+    "run.2": {
+      "candidate": "productions/qualified.socks/candidates/run.2/5382bda2a0db35bbbdbd3a3241e7897b9a60fba44e6e81c05bb2234e655be360",
+      "cuff_seams": [
+        {
+          "cuff_outside_anatomy_pixels": 0,
+          "cuff_shoe_overlap_pixels": 219,
+          "raw_shoe_pixels_unchanged": true,
+          "side": "back",
+          "sock_foot_alpha_matches_body": true
+        },
+        {
+          "cuff_outside_anatomy_pixels": 0,
+          "cuff_shoe_overlap_pixels": 309,
+          "raw_shoe_pixels_unchanged": true,
+          "side": "front",
+          "sock_foot_alpha_matches_body": true
+        }
+      ],
+      "reviews": {
+        "qualified.hair": {
+          "check": {
+            "art_approved": false,
+            "criteria": [
+              {
+                "basis": "authored body ownership",
+                "id": "body_reference_mismatches",
+                "label": "바디 레이어 소유 불일치",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "required_pixels",
+                "label": "필수 덮임 누락",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "protected_pixels",
+                "label": "보호 영역 침범",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "allowed_pixels",
+                "label": "허용 영역 밖",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "off_palette",
+                "label": "지정 팔레트 밖",
+                "limit": 0,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "holes",
+                "label": "작은 내부 구멍",
+                "limit": 0,
+                "status": "warning",
+                "value": 12
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "specks",
+                "label": "4px 미만 잔조각",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "area_jump",
+                "label": "인접 포즈 면적 변화",
+                "limit": 0.45,
+                "status": "범위 내",
+                "value": 0.018
+              },
+              {
+                "basis": "authored stable region",
+                "id": "stable_regions",
+                "label": "고정 영역 프레임 일관성",
+                "limit": null,
+                "status": "미설정",
+                "value": null
+              }
+            ],
+            "findings": [
+              "12 px of pinholes (gaps of 12 px or less inside the part)"
+            ],
+            "metrics": {
+              "alignment": null,
+              "allowed_pixels": 0,
+              "area_jump": 0.018,
+              "body_reference_mismatches": 0,
+              "coverage": null,
+              "holes": 12,
+              "inspection_space": "zmap-visible",
+              "occluded_pixels": 0,
+              "pixels": 40423,
+              "protected_pixels": 0,
+              "required_alpha_for_white": 230,
+              "required_pixels": 0,
+              "specks": 0,
+              "straight_edges": {},
+              "visible_alpha_min": 16,
+              "visible_pixels": 40423
+            },
+            "qa_policy": {
+              "stable_regions": []
+            },
+            "status": "warning"
+          },
+          "decision": "unverified",
+          "vision_current": false,
+          "vision_status": null
+        },
+        "qualified.sneakers": {
+          "check": {
+            "art_approved": false,
+            "criteria": [
+              {
+                "basis": "authored body ownership",
+                "id": "body_reference_mismatches",
+                "label": "바디 레이어 소유 불일치",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "required_pixels",
+                "label": "필수 덮임 누락",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "protected_pixels",
+                "label": "보호 영역 침범",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "allowed_pixels",
+                "label": "허용 영역 밖",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "off_palette",
+                "label": "지정 팔레트 밖",
+                "limit": 0,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "holes",
+                "label": "작은 내부 구멍",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "specks",
+                "label": "4px 미만 잔조각",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "area_jump",
+                "label": "인접 포즈 면적 변화",
+                "limit": 0.45,
+                "status": "범위 내",
+                "value": 0.11
+              },
+              {
+                "basis": "authored stable region",
+                "id": "stable_regions",
+                "label": "고정 영역 프레임 일관성",
+                "limit": null,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "explicitly authored rigid edge; not general art approval",
+                "id": "shoe_back.outsole",
+                "label": "shoe_back.outsole · 직선 윤곽 편차",
+                "limit": 2.0,
+                "status": "범위 내",
+                "value": 0.315
+              },
+              {
+                "basis": "explicitly authored rigid edge; not general art approval",
+                "id": "shoe_front.outsole",
+                "label": "shoe_front.outsole · 직선 윤곽 편차",
+                "limit": 2.0,
+                "status": "범위 내",
+                "value": 0.641
+              }
+            ],
+            "findings": [],
+            "metrics": {
+              "alignment": null,
+              "allowed_pixels": 0,
+              "area_jump": 0.11,
+              "body_reference_mismatches": 0,
+              "coverage": null,
+              "holes": 0,
+              "inspection_space": "zmap-visible",
+              "occluded_pixels": 123,
+              "pixels": 6140,
+              "protected_pixels": 0,
+              "required_alpha_for_white": 230,
+              "required_pixels": 0,
+              "specks": 0,
+              "straight_edges": {
+                "shoe_back.outsole": {
+                  "expected_samples": 30,
+                  "limit": 2.0,
+                  "max_deviation": 0.31464695321440317,
+                  "reason": "maximum deviation 0.315px; limit 2px",
+                  "rms_deviation": 0.18511264622039375,
+                  "samples": 30,
+                  "status": "pass"
+                },
+                "shoe_front.outsole": {
+                  "expected_samples": 32,
+                  "limit": 2.0,
+                  "max_deviation": 0.6414972350209622,
+                  "reason": "maximum deviation 0.641px; limit 2px",
+                  "rms_deviation": 0.21348529553021875,
+                  "samples": 32,
+                  "status": "pass"
+                }
+              },
+              "visible_alpha_min": 16,
+              "visible_pixels": 6017
+            },
+            "qa_policy": {
+              "stable_regions": []
+            },
+            "status": "passed"
+          },
+          "decision": "unverified",
+          "vision_current": false,
+          "vision_status": null
+        },
+        "qualified.socks": {
+          "check": {
+            "art_approved": false,
+            "criteria": [
+              {
+                "basis": "authored body ownership",
+                "id": "body_reference_mismatches",
+                "label": "바디 레이어 소유 불일치",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "required_pixels",
+                "label": "필수 덮임 누락",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "protected_pixels",
+                "label": "보호 영역 침범",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "allowed_pixels",
+                "label": "허용 영역 밖",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "off_palette",
+                "label": "지정 팔레트 밖",
+                "limit": 0,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "holes",
+                "label": "작은 내부 구멍",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "specks",
+                "label": "4px 미만 잔조각",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "area_jump",
+                "label": "인접 포즈 면적 변화",
+                "limit": 0.45,
+                "status": "범위 내",
+                "value": 0.116
+              },
+              {
+                "basis": "authored stable region",
+                "id": "stable_regions",
+                "label": "고정 영역 프레임 일관성",
+                "limit": null,
+                "status": "미설정",
+                "value": null
+              }
+            ],
+            "findings": [],
+            "metrics": {
+              "alignment": null,
+              "allowed_pixels": 0,
+              "area_jump": 0.116,
+              "body_reference_mismatches": 0,
+              "coverage": null,
+              "holes": 0,
+              "inspection_space": "zmap-visible",
+              "occluded_pixels": 0,
+              "pixels": 8908,
+              "protected_pixels": 0,
+              "required_alpha_for_white": 230,
+              "required_pixels": 0,
+              "specks": 0,
+              "straight_edges": {},
+              "visible_alpha_min": 16,
+              "visible_pixels": 8908
+            },
+            "qa_policy": {
+              "stable_regions": []
+            },
+            "status": "passed"
+          },
+          "decision": "unverified",
+          "vision_current": false,
+          "vision_status": null
+        }
+      }
+    },
+    "run.3": {
+      "candidate": "productions/qualified.socks/candidates/run.3/742eb06bc1e813ff3540853aae9b3cb5680440cce725f7ebea88385d2859213b",
+      "cuff_seams": [
+        {
+          "cuff_outside_anatomy_pixels": 0,
+          "cuff_shoe_overlap_pixels": 405,
+          "raw_shoe_pixels_unchanged": true,
+          "side": "back",
+          "sock_foot_alpha_matches_body": true
+        },
+        {
+          "cuff_outside_anatomy_pixels": 0,
+          "cuff_shoe_overlap_pixels": 297,
+          "raw_shoe_pixels_unchanged": true,
+          "side": "front",
+          "sock_foot_alpha_matches_body": true
+        }
+      ],
+      "reviews": {
+        "qualified.hair": {
+          "check": {
+            "art_approved": false,
+            "criteria": [
+              {
+                "basis": "authored body ownership",
+                "id": "body_reference_mismatches",
+                "label": "바디 레이어 소유 불일치",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "required_pixels",
+                "label": "필수 덮임 누락",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "protected_pixels",
+                "label": "보호 영역 침범",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "allowed_pixels",
+                "label": "허용 영역 밖",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "off_palette",
+                "label": "지정 팔레트 밖",
+                "limit": 0,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "holes",
+                "label": "작은 내부 구멍",
+                "limit": 0,
+                "status": "warning",
+                "value": 1
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "specks",
+                "label": "4px 미만 잔조각",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "area_jump",
+                "label": "인접 포즈 면적 변화",
+                "limit": 0.45,
+                "status": "범위 내",
+                "value": 0.006
+              },
+              {
+                "basis": "authored stable region",
+                "id": "stable_regions",
+                "label": "고정 영역 프레임 일관성",
+                "limit": null,
+                "status": "미설정",
+                "value": null
+              }
+            ],
+            "findings": [
+              "1 px of pinholes (gaps of 12 px or less inside the part)"
+            ],
+            "metrics": {
+              "alignment": null,
+              "allowed_pixels": 0,
+              "area_jump": 0.006,
+              "body_reference_mismatches": 0,
+              "coverage": null,
+              "holes": 1,
+              "inspection_space": "zmap-visible",
+              "occluded_pixels": 0,
+              "pixels": 40180,
+              "protected_pixels": 0,
+              "required_alpha_for_white": 230,
+              "required_pixels": 0,
+              "specks": 0,
+              "straight_edges": {},
+              "visible_alpha_min": 16,
+              "visible_pixels": 40180
+            },
+            "qa_policy": {
+              "stable_regions": []
+            },
+            "status": "warning"
+          },
+          "decision": "unverified",
+          "vision_current": false,
+          "vision_status": null
+        },
+        "qualified.sneakers": {
+          "check": {
+            "art_approved": false,
+            "criteria": [
+              {
+                "basis": "authored body ownership",
+                "id": "body_reference_mismatches",
+                "label": "바디 레이어 소유 불일치",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "required_pixels",
+                "label": "필수 덮임 누락",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "protected_pixels",
+                "label": "보호 영역 침범",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "allowed_pixels",
+                "label": "허용 영역 밖",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "off_palette",
+                "label": "지정 팔레트 밖",
+                "limit": 0,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "holes",
+                "label": "작은 내부 구멍",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "specks",
+                "label": "4px 미만 잔조각",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "area_jump",
+                "label": "인접 포즈 면적 변화",
+                "limit": 0.45,
+                "status": "범위 내",
+                "value": 0.044
+              },
+              {
+                "basis": "authored stable region",
+                "id": "stable_regions",
+                "label": "고정 영역 프레임 일관성",
+                "limit": null,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "explicitly authored rigid edge; not general art approval",
+                "id": "shoe_back.outsole",
+                "label": "shoe_back.outsole · 직선 윤곽 편차",
+                "limit": 2.0,
+                "status": "범위 내",
+                "value": 0.54
+              },
+              {
+                "basis": "explicitly authored rigid edge; not general art approval",
+                "id": "shoe_front.outsole",
+                "label": "shoe_front.outsole · 직선 윤곽 편차",
+                "limit": 2.0,
+                "status": "범위 내",
+                "value": 0.523
+              }
+            ],
+            "findings": [],
+            "metrics": {
+              "alignment": null,
+              "allowed_pixels": 0,
+              "area_jump": 0.044,
+              "body_reference_mismatches": 0,
+              "coverage": null,
+              "holes": 0,
+              "inspection_space": "zmap-visible",
+              "occluded_pixels": 201,
+              "pixels": 5871,
+              "protected_pixels": 0,
+              "required_alpha_for_white": 230,
+              "required_pixels": 0,
+              "specks": 0,
+              "straight_edges": {
+                "shoe_back.outsole": {
+                  "expected_samples": 28,
+                  "limit": 2.0,
+                  "max_deviation": 0.5400159753444953,
+                  "reason": "maximum deviation 0.540px; limit 2px",
+                  "rms_deviation": 0.22811279500935533,
+                  "samples": 28,
+                  "status": "pass"
+                },
+                "shoe_front.outsole": {
+                  "expected_samples": 29,
+                  "limit": 2.0,
+                  "max_deviation": 0.5230479619334395,
+                  "reason": "maximum deviation 0.523px; limit 2px",
+                  "rms_deviation": 0.21245794137997373,
+                  "samples": 29,
+                  "status": "pass"
+                }
+              },
+              "visible_alpha_min": 16,
+              "visible_pixels": 5670
+            },
+            "qa_policy": {
+              "stable_regions": []
+            },
+            "status": "passed"
+          },
+          "decision": "unverified",
+          "vision_current": false,
+          "vision_status": null
+        },
+        "qualified.socks": {
+          "check": {
+            "art_approved": false,
+            "criteria": [
+              {
+                "basis": "authored body ownership",
+                "id": "body_reference_mismatches",
+                "label": "바디 레이어 소유 불일치",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "required_pixels",
+                "label": "필수 덮임 누락",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "protected_pixels",
+                "label": "보호 영역 침범",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "authored interface",
+                "id": "allowed_pixels",
+                "label": "허용 영역 밖",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "off_palette",
+                "label": "지정 팔레트 밖",
+                "limit": 0,
+                "status": "미설정",
+                "value": null
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "holes",
+                "label": "작은 내부 구멍",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "specks",
+                "label": "4px 미만 잔조각",
+                "limit": 0,
+                "status": "범위 내",
+                "value": 0
+              },
+              {
+                "basis": "inspection heuristic",
+                "id": "area_jump",
+                "label": "인접 포즈 면적 변화",
+                "limit": 0.45,
+                "status": "범위 내",
+                "value": 0.022
+              },
+              {
+                "basis": "authored stable region",
+                "id": "stable_regions",
+                "label": "고정 영역 프레임 일관성",
+                "limit": null,
+                "status": "미설정",
+                "value": null
+              }
+            ],
+            "findings": [],
+            "metrics": {
+              "alignment": null,
+              "allowed_pixels": 0,
+              "area_jump": 0.022,
+              "body_reference_mismatches": 0,
+              "coverage": null,
+              "holes": 0,
+              "inspection_space": "zmap-visible",
+              "occluded_pixels": 0,
+              "pixels": 8716,
+              "protected_pixels": 0,
+              "required_alpha_for_white": 230,
+              "required_pixels": 0,
+              "specks": 0,
+              "straight_edges": {},
+              "visible_alpha_min": 16,
+              "visible_pixels": 8716
+            },
+            "qa_policy": {
+              "stable_regions": []
+            },
+            "status": "passed"
+          },
+          "decision": "unverified",
+          "vision_current": false,
+          "vision_status": null
+        }
+      }
+    }
+  },
+  "release_ready": false,
+  "runtime_masks_in_saved_render_cases": 16,
+  "scope": "four non-looping reference poses; procedural sock construction drafts",
+  "shoe_only_pixels_unchanged": 0
+}

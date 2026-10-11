@@ -102,8 +102,10 @@ _INDEPENDENT_LAYER = contract._record({
     "landmarks": contract._mapping(contract._mapping(contract._point)),
     "guides": contract._mapping(contract._list(contract._relative_file)),
     "straight_edges": contract._mapping(contract._records(_STRAIGHT_EDGE)),
+    "cover_rule": contract._cover_rule,
+    "provides": contract._ids, "masks": contract._mapping(contract._mask),
     "fit": contract._enum("contain", "cover"), "margin": contract._string,
-}, {"source_bounds": {}, "body_nodes": [], "replaces": [], "landmarks": {}, "guides": {}, "straight_edges": {}, "fit": "contain", "margin": "1"})
+}, {"source_bounds": {}, "body_nodes": [], "replaces": [], "landmarks": {}, "guides": {}, "straight_edges": {}, "fit": "contain", "margin": "1"}, optional=("cover_rule", "provides", "masks"))
 _INDEPENDENT = contract._record({"layers": contract._records(_INDEPENDENT_LAYER),
     "require_vision": contract._boolean, "reference_previous": contract._boolean}, {"require_vision": True, "reference_previous": False})
 _CONFIG = contract._record({
@@ -334,7 +336,7 @@ def configure(assembly, part, config):
     if value["pieces"] and value["segments"] is None:
         raise contract.PartsContractError("pieces are cut by body segments: give config.segments")
     previous = production["config"]
-    if any(previous[k] != value[k] for k in ("qa", "pose_checks", "visibility", "pieces", "segments", "independent")):
+    if any(previous[k] != value[k] for k in ("qa", "pose_checks", "visibility", "pieces", "segments", "independent", "covers", "cover_rule")):
         for track in production["tracks"].values():
             for row in track["poses"].values():
                 row.update(check=None, decision="unverified", reviewer=None, note=None)
@@ -962,8 +964,11 @@ def _measure(root, config, settings, location, context):
         for layer in config['independent']['layers']:
             old = frozen.get(layer['id'], {})
             if (old.get('replaces', []) != layer.get('replaces', []) or
+                old.get('provides',old.get('replaces',[])) != layer.get('provides',layer.get('replaces',[])) or
+                not parts_independent.mask_matches(record,layer,record['pose_id']) or
+                old.get('cover_rule') != layer.get('cover_rule') or
                 old.get('straight_edges', []) != layer.get('straight_edges', {}).get(record['pose_id'], [])):
-                findings.append(('error', f"{layer['id']}: replacement or structural criteria changed; prepare a new candidate"))
+                findings.append(('error', f"{layer['id']}: replacement, cover rule or structural criteria changed; prepare a new candidate"))
         ownership = parts_independent.body_ownership_errors(root,context[1],context[2],config,
             record['pose_id'],layers=record.get('independent_layers'))
         metrics['body_reference_mismatches'] = sum(ownership.values())
@@ -1230,6 +1235,8 @@ def build(assembly, part, *, allow_incomplete=False):
     production["built"] = {"part": imported["part"], "visibility": config["visibility"], "selection": {
         name: {p: row["selected"] for p, row in track["poses"].items() if p in order and row["selected"]}
         for name, track in production["tracks"].items()}}
+    if config['independent']:
+        production['built']['independent_semantics'] = _independent_semantics(config)
     _save(root, production)
     return {"part": imported["part"], "role": config["role"], "tracks": list(production["tracks"]), "missing": gaps,
             "pieces": ([p["id"] for p in config["pieces"]] or [config["slot"]]) if config["role"] == "part" else None,
@@ -1298,12 +1305,26 @@ def contact(frames, order, rows, *, scale=3, columns=8, crop=None):
     return sheet
 
 
+def _independent_semantics(config):
+    return contract.content_digest({layer['id']:{key:layer.get(key) for key in ('node','provides','replaces','cover_rule','masks')}
+                                    for layer in config['independent']['layers']})
+
+
 def _current(production, registry, order):
     built = production["built"]
     if built is None or registry.get(production["config"]["part_id"], {}).get("digest") != built["part"]["digest"]:
         return False
     if built.get("visibility", "mask") != production["config"]["visibility"]:
         return False
+    bindings = registry[production['config']['part_id']]['bindings']
+    if any(binding.get('covers', []) != production['config']['covers'] for binding in bindings):
+        return False
+    if production['config']['independent']:
+        if any('masks' in layer or 'provides' in layer for layer in production['config']['independent']['layers']) and built.get('independent_semantics') != _independent_semantics(production['config']):
+            return False
+        rules = {layer['id']: layer.get('cover_rule') for layer in production['config']['independent']['layers']}
+        if any(piece.get('cover_rule') != rules.get(piece['id']) for binding in bindings for piece in binding['pieces']):
+            return False
     for name, track in production["tracks"].items():
         selected = {p: row["selected"] for p, row in track["poses"].items() if p in order and row["selected"]}
         if selected != built["selection"].get(name, {}):

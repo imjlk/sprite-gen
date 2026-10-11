@@ -144,9 +144,12 @@ class ReviewDesk:
                 authored = {layer['id']:layer for layer in (state['config'].get('independent') or {}).get('layers', [])}
                 for layer in record.get('independent_layers', []):
                     current = authored.get(layer['id'], {})
-                    if (layer.get('replaces',[]) != current.get('replaces',[]) or
+                    if (layer['id'] not in authored or layer.get('replaces',[]) != current.get('replaces',[]) or
+                        layer.get('provides',layer.get('replaces',[])) != current.get('provides',current.get('replaces',[])) or
+                        not parts_independent.mask_matches(record,current,pose) or
+                        layer.get('cover_rule') != current.get('cover_rule') or
                         layer.get('straight_edges',[]) != current.get('straight_edges',{}).get(pose,[])):
-                        compatible, reason = False, '부위 교체·구조 검사 기준이 바뀐 이전 후보입니다.'
+                        compatible, reason = False, '부위 교체·착용 조건·구조 검사 기준이 바뀐 이전 후보입니다.'
             if not compatible:
                 metrics, findings = {}, [('error', reason or '이전 모션 기준 후보입니다.')]
             elif candidate == row["selected"] and row.get("check"):
@@ -289,6 +292,13 @@ class ReviewDesk:
                     raise contract.PartsContractError("this candidate did not retain this source view")
                 key = "part"
             image = Image.open(base / record["images"][key]["file"]).convert("RGBA")
+            if kind == 'visible' and record.get('independent_layers'):
+                from sprite_gen.frames import parts_candidate_scene
+                plan, sample, load = parts_candidate_scene.scene(
+                    root, index, registry, state['config'], pose, image,
+                    record['placement'], independent_layers=parts_independent.candidate_layers(record, base))
+                part_ids = [draw['id'] for draw in sample['draw'] if draw['pack']['id'] == part]
+                image = production.compose_parts.render_sample(plan, sample, load, only_ids=part_ids)[0]
         elif kind in ("interfaces", "errors"):
             image = Image.open(base / "under.png").convert("RGBA")
             masks = {n: Image.open(base / ref["file"]).convert("L") for n in parts_reference.COLORS
@@ -333,8 +343,12 @@ class ReviewDesk:
         if record.get('independent_layers'):
             from sprite_gen.frames import parts_candidate_scene
             raw=Image.open(base/record['images']['part']['file']).convert('RGBA')
+            layers = parts_independent.candidate_layers(record, base)
+            for layer in layers:
+                layer.pop('mask', None)
+                layer.pop('mask_image', None)
             plan,sample,load=parts_candidate_scene.scene(root,index,registry,config,pose,raw,record['placement'],
-                independent_layers=parts_independent.candidate_layers(record,base))
+                independent_layers=layers)
             return production.compose_parts.render_sample(plan,sample,load)[0]
         _, first = production._poses(motion, production._states(state, index))
         clip_id, sample = first[pose]

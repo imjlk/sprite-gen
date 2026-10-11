@@ -1,0 +1,75 @@
+{
+  "appearance": {
+    "digest": "45739f4bc94fe0b6f9f5768663dd620ff0d7192a9fe5526a48b2824526a6787c",
+    "id": "qualified.example"
+  },
+  "art_approved": false,
+  "input_sha256": "6f2c313b0bebc902db377c6edb4af8da9956d7a793c596906b642cd34bef310a",
+  "observation": {
+    "limits": [
+      "Only current columns 3–5 are scored; the bare-body column supplies the ear reference.",
+      "The main ear contours remain readable. The visible hair concerns are aperture fringes and notch transitions; definite large contour clipping or strand smearing is not established.",
+      "At the displayed scale, both ankle attachments in each pose appear connected, with plausible cuff tilt and no clearly visible floating shoe, open collar gap, or calf discontinuity.",
+      "Small edge artifacts cannot be fully resolved from this contact sheet alone.",
+      "These are four independently authored still poses. No animation timing, interpolation, or motion quality is assessed.",
+      "This is an observational attachment audit only, not curator approval or release readiness."
+    ],
+    "overall": "rework",
+    "poses": {
+      "run.0": {
+        "hair": "rework",
+        "issues": [
+          "A narrow pale skin halo follows the upper and rear ear rim, separating the hair from the reference ear outline.",
+          "The lower-right ear aperture ends with a small dark sliver and an abrupt hair notch; this junction is visibly untidy."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.1": {
+        "hair": "rework",
+        "issues": [
+          "A pale exposed band remains around the rear ear contour, most apparent along its left and lower edges.",
+          "The hair boundary beneath the earlobe forms a sharp dark spur toward the face rather than following the reference's smooth lower-ear termination."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.2": {
+        "hair": "rework",
+        "issues": [
+          "A thin light halo is visible between the hair and the upper-left ear outline.",
+          "The lower-right aperture transition has a short angular dark projection and a small exposed skin wedge above the lower strands."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.3": {
+        "hair": "rework",
+        "issues": [
+          "The upper and rear ear boundary retains a pale rim beyond the dark reference contour.",
+          "The lower-right ear-to-hair junction has a pointed dark extension and an abrupt change into the hanging strands."
+        ],
+        "socks_shoes": "pass"
+      }
+    }
+  },
+  "parts": {
+    "qualified.hair": {
+      "digest": "ec3641a2db958daa63086c3e98cc41d73c55467e8c647fb67887757f3c2e39d5",
+      "id": "qualified.hair"
+    },
+    "qualified.sneakers": {
+      "digest": "f6a523f329bc59dbac863b02a790c62fdb54547b920364d1a9f6bce2f85695e2",
+      "id": "qualified.sneakers"
+    },
+    "qualified.socks": {
+      "digest": "68406dc2a6c70661a0155f28ae3e8b00dc059b9b4f76a4cc4f03431012786ec6",
+      "id": "qualified.socks"
+    }
+  },
+  "release_ready": false,
+  "response_sha256": "3c8c87ddb3e2e0042b71764c71e63290f000c37bd8efe5a87e5f06a766531a63",
+  "scope": "attachment contact audit only; not part approval or full motion QC",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

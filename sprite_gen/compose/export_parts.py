@@ -106,6 +106,7 @@ def pack(root, index, registry, *, title=None, interpolation="frame"):
                         # The player applies a mask to every layer providing its target node,
                         # the same rule the Python renderer uses, so cross-layer masks travel.
                         row["mask"] = {**{k: mask[k] for k in ("target_node", "space", "channel")},
+                                       **({'optional_target':mask['optional_target']} if 'optional_target' in mask else {}),
                                        "texture": texture(source, mask["image"])}
                     socket = sample["sockets"].get(placement["target_socket"])
                     if row["visible"] and (socket is None or socket["confidence"] != "verified"):

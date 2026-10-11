@@ -26,6 +26,7 @@ def _input_paths(root, config):
     if config.get("independent"):
         paths.extend(path for layer in config['independent']['layers']
                      for guides in layer.get('guides', {}).values() for path in guides)
+        paths.extend(mask['image']['file'] for layer in config['independent']['layers'] for mask in layer.get('masks',{}).values())
     return sorted(set(p for p in paths if p))
 
 

@@ -201,7 +201,7 @@ def resolve(appearance, documents, *, complete=True):
             ordered = _order(active, known, {n["id"] for n in topology["nodes"]}, ranks)
             for entry in ordered:
                 mask = entry["placement"]["mask"]
-                if mask is not None and not any(mask["target_node"] in e["provides"] for e in remaining):
+                if mask is not None and not mask.get('optional_target',False) and not any(mask["target_node"] in e["provides"] for e in remaining):
                     raise contract.PartsContractError(f"{entry['id']}: mask target has no raster provider")
             samples.append({"id": sample["id"], "duration_ticks": sample["duration_ticks"],
                             "sockets": deepcopy(sample["sockets"]), "draw": ordered,

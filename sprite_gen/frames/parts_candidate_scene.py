@@ -118,6 +118,13 @@ def scene(
             "sha256": assets.sha256(assets.png_bytes(raster)),
         }
         references[ref["file"]] = raster
+        mask = configured.get(name,{}).get('mask')
+        candidate_mask = None
+        if mask is not None:
+            mask_raster = configured[name]['mask_image']
+            ref_mask = {'file':f'candidate/{name}.mask.png','sha256':assets.sha256(assets.png_bytes(mask_raster))}
+            references[ref_mask['file']] = mask_raster
+            candidate_mask = {**{k:v for k,v in mask.items() if k not in ('image_key','source_sha256')},'image':ref_mask}
         mapping = {
             c["id"]: {
                 s["id"]: contract._placement(
@@ -126,6 +133,7 @@ def scene(
                         "pivot": placement["pivot"],
                         "target_socket": placement["target_socket"],
                         "offset": placement.get("offset", [0, 0]),
+                        "mask": candidate_mask,
                         "visible": s["pose_id"] == pose
                         and raster.getbbox() is not None,
                     },
@@ -142,10 +150,13 @@ def scene(
                 "node": nodes[name],
                 "mode": config["mode"],
                 "replaces": configured.get(name, {}).get("replaces", []),
-                "provides": configured.get(name, {}).get("replaces", []),
+                "provides": configured.get(name,{}).get('provides',configured.get(name, {}).get("replaces", [])),
                 "sample_map": mapping,
             }
         )
+        rule = configured.get(name, {}).get('cover_rule') if independent_layers else config.get('cover_rule')
+        if rule is not None:
+            pieces[-1]['cover_rule'] = rule
     pack = contract.seal(
         {
             "kind": "parts-pack",
@@ -161,6 +172,7 @@ def scene(
                     "view": rig["view"],
                     "occupies": [config["slot"]],
                     "pieces": pieces,
+                    **({"covers": config['covers']} if config.get('covers') else {}),
                 }
             ],
         }
@@ -237,10 +249,19 @@ def visibility(root, index, registry, config, pose, image, placement, *, require
         independent_layers=independent_layers,
     )
     visible = np.zeros((image.height, image.width), dtype=bool)
+    masks = []
+    for entry in frame['draw']:
+        if mask := entry['placement']['mask']:
+            canvas_mask = Image.new('L',image.size,0)
+            canvas_mask.paste(compose_parts._coverage(load(entry['pack'],mask['image']),mask['channel']),tuple(entry['offset']) if mask['space']=='part-local' else (0,0))
+            masks.append((mask['target_node'],canvas_mask))
     for entry in frame["draw"]:
         raster = load(entry["pack"], entry["placement"]["image"])
         canvas = Image.new("RGBA", image.size)
         canvas.alpha_composite(raster, tuple(entry["offset"]))
+        for node,mask in masks:
+            if node in entry['provides']:
+                canvas = compose_parts.apply_alpha_mask(canvas,mask)
         ink = np.asarray(canvas)[..., 3] > 0
         if entry["role"] == "part":
             visible |= ink

@@ -128,6 +128,9 @@ def validate(config, index, registry):
     width, height = canvas["width"], canvas["height"]
     for layer in direct["layers"]:
         targets = set(layer.get("replaces", []))
+        supplied = set(layer.get('provides',layer.get('replaces',[])))
+        c._members(supplied,{node['id'] for node in topology['nodes']},'independent provided nodes')
+        c._members(targets,supplied,'replacement must also provide its interface')
         c._members(targets, provided, "replacement body nodes")
         if targets and any(body["body_mode"] == "flat" for body in bodies):
             raise c.PartsContractError("independent replacement needs segmented body artwork")
@@ -153,6 +156,9 @@ def validate(config, index, registry):
         c._members(layer["landmarks"], layer["targets"], "landmark poses")
         c._members(layer["guides"], layer["targets"], "guide poses")
         c._members(layer.get("straight_edges", {}), layer["targets"], "straight edge poses")
+        c._members(layer.get('masks',{}),layer['targets'],'mask poses')
+        for mask in layer.get('masks',{}).values():
+            c._members([mask['target_node']],{node['id'] for node in topology['nodes']},'mask target node')
         for edges in layer.get("straight_edges", {}).values():
             if len({edge['id'] for edge in edges}) != len(edges):
                 raise c.PartsContractError("straight edge IDs must be unique per layer/pose")
@@ -557,6 +563,8 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                     "layer": layer["id"],
                     "node": layer["node"],
                     "replaces": layer.get("replaces", []),
+                    "provides": layer.get('provides',layer.get('replaces',[])),
+                    "cover_rule": layer.get("cover_rule"),
                     "geometry_candidate": prior['digest'] if corrected is not None else None,
                     "shape_review": shape_review_file,
                     "straight_edges": layer.get("straight_edges", {}).get(pose, []),
@@ -572,6 +580,12 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                     "reuse": reuse,
                 }
             )
+            if mask := layer.get('masks',{}).get(pose):
+                encoded = assets.SourceReader(root).read(mask['image']['file'],mask['image']['sha256'])
+                if Image.open(BytesIO(encoded)).size != body.size:
+                    raise c.PartsContractError('independent masks must match the native rig canvas')
+                filename = keep(f"{pose}/{layer['id']}.mask.png",encoded)
+                jobs[-1]['mask'] = {**mask,'image':files[filename]}
     doc = {
         "kind": "parts-independent-reference",
         "schema_version": 1,
@@ -885,11 +899,19 @@ def slice_batch(assembly, part, entry, *, pages=(), track=None, registered_canva
                     "id": job["layer"],
                     "node": job["node"],
                     "replaces": job.get("replaces", []),
+                    "provides": job.get('provides',job.get('replaces',[])),
+                    "cover_rule": job.get("cover_rule"),
                     "straight_edges": job.get("straight_edges", []),
                     "image_key": key,
                     "target": job["target"],
                 }
             )
+            if mask := job.get('mask'):
+                key_mask = 'mask.'+job['layer']
+                encoded = assets.SourceReader(root/base).read(mask['image']['file'],mask['image']['sha256'])
+                images[key_mask] = Image.open(BytesIO(encoded)).convert('RGBA')
+                layers[-1]['mask'] = {**{k:v for k,v in mask.items() if k!='image'},'image_key':key_mask,
+                                      'source_sha256':mask['image']['sha256']}
             registration[job["layer"]] = details
             sources.append(
                 {
@@ -975,6 +997,7 @@ def candidate_layers(record, base):
     return [
         {
             **item,
+            **({'mask_image':Image.open(BytesIO(reader.read(record['images'][item['mask']['image_key']]['file'],record['images'][item['mask']['image_key']]['sha256']))).convert('RGBA')} if item.get('mask') else {}),
             "image": Image.open(
                 BytesIO(
                     reader.read(
@@ -986,6 +1009,15 @@ def candidate_layers(record, base):
         }
         for item in record.get("independent_layers", [])
     ]
+
+
+def mask_matches(record, layer, pose):
+    frozen = next((item for item in record.get('independent_layers',[]) if item['id']==layer['id']),{})
+    old, current = frozen.get('mask'),layer.get('masks',{}).get(pose)
+    if not old or not current:
+        return not old and not current
+    return (old['source_sha256']==current['image']['sha256'] and
+            {k:v for k,v in old.items() if k not in ('image_key','source_sha256')}=={k:v for k,v in current.items() if k!='image'})
 
 
 def build_pieces(root, part, state, order):
@@ -1001,6 +1033,9 @@ def build_pieces(root, part, state, order):
             if not any(
                 item["id"] == layer["id"] and item["node"] == layer["node"]
                 and item.get("replaces", []) == layer.get("replaces", [])
+                and item.get('provides',item.get('replaces',[])) == layer.get('provides',layer.get('replaces',[]))
+                and mask_matches(record,layer,pose)
+                and item.get("cover_rule") == layer.get("cover_rule")
                 and item.get("straight_edges", []) == layer.get("straight_edges", {}).get(pose, [])
                 for item in record.get("independent_layers", [])
             ):
@@ -1018,17 +1053,24 @@ def build_pieces(root, part, state, order):
                 },
                 "visible": True,
             }
+            item = next(item for item in record['independent_layers'] if item['id']==layer['id'])
+            if mask := item.get('mask'):
+                ref_mask = record['images'][mask['image_key']]
+                mapping[pose]['mask'] = {**{k:v for k,v in mask.items() if k not in ('image_key','source_sha256')},
+                    'image':{'file':(root/row['selected']/ref_mask['file']).relative_to(p._folder(root,part)).as_posix(),'sha256':ref_mask['sha256']}}
         specs.append(
             {
                 "id": layer["id"],
                 "slot": state["config"]["slot"],
                 "node": layer["node"],
                 "mode": "raster",
-                "provides": layer.get("replaces", []),
+                "provides": layer.get('provides',layer.get("replaces", [])),
                 "replaces": layer.get("replaces", []),
                 "pose_map": mapping,
             }
         )
+        if layer.get('cover_rule') is not None:
+            specs[-1]['cover_rule'] = layer['cover_rule']
     return specs
 
 

@@ -1,0 +1,85 @@
+{
+  "appearance": {
+    "digest": "3aacd2f73e4fcd549de400851c19d8370ab7e7f75d78668b8664fc0a58e62675",
+    "id": "qualified.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "2b3d2b0c4ae5e0f78e1e1a84978a8047fd1fa0b2d2aab24f512705a4ed274f63",
+      "id": "qualified.body"
+    }
+  ],
+  "input_sha256": "b2cadc008ab27532ac0d5b1891af5d7df8e8b34c5c911c07a5134b5c7b8fd1b4",
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "observation": {
+    "limits": [
+      "The body's own curved ear line is present in the references; that line alone is not a defect.",
+      "Fine fringe pixels cannot be fully distinguished from antialiasing at this contact-sheet resolution.",
+      "No clear calf/cuff gaps, open shoe collars, floating shoes, or attachment discontinuities are visible in the current footwear columns.",
+      "These are four independently authored still poses; motion quality and temporal consistency are not assessed.",
+      "This is an observational attachment audit, not curator approval or release readiness."
+    ],
+    "overall": "rework",
+    "poses": {
+      "run.0": {
+        "hair": "rework",
+        "issues": [
+          "The upper-left ear boundary has a thin pale fringe and a harder cut edge than the bare-body reference; the reference's dark contour appears partly thinned.",
+          "The lower-right aperture junction forms a sharp dark notch where hair meets the ear's curved endpoint."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.1": {
+        "hair": "rework",
+        "issues": [
+          "A narrow light rim follows the upper-left aperture, making the ear boundary look traced rather than cleanly preserving the reference contour.",
+          "The lower-right ear/hair junction ends in an abrupt pointed segment instead of the reference's smooth curved termination."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.2": {
+        "hair": "rework",
+        "issues": [
+          "The aperture edge is visibly hard along the upper-left ear arc, with a narrow pale fringe outside the dark contour.",
+          "A dark hair point intrudes at the lower-right ear opening, interrupting the rounded contour visible in the bare-body reference."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.3": {
+        "hair": "rework",
+        "issues": [
+          "The upper-left ear boundary shows a thin light fringe and uneven contour thickness relative to the reference.",
+          "The lower-right opening joins the hair through a sharp wedge, making the ear endpoint look cut rather than smoothly curved."
+        ],
+        "socks_shoes": "pass"
+      }
+    }
+  },
+  "parts": {
+    "qualified.hair": {
+      "digest": "1cf8b9bbd65e2afa73c3f38ff96329c43996c8669a73ef3cc000c18b2f66fa50",
+      "id": "qualified.hair"
+    },
+    "qualified.sneakers": {
+      "digest": "a552ce4e7850a0660d4b7cf49fa6d8cb2405fcbe09562751ce706fb501a9b9f1",
+      "id": "qualified.sneakers"
+    },
+    "qualified.socks": {
+      "digest": "68406dc2a6c70661a0155f28ae3e8b00dc059b9b4f76a4cc4f03431012786ec6",
+      "id": "qualified.socks"
+    }
+  },
+  "prompt_sha256": "2b4d85acd7644a4bdf28fd28641d884d874b00b7d973a2686ac81c92ae59e2ab",
+  "release_ready": false,
+  "response_sha256": "24d480c1b013be89d8587533227acb6f8bf250342eaf13ed22022b23e9b70037",
+  "scope": "attachment contact audit only; not part approval or full motion QC",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

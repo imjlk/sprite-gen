@@ -1,0 +1,260 @@
+{
+  "appearance": {
+    "digest": "93b2892ad10c8cd9906c33ad73e08565245d53cbec2c31aaa267287f916d8f5d",
+    "id": "qualified.example"
+  },
+  "art_approved": false,
+  "body_modified": false,
+  "poses": {
+    "run.0": {
+      "ear": {
+        "body": [
+          344,
+          273
+        ],
+        "body_tangent": [
+          318,
+          270.64
+        ],
+        "edit_box": [
+          300,
+          227,
+          380,
+          316
+        ],
+        "feather_px": 8,
+        "method": "native independent-hair retouch; bounded registered patch; no body RGB",
+        "native_grid_origin": [
+          215,
+          90
+        ],
+        "notch_target_margin_px": 1,
+        "old": [
+          338,
+          264
+        ],
+        "radius": [
+          26,
+          31
+        ],
+        "runtime_mask": false,
+        "source_tangent": [
+          105,
+          180.0
+        ],
+        "translation": [
+          -1,
+          1
+        ]
+      },
+      "shoe_back": {
+        "collar_opening_pixels": 86,
+        "raw_shoe_unchanged": true,
+        "target_node": "foot_back"
+      },
+      "shoe_front": {
+        "collar_opening_pixels": 82,
+        "raw_shoe_unchanged": true,
+        "target_node": "foot_front"
+      }
+    },
+    "run.1": {
+      "ear": {
+        "body": [
+          346,
+          275
+        ],
+        "body_tangent": [
+          322,
+          271.5
+        ],
+        "edit_box": [
+          302,
+          229,
+          382,
+          318
+        ],
+        "feather_px": 8,
+        "method": "native independent-hair retouch; bounded registered patch; no body RGB",
+        "native_grid_origin": [
+          215,
+          90
+        ],
+        "notch_target_margin_px": 1,
+        "old": [
+          342,
+          255
+        ],
+        "radius": [
+          27,
+          31
+        ],
+        "runtime_mask": false,
+        "source_tangent": [
+          109,
+          181.5
+        ],
+        "translation": [
+          -1,
+          0
+        ]
+      },
+      "shoe_back": {
+        "collar_opening_pixels": 78,
+        "raw_shoe_unchanged": true,
+        "target_node": "foot_back"
+      },
+      "shoe_front": {
+        "collar_opening_pixels": 50,
+        "raw_shoe_unchanged": true,
+        "target_node": "foot_front"
+      }
+    },
+    "run.2": {
+      "ear": {
+        "body": [
+          350,
+          246
+        ],
+        "body_tangent": [
+          324,
+          245.0
+        ],
+        "edit_box": [
+          306,
+          200,
+          386,
+          289
+        ],
+        "feather_px": 8,
+        "method": "native independent-hair retouch; bounded registered patch; no body RGB",
+        "native_grid_origin": [
+          215,
+          90
+        ],
+        "notch_target_margin_px": 1,
+        "old": [
+          344,
+          239
+        ],
+        "radius": [
+          27,
+          31
+        ],
+        "runtime_mask": false,
+        "source_tangent": [
+          110,
+          153.5
+        ],
+        "translation": [
+          0,
+          2
+        ]
+      },
+      "shoe_back": {
+        "collar_opening_pixels": 69,
+        "raw_shoe_unchanged": true,
+        "target_node": "foot_back"
+      },
+      "shoe_front": {
+        "collar_opening_pixels": 74,
+        "raw_shoe_unchanged": true,
+        "target_node": "foot_front"
+      }
+    },
+    "run.3": {
+      "ear": {
+        "body": [
+          346,
+          258
+        ],
+        "body_tangent": [
+          320,
+          253.31428571428572
+        ],
+        "edit_box": [
+          302,
+          212,
+          382,
+          301
+        ],
+        "feather_px": 8,
+        "method": "native independent-hair retouch; bounded registered patch; no body RGB",
+        "native_grid_origin": [
+          215,
+          90
+        ],
+        "notch_target_margin_px": 1,
+        "old": [
+          341,
+          248
+        ],
+        "radius": [
+          27,
+          31
+        ],
+        "runtime_mask": false,
+        "source_tangent": [
+          107,
+          161.5
+        ],
+        "translation": [
+          -1,
+          2
+        ]
+      },
+      "shoe_back": {
+        "collar_opening_pixels": 115,
+        "raw_shoe_unchanged": true,
+        "target_node": "foot_back"
+      },
+      "shoe_front": {
+        "collar_opening_pixels": 102,
+        "raw_shoe_unchanged": true,
+        "target_node": "foot_front"
+      }
+    }
+  },
+  "qualified.hair": {
+    "checks": {
+      "checked": 4,
+      "findings": {
+        "run.0": [
+          "4 px of pinholes (gaps of 12 px or less inside the part)"
+        ],
+        "run.1": [
+          "7 px of pinholes (gaps of 12 px or less inside the part)"
+        ],
+        "run.2": [
+          "12 px of pinholes (gaps of 12 px or less inside the part)"
+        ],
+        "run.3": [
+          "1 px of pinholes (gaps of 12 px or less inside the part)"
+        ]
+      },
+      "part": "qualified.hair",
+      "release_ready": false,
+      "summary": {
+        "error": 0,
+        "passed": 0,
+        "warning": 4
+      }
+    },
+    "config": "inputs/attachments-r9/qualified.hair.config.json"
+  },
+  "qualified.sneakers": {
+    "checks": {
+      "checked": 4,
+      "findings": {},
+      "part": "qualified.sneakers",
+      "release_ready": false,
+      "summary": {
+        "error": 0,
+        "passed": 4,
+        "warning": 0
+      }
+    },
+    "config": "inputs/attachments-r9/qualified.sneakers.config.json"
+  },
+  "source_preserved": true
+}

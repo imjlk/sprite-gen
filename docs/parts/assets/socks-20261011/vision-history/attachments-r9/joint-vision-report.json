@@ -1,0 +1,84 @@
+{
+  "appearance": {
+    "digest": "93b2892ad10c8cd9906c33ad73e08565245d53cbec2c31aaa267287f916d8f5d",
+    "id": "qualified.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "2b3d2b0c4ae5e0f78e1e1a84978a8047fd1fa0b2d2aab24f512705a4ed274f63",
+      "id": "qualified.body"
+    }
+  ],
+  "input_sha256": "1e5bf13525a25ff8b3f29858b3d023a4541e242a6768fa7ac3c82fbfdca73342",
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "observation": {
+    "limits": [
+      "Pass means no definite attachment defect is visible at the supplied contact-sheet resolution.",
+      "Fine edge pixels and collar regions obscured by laces cannot be fully assessed.",
+      "These are four independently authored still poses; no animation or motion quality is inferred.",
+      "This is an observational attachment audit, not curator approval or release-readiness assessment."
+    ],
+    "overall": "pass",
+    "poses": {
+      "run.0": {
+        "hair": "pass",
+        "issues": [
+          "No clear clipping of the ear's outer arc or lower tip is visible. The curved inner ear line also appears in the bare-body reference.",
+          "Both socks meet their calves along aligned cuff edges; no visible background gap separates either sock from its shoe collar."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.1": {
+        "hair": "pass",
+        "issues": [
+          "The exposed ear contour follows the reference, including its lower opening. No obvious empty skin halo or smeared strand surrounds it.",
+          "The cuffs follow the differently angled calves. The pale collar rims remain connected around the socks without an obvious open seam."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.2": {
+        "hair": "pass",
+        "issues": [
+          "The upper ear arc and lower tip remain visible in their reference positions; the adjacent hair tips show no obvious hard cut seam.",
+          "The diagonal back cuff and front cuff meet their calves continuously. Neither shoe visibly floats away from its sock."
+        ],
+        "socks_shoes": "pass"
+      },
+      "run.3": {
+        "hair": "pass",
+        "issues": [
+          "The lower ear curve is present in the bare-body reference; the neighboring hair curl does not visibly truncate it.",
+          "Both calf-to-cuff boundaries appear continuous, and no clear break is visible at either shoe collar."
+        ],
+        "socks_shoes": "pass"
+      }
+    }
+  },
+  "parts": {
+    "qualified.hair": {
+      "digest": "5df3f5be12a8428e086a69e0ba980d07f1b1945e0e414e8f940c958e7aac8394",
+      "id": "qualified.hair"
+    },
+    "qualified.sneakers": {
+      "digest": "b67e30ff51d2778c45dba17385949050231026b4365a4812307a551c8630c95a",
+      "id": "qualified.sneakers"
+    },
+    "qualified.socks": {
+      "digest": "bb93d06f75e10e5caa529c6ada418fc6b7b2e91e9de2ab2390c8a8059c572a87",
+      "id": "qualified.socks"
+    }
+  },
+  "prompt_sha256": "b77ad93dcefaae8792f18c7cf5ac7a68250905bda343ff7e5f77542d3d7d1663",
+  "release_ready": false,
+  "response_sha256": "e447778ba907337ee76b8056c2b91c58018e6855ea99a93c3d4fe94bdfe9deb5",
+  "scope": "attachment contact audit only; not part approval or full motion QC",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

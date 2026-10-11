@@ -8,7 +8,7 @@
 - `body_nodes`는 생성 시 참고할 실제 바디 분리 이미지다. 발바닥/발등 방향처럼 전체 몸 축소본에서 모호한 부분을 명확히 한다. `landmarks`에는 포즈별 heel/toe/ankle 또는 crown/ear 같은 바디 좌표를 작성할 수 있다. 엔진이 실제 참조 이미지에 점·이름·방향 선을 붙인다. 런타임 소켓을 추가하거나 파츠를 변형하는 기능은 아니다.
 - 각 생성 입력은 바디, 포즈, 바디 분리 이미지, 디자인 참조, QA 지도와 프롬프트를 해시로 고정한다. 생성 출력은 투명한 **파츠만**이어야 한다. 기본은 바디에서 새로 생성한다. `independent.reference_previous: true`를 명시하면 이전 원본도 AI 편집 참조로 붙인다. 잘못된 이전 원근을 다시 복사하는 문제 때문에 기본값은 false다. 이전 원본 파일은 두 방식 모두 보존한다.
 - 원본은 그대로 보존한다. 좌표 등록은 양수 보간을 사용하는 premultiplied bilinear 리사이즈 한 번과 균일 scale/translation으로 수행한다. `source_bounds`는 외부에서 가져온 원본의 명시적 crop이며, 새로 생성한 독립 이미지에는 적용하지 않는다.
-- 뒤 레이어가 앞 레이어에 가려져도 그 독립 원본 픽셀을 남긴다. 겹침은 실제 body/part node의 zmap으로 처리한다. 새 direct production의 기본은 `visibility: zmap`이다. 예외적인 렌더 마스크가 필요한 자산은 별도 기존 mask production으로 작성한다. QA 지도는 검사용이며 렌더링 마스크가 아니다.
+- 뒤 레이어가 앞 레이어에 가려져도 그 독립 원본 픽셀을 남긴다. 겹침은 실제 body/part node의 zmap으로 처리한다. 새 direct production의 기본은 `visibility: zmap`이다. 예외적인 렌더 마스크는 독립 레이어의 포즈별 `masks`로 명시할 수 있다. 대상·좌표계·채널·원본 바이트를 job/후보/빌드에 고정한다. QA 지도는 검사용이며 렌더링 마스크가 아니다. `provides`로 실제 제공 부위를 지정하고, `cover_rule`로 레이어별 착용 조건을 지정한다.
 - 완성 캐릭터에서 옷을 빼내거나 바디를 지워 파츠를 만들지 않는다. 모션을 외형 조합별로 생성하지 않는다. 바디와 파츠 모두 동일한 sample clock을 따른다.
 
 ## 새 파츠 시작
@@ -91,7 +91,7 @@ sprite-gen parts-part-sheet --assembly library/assembly.json --part demo.sneaker
 
 현재 제작 예제는 `assets/parts-independent-qualified-20261011/library/assembly.json`의 `qualified.hair` 1레이어와 `qualified.sneakers` 2레이어다. Native Codex image generation으로 만든 고해상도 SD 바디 시트의 **4개 달리기 참고 포즈**를 공통 모션으로 고정했다. 제작 경로를 검증하는 non-looping 구간이다. 전체 idle/walk/run 사이클과 추가 체형의 최종 아트 승인은 별도 작업이다.
 
-후속 수정안의 재승인도 철회했다. 현재는 신발이 덮는 발 레이어를 실제로 교체하며, 곧은 밑창과 포즈별 발목 진입을 다시 제작했다. 최신 기계 검사와 비전 v6는 4포즈 모두 통과했지만 **큐레이터 승인 0**으로 유지한다. [현재 수정안과 재검증 기록](22-shoe-replacement-revalidation.md)을 확인한다. 아래 기존 archive에는 최신 수정안이 포함되지 않는다.
+후속 수정안의 재승인도 철회했다. 신발이 덮는 발 레이어를 실제로 교체한 [신발 수정 당시 기록](22-shoe-replacement-revalidation.md)을 보존했다. 이후 양말과 신발 입구/귀 파임 마스크를 추가하고 변경 전 판정은 현재 승인으로 사용하지 않는다. **현재 3파츠의 큐레이터 승인 0**이다. [최신 양말·접합 교정과 실제 검수 상태](23-sock-and-attachment-masks.md)를 확인한다. 아래 기존 archive에는 최신 수정안이 포함되지 않는다.
 
 원본 `body-native-sheet.png`와 실제 provider 보고서를 보존했다. 각 cell은 같은 해상도에서 정수 이동만 했고, 주요 alpha 연결 성분과 2px AA 경계를 남겼으며 alpha 240 이상은 opaque로 정규화했다. 그 정규화된 바디 4장은 분리/재분리/파츠 제작 이후에도 bare-body 렌더와 픽셀 단위로 동일하다. 바디 분리는 명시적으로 작성한 영역이며 자동 해부학 추론 결과가 아니다. 팔·의상 접합부 등 현재 헤어/신발 밖의 영역에는 별도 검수가 필요하다.
 

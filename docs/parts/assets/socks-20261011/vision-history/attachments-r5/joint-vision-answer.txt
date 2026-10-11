@@ -1,0 +1,44 @@
+{
+  "poses": {
+    "run.0": {
+      "hair": "rework",
+      "socks_shoes": "pass",
+      "issues": [
+        "The upper-left ear boundary has a thin pale fringe and a harder cut edge than the bare-body reference; the reference's dark contour appears partly thinned.",
+        "The lower-right aperture junction forms a sharp dark notch where hair meets the ear's curved endpoint."
+      ]
+    },
+    "run.1": {
+      "hair": "rework",
+      "socks_shoes": "pass",
+      "issues": [
+        "A narrow light rim follows the upper-left aperture, making the ear boundary look traced rather than cleanly preserving the reference contour.",
+        "The lower-right ear/hair junction ends in an abrupt pointed segment instead of the reference's smooth curved termination."
+      ]
+    },
+    "run.2": {
+      "hair": "rework",
+      "socks_shoes": "pass",
+      "issues": [
+        "The aperture edge is visibly hard along the upper-left ear arc, with a narrow pale fringe outside the dark contour.",
+        "A dark hair point intrudes at the lower-right ear opening, interrupting the rounded contour visible in the bare-body reference."
+      ]
+    },
+    "run.3": {
+      "hair": "rework",
+      "socks_shoes": "pass",
+      "issues": [
+        "The upper-left ear boundary shows a thin light fringe and uneven contour thickness relative to the reference.",
+        "The lower-right opening joins the hair through a sharp wedge, making the ear endpoint look cut rather than smoothly curved."
+      ]
+    }
+  },
+  "overall": "rework",
+  "limits": [
+    "The body's own curved ear line is present in the references; that line alone is not a defect.",
+    "Fine fringe pixels cannot be fully distinguished from antialiasing at this contact-sheet resolution.",
+    "No clear calf/cuff gaps, open shoe collars, floating shoes, or attachment discontinuities are visible in the current footwear columns.",
+    "These are four independently authored still poses; motion quality and temporal consistency are not assessed.",
+    "This is an observational attachment audit, not curator approval or release readiness."
+  ]
+}

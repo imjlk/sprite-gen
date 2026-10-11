@@ -1,0 +1,44 @@
+{
+  "poses": {
+    "run.0": {
+      "hair": "pass",
+      "socks_shoes": "pass",
+      "issues": [
+        "The exposed ear curve and lower lobe follow the bare-body reference. The dark ear contour is present in the reference and does not establish a cut seam.",
+        "Both socks meet the calves and shoe collars without a visible background gap; cuff angles follow the respective calves."
+      ]
+    },
+    "run.1": {
+      "hair": "pass",
+      "socks_shoes": "pass",
+      "issues": [
+        "The ear outline remains continuous around the exposed ear. No separate empty skin halo or visibly smeared strand is apparent.",
+        "The horizontal back shoe and angled front shoe remain connected to their socks; no clearly open collar seam is visible."
+      ]
+    },
+    "run.2": {
+      "hair": "pass",
+      "socks_shoes": "pass",
+      "issues": [
+        "The upper ear arc and lower lobe correspond to the bare-body outline; the hair meets the ear without a clearly misplaced notch.",
+        "The angled back attachment has continuous calf-to-sock and sock-to-collar joins. The front attachment likewise shows no visible separation."
+      ]
+    },
+    "run.3": {
+      "hair": "pass",
+      "socks_shoes": "pass",
+      "issues": [
+        "The exposed ear contour matches the reference, including its lower opening. The pointed strands beneath it remain visually distinct.",
+        "Both cuffs connect to the calves, and both shoes connect to the socks without a visible floating gap."
+      ]
+    }
+  },
+  "overall": "pass",
+  "limits": [
+    "Pass means no clear attachment defect is visible at this contact-sheet resolution; small edge defects may be unresolved.",
+    "Panel crops limit inspection of some hair tips and surrounding limb contours.",
+    "Bare-body references support ear comparisons; equivalent bare-ankle references are not supplied.",
+    "These are four independently authored still poses. Animation, temporal consistency, and motion quality are not assessed.",
+    "This is an observational attachment audit only, not curator approval or release readiness."
+  ]
+}

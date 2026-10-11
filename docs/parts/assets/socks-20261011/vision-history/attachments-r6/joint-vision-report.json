@@ -1,0 +1,37 @@
+{
+  "appearance": {
+    "digest": "f43df41e90cde07cf3cdc4f111da4fc0fe0bacbf0e14aa14ec1d921c620e0075",
+    "id": "qualified.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "2b3d2b0c4ae5e0f78e1e1a84978a8047fd1fa0b2d2aab24f512705a4ed274f63",
+      "id": "qualified.body"
+    }
+  ],
+  "error": "Command '['/Users/imjlk/.local/share/mise/installs/node/26.4.0/bin/codex', 'exec', '--sandbox', 'read-only', '--skip-git-repo-check', '--ephemeral', '--color', 'never', '-C', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/docs/parts/assets/socks-20261011/vision-history/attachments-r6/facing-4ablms_o', '-i', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/docs/parts/assets/socks-20261011/vision-history/attachments-r6/joint-visual-audit.png', '-o', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/docs/parts/assets/socks-20261011/vision-history/attachments-r6/facing-4ablms_o/answer.txt', '-']' timed out after 180 seconds",
+  "input_sha256": "c9b068b62221e6fb1d8ecd2bb5a93d0fefd3aa10d89fed5b2bcf17313723e754",
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "parts": {
+    "qualified.hair": {
+      "digest": "5df97ed018d73ac905d4c02691d450bf276576fa38f42f58ad8154a63b38eb5f",
+      "id": "qualified.hair"
+    },
+    "qualified.sneakers": {
+      "digest": "024715317975a3c0db0ebcd86a1e950d5f7afe15a96685fccdb2655da63ae0ec",
+      "id": "qualified.sneakers"
+    },
+    "qualified.socks": {
+      "digest": "68406dc2a6c70661a0155f28ae3e8b00dc059b9b4f76a4cc4f03431012786ec6",
+      "id": "qualified.socks"
+    }
+  },
+  "prompt_sha256": "2b4d85acd7644a4bdf28fd28641d884d874b00b7d973a2686ac81c92ae59e2ab",
+  "release_ready": false,
+  "scope": "attachment contact audit only; not part approval or full motion QC",
+  "status": "failed"
+}

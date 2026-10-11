@@ -74,6 +74,121 @@ def produce(assembly, order, tmp_path):
     return batch
 
 
+@pytest.mark.parametrize('covered', [False, True])
+def test_independent_cover_rule_matches_preview_build_and_frozen_history(tmp_path, covered):
+    from sprite_gen.curate import parts_motion
+    from sprite_gen.compose import compose_parts
+    from sprite_gen.frames import parts_candidate_scene, parts_independent
+    from sprite_gen.serve.serve_parts_review import ReviewDesk
+
+    assembly, order = setup(tmp_path)
+    root, _, _, _ = parts_motion._active(assembly)
+    cfg = p._load(root, 'test.direct')['config']
+    rule = {'tag': 'footwear', 'show': 'uncovered'}
+    cfg['independent']['layers'][1]['cover_rule'] = rule
+    cfg['covers'] = ['footwear'] if covered else []
+    path = tmp_path / 'cover.json'
+    path.write_bytes(w.json_bytes(cfg))
+    p.configure(assembly, 'test.direct', path)
+    batch = produce(assembly, order, tmp_path)
+    doc, _ = parts_independent.read_reference(root, batch['reference'])
+    assert all(job.get('cover_rule') == (rule if job['layer'] == 'front' else None) for job in doc['jobs'])
+    p.check(assembly, 'test.direct')
+    p.build(assembly, 'test.direct')
+    root, index, registry, _ = parts_motion._active(assembly)
+    state = p._load(root, 'test.direct')
+    row = state['tracks']['main']['poses'][order[0]]
+    record = p.candidate_record(root, state, order[0], row['selected'])
+    base = root / row['selected']
+    plan, sample, load = parts_candidate_scene.scene(root, index, registry, state['config'], order[0],
+        Image.open(base / 'part.png'), record['placement'], independent_layers=parts_independent.candidate_layers(record, base))
+    preview, _ = compose_parts.render_sample(plan, sample, load)
+    rendered, built_plan = p._render_alone(root, index, registry, c.reference(registry['test.direct']), index['states'])
+    assert np.array_equal(np.asarray(preview), np.asarray(rendered[order[0]]))
+    assert ('test.direct.front' in sample['suppressed']) == covered
+    assert 'test.direct.back' not in sample['suppressed']
+    assert sample['suppressed'] == built_plan['clips'][0]['samples'][0]['suppressed']
+    assert not any(draw['placement']['mask'] for draw in sample['draw'])
+
+    cfg['independent']['layers'][1]['cover_rule'] = {'tag': 'footwear', 'show': 'covered'}
+    path.write_bytes(w.json_bytes(cfg))
+    p.configure(assembly, 'test.direct', path)
+    state = p._load(root, 'test.direct')
+    assert not p._current(state, registry, order)
+    assert ReviewDesk(assembly).candidates('test.direct', order[0])['candidates'][0]['status'] == 'stale'
+    with pytest.raises(c.PartsContractError, match='independent layers changed'):
+        p.build(assembly, 'test.direct')
+
+
+def test_binding_cover_change_invalidates_current_production_build(tmp_path):
+    assembly, order = setup(tmp_path)
+    produce(assembly, order, tmp_path)
+    p.check(assembly, 'test.direct')
+    p.build(assembly, 'test.direct')
+    from sprite_gen.curate import parts_motion
+    root, _, registry, _ = parts_motion._active(assembly)
+    state = p._load(root, 'test.direct')
+    assert p._current(state, registry, order)
+    cfg = state['config']
+    cfg['covers'] = ['footwear']
+    path = tmp_path / 'cover-binding.json'
+    path.write_bytes(w.json_bytes(cfg))
+    p.configure(assembly, 'test.direct', path)
+    state = p._load(root, 'test.direct')
+    assert not p._current(state, registry, order)
+    assert all(row['check'] is None for row in state['tracks']['main']['poses'].values())
+
+
+@pytest.mark.parametrize('has_provider', [True,False])
+def test_independent_authored_mask_freezes_and_matches_real_render(tmp_path, has_provider):
+    from sprite_gen.curate import parts_motion
+    from sprite_gen.frames import parts_independent,parts_candidate_scene
+    from sprite_gen.compose import compose_parts
+    from sprite_gen.spec import parts_assets as assets
+    from sprite_gen.serve.serve_parts_review import ReviewDesk
+    assembly,order=setup(tmp_path)
+    root,index,registry,_=parts_motion._active(assembly)
+    mask=Image.new('RGBA',(128,128),'white')
+    ImageDraw.Draw(mask).rectangle((38,25,45,35),fill='black')
+    ImageDraw.Draw(mask).rectangle((31,21,34,24),fill='black')
+    file=root/'mask.png';mask.save(file)
+    spec={'image':{'file':file.name,'sha256':assets.sha256(file.read_bytes())},'target_node':'hair_back','space':'rig-canvas','channel':'luma','optional_target':not has_provider}
+    cfg=p._load(root,'test.direct')['config'];layer=cfg['independent']['layers'][0]
+    layer['provides']=['hair_back'] if has_provider else []
+    layer['masks']={pose:spec for pose in order}
+    config=root/'masked.json';config.write_bytes(w.json_bytes(cfg));p.configure(assembly,'test.direct',config)
+    batch=produce(assembly,order,tmp_path)
+    doc,base=parts_independent.read_reference(root,batch['reference'])
+    assert all(job['mask']['image']['sha256']==spec['image']['sha256'] for job in doc['jobs'] if job['layer']=='back')
+    p.check(assembly,'test.direct');p.build(assembly,'test.direct')
+    root,index,registry,_=parts_motion._active(assembly);state=p._load(root,'test.direct')
+    row=state['tracks']['main']['poses'][order[0]];record=p.candidate_record(root,state,order[0],row['selected']);base=root/row['selected']
+    plan,sample,load=parts_candidate_scene.scene(root,index,registry,state['config'],order[0],Image.open(base/'part.png'),record['placement'],independent_layers=parts_independent.candidate_layers(record,base))
+    pixel=compose_parts.render_sample(plan,sample,load,only_ids=['test.direct.back'])[0].getpixel((40,30))
+    assert pixel[3]==(0 if has_provider else 255)
+    actual=compose_parts.render_sample(plan,sample,load)[0]
+    built,_=p._render_alone(root,index,registry,c.reference(registry['test.direct']),index['states'])
+    assert np.array_equal(np.asarray(actual),np.asarray(built[order[0]]))
+    built_piece=next(piece for piece in registry['test.direct']['bindings'][0]['pieces'] if piece['id']=='back')
+    built_mask=built_piece['sample_map'][plan['clips'][0]['id']][sample['id']]['mask']
+    assert built_mask['optional_target'] is (not has_provider)
+    # Curation views must distinguish actual masking, raw zmap, and part only.
+    from io import BytesIO
+    desk=ReviewDesk(assembly)
+    rendered=Image.open(BytesIO(desk.render('test.direct',order[0],'body'))).convert('RGBA')
+    unmasked=Image.open(BytesIO(desk.render('test.direct',order[0],'body-zraw'))).convert('RGBA')
+    visible=Image.open(BytesIO(desk.render('test.direct',order[0],'visible'))).convert('RGBA')
+    at=(32*4,22*4)
+    assert (rendered.getpixel(at)!=unmasked.getpixel(at)) is has_provider
+    assert visible.getpixel(at)[3]==(0 if has_provider else 255)
+    # Changing the authoring mask is a new candidate/review, not reinterpretation.
+    mask.putpixel((40,30),(255,255,255,255));mask.save(file)
+    for value in layer['masks'].values(): value['image']['sha256']=assets.sha256(file.read_bytes())
+    config.write_bytes(w.json_bytes(cfg));p.configure(assembly,'test.direct',config)
+    assert ReviewDesk(assembly).candidates('test.direct',order[0])['candidates'][0]['status']=='stale'
+    with pytest.raises(c.PartsContractError,match='independent layers changed'):p.build(assembly,'test.direct')
+
+
 def test_independent_replacement_uses_same_body_suppression_in_preview_and_build(tmp_path):
     from copy import deepcopy
     from sprite_gen.curate import parts_motion

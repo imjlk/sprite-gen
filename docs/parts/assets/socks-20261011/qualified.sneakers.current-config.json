@@ -1,0 +1,608 @@
+{
+  "body": null,
+  "by_component": false,
+  "cover_rule": null,
+  "covers": [
+    "footwear.closed-foot"
+  ],
+  "cut": {
+    "against": [],
+    "body_threshold": 40,
+    "close_body": 5,
+    "exclude": [],
+    "fill_holes": 6,
+    "inset": 0,
+    "keep_palette": null,
+    "largest": null,
+    "method": "difference",
+    "min_island": 12,
+    "near_body": 2,
+    "outline": true,
+    "palette": null,
+    "prune": 0,
+    "region": null,
+    "rescue": null,
+    "rim": 0,
+    "specks": 0,
+    "tolerance": 80
+  },
+  "design_id": "qualified.sneakers",
+  "draw": {
+    "model": null,
+    "provider": "codex"
+  },
+  "follow": null,
+  "independent": {
+    "layers": [
+      {
+        "body_nodes": [
+          "foot_back",
+          "leg_back"
+        ],
+        "fit": "contain",
+        "guides": {
+          "run.0": [
+            "inputs/shoe-replacement-r12/run.0.shoe_back.png"
+          ],
+          "run.1": [
+            "inputs/shoe-replacement-r12/run.1.shoe_back.png"
+          ],
+          "run.2": [
+            "inputs/shoe-replacement-r12/run.2.shoe_back.png"
+          ],
+          "run.3": [
+            "inputs/shoe-replacement-r12/run.3.shoe_back.png"
+          ]
+        },
+        "id": "shoe_back",
+        "landmarks": {
+          "run.0": {
+            "ankle": [
+              160,
+              580
+            ],
+            "heel": [
+              136,
+              554
+            ],
+            "toe": [
+              136,
+              647
+            ]
+          },
+          "run.1": {
+            "ankle": [
+              325,
+              657
+            ],
+            "heel": [
+              299,
+              681
+            ],
+            "toe": [
+              392,
+              681
+            ]
+          },
+          "run.2": {
+            "ankle": [
+              196,
+              475
+            ],
+            "heel": [
+              195,
+              439
+            ],
+            "toe": [
+              135,
+              511
+            ]
+          },
+          "run.3": {
+            "ankle": [
+              211,
+              513
+            ],
+            "heel": [
+              198,
+              481
+            ],
+            "toe": [
+              168,
+              565
+            ]
+          }
+        },
+        "margin": "1",
+        "masks": {
+          "run.0": {
+            "channel": "luma",
+            "image": {
+              "file": "inputs/attachments-r9/run.0.shoe_back.keep-mask.png",
+              "sha256": "c7b7dd89320d6966d65b170a446cfd6201b68d8d8e9c854c8fc13942feef09c9"
+            },
+            "space": "rig-canvas",
+            "target_node": "foot_back"
+          },
+          "run.1": {
+            "channel": "luma",
+            "image": {
+              "file": "inputs/attachments-r9/run.1.shoe_back.keep-mask.png",
+              "sha256": "716fa7d51639a6b1aef27a205933458798f65b5d1b8f884eb5ffda8fb37d04b8"
+            },
+            "space": "rig-canvas",
+            "target_node": "foot_back"
+          },
+          "run.2": {
+            "channel": "luma",
+            "image": {
+              "file": "inputs/attachments-r9/run.2.shoe_back.keep-mask.png",
+              "sha256": "8a419123c088db12ff18a42a82f7b56aa977ee6c3bfe68bf4d6ccdbfd4e02b6f"
+            },
+            "space": "rig-canvas",
+            "target_node": "foot_back"
+          },
+          "run.3": {
+            "channel": "luma",
+            "image": {
+              "file": "inputs/attachments-r9/run.3.shoe_back.keep-mask.png",
+              "sha256": "833a1d58f26634ae52be3ab3f9f7016d0d88024084c70dffcdde6a7e03d56466"
+            },
+            "space": "rig-canvas",
+            "target_node": "foot_back"
+          }
+        },
+        "node": "shoe_back",
+        "replaces": [
+          "foot_back"
+        ],
+        "source_bounds": {
+          "run.0": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.1": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.2": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.3": [
+            0,
+            0,
+            768,
+            768
+          ]
+        },
+        "straight_edges": {
+          "run.0": [
+            {
+              "end": [
+                136,
+                647
+              ],
+              "id": "outsole",
+              "max_deviation": "2",
+              "side": "positive",
+              "span": [
+                "3/20",
+                "4/5"
+              ],
+              "start": [
+                136,
+                554
+              ]
+            }
+          ],
+          "run.1": [
+            {
+              "end": [
+                392,
+                681
+              ],
+              "id": "outsole",
+              "max_deviation": "2",
+              "side": "positive",
+              "span": [
+                "3/20",
+                "4/5"
+              ],
+              "start": [
+                299,
+                681
+              ]
+            }
+          ],
+          "run.2": [
+            {
+              "end": [
+                135,
+                511
+              ],
+              "id": "outsole",
+              "max_deviation": "2",
+              "side": "positive",
+              "span": [
+                "3/20",
+                "4/5"
+              ],
+              "start": [
+                195,
+                439
+              ]
+            }
+          ],
+          "run.3": [
+            {
+              "end": [
+                168,
+                565
+              ],
+              "id": "outsole",
+              "max_deviation": "2",
+              "side": "positive",
+              "span": [
+                "3/20",
+                "4/5"
+              ],
+              "start": [
+                198,
+                481
+              ]
+            }
+          ]
+        },
+        "targets": {
+          "run.0": [
+            131,
+            548,
+            179,
+            659
+          ],
+          "run.1": [
+            293,
+            637,
+            404,
+            685
+          ],
+          "run.2": [
+            129,
+            435,
+            221,
+            528
+          ],
+          "run.3": [
+            164,
+            469,
+            233,
+            579
+          ]
+        }
+      },
+      {
+        "body_nodes": [
+          "foot_front",
+          "leg_front"
+        ],
+        "fit": "contain",
+        "guides": {
+          "run.0": [
+            "inputs/shoe-replacement-r12/run.0.shoe_front.png"
+          ],
+          "run.1": [
+            "inputs/shoe-replacement-r12/run.1.shoe_front.png"
+          ],
+          "run.2": [
+            "inputs/shoe-replacement-r12/run.2.shoe_front.png"
+          ],
+          "run.3": [
+            "inputs/shoe-replacement-r12/run.3.shoe_front.png"
+          ]
+        },
+        "id": "shoe_front",
+        "landmarks": {
+          "run.0": {
+            "ankle": [
+              469,
+              631
+            ],
+            "heel": [
+              450,
+              663
+            ],
+            "toe": [
+              543,
+              633
+            ]
+          },
+          "run.1": {
+            "ankle": [
+              422,
+              555
+            ],
+            "heel": [
+              390,
+              562
+            ],
+            "toe": [
+              464,
+              604
+            ]
+          },
+          "run.2": {
+            "ankle": [
+              505,
+              537
+            ],
+            "heel": [
+              486,
+              571
+            ],
+            "toe": [
+              582,
+              539
+            ]
+          },
+          "run.3": {
+            "ankle": [
+              478,
+              624
+            ],
+            "heel": [
+              462,
+              654
+            ],
+            "toe": [
+              546,
+              623
+            ]
+          }
+        },
+        "margin": "1",
+        "masks": {
+          "run.0": {
+            "channel": "luma",
+            "image": {
+              "file": "inputs/attachments-r9/run.0.shoe_front.keep-mask.png",
+              "sha256": "a94755544ce15b68cc8c397bd2521c7aaffbc03533ab7a579f311e986f4c4f4f"
+            },
+            "space": "rig-canvas",
+            "target_node": "foot_front"
+          },
+          "run.1": {
+            "channel": "luma",
+            "image": {
+              "file": "inputs/attachments-r9/run.1.shoe_front.keep-mask.png",
+              "sha256": "b7918b44ba464aa6f3d726a4c49fe368e91e3bf1afd75ac2e3f695f97e250d16"
+            },
+            "space": "rig-canvas",
+            "target_node": "foot_front"
+          },
+          "run.2": {
+            "channel": "luma",
+            "image": {
+              "file": "inputs/attachments-r9/run.2.shoe_front.keep-mask.png",
+              "sha256": "c624de2739d454ca4aa356c325759f29a34291c94e5c42e2b2d435f52165cb53"
+            },
+            "space": "rig-canvas",
+            "target_node": "foot_front"
+          },
+          "run.3": {
+            "channel": "luma",
+            "image": {
+              "file": "inputs/attachments-r9/run.3.shoe_front.keep-mask.png",
+              "sha256": "4b778e5995fcc421c7e55bd0802f982e70da6d76523a1a374779f51cddd47f4d"
+            },
+            "space": "rig-canvas",
+            "target_node": "foot_front"
+          }
+        },
+        "node": "shoe_front",
+        "replaces": [
+          "foot_front"
+        ],
+        "source_bounds": {
+          "run.0": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.1": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.2": [
+            0,
+            0,
+            768,
+            768
+          ],
+          "run.3": [
+            0,
+            0,
+            768,
+            768
+          ]
+        },
+        "straight_edges": {
+          "run.0": [
+            {
+              "end": [
+                543,
+                633
+              ],
+              "id": "outsole",
+              "max_deviation": "2",
+              "side": "positive",
+              "span": [
+                "3/20",
+                "4/5"
+              ],
+              "start": [
+                450,
+                663
+              ]
+            }
+          ],
+          "run.1": [
+            {
+              "end": [
+                464,
+                604
+              ],
+              "id": "outsole",
+              "max_deviation": "2",
+              "side": "positive",
+              "span": [
+                "3/20",
+                "4/5"
+              ],
+              "start": [
+                390,
+                562
+              ]
+            }
+          ],
+          "run.2": [
+            {
+              "end": [
+                582,
+                539
+              ],
+              "id": "outsole",
+              "max_deviation": "2",
+              "side": "positive",
+              "span": [
+                "3/20",
+                "4/5"
+              ],
+              "start": [
+                486,
+                571
+              ]
+            }
+          ],
+          "run.3": [
+            {
+              "end": [
+                546,
+                623
+              ],
+              "id": "outsole",
+              "max_deviation": "2",
+              "side": "positive",
+              "span": [
+                "3/20",
+                "4/5"
+              ],
+              "start": [
+                462,
+                654
+              ]
+            }
+          ]
+        },
+        "targets": {
+          "run.0": [
+            439,
+            606,
+            553,
+            667
+          ],
+          "run.1": [
+            386,
+            534,
+            479,
+            609
+          ],
+          "run.2": [
+            474,
+            511,
+            592,
+            575
+          ],
+          "run.3": [
+            450,
+            600,
+            555,
+            658
+          ]
+        }
+      }
+    ],
+    "reference_previous": false,
+    "require_vision": true
+  },
+  "kind": "parts-production-config",
+  "mode": "raster",
+  "node": "shoe_back",
+  "part_id": "qualified.sneakers",
+  "pieces": [],
+  "pose_checks": {
+    "run.0": {
+      "allowed": "inputs/shoe-replacement-r12/run.0.allowed.png",
+      "occluded": null,
+      "protected": "inputs/shoe-replacement-r12/run.0.protected.png",
+      "required": "inputs/shoe-replacement-r12/run.0.required.png"
+    },
+    "run.1": {
+      "allowed": "inputs/shoe-replacement-r12/run.1.allowed.png",
+      "occluded": null,
+      "protected": "inputs/shoe-replacement-r12/run.1.protected.png",
+      "required": "inputs/shoe-replacement-r12/run.1.required.png"
+    },
+    "run.2": {
+      "allowed": "inputs/shoe-replacement-r12/run.2.allowed.png",
+      "occluded": null,
+      "protected": "inputs/shoe-replacement-r12/run.2.protected.png",
+      "required": "inputs/shoe-replacement-r12/run.2.required.png"
+    },
+    "run.3": {
+      "allowed": "inputs/shoe-volume-reference-r2/run.3.allowed.png",
+      "occluded": null,
+      "protected": "inputs/shoe-replacement-r12/run.3.protected.png",
+      "required": "inputs/shoe-replacement-r12/run.3.required.png"
+    }
+  },
+  "prompt": {
+    "refs": [
+      "inputs/shoe-replacement-r12/native-master.png"
+    ],
+    "text": "Independent low-top navy canvas sneakers with a rigid thin cream outsole, one navy welt stripe, cream toe cap and laces. Foot nodes are replaced when worn. Match the retained ankle interface; do not reproduce flexible bare-foot curves in the sole."
+  },
+  "qa": {
+    "stable_regions": []
+  },
+  "reference_pose": null,
+  "role": "part",
+  "schema_version": 1,
+  "segments": null,
+  "sheet": {
+    "aspect": "1:1",
+    "columns": null,
+    "crop": null,
+    "gutter": 8,
+    "page_size": 12,
+    "scale": 4
+  },
+  "slot": "footwear",
+  "socket": "root",
+  "states": [
+    "run"
+  ],
+  "trail": null,
+  "variants": [],
+  "visibility": "zmap",
+  "wearing": []
+}

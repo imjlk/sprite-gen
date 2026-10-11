@@ -1,0 +1,123 @@
+{
+  "alignment": null,
+  "body_sha256": "42aa503e396e99765f5a3e9533fd94a2d5cfb16bd09676c8b869f2c88dd880fa",
+  "clip": "run.reference",
+  "digest": "97a9294348501cb3ba4dd46fbd9a75ae3860f593f8e222aedcf8e7e262bb9937",
+  "holes_filled": 0,
+  "images": {
+    "mask": {
+      "file": "mask.png",
+      "sha256": "09063547608ccb6be710bed4e8cf160a408d2e3b76354f2f0bea44ff4533e18d"
+    },
+    "part": {
+      "file": "part.png",
+      "sha256": "cf14483244678c30d62ea6ed14cb4d60cd127fa9bf8edfd4f8dccd6ae93aede3"
+    },
+    "piece.hair": {
+      "file": "piece.hair.png",
+      "sha256": "9284c0e0a06fc3761f1d0092d29247b0ee964a75e38be78aadf2719f0919a634"
+    },
+    "qa_allowed": {
+      "file": "qa_allowed.png",
+      "sha256": "94f1ba26089eae792eb56d56ab661813e49cd01544c831e995ebcad20085f600"
+    },
+    "qa_protected": {
+      "file": "qa_protected.png",
+      "sha256": "9d2159a5ab731d494e0594e108ecbfb5a932dfcde6d770ca807659b1aec37f3c"
+    },
+    "qa_required": {
+      "file": "qa_required.png",
+      "sha256": "4f8537845c4672461f7cc1a4ae658d92d0e206cee49fbbe21ef94f26bd71b13a"
+    },
+    "raw.hair": {
+      "file": "raw.hair.png",
+      "sha256": "9284c0e0a06fc3761f1d0092d29247b0ee964a75e38be78aadf2719f0919a634"
+    },
+    "under": {
+      "file": "under.png",
+      "sha256": "42aa503e396e99765f5a3e9533fd94a2d5cfb16bd09676c8b869f2c88dd880fa"
+    }
+  },
+  "independent_layers": [
+    {
+      "cover_rule": null,
+      "id": "hair",
+      "image_key": "piece.hair",
+      "node": "hair",
+      "provides": [
+        "hair"
+      ],
+      "replaces": [],
+      "straight_edges": [],
+      "target": [
+        236,
+        63,
+        535,
+        328
+      ]
+    }
+  ],
+  "independent_reference": {
+    "file": "productions/qualified.hair/independent-inputs/inputs/126f0dfe71da1fa56bedce7567183c8f5e05207408a2642c23f75be578cf0b12/reference.json",
+    "sha256": "25bcca89bcc196a711a0a133f4c9b6261726dabc50d1cdfecaef574faa0705cd"
+  },
+  "kind": "parts-production-candidate",
+  "method": {
+    "independent": true,
+    "registration": {
+      "hair": {
+        "fit": "native-canvas",
+        "position": [
+          0,
+          0
+        ],
+        "sampling": "unchanged",
+        "source_bounds": null,
+        "target": [
+          236,
+          63,
+          535,
+          328
+        ],
+        "uniform_scale": 1
+      }
+    }
+  },
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "part": "qualified.hair",
+  "pixels": 41416,
+  "placement": {
+    "format": "full-canvas",
+    "offset": [
+      0,
+      0
+    ],
+    "pivot": [
+      0,
+      0
+    ],
+    "target_socket": "root"
+  },
+  "policy": "parts.production.v1",
+  "pose_id": "run.3",
+  "sample": "sample.3",
+  "schema_version": 1,
+  "source": [
+    {
+      "artifact": {
+        "file": "productions/qualified.hair/native-art/source/335bc25010df6265f1d19b328b2b020e058812951e85936c93a1f3c1e6fd9bb2/source.image",
+        "sha256": "335bc25010df6265f1d19b328b2b020e058812951e85936c93a1f3c1e6fd9bb2"
+      },
+      "file": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/library/inputs/attachments-r9/run.3.hair.png",
+      "layer": "hair",
+      "provider_report": null,
+      "sha256": "335bc25010df6265f1d19b328b2b020e058812951e85936c93a1f3c1e6fd9bb2"
+    }
+  ],
+  "track": "main",
+  "under_sha256": "42aa503e396e99765f5a3e9533fd94a2d5cfb16bd09676c8b869f2c88dd880fa",
+  "wearing": []
+}

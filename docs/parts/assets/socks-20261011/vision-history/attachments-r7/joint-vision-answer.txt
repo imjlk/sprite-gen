@@ -1,0 +1,42 @@
+{
+  "poses": {
+    "run.0": {
+      "hair": "rework",
+      "socks_shoes": "pass",
+      "issues": [
+        "An extra narrow, speckled tan rim follows the rear and lower ear aperture, producing a hard cut seam beside the body's smooth ear outline. The ear's open contour endpoints are also present in the reference and are not themselves defects."
+      ]
+    },
+    "run.1": {
+      "hair": "rework",
+      "socks_shoes": "pass",
+      "issues": [
+        "The aperture has a conspicuous tan-and-dark double edge around the upper-left and lower ear contour. This additional border is absent from the bare-body reference."
+      ]
+    },
+    "run.2": {
+      "hair": "rework",
+      "socks_shoes": "rework",
+      "issues": [
+        "A thin speckled border remains around the rear and bottom of the ear aperture, making the mask boundary visible despite preserving the main ear shape.",
+        "The back sock's calf-facing cuff boundary runs vertically, then turns sharply diagonally at its lower corner. This creates an angular, kinked attachment across the sloping calf."
+      ]
+    },
+    "run.3": {
+      "hair": "rework",
+      "socks_shoes": "rework",
+      "issues": [
+        "The rear and lower ear aperture show an additional light rim beside the dark body contour, leaving a visible cut seam.",
+        "The back cuff repeats the sharply bent calf-facing boundary: a vertical segment ends in a diagonal corner, making the sock-to-calf join look cut into a polygon."
+      ]
+    }
+  },
+  "overall": "rework",
+  "limits": [
+    "Only current columns 3–5 were reviewed; the bare-body column was used to distinguish the original ear contour from added aperture artifacts.",
+    "No clear floating shoe, open collar gap, or smeared strand is visible at this contact-sheet resolution.",
+    "Four independently authored still poses do not establish animation continuity or motion quality.",
+    "Crops and contact-sheet resolution limit assessment of fine edge pixels and complete attachment geometry.",
+    "This is an observational attachment audit, not curator approval or release readiness."
+  ]
+}

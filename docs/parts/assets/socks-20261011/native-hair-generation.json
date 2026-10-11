@@ -1,0 +1,19 @@
+{
+  "provider": "Codex built-in image generation",
+  "request": {
+    "prompt": "Edit the FIRST reference image, which is a 2 by 2 sprite sheet containing four independent brown hair layers on transparency. The SECOND image is the fixed bare-body head reference with the exact same grid, camera and crop coordinates. Preserve the 640x640 grid, each 320x320 cell, all hair shapes, sizes, poses, strand style, shading and alignment. Only clean up the small ear-opening region on each hair layer so it fits the corresponding body's actual ear. The entire ear's C shaped outer contour must be visible through a clean transparent aperture. Make the hair strands end naturally beside and behind that ear, with a smooth single antialiased brown hair edge. Remove the pale or tan matte fringe, speckled double outline, circular cut seam, and stray dark spur at the lower ear opening. Do not redraw the body, face, skin, ear or clothing into the output; the output must contain ONLY the same four separate hair sprites on full alpha transparency. Do not add borders, labels, shadows, a checkerboard, or a background. This is a localized repair to reusable hair parts, not a new hairstyle or a complete character sheet. Keep each sprite at its existing scale and registration in its cell. In particular, do not bake a skin-colored ear or face into the hair cutout.",
+    "transparent_background": true,
+    "referenced_images": [
+      "hair-edit-target.png",
+      "hair-body-reference.png"
+    ]
+  },
+  "output_file": "native-hair-sheet.png",
+  "processing": "bounded native hair retouch; fixed cell extraction and recorded tangent registration; alpha intrinsic to hair, no runtime ear mask",
+  "art_approved": false,
+  "sha256": {
+    "hair-edit-target.png": "7f03a29ffb992e3cce09dbca8af62676612d0bd3a691fb34f5221917bbeea6b6",
+    "hair-body-reference.png": "371548c758d3648802a702848493050082f4a41e294c817fbc2c7de65761a6ef",
+    "native-hair-sheet.png": "f22d371b35df4293078d01f70bc59c97304cc8d26883789c9618022b6e91bd88"
+  }
+}
