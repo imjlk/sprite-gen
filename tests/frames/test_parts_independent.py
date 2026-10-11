@@ -90,6 +90,100 @@ def answer(status="pass"):
     )
 
 
+def test_vision_closeups_keep_distant_piece_out_of_each_joint_crop():
+    under = Image.new("RGBA", (768, 768))
+    back = Image.new("RGBA", under.size)
+    front = Image.new("RGBA", under.size)
+    ImageDraw.Draw(back).rectangle((105, 455, 145, 490), fill="red")
+    ImageDraw.Draw(front).rectangle((570, 630, 610, 665), fill="blue")
+    layers = [
+        {"id": "back", "target": [100, 450, 150, 500]},
+        {"id": "front", "target": [565, 625, 615, 675]},
+    ]
+    panels, crops = parts_vision.layer_closeups(
+        {"under": under, "piece.back": back, "piece.front": front}, under, layers
+    )
+    assert len(panels) == 6
+    assert crops["back"] == [68, 402, 182, 532]
+    assert crops["front"] == [533, 577, 647, 707]
+    assert all(image.size == (114, 130) for _, image in panels)
+    assert crops["back"][2] < crops["front"][0]
+
+
+def test_review_attachment_views_use_same_native_crop_without_vision_call(tmp_path):
+    from io import BytesIO
+    from sprite_gen.serve.serve_parts_review import ReviewDesk
+
+    assembly, order = setup(tmp_path)
+    produce(assembly, order, tmp_path)
+    desk = ReviewDesk(assembly)
+    images = [Image.open(BytesIO(desk.render("test.direct", order[0], kind, piece="back")))
+              for kind in ("attachment-body", "attachment-part", "attachment-composite")]
+    assert len({im.size for im in images}) == 1
+    assert images[1].getbbox()
+    assert not p._load(assembly.parent, "test.direct")["tracks"]["main"]["poses"][order[0]].get("vision")
+    with pytest.raises(c.PartsContractError, match="known independent"):
+        desk.render("test.direct", order[0], "attachment-composite", piece="unknown")
+
+
+def test_provider_receives_coverage_reference_not_just_saved_qa_files(tmp_path):
+    assembly, order = setup(tmp_path)
+    root = assembly.parent
+    state = p._load(root, "test.direct")
+    required = Image.new("L", (128, 128))
+    ImageDraw.Draw(required).rectangle((35, 25, 40, 30), fill=255)
+    required.save(root / "required.png")
+    cfg = state["config"]
+    cfg["pose_checks"] = {order[0]: {"required": "required.png"}}
+    path = tmp_path / "with-coverage.json"
+    path.write_bytes(w.json_bytes(cfg))
+    p.configure(assembly, "test.direct", path)
+    batch = p.sheet(assembly, "test.direct", poses=[order[0]])
+    from sprite_gen.frames import parts_independent
+    document, folder = parts_independent.read_reference(root, batch["reference"])
+    for job in document["jobs"]:
+        refs = [file for file in job["refs"] if file.endswith(".interfaces.png")]
+        assert len(refs) == 1
+        assert (root / folder / refs[0]).is_file()
+        assert "GREEN required coverage" in (root / folder / job["prompt"]).read_text()
+
+
+def test_failed_vision_preserves_explicit_curator_rejection(tmp_path):
+    assembly, order = setup(tmp_path)
+    produce(assembly, order, tmp_path)
+    p.check(assembly, "test.direct")
+    p.build(assembly, "test.direct")
+    p.review(assembly, "test.direct", reject=[order[0]], reviewer="curator", note="Wrong ankle perspective")
+    parts_vision.inspect(assembly, "test.direct", order[0],
+                         transport=lambda *args, **kwargs: (answer("rework"), {"transport": "test-double"}))
+    row = p._load(assembly.parent, "test.direct")["tracks"]["main"]["poses"][order[0]]
+    assert (row["decision"], row["reviewer"], row["note"]) == ("rejected", "curator", "Wrong ankle perspective")
+
+
+def test_reference_budget_combines_geometry_without_dropping_coverage(tmp_path):
+    assembly, order = setup(tmp_path)
+    produce(assembly, order, tmp_path)
+    root = assembly.parent
+    cfg = p._load(root, "test.direct")["config"]
+    Image.new("L", (128, 128), 255).save(root / "coverage.png")
+    for name in ("design1.png", "design2.png", "design3.png"):
+        Image.new("RGBA", (32, 32), "red").save(root / name)
+    cfg["prompt"]["refs"] = ["design1.png", "design2.png", "design3.png"]
+    cfg["pose_checks"] = {order[0]: {"required": "coverage.png"}}
+    cfg["independent"]["reference_previous"] = True
+    path = tmp_path / "budget.json"
+    path.write_bytes(w.json_bytes(cfg))
+    p.configure(assembly, "test.direct", path)
+    batch = p.sheet(assembly, "test.direct", poses=[order[0]])
+    from sprite_gen.frames import parts_independent
+    document, folder = parts_independent.read_reference(root, batch["reference"])
+    for job in document["jobs"]:
+        assert len(job["refs"]) == 5
+        assert job["refs"][0].endswith(".geometry.png")
+        assert Image.open(root / folder / job["refs"][0]).size == (1280, 640)
+        assert f"{order[0]}/{job['layer']}.interfaces.png" in document["files"]
+
+
 def test_independent_images_retain_overlapping_back_layer_and_require_actual_vision(
     tmp_path,
 ):

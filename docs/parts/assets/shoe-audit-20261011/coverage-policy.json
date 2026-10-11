@@ -1,0 +1,25 @@
+{
+  "pose": "run.2",
+  "new_source_boundary_regions": [
+    [
+      161,
+      438,
+      196,
+      470
+    ],
+    [
+      547,
+      526,
+      590,
+      570
+    ]
+  ],
+  "body_revision": [
+    {
+      "id": "qualified.body",
+      "digest": "2ead84b57231de4eb5f19450decc1f8aee660357710ee0c6c2023d8c2b3b59bc"
+    }
+  ],
+  "criteria_relaxed": false,
+  "reason": "Previous eroded interior regions did not include the heel crest and toe boundary. Extend from actual body alpha, excluding ankle entry."
+}

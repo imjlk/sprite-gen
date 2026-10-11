@@ -85,9 +85,9 @@ sprite-gen parts-part-sheet --assembly library/assembly.json --part demo.sneaker
 
 ## 실제 검증 자산
 
-![승인된 헤어와 신발의 공통 참고 포즈](assets/independent-parts-20261011.jpg)
+![오승인 당시 참고 포즈 — 신발 승인 철회됨](assets/independent-parts-20261011.jpg)
 
-최종 결과는 두 파츠 × 4포즈의 실제 Codex 비전 pass 8건과 별도 `codex-visual-review` 승인 8건이다. 회귀 테스트 80개를 통과했고, 소스 archive를 새 디렉터리로 복원한 뒤에도 원본 바디 4장·Python/JavaScript 16경우·마스크 0·외형별 baked clip 0을 다시 확인했다. 파츠 승인은 코디 최종 승인과 별도이며, 이 예제는 release-ready로 표시하지 않는다.
+**2026-10-11 정정:** 이전에 두 파츠 × 4포즈의 비전 pass 8건과 큐레이터 승인 8건을 근거로 품질을 확인했다고 보고했지만, 신발 승인은 잘못이었다. 신발 4포즈의 승인을 철회했다. 회귀 테스트 80개, 바디 픽셀 동일성, Python/JavaScript 16경우 일치, 마스크 0·외형별 baked clip 0은 런타임 동작의 증거이며 신발의 원근·부착·제품 일관성을 보증하지 않는다. [오승인 조사와 재검증](20-shoe-acceptance-audit.md)을 먼저 확인한다. 아래 기존 archive는 **철회 전 이력 보존용**이며, 복원한다고 현재 승인 자산이 되는 것이 아니다.
 
 현재 제작 예제는 `assets/parts-independent-qualified-20261011/library/assembly.json`의 `qualified.hair` 1레이어와 `qualified.sneakers` 2레이어다. Native Codex image generation으로 만든 고해상도 SD 바디 시트의 **4개 달리기 참고 포즈**를 공통 모션으로 고정했다. 제작 경로를 검증하는 non-looping 구간이다. 전체 idle/walk/run 사이클과 추가 체형의 최종 아트 승인은 별도 작업이다.
 
@@ -100,8 +100,8 @@ sprite-gen parts-part-sheet --assembly library/assembly.json --part demo.sneaker
 - 뒤꿈치 일부가 몸통에 배정되어 신발 위로 렌더링되는 오류를 수정했다. `parts_qualified_body_fix.py`와 `parts_qualified_body_finalize.py`의 소유 변경 내역과 원본 픽셀 동일성 증거가 archive에 있다. 요구한 해부학 node와 필수 바디 픽셀이 다르면 생성 전·후 검사에서 차단한다.
 - 후두부가 비던 forelock 후보는 반려하고 full-cap을 실제 AI로 재생성했다. 두상 크기와 귀 위치에 맞춰 균일 scale/translation 후보를 만들었다. 선택한 스타일은 뒷귀 테두리에 짧은 층진 머리끝이 겹칠 수 있으며 귀 안쪽과 아래 얼굴은 보인다. 옛 기준의 반려를 통과로 바꾸지 않았다.
 - 신발의 잘못된 방향은 heel/toe/ankle 참조를 표시해 해당 레이어만 다시 생성했다. 다른 레이어는 동일한 pixels/원본으로 보존했다. 잘못된 원본 조건을 반복 복사하던 재작업은 body-first 생성으로 바꿨다.
-- 뒤로 든 발을 발등 그림으로 생성하는 오류에는 밑창 면과 칼라 방향을 명시한 포즈별 형태 초안을 사용했다. 초안을 참고한 실제 AI 결과를 등록했고, 잘못 넓어진 뒤꿈치는 초안 자체를 교정해 다시 생성했다. 최종 밑창 무늬 편집은 원본을 AI 편집 참조로 제공했으며, 원본과 편집 결과를 모두 남겼다.
-- 발목 피부를 필수 덮임으로 잡은 QA를 발 원본의 발끝·뒤꿈치 영역으로 교정했다. 실제 발끝 피부 노출은 추가 지도와 비전 검사로 계속 차단한다.
+- 뒤로 든 발을 밑창 시점으로 단정한 형태 초안을 사용했다. 이 해석을 독립적으로 검증하지 않았고, 생성된 밑창을 다시 디자인 참조로 삼았다. 이 초안과 당시 pass는 올바른 원근의 증거로 사용할 수 없다.
+- 필수 덮임 QA를 안쪽 영역으로 줄이면서 뒤꿈치·발끝 경계가 빠졌다. 확대 재검사에서 `run.2`의 누락이 확인됐다. 원본 바디 경계를 포함한 기준으로 강화했으며, 새 후보도 검사 오류나 비전 rework이면 승인하지 않는다.
 
 웹 재작업은 실제 native draw·등록·검사·빌드·비전까지 실행한다. job이 완료되어도 비전이 rework/uncertain이면 승인할 수 없다. provider 성공과 아트 통과는 별도 상태다.
 
@@ -109,10 +109,10 @@ sprite-gen parts-part-sheet --assembly library/assembly.json --part demo.sneaker
 PYTHONPATH=. .venv/bin/python scripts/dev/parts_independent_verify.py \
   --out assets/parts-independent-qualified-20261011 --require-approval
 sprite-gen parts-play --assembly assets/parts-independent-qualified-20261011/library/assembly.json \
-  --port 63839 --interpolation frame --title '독립 파츠 제작 · 4포즈 검증'
+  --port 63839 --interpolation frame --title '독립 파츠 제작 · 신발 미승인 검수'
 ```
 
-검증기는 원본 바디 4장과 bare-body 렌더, 헤어/신발 on/off 네 조합의 **16개 sample**에서 Python과 portable JavaScript 런타임의 clock/레이어를 비교한다. 렌더 마스크와 외형 조합별 baked clip은 0이어야 한다. `--require-approval`은 현재 실제 Codex 비전 pass와 별도 큐레이터 승인을 모두 요구한다.
+검증기는 원본 바디 4장과 bare-body 렌더, 헤어/신발 on/off 네 조합의 **16개 sample**에서 Python과 portable JavaScript 런타임의 clock/레이어를 비교한다. 렌더 마스크와 외형 조합별 baked clip은 0이어야 한다. 기본 실행은 미승인·검사 오류 아트도 런타임 일관성만 측정하고 `art_checks`에 별도 기록한다. `--require-approval`은 검사 범위 내 통과, 현재 실제 Codex 비전 pass와 큐레이터 승인을 요구한다. 그 조건을 만족해도 사람이 실제 부착과 형태를 잘못 판정하면 오승인이 발생할 수 있다.
 
 현재 후보·실제 비전 입력/응답·원본·교정 이력은 workspace의 immutable production records에 있다. 소스 전달용 archive는 원본 바이트의 중복만 제거한 저장 형식이며 `parts_workspace_snapshot.py restore`가 모든 파일의 SHA-256을 검증해 새 디렉터리로 복원한다.
 

@@ -1,0 +1,76 @@
+{
+  "appearance_clips_baked": 0,
+  "approved": false,
+  "art_checks": [
+    {
+      "check": "warning",
+      "decision": "approved",
+      "missing": 0,
+      "part": "qualified.hair",
+      "pose": "run.0"
+    },
+    {
+      "check": "passed",
+      "decision": "rejected",
+      "missing": 0,
+      "part": "qualified.sneakers",
+      "pose": "run.0"
+    },
+    {
+      "check": "warning",
+      "decision": "approved",
+      "missing": 0,
+      "part": "qualified.hair",
+      "pose": "run.1"
+    },
+    {
+      "check": "passed",
+      "decision": "rejected",
+      "missing": 0,
+      "part": "qualified.sneakers",
+      "pose": "run.1"
+    },
+    {
+      "check": "warning",
+      "decision": "approved",
+      "missing": 0,
+      "part": "qualified.hair",
+      "pose": "run.2"
+    },
+    {
+      "check": "error",
+      "decision": "rejected",
+      "missing": 221,
+      "part": "qualified.sneakers",
+      "pose": "run.2"
+    },
+    {
+      "check": "passed",
+      "decision": "approved",
+      "missing": 0,
+      "part": "qualified.hair",
+      "pose": "run.3"
+    },
+    {
+      "check": "passed",
+      "decision": "rejected",
+      "missing": 0,
+      "part": "qualified.sneakers",
+      "pose": "run.3"
+    }
+  ],
+  "body_pixel_identical": 4,
+  "loop": false,
+  "masks": 0,
+  "motion": {
+    "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+    "id": "qualified.run.reference"
+  },
+  "parts": {
+    "footwear": "qualified.sneakers",
+    "hair": "qualified.hair"
+  },
+  "python_js_cases_identical": 16,
+  "release_ready": false,
+  "verification_scope": "runtime invariants; artwork quality is separate"
+}

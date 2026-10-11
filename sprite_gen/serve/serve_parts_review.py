@@ -187,7 +187,7 @@ class ReviewDesk:
         row = production._track(state, track)["poses"].get(pose)
         if row is None or row.get("selected") is None:
             raise contract.PartsContractError(f"{pose} has no drawing yet")
-        allowed = ("position", "body", "body-raw", "body-zraw", "cut", "part", "visible", "drawn", "reference", "interfaces", "errors")
+        allowed = ("attachment-body", "attachment-part", "attachment-composite", "position", "body", "body-raw", "body-zraw", "cut", "part", "visible", "drawn", "reference", "interfaces", "errors")
         if kind not in allowed:
             raise contract.PartsContractError("unknown render view")
         location = row["selected"] if candidate is None else next(
@@ -196,6 +196,17 @@ class ReviewDesk:
             raise contract.PartsContractError("unknown candidate")
         record = production.candidate_record(root, state, pose, location, track=track)
         base = root / location
+        if kind.startswith("attachment-"):
+            layers = record.get("independent_layers", [])
+            if piece not in {item["id"] for item in layers}:
+                raise contract.PartsContractError("choose a known independent attachment layer")
+            reader = assets.SourceReader(base)
+            images = {key: Image.open(BytesIO(reader.read(ref["file"], ref["sha256"]))).convert("RGBA")
+                      for key, ref in record["images"].items() if key == "under" or key.startswith("piece.")}
+            actual = parts_vision._render(root, index, registry, state["config"], pose, record, base)
+            panels, _ = parts_vision.layer_closeups(images, actual, [item for item in layers if item["id"] == piece])
+            image = panels[{"attachment-body": 0, "attachment-part": 1, "attachment-composite": 2}[kind]][1]
+            return assets.png_bytes(image)
         built = state["built"]
         box = None
         render_key = None

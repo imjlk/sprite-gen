@@ -17,6 +17,7 @@ from sprite_gen._deps import np
 from sprite_gen.compose import parts_resolve, compose_parts
 from sprite_gen.curate import parts_motion
 from sprite_gen.frames import parts_production as p
+from sprite_gen.frames import parts_reference
 from sprite_gen.spec import (
     parts_assets as assets,
     parts_contract as c,
@@ -246,6 +247,16 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
             guide_file = keep(
                 f"{pose}/{layer['id']}.guide.png", assets.png_bytes(guide)
             )
+            interface_files = []
+            if checks:
+                # Retaining QA files in the batch did not make them visible to
+                # the image provider. Send a cropped anatomy/coverage overlay.
+                masks = {name: Image.open(BytesIO(payloads[path])).convert("L")
+                         for name, path in checks.items() if name in ("required", "protected")}
+                if masks:
+                    interfaces = parts_reference.overlay(body, masks).crop(roi)
+                    interfaces = interfaces.convert("RGBa").resize(guide.size, Image.Resampling.BILINEAR).convert("RGBA")
+                    interface_files.append(keep(f"{pose}/{layer['id']}.interfaces.png", assets.png_bytes(interfaces)))
             landmark_files = []
             points = layer["landmarks"].get(pose, {})
             if points:
@@ -344,7 +355,7 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                 f"It belongs to render node {layer['node']}. The attached body crop is the exact pose reference. "
                 "Match its angle, perspective, attachments, and art style. Draw the complete layer, including portions hidden by foreground limbs. "
                 + (
-                    "The second reference isolates the exact BODY anatomy for this layer; it is geometry guidance, never output. Match its toe/heel or attachment direction instead of copying the old part's mistaken perspective. "
+                    "The anatomy reference isolates the exact BODY for this layer; it is geometry guidance, never output. It may appear as a labelled panel in the combined geometry board. Match its toe/heel or attachment direction instead of copying the old part's mistaken perspective. "
                     if ownership
                     else ""
                 )
@@ -352,6 +363,10 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                 "Return one clean isolated asset on genuine transparent alpha, with the whole silhouette visible. "
                 "Do not draw a sheet or a grid. Preserve the design from the attached design reference. "
                 "Output framing is free; registration uses a single uniform scale and translation. "
+                + (
+                    "The interface overlay shows GREEN required coverage on the actual body and RED protected areas. Cover the full green contour including heel/toe boundaries; leave red areas free. These colours are inspection guidance, never paint them in the final part. "
+                    if interface_files else ""
+                )
                 + (
                     f"Authored body landmarks: {points}. The marked guide labels the exact attachment/toe/heel direction. These markers are instructions for geometry ONLY; never draw labels or markers in the final asset. Design references determine materials, never override this pose direction. "
                     if points
@@ -436,6 +451,30 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                     .get("registration", {})
                     .get(layer["id"], {}),
                 }
+            references = [guide_file, *ownership, *landmark_files, *interface_files,
+                          *design, *shape_guides, *previous]
+            if len(references) > 5:
+                # Native image editing has a limited reference budget. Keep all
+                # geometric evidence together instead of asking the child agent
+                # to silently drop the body, markers or coverage reference.
+                geometry = [("Exact body", guide_file)]
+                geometry.extend(("Isolated anatomy", file) for file in ownership)
+                geometry.extend(("Body landmarks", file) for file in landmark_files)
+                geometry.extend(("Coverage / protection", file) for file in interface_files)
+                board = Image.new("RGBA", (1280, 640 * ((len(geometry) + 1) // 2)), (235, 235, 235, 255))
+                labels = ImageDraw.Draw(board)
+                for n, (label, file) in enumerate(geometry):
+                    panel = Image.open(BytesIO(payloads[file])).convert("RGBA")
+                    panel.thumbnail((624, 600), Image.Resampling.BILINEAR)
+                    x, y = n % 2 * 640, n // 2 * 640
+                    board.alpha_composite(panel, (x + (640 - panel.width) // 2, y + 32 + (600 - panel.height) // 2))
+                    labels.text((x + 8, y + 8), label, fill=(20, 20, 20))
+                geometry_file = keep(f"{pose}/{layer['id']}.geometry.png", assets.png_bytes(board))
+                references = [geometry_file, *design, *shape_guides, *previous]
+                if len(references) > 5:
+                    raise c.PartsContractError("too many independent design/template references; author combined reference boards before generation")
+                prompt += " The FIRST reference is a labelled geometry board: exact body, isolated anatomy, landmarks and coverage panels are evidence for this same pose. Use every panel; never discard one to fit a reference limit."
+                prompt_file = keep(f"{pose}/{layer['id']}.prompt.txt", prompt.encode("utf-8"))
             jobs.append(
                 {
                     "pose": pose,
@@ -448,14 +487,7 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                     "body": body_file,
                     "guide": guide_file,
                     "prompt": prompt_file,
-                    "refs": [
-                        guide_file,
-                        *ownership,
-                        *landmark_files,
-                        *design,
-                        *shape_guides,
-                        *previous,
-                    ],
+                    "refs": references,
                     "checks": checks,
                     "reuse": reuse,
                 }

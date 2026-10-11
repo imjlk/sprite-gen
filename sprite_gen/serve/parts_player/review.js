@@ -8,6 +8,11 @@ const statusName=(s,m)=>m&&['passed','warning'].includes(s)&&['required_pixels',
 const log = text => { $('log').textContent = text + '\n' + $('log').textContent; };
 const node = (tag, text, className='') => { const el=document.createElement(tag); el.textContent=text; el.className=className; return el; };
 const url = (pose, kind, candidate) => '/api/render/' + encodeURIComponent(state.part) + '/' + encodeURIComponent(pose) + '/' + kind + '.png' + (candidate ? '?candidate='+encodeURIComponent(candidate) : '');
+function attachmentImages(){
+ if(!state.candidate?.layers?.length)return;
+ for(const id of ['attachment-body','attachment-part','attachment-composite'])$(id).src=url(state.pose,id,state.candidate.id)+'&piece='+encodeURIComponent($('attachment-piece').value);
+}
+$('attachment-piece').onchange=attachmentImages;
 async function get(path){ const r=await fetch(path); const j=await r.json(); if(!r.ok) throw new Error(j.error); return j; }
 async function act(action, body={}){
  if(!token) throw new Error('읽기 전용입니다. 읽기 전용 주소의 ?readonly=1을 제거해 다시 여세요.');
@@ -81,6 +86,11 @@ $('position-hint').onclick=()=>{const report=state.data?.revalidation,row=report
 function showCandidate(c){
  state.candidate=c;
  const row=state.data.poses.find(p=>p.pose===state.pose);
+ const closeup=$('attachment-piece'),previous=closeup.value;
+ closeup.replaceChildren(...(c.layers||[]).map(name=>{const option=node('option',name);option.value=name;return option;}));
+ if((c.layers||[]).includes(previous))closeup.value=previous;
+ $('attachment-review').hidden=!c.layers?.length;
+ attachmentImages();
  $('pose-title').textContent=state.pose;
  $('pose-status').textContent=(c.selected?'현재 선택':c.method?.programmatic_edit?'수정 후보 비교 · 미적용':'이전 후보 비교')+' · '+statusName(c.status,c.metrics)+' · 후보 '+c.id.slice(0,10);
  const view=$('view').value, onBody=['body','body-raw','body-zraw'].includes(view);
@@ -109,6 +119,7 @@ function showCandidate(c){
 }
 function clearInspector(message){
  state.candidate=null;state.candidates=[];
+ $('attachment-review').hidden=true;
  $('vision-summary').textContent='미실행 · 검사할 후보를 선택하세요.';$('vision-checks').replaceChildren();
  $('candidates').replaceChildren();$('findings').replaceChildren();$('criteria').querySelector('tbody').replaceChildren();
  for(const id of ['part-image','reference-image']){const image=$(id);image.hidden=true;image.removeAttribute('src');}

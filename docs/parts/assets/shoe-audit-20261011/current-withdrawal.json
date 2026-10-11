@@ -1,0 +1,20 @@
+{
+  "part": "qualified.sneakers",
+  "track": "main",
+  "review": {
+    "id": "review.part.qualified.sneakers",
+    "digest": "ab2d272a22165c6c6c3470e0d93404c015fb813877102caaca27016f14855871"
+  },
+  "status": "rejected",
+  "approved": 0,
+  "rejected": [
+    "run.0",
+    "run.1",
+    "run.2",
+    "run.3"
+  ],
+  "unverified": 0,
+  "contact": "reviews/review.part.qualified.sneakers/ab2d272a22165c6c6c3470e0d93404c015fb813877102caaca27016f14855871/contact.main.png",
+  "next": "parts-part-sheet draws the rejected poses again",
+  "release_ready": false
+}

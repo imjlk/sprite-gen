@@ -1,0 +1,16 @@
+{
+  "old_candidate": "productions/qualified.sneakers/candidates/run.2/51d8d94f1640499340922315a881e4145319fed6ae093af7888bdec8ffddf348",
+  "current_candidate": "productions/qualified.sneakers/candidates/run.2/5413b837254b7f01e5992f7580a3f7935ff3c26223093adf08d2a1bfc7d3b108",
+  "original_art_rgba_identical": {
+    "under": true,
+    "part": true,
+    "piece.shoe_back": true,
+    "piece.shoe_front": true
+  },
+  "previous_reported_missing": 0,
+  "current_strict_missing": 221,
+  "decision": "rejected",
+  "vision_file": "productions/qualified.sneakers/vision-reports/run.2/09596353db7ab1ab68c473d20d0e1844afd038d25e84639bde3fc692d0d0f8c1/report.json",
+  "full_motion_expansion": false,
+  "art_repair_complete": false
+}

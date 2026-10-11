@@ -24,7 +24,31 @@ from sprite_gen.spec import (
 )
 
 CATEGORIES = ("attachment", "shape", "occlusion", "design", "alpha", "temporal")
-INSPECTION_POLICY = "parts.vision.focused-interfaces.v4"
+INSPECTION_POLICY = "parts.vision.layer-closeups.v5"
+
+
+def layer_closeups(images, actual, layers):
+    """Inspect each attachment separately; distant pieces must not shrink it."""
+    panels, crops = [], {}
+    for layer in layers:
+        piece = images[f"piece.{layer['id']}"]
+        boxes = [layer["target"]]
+        if box := piece.getbbox():
+            boxes.append(box)
+        roi = (
+            max(0, min(b[0] for b in boxes) - 32),
+            max(0, min(b[1] for b in boxes) - 48),
+            min(actual.width, max(b[2] for b in boxes) + 32),
+            min(actual.height, max(b[3] for b in boxes) + 32),
+        )
+        crops[layer["id"]] = list(roi)
+        for label, image in (
+            ("Bare body", images["under"]),
+            ("Independent piece", piece),
+            ("ACTUAL attachment", actual),
+        ):
+            panels.append((f"{layer['id']} / {label}", image.crop(roi)))
+    return panels, crops
 
 
 def context(root, index, config, record, *, state=None, pose=None, track=None):
@@ -169,12 +193,13 @@ def inspect(assembly, part, pose, *, provider="codex", track=None, transport=Non
         )
         for key, ref in record["images"].items()
     }
+    actual = _render(root, index, registry, config, pose, record, base)
     panels = [
         ("Body reference", images["under"]),
         ("Independent artwork", images["part"]),
         (
             "ACTUAL zmap composite",
-            _render(root, index, registry, config, pose, record, base),
+            actual,
         ),
     ]
     raw_keys = [key for key in images if key.startswith("raw.")]
@@ -182,7 +207,7 @@ def inspect(assembly, part, pose, *, provider="codex", track=None, transport=Non
     if design_refs:
         panels.append(
             (
-                "Canonical design",
+                "Design reference (not ground truth)",
                 Image.open(
                     BytesIO(assets.SourceReader(root).read(design_refs[0]))
                 ).convert("RGBA"),
@@ -229,12 +254,20 @@ def inspect(assembly, part, pose, *, provider="codex", track=None, transport=Non
             (
                 label,
                 image
-                if label in ("Original generated layer", "Canonical design")
+                if label in ("Original generated layer", "Design reference (not ground truth)")
                 else image.crop(roi),
             )
             for label, image in panels
         ]
-    board = Image.new("RGB", (1152, 864), (231, 231, 231))
+    # Keep the overview above and explicit per-piece anatomy below. In v4 a
+    # two-foot union plus neighbours reduced a shoe to a small thumbnail.
+    while len(panels) % 3:
+        panels.append(("", Image.new("RGBA", (1, 1))))
+    closeups, crops = layer_closeups(
+        images, actual, record.get("independent_layers", [])
+    )
+    panels.extend(closeups)
+    board = Image.new("RGB", (1152, 432 * ((len(panels) + 2) // 3)), (231, 231, 231))
     draw = ImageDraw.Draw(board)
     for n, (label, image) in enumerate(panels):
         rgb = Image.new("RGBA", image.size, (231, 231, 231, 255))
@@ -259,7 +292,10 @@ def inspect(assembly, part, pose, *, provider="codex", track=None, transport=Non
         "The body is fixed. Judge the part's attachment to it, silhouette/perspective, actual occlusion order, requested design, "
         "These are close-up crops. Inspect small exposed scalp/foot slivers at boundaries, and use bare toe anatomy to distinguish sole, heel and upper views. "
         "alpha holes/fringes and temporal consistency with the displayed neighbours. Distinguish part defects from defects already visible in the unchanged body. "
-        "For temporal consistency compare common visible design features. A change from upper view to sole view can be required by the body pose; do not require hidden soles or laces to remain visible in every frame. Use the canonical design for material details obscured in neighbours. "
+        "Use the individual layer closeups to check collar/ankle entry, heel and toe directions, shoe length/volume and visible viewing planes. "
+        "Do not presume a sole-facing view is correct merely because a leg is bent. Determine the view from the bare body; if its projection is ambiguous, shape is unknown. "
+        "Design references and authored guides may themselves be generated drafts. They are requests, not independent proof of correct anatomy or perspective. "
+        "For temporal consistency compare the same product's proportions, collar, toe cap, panels and sole across neighbours. Only explain a view change when visible anatomy supports it; otherwise record unknown. "
         "Do not approve a body defect as a part defect or claim correctness from pixel counts. Visible ankle skin is allowed unless the design specifies socks. "
         f"Displayed neighbouring poses: {included}. Expected neighbouring poses: {sorted(neighbours)}. "
         "If an expected neighbour is missing, temporal is unknown. Only when no neighbours are expected may temporal be not-applicable. "
@@ -275,6 +311,7 @@ def inspect(assembly, part, pose, *, provider="codex", track=None, transport=Non
         ],
         "prompt": prompt,
         "provider": provider,
+        "layer_crops": crops,
     }
     folder = assets.publish_object(
         p._folder(root, part),
@@ -344,7 +381,9 @@ def inspect(assembly, part, pose, *, provider="codex", track=None, transport=Non
             "file": (saved / "report.json").relative_to(root).as_posix(),
             "sha256": assets.sha256((saved / "report.json").read_bytes()),
         }
-        if report["status"] != "pass":
+        if report["status"] != "pass" and latest_row.get("decision") == "approved":
+            # A model failure revokes acceptance; it must not erase a curator's
+            # explicit rejection or replace their reason with an empty verdict.
             latest_row.update(decision="unverified", reviewer=None, note=None)
         p._save(root, latest)
     return {

@@ -1,0 +1,89 @@
+{
+  "answer": {
+    "checks": {
+      "alpha": {
+        "reason": "표시된 회색 배경에서 뚜렷한 내부 구멍이나 외곽 프린지는 보이지 않는다.",
+        "result": "pass"
+      },
+      "attachment": {
+        "reason": "shoe_back 위로 발의 윤곽이 남고, shoe_front의 토캡 뒤쪽에도 발가락 피부선이 보여 발을 충분히 감싸지 못한다.",
+        "result": "fail"
+      },
+      "design": {
+        "reason": "앞 신발에서 네이비 패널, 크림 끈과 둥근 토캡, 낮은 칼라, 갈색 테두리의 크림 밑창이 확인된다.",
+        "result": "pass"
+      },
+      "occlusion": {
+        "reason": "앞 신발에서 갑피와 토캡으로 가려져야 할 발가락 윗경계가 노출된다.",
+        "result": "fail"
+      },
+      "shape": {
+        "reason": "뒤 맨발은 측면 윤곽인데 shoe_back은 밑창 전면을 카메라로 돌려 측면 갑피가 거의 사라졌다.",
+        "result": "fail"
+      },
+      "temporal": {
+        "reason": "run.1·run.3 모두 표시되고 배색은 이어지지만, 뒤 신발의 갑피·칼라가 거의 보이지 않아 제품 비율의 연속성을 확정하기 어렵다.",
+        "result": "unknown"
+      }
+    },
+    "status": "rework",
+    "summary": "뒤 신발의 밑창 중심 시점이 맨발의 측면 윤곽과 맞지 않고, 앞 신발에는 발가락 피부선이 남는다."
+  },
+  "art_approved": false,
+  "board": {
+    "file": "productions/qualified.sneakers/vision-inputs/run.2/2c5e2b4d1dfb1f7f7d935fd06237b2bb966352cae86363f5bfd0bbf76044b670/board.png",
+    "sha256": "6a7ff621b30e1be6f388b812e4435e6b4bdc8fd434066c47ed60796c86face94"
+  },
+  "context": {
+    "body": [
+      {
+        "digest": "2ead84b57231de4eb5f19450decc1f8aee660357710ee0c6c2023d8c2b3b59bc",
+        "id": "qualified.body"
+      }
+    ],
+    "candidate": "5413b837254b7f01e5992f7580a3f7935ff3c26223093adf08d2a1bfc7d3b108",
+    "config_digest": "741df4dc778d4295fecb8dd64b38dfacfb0fa4f57b17b155c8975456b26a9324",
+    "inputs": {
+      "inputs/criteria-audit/run.2.required-heel-toe-boundaries.png": "3951a8d67c141a2e4c443cfd53ecd6a94e52b507167383e4cc4b91029a06d7e2",
+      "inputs/criteria-calibrated/footwear.run.0.allowed-final.png": "4bf7d04be18f5bf97736f3938ffbb72bef9350dd34d607ff832b9adfbd8bd7de",
+      "inputs/criteria-calibrated/footwear.run.2.allowed-final.png": "29b0efe48453641e3269b8c1327c73dacb8c84ee5ed25b86d718d1773d40444f",
+      "inputs/criteria-final/footwear.run.0.required.png": "52baf3751ee4bcbbef88a86063a14b35d95fe0056b1fcc9e9ed8a83e60f50b1c",
+      "inputs/criteria-final/footwear.run.3.allowed-full-heel.png": "f94a6c76b67dcda4202fe2e44f13d1deb334f0b778925ef322745110e2bec516",
+      "inputs/criteria-final/footwear.run.3.required-full-heel.png": "707ffbd23df865c16334bc4f3f54c83eec71dd75aaf44291701fb3dc1213d426",
+      "inputs/criteria-r2/footwear.run.0.protected.png": "f6bb63adef58d05ae6e9109b985ef560a0708d7ce0f111b95848386070662c89",
+      "inputs/criteria-r2/footwear.run.1.allowed.png": "4e189c8fd0b55d925ab0a650ec3cd9f0e658bbc946afd25893f84768c2fcb980",
+      "inputs/criteria-r2/footwear.run.1.protected.png": "f6bb63adef58d05ae6e9109b985ef560a0708d7ce0f111b95848386070662c89",
+      "inputs/criteria-r2/footwear.run.1.required.png": "00ffb054e908e02daf92b5aee2b1c08e115b915e7aab568533b5e71eae976482",
+      "inputs/criteria-r2/footwear.run.2.protected.png": "f6bb63adef58d05ae6e9109b985ef560a0708d7ce0f111b95848386070662c89",
+      "inputs/criteria-r2/footwear.run.3.protected.png": "f6bb63adef58d05ae6e9109b985ef560a0708d7ce0f111b95848386070662c89",
+      "inputs/design/side-product-draft.png": "0582908c677d39b699155d517ac6e867b411ca86d699dafeb2c6b2c2959a0cd5"
+    },
+    "inspection_policy": "parts.vision.layer-closeups.v5",
+    "motion": {
+      "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+      "id": "qualified.run.reference"
+    },
+    "neighbours": {
+      "run.1": "4631c6f633ef980ebc09ef470d6a15fe09a84ef0308ab91ddf6876180256640e",
+      "run.3": "5937ffd78e36e3331ae734f33a6bc7b11c87d05c3f15da7400556ecc9845d732"
+    },
+    "rig": {
+      "digest": "cab21d2659f1e430b22221d291bb282b7b0e2f15a85d4fd2bb3fd50c8838873b",
+      "id": "illustration.motion.rig"
+    }
+  },
+  "error": null,
+  "input": "productions/qualified.sneakers/vision-inputs/run.2/2c5e2b4d1dfb1f7f7d935fd06237b2bb966352cae86363f5bfd0bbf76044b670/input.json",
+  "kind": "parts-vision-inspection",
+  "neighbours": [
+    "run.1",
+    "run.3"
+  ],
+  "provider": "codex",
+  "schema_version": 1,
+  "status": "rework",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

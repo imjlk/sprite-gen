@@ -49,18 +49,19 @@ def verify(out, *, require_approval=False):
     )
     draw = ImageDraw.Draw(contact)
     bare_count, tick, masks = 0, 0, 0
+    art_checks = []
     for n, sample in enumerate(clip["samples"]):
         pose = sample["pose_id"]
         for slot, identity in ids.items():
             state = rows[slot]
             row = state["tracks"]["main"]["poses"][pose]
             metrics = row["check"]["metrics"]
-            assert row["check"]["status"] != "error", (identity, pose, metrics)
-            assert all(
-                metrics[k] == 0
-                for k in ("required_pixels", "allowed_pixels", "protected_pixels")
-            )
+            art_checks.append({"part": identity, "pose": pose,
+                               "decision": row["decision"], "check": row["check"]["status"],
+                               "missing": metrics["required_pixels"]})
             if require_approval:
+                assert row["check"]["status"] != "error", (identity, pose, metrics)
+                assert all(metrics[k] == 0 for k in ("required_pixels", "allowed_pixels", "protected_pixels"))
                 vision = parts_vision.current(root, index, state, pose)
                 assert vision and vision["current"] and vision["status"] == "pass", (
                     identity,
@@ -142,6 +143,8 @@ return {...Object.fromEntries(keys.map(k=>[k,s[k]])),layers:s.layers.map(l=>Obje
         "appearance_clips_baked": 0,
         "loop": False,
         "approved": require_approval,
+        "verification_scope": "runtime invariants; artwork quality is separate",
+        "art_checks": art_checks,
         "release_ready": False,
     }
     (out / "runtime-verification.json").write_bytes(w.json_bytes(proof))
