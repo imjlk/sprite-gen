@@ -1,0 +1,21 @@
+{
+  "operation": "scanline paint registration to retained independent shoe silhouette",
+  "shape_source": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/shoe-repair/run.3.pose-reference-r1/native-shoe-r1.png",
+  "shape_sha256": "426f58790119e0452d91df811887685c145d8cfbcbe441899fd7712ca391a57f",
+  "native_paint": "/Users/imjlk/.codex/generated_images/01a10599-3777-70a3-a202-f7e2f6376246/exec-93e13120-42d9-4f18-bc92-4cb2f65ea546.png",
+  "native_paint_sha256": "e91ba71d5f38ae1e91ff53a109e5cc060ca9eeaf4990e1f205bf72f232b0280f",
+  "paint_canvas": [
+    1122,
+    1402
+  ],
+  "retained_canvas": [
+    1123,
+    1401
+  ],
+  "alpha_unchanged": true,
+  "body_pixels_used": 0,
+  "registered_rows": 1344,
+  "runtime_deformation": false,
+  "batch": "i0cef1e13a389",
+  "art_approved": false
+}

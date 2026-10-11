@@ -25,6 +25,17 @@ from sprite_gen.spec import (
 )
 
 
+def reference_view(image):
+    """Make the visible RGBA result explicit for image-understanding inputs.
+
+    Some consumers flatten RGB without alpha. Hidden RGB must not turn a cutout
+    construction draft into a solid coloured rectangle. Originals stay frozen.
+    """
+    view = Image.new("RGBA", image.size, (231, 231, 231, 255))
+    view.alpha_composite(image.convert("RGBA"))
+    return view.convert("RGB")
+
+
 def body_ownership_errors(root, index, registry, config, pose, *, layers=None):
     """Required body interfaces must belong to the declared anatomical nodes.
 
@@ -202,9 +213,9 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
     body_loader = compose_parts.AssetLoader(root, index)
     design = []
     for n, path in enumerate((settings["prompt"] or {}).get("refs", [])):
-        design.append(
-            keep(f"design/{n}{Path(path).suffix}", assets.SourceReader(root).read(path))
-        )
+        encoded = assets.SourceReader(root).read(path)
+        keep(f"design/{n}{Path(path).suffix}", encoded)
+        design.append(keep(f"design/{n}.view.png", assets.png_bytes(reference_view(Image.open(BytesIO(encoded))))))
     jobs = []
     for pose in wanted:
         if errors := body_ownership_errors(root, index, registry, config, pose):
@@ -247,6 +258,7 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
             guide_file = keep(
                 f"{pose}/{layer['id']}.guide.png", assets.png_bytes(guide)
             )
+            guide_view = keep(f"{pose}/{layer['id']}.guide.view.png", assets.png_bytes(reference_view(guide)))
             interface_files = []
             if checks:
                 # Retaining QA files in the batch did not make them visible to
@@ -256,7 +268,8 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                 if masks:
                     interfaces = parts_reference.overlay(body, masks).crop(roi)
                     interfaces = interfaces.convert("RGBa").resize(guide.size, Image.Resampling.BILINEAR).convert("RGBA")
-                    interface_files.append(keep(f"{pose}/{layer['id']}.interfaces.png", assets.png_bytes(interfaces)))
+                    keep(f"{pose}/{layer['id']}.interfaces.png", assets.png_bytes(interfaces))
+                    interface_files.append(keep(f"{pose}/{layer['id']}.interfaces.view.png", assets.png_bytes(reference_view(interfaces))))
             landmark_files = []
             points = layer["landmarks"].get(pose, {})
             if points:
@@ -286,11 +299,8 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                         fill=(240, 30, 80, 255),
                         width=3,
                     )
-                landmark_files.append(
-                    keep(
-                        f"{pose}/{layer['id']}.landmarks.png", assets.png_bytes(marked)
-                    )
-                )
+                keep(f"{pose}/{layer['id']}.landmarks.png", assets.png_bytes(marked))
+                landmark_files.append(keep(f"{pose}/{layer['id']}.landmarks.view.png", assets.png_bytes(reference_view(marked))))
             ownership = []
             if layer["body_nodes"]:
                 anatomy = Image.new("RGBA", body.size)
@@ -311,16 +321,13 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                     .resize(guide.size, Image.Resampling.BILINEAR)
                     .convert("RGBA")
                 )
-                ownership.append(
-                    keep(f"{pose}/{layer['id']}.anatomy.png", assets.png_bytes(anatomy))
-                )
-            shape_guides = [
-                keep(
-                    f"{pose}/{layer['id']}.shape-{n}.png",
-                    assets.SourceReader(root).read(path),
-                )
-                for n, path in enumerate(layer["guides"].get(pose, []))
-            ]
+                keep(f"{pose}/{layer['id']}.anatomy.png", assets.png_bytes(anatomy))
+                ownership.append(keep(f"{pose}/{layer['id']}.anatomy.view.png", assets.png_bytes(reference_view(anatomy))))
+            shape_guides = []
+            for n, path in enumerate(layer["guides"].get(pose, [])):
+                encoded = assets.SourceReader(root).read(path)
+                keep(f"{pose}/{layer['id']}.shape-{n}.png", encoded)
+                shape_guides.append(keep(f"{pose}/{layer['id']}.shape-{n}.view.png", assets.png_bytes(reference_view(Image.open(BytesIO(encoded))))))
             previous = []
             selected = rows["poses"].get(pose, {}).get("selected")
             if selected and config["independent"]["reference_previous"]:
@@ -342,12 +349,8 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                     )
                     if previous_bounds:
                         previous_image = previous_image.crop(tuple(previous_bounds))
-                    previous.append(
-                        keep(
-                            f"{pose}/{layer['id']}.previous.png",
-                            assets.png_bytes(previous_image),
-                        )
-                    )
+                    keep(f"{pose}/{layer['id']}.previous.png", assets.png_bytes(previous_image))
+                    previous.append(keep(f"{pose}/{layer['id']}.previous.view.png", assets.png_bytes(reference_view(previous_image))))
             prompt = (
                 (settings["prompt"] or {}).get("text", "")
                 + "\n\n"
@@ -363,6 +366,7 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                 "Return one clean isolated asset on genuine transparent alpha, with the whole silhouette visible. "
                 "Do not draw a sheet or a grid. Preserve the design from the attached design reference. "
                 "Output framing is free; registration uses a single uniform scale and translation. "
+                "Provider references use a neutral gray background to expose the actual alpha silhouette; gray is never output artwork. "
                 + (
                     "The interface overlay shows GREEN required coverage on the actual body and RED protected areas. Cover the full green contour including heel/toe boundaries; leave red areas free. These colours are inspection guidance, never paint them in the final part. "
                     if interface_files else ""
@@ -451,13 +455,13 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                     .get("registration", {})
                     .get(layer["id"], {}),
                 }
-            references = [guide_file, *ownership, *landmark_files, *interface_files,
+            references = [guide_view, *ownership, *landmark_files, *interface_files,
                           *design, *shape_guides, *previous]
             if len(references) > 5:
                 # Native image editing has a limited reference budget. Keep all
                 # geometric evidence together instead of asking the child agent
                 # to silently drop the body, markers or coverage reference.
-                geometry = [("Exact body", guide_file)]
+                geometry = [("Exact body", guide_view)]
                 geometry.extend(("Isolated anatomy", file) for file in ownership)
                 geometry.extend(("Body landmarks", file) for file in landmark_files)
                 geometry.extend(("Coverage / protection", file) for file in interface_files)
@@ -691,6 +695,17 @@ def slice_batch(assembly, part, entry, *, pages=(), track=None):
     supplied = {int(str(n)): path for n, path in pages}
     if set(supplied) - set(range(len(entry["pages"]))):
         raise c.PartsContractError("unknown independent image index")
+    preserved = [n for n in supplied if entry["pages"][n].get("reuse")]
+    if preserved:
+        editable = ", ".join(
+            f"{n} ({job['pose']}/{job['layer']})"
+            for n, job in enumerate(entry["pages"])
+            if not job.get("reuse")
+        )
+        raise c.PartsContractError(
+            f"image indexes {preserved} are preserved layers; no supplied image was imported. "
+            f"Use editable indexes: {editable}"
+        )
     rig = registry[index["rig"]["id"]]
     canvas = (rig["canvas"]["width"], rig["canvas"]["height"])
     ranks = parts_resolve.layer_ranks(registry[rig["topology"]["id"]])

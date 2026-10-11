@@ -1,0 +1,21 @@
+{
+  "operation": "scanline paint registration to retained independent shoe silhouette",
+  "shape_source": "/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-independent-qualified-20261011/shoe-repair/run.2.rounded-heel-r4.png",
+  "shape_sha256": "a061e2d7c8ee5daa844d20f22bb3bffec73c755d50e64cf641d0fe311faeebd2",
+  "native_paint": "/Users/imjlk/.codex/generated_images/01a10599-3777-70a3-a202-f7e2f6376246/exec-fad3ecf3-8f24-4c37-a4a6-4352998d9958.png",
+  "native_paint_sha256": "fbc0fc75c7fd8a60031039c12ff126ad18beb800c5f8ee4f2d8041dd5e3bf1f0",
+  "paint_canvas": [
+    1323,
+    1189
+  ],
+  "retained_canvas": [
+    1324,
+    1188
+  ],
+  "alpha_unchanged": true,
+  "body_pixels_used": 0,
+  "registered_rows": 1159,
+  "runtime_deformation": false,
+  "batch": "i31dfa5a32f28",
+  "art_approved": false
+}

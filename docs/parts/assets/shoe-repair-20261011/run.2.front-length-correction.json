@@ -1,0 +1,18 @@
+{
+  "source_candidate": "productions/qualified.sneakers/candidates/run.2/7c7766746d4b52f80f63ca8f6744c8c8696551653d6395687fa23c2b78280181",
+  "source_image": {
+    "file": "piece.shoe_front.png",
+    "sha256": "ab30d8cccf706c1e4120528ae7f864a6ca2120f3687a4c6a810632a6e3e00a35"
+  },
+  "source_bounds": [
+    487,
+    513,
+    596,
+    589
+  ],
+  "operation": "horizontal length correction, height unchanged",
+  "width_ratio": 0.8990825688073395,
+  "body_pixels_used": 0,
+  "runtime_deformation": false,
+  "art_approved": false
+}

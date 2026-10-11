@@ -142,10 +142,25 @@ def test_provider_receives_coverage_reference_not_just_saved_qa_files(tmp_path):
     from sprite_gen.frames import parts_independent
     document, folder = parts_independent.read_reference(root, batch["reference"])
     for job in document["jobs"]:
-        refs = [file for file in job["refs"] if file.endswith(".interfaces.png")]
+        refs = [file for file in job["refs"] if file.endswith(".interfaces.view.png")]
         assert len(refs) == 1
         assert (root / folder / refs[0]).is_file()
         assert "GREEN required coverage" in (root / folder / job["prompt"]).read_text()
+
+
+def test_reference_view_cannot_expose_hidden_rgb_as_false_geometry():
+    from sprite_gen.frames.parts_independent import reference_view
+
+    a = Image.new("RGBA", (40, 30), (255, 0, 0, 0))
+    b = Image.new("RGBA", (40, 30), (0, 255, 0, 0))
+    for image in (a, b):
+        ImageDraw.Draw(image).rectangle((10, 10, 20, 20), fill=(0, 0, 255, 255))
+    before = np.array(a).copy()
+    av, bv = reference_view(a), reference_view(b)
+    assert av.mode == "RGB" and np.array_equal(np.asarray(av), np.asarray(bv))
+    assert av.getpixel((0, 0)) == (231, 231, 231)
+    assert av.getpixel((15, 15)) == (0, 0, 255)
+    assert np.array_equal(np.asarray(a), before)
 
 
 def test_failed_vision_preserves_explicit_curator_rejection(tmp_path):
@@ -364,6 +379,35 @@ def test_redraw_one_layer_preserves_other_pixels_and_native_output_ignores_impor
     assert candidate["images"]["piece.front"] != prior["images"]["piece.front"]
 
 
+def test_external_redraw_cannot_silently_target_a_preserved_layer(tmp_path):
+    assembly, order = setup(tmp_path)
+    produce(assembly, order, tmp_path)
+    root = assembly.parent
+    batch = p.sheet(assembly, "test.direct", poses=[order[0]], layers=["front"])
+    before = p._load(root, "test.direct")
+    image = tmp_path / "external-front.png"
+    art = Image.new("RGBA", (64, 64))
+    ImageDraw.Draw(art).rectangle((16, 16, 48, 48), fill="green")
+    art.save(image)
+    with pytest.raises(c.PartsContractError, match="preserved layers.*editable indexes: 1"):
+        p.slice_batch(
+            assembly, "test.direct", batch=batch["batch"], pages=[(Path("0"), image)]
+        )
+    assert p._load(root, "test.direct") == before
+    result = p.slice_batch(
+        assembly, "test.direct", batch=batch["batch"], pages=[(Path("1"), image)]
+    )
+    assert result["sliced"] == 1
+    after = p._load(root, "test.direct")
+    old = before["tracks"]["main"]["poses"][order[0]]["selected"]
+    new = after["tracks"]["main"]["poses"][order[0]]["selected"]
+    assert new != old
+    old_record = p.candidate_record(root, before, order[0], old)
+    new_record = p.candidate_record(root, after, order[0], new)
+    assert new_record["images"]["piece.back"] == old_record["images"]["piece.back"]
+    assert new_record["images"]["piece.front"] != old_record["images"]["piece.front"]
+
+
 def test_nonlooping_reference_does_not_compare_last_pose_as_first_neighbour():
     motion = {
         "clips": [
@@ -421,7 +465,7 @@ def test_authored_landmarks_are_frozen_geometry_guides_and_not_runtime_sockets(
     p.configure(assembly, "test.direct", f)
     batch = p.sheet(assembly, "test.direct", poses=[order[0]])
     job = batch["pages"][0]
-    assert any(path.endswith(".landmarks.png") for path in job["refs"])
+    assert any(path.endswith(".landmarks.view.png") for path in job["refs"])
     from sprite_gen.frames import parts_independent
 
     doc, base = parts_independent.read_reference(root, batch["reference"])
@@ -584,7 +628,7 @@ def test_pose_template_is_frozen_and_same_path_edits_stale_vision(tmp_path):
     file.write_bytes(w.json_bytes(state["config"]))
     p.configure(assembly, "test.direct", file)
     batch = produce(assembly, order, tmp_path)
-    assert any(".shape-0.png" in path for path in batch["pages"][0]["refs"])
+    assert any(".shape-0.view.png" in path for path in batch["pages"][0]["refs"])
     parts_vision.inspect(
         assembly,
         "test.direct",

@@ -1,0 +1,15 @@
+{
+  "operation": "scanline paint registration to retained independent shoe silhouette",
+  "alpha_source": "native-shoe-r1.png",
+  "paint_source": "native-thin-sole-r2.png",
+  "alpha_unchanged": true,
+  "body_pixels_used": 0,
+  "native_canvas": [
+    915,
+    1719
+  ],
+  "registered_rows": 1643,
+  "runtime_deformation": false,
+  "art_approved": false,
+  "limitation": "shape preservation is not visual approval; manually inspect product proportions and seam continuity"
+}

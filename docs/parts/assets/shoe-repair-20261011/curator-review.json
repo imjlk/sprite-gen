@@ -1,0 +1,15 @@
+{
+  "part": "qualified.sneakers",
+  "track": "main",
+  "review": {
+    "id": "review.part.qualified.sneakers",
+    "digest": "a7c1161ecc3d57ae89a21d231f7b521f8466e4840601b9f545c763c2abadfd78"
+  },
+  "status": "approved",
+  "approved": 4,
+  "rejected": [],
+  "unverified": 0,
+  "contact": "reviews/review.part.qualified.sneakers/a7c1161ecc3d57ae89a21d231f7b521f8466e4840601b9f545c763c2abadfd78/contact.main.png",
+  "next": null,
+  "release_ready": false
+}

@@ -1,0 +1,90 @@
+{
+  "answer": {
+    "checks": {
+      "alpha": {
+        "reason": "표시된 외곽에 뚜렷한 배경 잔여물, 프린지 또는 갑피 내부 구멍이 보이지 않습니다.",
+        "result": "pass"
+      },
+      "attachment": {
+        "reason": "두 발목이 칼라 안으로 이어지고, 토 캡이 실제 발가락 위치를 감쌉니다.",
+        "result": "pass"
+      },
+      "design": {
+        "reason": "각 독립 조각에 피부 없이 네이비 패널, 크림 끈과 둥근 토 캡, 낮은 칼라, 갈색 테두리의 얇은 크림 밑창이 표현됩니다.",
+        "result": "pass"
+      },
+      "occlusion": {
+        "reason": "갑피와 칼라가 발을 덮으며, 합성 경계에 발가락이나 뒤꿈치 피부가 삐져나온 부분은 보이지 않습니다.",
+        "result": "pass"
+      },
+      "shape": {
+        "reason": "뒤쪽 신발은 아래로 향하는 발을, 앞쪽 신발은 오른쪽 위로 향하는 발을 따릅니다. 두 신발 모두 측면 패널이 보입니다.",
+        "result": "pass"
+      },
+      "temporal": {
+        "reason": "표시된 run.1과 낮은 칼라, 네이비 패널, 크림 토 캡 및 얇은 밑창의 구성이 일관됩니다.",
+        "result": "pass"
+      }
+    },
+    "status": "pass",
+    "summary": "두 신발은 맨발의 방향과 측면 윤곽을 따르며, 표시된 합성에서 뚜렷한 결함은 보이지 않습니다. 별도 큐레이터 승인이 필요합니다."
+  },
+  "art_approved": false,
+  "board": {
+    "file": "productions/qualified.sneakers/vision-inputs/run.0/42e1ce2ed47b2dddf7dd78198aec537c2816da4eb18a71418e63360ba9d34c09/board.png",
+    "sha256": "c4718f2db68c8c98e51bcc1e73a2700977d6be996a8a68bb81e80040552d4e03"
+  },
+  "context": {
+    "body": [
+      {
+        "digest": "2ead84b57231de4eb5f19450decc1f8aee660357710ee0c6c2023d8c2b3b59bc",
+        "id": "qualified.body"
+      }
+    ],
+    "candidate": "707aed0ff501b3ca0b5d68044deaeed4706735f2cb57cf2114ef9babb7d47c42",
+    "config_digest": "385e198c4a531c1fbbe89cd9b43ecfd564c1bc4d89d1b96a53b3341abe294457",
+    "inputs": {
+      "inputs/criteria-audit/run.0.required-foot-interface.png": "03a5ba4973cd963ce3181a792bf899536455da147a43319c3af7b1bbbbe66f0a",
+      "inputs/criteria-audit/run.2.required-full-rear-interface.png": "887fd3767cb19ff78fe62f2c736b86efe7c27b3546f6c4a2dafc00bb12f01f3c",
+      "inputs/criteria-audit/run.3.required-foot-interface.png": "93cd66f6a9843828980bb8936dc1fa96ac15ed381dfd49ac47df773b70d9212e",
+      "inputs/criteria-calibrated/footwear.run.0.allowed-final.png": "4bf7d04be18f5bf97736f3938ffbb72bef9350dd34d607ff832b9adfbd8bd7de",
+      "inputs/criteria-calibrated/footwear.run.2.allowed-final.png": "29b0efe48453641e3269b8c1327c73dacb8c84ee5ed25b86d718d1773d40444f",
+      "inputs/criteria-final/footwear.run.3.allowed-full-heel.png": "f94a6c76b67dcda4202fe2e44f13d1deb334f0b778925ef322745110e2bec516",
+      "inputs/criteria-r2/footwear.run.0.protected.png": "f6bb63adef58d05ae6e9109b985ef560a0708d7ce0f111b95848386070662c89",
+      "inputs/criteria-r2/footwear.run.1.allowed.png": "4e189c8fd0b55d925ab0a650ec3cd9f0e658bbc946afd25893f84768c2fcb980",
+      "inputs/criteria-r2/footwear.run.1.protected.png": "f6bb63adef58d05ae6e9109b985ef560a0708d7ce0f111b95848386070662c89",
+      "inputs/criteria-r2/footwear.run.1.required.png": "00ffb054e908e02daf92b5aee2b1c08e115b915e7aab568533b5e71eae976482",
+      "inputs/criteria-r2/footwear.run.2.protected.png": "f6bb63adef58d05ae6e9109b985ef560a0708d7ce0f111b95848386070662c89",
+      "inputs/criteria-r2/footwear.run.3.protected.png": "f6bb63adef58d05ae6e9109b985ef560a0708d7ce0f111b95848386070662c89",
+      "inputs/design/side-product-draft.png": "0582908c677d39b699155d517ac6e867b411ca86d699dafeb2c6b2c2959a0cd5",
+      "inputs/oriented-shoe-guide-r4/run.0.shoe_back.png": "4e241d886d64d6c006e4c776c457286a5cdb696cc7788a7c6e559c5189cb219a",
+      "inputs/oriented-shoe-guide-r4/run.2.shoe_back.png": "09412e31b5ccd33b264134be8bc188f4af2079f8446086c39a7e912734a8390a",
+      "inputs/oriented-shoe-guide-r4/run.3.shoe_back.png": "3585fe9066b83f2fdfd476069e5dcebde151b0dbb26c6dd909075d6eb02e70a8"
+    },
+    "inspection_policy": "parts.vision.layer-closeups.v5",
+    "motion": {
+      "digest": "ae2604890d929101e7f67e512ae6f28014da6cf7296ebf5217ba0bc8d23de648",
+      "id": "qualified.run.reference"
+    },
+    "neighbours": {
+      "run.1": "4631c6f633ef980ebc09ef470d6a15fe09a84ef0308ab91ddf6876180256640e"
+    },
+    "rig": {
+      "digest": "cab21d2659f1e430b22221d291bb282b7b0e2f15a85d4fd2bb3fd50c8838873b",
+      "id": "illustration.motion.rig"
+    }
+  },
+  "error": null,
+  "input": "productions/qualified.sneakers/vision-inputs/run.0/42e1ce2ed47b2dddf7dd78198aec537c2816da4eb18a71418e63360ba9d34c09/input.json",
+  "kind": "parts-vision-inspection",
+  "neighbours": [
+    "run.1"
+  ],
+  "provider": "codex",
+  "schema_version": 1,
+  "status": "pass",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

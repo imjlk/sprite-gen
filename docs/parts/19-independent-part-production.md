@@ -91,6 +91,8 @@ sprite-gen parts-part-sheet --assembly library/assembly.json --part demo.sneaker
 
 현재 제작 예제는 `assets/parts-independent-qualified-20261011/library/assembly.json`의 `qualified.hair` 1레이어와 `qualified.sneakers` 2레이어다. Native Codex image generation으로 만든 고해상도 SD 바디 시트의 **4개 달리기 참고 포즈**를 공통 모션으로 고정했다. 제작 경로를 검증하는 non-looping 구간이다. 전체 idle/walk/run 사이클과 추가 체형의 최종 아트 승인은 별도 작업이다.
 
+신발 후속 수정안 4포즈는 발별 확대·실제 zmap·현재 비전 v5와 큐레이터 대조를 거쳐 이 바디와 참고 구간 범위로 승인했다. [최종 수정안과 검증 기록](21-shoe-repair-followup.md)을 확인한다. 아래 기존 archive에는 이 후속 수정안이 포함되지 않는다.
+
 원본 `body-native-sheet.png`와 실제 provider 보고서를 보존했다. 각 cell은 같은 해상도에서 정수 이동만 했고, 주요 alpha 연결 성분과 2px AA 경계를 남겼으며 alpha 240 이상은 opaque로 정규화했다. 그 정규화된 바디 4장은 분리/재분리/파츠 제작 이후에도 bare-body 렌더와 픽셀 단위로 동일하다. 바디 분리는 명시적으로 작성한 영역이며 자동 해부학 추론 결과가 아니다. 팔·의상 접합부 등 현재 헤어/신발 밖의 영역에는 별도 검수가 필요하다.
 
 몸 위 비교에서 발견한 실제 오류를 다음처럼 처리했다.

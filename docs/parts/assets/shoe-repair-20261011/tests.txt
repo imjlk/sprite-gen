@@ -1,0 +1,1 @@
+87 relevant regression tests passed in 30.37s. Tests verify engine behavior, not visual artwork quality.
