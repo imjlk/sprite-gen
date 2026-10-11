@@ -1,0 +1,96 @@
+{
+  "answer": {
+    "limits": [
+      "Crossing legs in run.13–run.15 obscure portions of the ankle junctions; hidden attachment edges cannot be verified.",
+      "Only run.12–run.17 are shown. These stills do not establish full-sequence continuity, speed, gait quality, curator approval, or release readiness."
+    ],
+    "poses": {
+      "run.12": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.13": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.14": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.15": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.16": {
+        "hair": "pass",
+        "issues": [
+          "Front sock appears shorter along the calf than in neighboring frames, particularly run.17. Its cream ankle bridge remains visible; the uncertainty concerns cuff-height continuity, not an exposed-background hole."
+        ],
+        "shoes": "pass",
+        "socks": "unknown"
+      },
+      "run.17": {
+        "hair": "pass",
+        "issues": [
+          "Rear shoe's navy upper appears unusually narrow beside the long sole compared with neighboring frames. Attachment and downward toe direction are visible, but preservation of product volume is uncertain."
+        ],
+        "shoes": "unknown",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "5e40625498a51c31a268a6fe5afe0ddb6990e27a990997ba8c2f376058f1d851",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "c9cd5c50abda39c18e144d8b9335c8d81736515fefa665f8e8c013d52fe3ba22",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "1a6f824b491e1c251f3851a551a67dc5f8e42ad77ec874fb0a5bca63f6068cb7",
+  "motion": {
+    "digest": "b2b3be93a5fab17fcb945e3d9f5ebe4b6d78b47c58e4d9d8c8e2b10b4f79206f",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "9a4787f03952602c0e3126d44bd3d940c591e7f49a6ca767577ebab2e189b849",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "1a8f9d24fa991cc96ffa0956d109c4d70741874e7a5fa77dbe54ac94b633bda7",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "ede39f4f1ce8d7e0b8261ab5f5953d6c3319861c907cab81906d5aa50e81e6a1",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "aca83e2f4506e2c1f75751c7cfb93809247d69105f087a04422b020654b44e38",
+  "release_ready": false,
+  "required_poses": [
+    "run.12",
+    "run.13",
+    "run.14",
+    "run.15",
+    "run.16",
+    "run.17"
+  ],
+  "response_sha256": "3fe06e768f6895d7404e3e2353ae44070cb2b04165260f7235e2d609d10c8bb3",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

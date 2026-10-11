@@ -1,0 +1,1608 @@
+{
+  "anatomical_identity_approved": false,
+  "art_approved": false,
+  "failed": [],
+  "maximum_px": 8,
+  "points": [
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.00",
+      "side": "front",
+      "source_sha256": "b07a6897115acdd43b2b8c469f8c4973d7dd42c961b1ab74ac46fd47913871c4",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.00",
+      "side": "front",
+      "source_sha256": "b07a6897115acdd43b2b8c469f8c4973d7dd42c961b1ab74ac46fd47913871c4",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.00",
+      "side": "back",
+      "source_sha256": "b07a6897115acdd43b2b8c469f8c4973d7dd42c961b1ab74ac46fd47913871c4",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.00",
+      "side": "back",
+      "source_sha256": "b07a6897115acdd43b2b8c469f8c4973d7dd42c961b1ab74ac46fd47913871c4",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.01",
+      "side": "front",
+      "source_sha256": "74a59bb48628f7f7f2c03cb59e4f729232b9bd5227c0c92f46f255b37bb638e0",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.0,
+      "point": "toe",
+      "pose": "run.01",
+      "side": "front",
+      "source_sha256": "74a59bb48628f7f7f2c03cb59e4f729232b9bd5227c0c92f46f255b37bb638e0",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.01",
+      "side": "back",
+      "source_sha256": "74a59bb48628f7f7f2c03cb59e4f729232b9bd5227c0c92f46f255b37bb638e0",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.01",
+      "side": "back",
+      "source_sha256": "74a59bb48628f7f7f2c03cb59e4f729232b9bd5227c0c92f46f255b37bb638e0",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.02",
+      "side": "front",
+      "source_sha256": "2c663a347da19e981b00b97d91a45116a4f22f3941f175acdcc8b12ffb5828ca",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.0,
+      "point": "toe",
+      "pose": "run.02",
+      "side": "front",
+      "source_sha256": "2c663a347da19e981b00b97d91a45116a4f22f3941f175acdcc8b12ffb5828ca",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.0,
+      "point": "heel",
+      "pose": "run.02",
+      "side": "back",
+      "source_sha256": "2c663a347da19e981b00b97d91a45116a4f22f3941f175acdcc8b12ffb5828ca",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.02",
+      "side": "back",
+      "source_sha256": "2c663a347da19e981b00b97d91a45116a4f22f3941f175acdcc8b12ffb5828ca",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.03",
+      "side": "front",
+      "source_sha256": "2c88dbb1929f316e26c5f82e0e9abb73862b8cf773034bdc93fe9aced0839f7f",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.03",
+      "side": "front",
+      "source_sha256": "2c88dbb1929f316e26c5f82e0e9abb73862b8cf773034bdc93fe9aced0839f7f",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.03",
+      "side": "back",
+      "source_sha256": "2c88dbb1929f316e26c5f82e0e9abb73862b8cf773034bdc93fe9aced0839f7f",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.03",
+      "side": "back",
+      "source_sha256": "2c88dbb1929f316e26c5f82e0e9abb73862b8cf773034bdc93fe9aced0839f7f",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.04",
+      "side": "front",
+      "source_sha256": "46fc6de39d4d5fd46ceb79d4e43ad1c3a34bb5c0c810abdfb496af3e74a6cfe6",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.04",
+      "side": "front",
+      "source_sha256": "46fc6de39d4d5fd46ceb79d4e43ad1c3a34bb5c0c810abdfb496af3e74a6cfe6",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 5.0,
+      "point": "heel",
+      "pose": "run.04",
+      "side": "back",
+      "source_sha256": "46fc6de39d4d5fd46ceb79d4e43ad1c3a34bb5c0c810abdfb496af3e74a6cfe6",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.04",
+      "side": "back",
+      "source_sha256": "46fc6de39d4d5fd46ceb79d4e43ad1c3a34bb5c0c810abdfb496af3e74a6cfe6",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.05",
+      "side": "front",
+      "source_sha256": "d67948869e52dd5cedc285aad908657c20c175343df2160047db61beec3f1ffa",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.05",
+      "side": "front",
+      "source_sha256": "d67948869e52dd5cedc285aad908657c20c175343df2160047db61beec3f1ffa",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.05",
+      "side": "back",
+      "source_sha256": "d67948869e52dd5cedc285aad908657c20c175343df2160047db61beec3f1ffa",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.05",
+      "side": "back",
+      "source_sha256": "d67948869e52dd5cedc285aad908657c20c175343df2160047db61beec3f1ffa",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.06",
+      "side": "front",
+      "source_sha256": "e206cc6cab631bb5ede1560fb3dfc433db91798adc8c44fc8f3558efccaf97f3",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.06",
+      "side": "front",
+      "source_sha256": "e206cc6cab631bb5ede1560fb3dfc433db91798adc8c44fc8f3558efccaf97f3",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.06",
+      "side": "back",
+      "source_sha256": "e206cc6cab631bb5ede1560fb3dfc433db91798adc8c44fc8f3558efccaf97f3",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.06",
+      "side": "back",
+      "source_sha256": "e206cc6cab631bb5ede1560fb3dfc433db91798adc8c44fc8f3558efccaf97f3",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.07",
+      "side": "front",
+      "source_sha256": "4137e782ec66cbc0c15e2a29cd0abffb5e9e9586f1d59b957c366dcaf1ac45ce",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.07",
+      "side": "front",
+      "source_sha256": "4137e782ec66cbc0c15e2a29cd0abffb5e9e9586f1d59b957c366dcaf1ac45ce",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.07",
+      "side": "back",
+      "source_sha256": "4137e782ec66cbc0c15e2a29cd0abffb5e9e9586f1d59b957c366dcaf1ac45ce",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.07",
+      "side": "back",
+      "source_sha256": "4137e782ec66cbc0c15e2a29cd0abffb5e9e9586f1d59b957c366dcaf1ac45ce",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.08",
+      "side": "front",
+      "source_sha256": "46ecf13da849b0ebb02c9d910b24457fa0305b2bf8fd1dbca72ee6444114a066",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.0,
+      "point": "toe",
+      "pose": "run.08",
+      "side": "front",
+      "source_sha256": "46ecf13da849b0ebb02c9d910b24457fa0305b2bf8fd1dbca72ee6444114a066",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.828,
+      "point": "heel",
+      "pose": "run.08",
+      "side": "back",
+      "source_sha256": "46ecf13da849b0ebb02c9d910b24457fa0305b2bf8fd1dbca72ee6444114a066",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.08",
+      "side": "back",
+      "source_sha256": "46ecf13da849b0ebb02c9d910b24457fa0305b2bf8fd1dbca72ee6444114a066",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.09",
+      "side": "front",
+      "source_sha256": "25279d1af41d7613ca20e4b3012fc8743c6f3136e40891d1e985c3b58eebbde7",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.09",
+      "side": "front",
+      "source_sha256": "25279d1af41d7613ca20e4b3012fc8743c6f3136e40891d1e985c3b58eebbde7",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.09",
+      "side": "back",
+      "source_sha256": "25279d1af41d7613ca20e4b3012fc8743c6f3136e40891d1e985c3b58eebbde7",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.09",
+      "side": "back",
+      "source_sha256": "25279d1af41d7613ca20e4b3012fc8743c6f3136e40891d1e985c3b58eebbde7",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 5.0,
+      "point": "heel",
+      "pose": "run.10",
+      "side": "front",
+      "source_sha256": "53a1483ec2fc79451bff19fa76732926bcb35a76a0c0d79428aa59ddf745a45a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.10",
+      "side": "front",
+      "source_sha256": "53a1483ec2fc79451bff19fa76732926bcb35a76a0c0d79428aa59ddf745a45a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.10",
+      "side": "back",
+      "source_sha256": "53a1483ec2fc79451bff19fa76732926bcb35a76a0c0d79428aa59ddf745a45a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.10",
+      "side": "back",
+      "source_sha256": "53a1483ec2fc79451bff19fa76732926bcb35a76a0c0d79428aa59ddf745a45a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.11",
+      "side": "front",
+      "source_sha256": "83fda0580c7ce0a9dd35235dca06fc631118ec68573cd0bf9ccaa83647370e62",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.11",
+      "side": "front",
+      "source_sha256": "83fda0580c7ce0a9dd35235dca06fc631118ec68573cd0bf9ccaa83647370e62",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.11",
+      "side": "back",
+      "source_sha256": "83fda0580c7ce0a9dd35235dca06fc631118ec68573cd0bf9ccaa83647370e62",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.11",
+      "side": "back",
+      "source_sha256": "83fda0580c7ce0a9dd35235dca06fc631118ec68573cd0bf9ccaa83647370e62",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.12",
+      "side": "front",
+      "source_sha256": "1ce291cad21ded231517f4457b8b564aab7ccdec25c9cc1e1bc84b41820d0262",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.12",
+      "side": "front",
+      "source_sha256": "1ce291cad21ded231517f4457b8b564aab7ccdec25c9cc1e1bc84b41820d0262",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.12",
+      "side": "back",
+      "source_sha256": "1ce291cad21ded231517f4457b8b564aab7ccdec25c9cc1e1bc84b41820d0262",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.12",
+      "side": "back",
+      "source_sha256": "1ce291cad21ded231517f4457b8b564aab7ccdec25c9cc1e1bc84b41820d0262",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.13",
+      "side": "front",
+      "source_sha256": "663ea458b4947074de16b16c363edc012243aea6240dc9df591dcacfddddb8fc",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.13",
+      "side": "front",
+      "source_sha256": "663ea458b4947074de16b16c363edc012243aea6240dc9df591dcacfddddb8fc",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.13",
+      "side": "back",
+      "source_sha256": "663ea458b4947074de16b16c363edc012243aea6240dc9df591dcacfddddb8fc",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.13",
+      "side": "back",
+      "source_sha256": "663ea458b4947074de16b16c363edc012243aea6240dc9df591dcacfddddb8fc",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.14",
+      "side": "front",
+      "source_sha256": "9e460981c80cfd9a86113558e499d7089a6169366c29701e80aa1ddd7c927df5",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.14",
+      "side": "front",
+      "source_sha256": "9e460981c80cfd9a86113558e499d7089a6169366c29701e80aa1ddd7c927df5",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.0,
+      "point": "heel",
+      "pose": "run.14",
+      "side": "back",
+      "source_sha256": "9e460981c80cfd9a86113558e499d7089a6169366c29701e80aa1ddd7c927df5",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.14",
+      "side": "back",
+      "source_sha256": "9e460981c80cfd9a86113558e499d7089a6169366c29701e80aa1ddd7c927df5",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 5.0,
+      "point": "heel",
+      "pose": "run.15",
+      "side": "front",
+      "source_sha256": "380271a3cd5cd7e0548e59a41f4b4fa48b5832a47a80851d51663372914703ed",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.15",
+      "side": "front",
+      "source_sha256": "380271a3cd5cd7e0548e59a41f4b4fa48b5832a47a80851d51663372914703ed",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.15",
+      "side": "back",
+      "source_sha256": "380271a3cd5cd7e0548e59a41f4b4fa48b5832a47a80851d51663372914703ed",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.15",
+      "side": "back",
+      "source_sha256": "380271a3cd5cd7e0548e59a41f4b4fa48b5832a47a80851d51663372914703ed",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.16",
+      "side": "front",
+      "source_sha256": "0f94a2f5f30cc597a38e1382c7ba15ddc8fe89bf33cbc5c11a20107887624f42",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.236,
+      "point": "toe",
+      "pose": "run.16",
+      "side": "front",
+      "source_sha256": "0f94a2f5f30cc597a38e1382c7ba15ddc8fe89bf33cbc5c11a20107887624f42",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.16",
+      "side": "back",
+      "source_sha256": "0f94a2f5f30cc597a38e1382c7ba15ddc8fe89bf33cbc5c11a20107887624f42",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.16",
+      "side": "back",
+      "source_sha256": "0f94a2f5f30cc597a38e1382c7ba15ddc8fe89bf33cbc5c11a20107887624f42",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.17",
+      "side": "front",
+      "source_sha256": "25429ea949022d998f799c4ab2bdbfb67a1bcefd64ce5ec985ce08c31d215741",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.17",
+      "side": "front",
+      "source_sha256": "25429ea949022d998f799c4ab2bdbfb67a1bcefd64ce5ec985ce08c31d215741",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.17",
+      "side": "back",
+      "source_sha256": "25429ea949022d998f799c4ab2bdbfb67a1bcefd64ce5ec985ce08c31d215741",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.17",
+      "side": "back",
+      "source_sha256": "25429ea949022d998f799c4ab2bdbfb67a1bcefd64ce5ec985ce08c31d215741",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.18",
+      "side": "front",
+      "source_sha256": "3ec5174ced1ace6daeab8e22394b816e956a4aa2bd3ab5293fadd0db71840623",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.18",
+      "side": "front",
+      "source_sha256": "3ec5174ced1ace6daeab8e22394b816e956a4aa2bd3ab5293fadd0db71840623",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.18",
+      "side": "back",
+      "source_sha256": "3ec5174ced1ace6daeab8e22394b816e956a4aa2bd3ab5293fadd0db71840623",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.18",
+      "side": "back",
+      "source_sha256": "3ec5174ced1ace6daeab8e22394b816e956a4aa2bd3ab5293fadd0db71840623",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.0,
+      "point": "heel",
+      "pose": "run.19",
+      "side": "front",
+      "source_sha256": "a6ea9c763703e172a69617d7eb5605569d2e508bfadb082332e069eaff31c99a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.236,
+      "point": "toe",
+      "pose": "run.19",
+      "side": "front",
+      "source_sha256": "a6ea9c763703e172a69617d7eb5605569d2e508bfadb082332e069eaff31c99a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.19",
+      "side": "back",
+      "source_sha256": "a6ea9c763703e172a69617d7eb5605569d2e508bfadb082332e069eaff31c99a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.414,
+      "point": "toe",
+      "pose": "run.19",
+      "side": "back",
+      "source_sha256": "a6ea9c763703e172a69617d7eb5605569d2e508bfadb082332e069eaff31c99a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 3.0,
+      "point": "heel",
+      "pose": "run.20",
+      "side": "front",
+      "source_sha256": "3861829dbab6b302465bc272886dc0b1a51ce60ecbec75f5c57f8e1790dbfff3",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.20",
+      "side": "front",
+      "source_sha256": "3861829dbab6b302465bc272886dc0b1a51ce60ecbec75f5c57f8e1790dbfff3",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.20",
+      "side": "back",
+      "source_sha256": "3861829dbab6b302465bc272886dc0b1a51ce60ecbec75f5c57f8e1790dbfff3",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.828,
+      "point": "toe",
+      "pose": "run.20",
+      "side": "back",
+      "source_sha256": "3861829dbab6b302465bc272886dc0b1a51ce60ecbec75f5c57f8e1790dbfff3",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.21",
+      "side": "front",
+      "source_sha256": "69cf7aa7922ddcfdf0d6034be62af52bf398cf6749b25ef8dce58bd6665f918f",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.21",
+      "side": "front",
+      "source_sha256": "69cf7aa7922ddcfdf0d6034be62af52bf398cf6749b25ef8dce58bd6665f918f",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.21",
+      "side": "back",
+      "source_sha256": "69cf7aa7922ddcfdf0d6034be62af52bf398cf6749b25ef8dce58bd6665f918f",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.21",
+      "side": "back",
+      "source_sha256": "69cf7aa7922ddcfdf0d6034be62af52bf398cf6749b25ef8dce58bd6665f918f",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.22",
+      "side": "front",
+      "source_sha256": "299c7b7391985700c9c48592edfcb7df7d0b89e6b93c16e7f4cdc184610adf1c",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.22",
+      "side": "front",
+      "source_sha256": "299c7b7391985700c9c48592edfcb7df7d0b89e6b93c16e7f4cdc184610adf1c",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "run.22",
+      "side": "back",
+      "source_sha256": "299c7b7391985700c9c48592edfcb7df7d0b89e6b93c16e7f4cdc184610adf1c",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "run.22",
+      "side": "back",
+      "source_sha256": "299c7b7391985700c9c48592edfcb7df7d0b89e6b93c16e7f4cdc184610adf1c",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.00",
+      "side": "front",
+      "source_sha256": "96ccd40082d6aa0f198a360a2d1ad43bd5c2bb50571c3bacbc8b7862def4e275",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.00",
+      "side": "front",
+      "source_sha256": "96ccd40082d6aa0f198a360a2d1ad43bd5c2bb50571c3bacbc8b7862def4e275",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.00",
+      "side": "back",
+      "source_sha256": "96ccd40082d6aa0f198a360a2d1ad43bd5c2bb50571c3bacbc8b7862def4e275",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.00",
+      "side": "back",
+      "source_sha256": "96ccd40082d6aa0f198a360a2d1ad43bd5c2bb50571c3bacbc8b7862def4e275",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.236,
+      "point": "heel",
+      "pose": "walk.01",
+      "side": "front",
+      "source_sha256": "77495276708e295aac9faa796ae7c55513ee090709350a3e01e57043ae55aa40",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.01",
+      "side": "front",
+      "source_sha256": "77495276708e295aac9faa796ae7c55513ee090709350a3e01e57043ae55aa40",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.01",
+      "side": "back",
+      "source_sha256": "77495276708e295aac9faa796ae7c55513ee090709350a3e01e57043ae55aa40",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.01",
+      "side": "back",
+      "source_sha256": "77495276708e295aac9faa796ae7c55513ee090709350a3e01e57043ae55aa40",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.02",
+      "side": "front",
+      "source_sha256": "4b045b240e443863762e34727b165c0e15723598b9fdef6ec041d28b584f3efd",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.02",
+      "side": "front",
+      "source_sha256": "4b045b240e443863762e34727b165c0e15723598b9fdef6ec041d28b584f3efd",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.02",
+      "side": "back",
+      "source_sha256": "4b045b240e443863762e34727b165c0e15723598b9fdef6ec041d28b584f3efd",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.02",
+      "side": "back",
+      "source_sha256": "4b045b240e443863762e34727b165c0e15723598b9fdef6ec041d28b584f3efd",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.236,
+      "point": "heel",
+      "pose": "walk.03",
+      "side": "front",
+      "source_sha256": "934bbbfcf585489fecc7e9268d4c711cec4bc344ebaf745b25a5723c0d5eadd9",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.03",
+      "side": "front",
+      "source_sha256": "934bbbfcf585489fecc7e9268d4c711cec4bc344ebaf745b25a5723c0d5eadd9",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.03",
+      "side": "back",
+      "source_sha256": "934bbbfcf585489fecc7e9268d4c711cec4bc344ebaf745b25a5723c0d5eadd9",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.0,
+      "point": "toe",
+      "pose": "walk.03",
+      "side": "back",
+      "source_sha256": "934bbbfcf585489fecc7e9268d4c711cec4bc344ebaf745b25a5723c0d5eadd9",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.04",
+      "side": "front",
+      "source_sha256": "5692a04c982a6dd402a5a65f8445ae938153eca00b1a9c1337938486f2d58d4c",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.04",
+      "side": "front",
+      "source_sha256": "5692a04c982a6dd402a5a65f8445ae938153eca00b1a9c1337938486f2d58d4c",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.04",
+      "side": "back",
+      "source_sha256": "5692a04c982a6dd402a5a65f8445ae938153eca00b1a9c1337938486f2d58d4c",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.828,
+      "point": "toe",
+      "pose": "walk.04",
+      "side": "back",
+      "source_sha256": "5692a04c982a6dd402a5a65f8445ae938153eca00b1a9c1337938486f2d58d4c",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.236,
+      "point": "heel",
+      "pose": "walk.05",
+      "side": "front",
+      "source_sha256": "76a884d6936fe257eb65c21c8076936df4f59a7bf5536f669677b7c9659bd23c",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.236,
+      "point": "toe",
+      "pose": "walk.05",
+      "side": "front",
+      "source_sha256": "76a884d6936fe257eb65c21c8076936df4f59a7bf5536f669677b7c9659bd23c",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.05",
+      "side": "back",
+      "source_sha256": "76a884d6936fe257eb65c21c8076936df4f59a7bf5536f669677b7c9659bd23c",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.236,
+      "point": "toe",
+      "pose": "walk.05",
+      "side": "back",
+      "source_sha256": "76a884d6936fe257eb65c21c8076936df4f59a7bf5536f669677b7c9659bd23c",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.06",
+      "side": "front",
+      "source_sha256": "67f9d385f3d4ab01035884c6e4c252ad687fa3d3a977706b8ecadb38daef8e86",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.06",
+      "side": "front",
+      "source_sha256": "67f9d385f3d4ab01035884c6e4c252ad687fa3d3a977706b8ecadb38daef8e86",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.06",
+      "side": "back",
+      "source_sha256": "67f9d385f3d4ab01035884c6e4c252ad687fa3d3a977706b8ecadb38daef8e86",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.06",
+      "side": "back",
+      "source_sha256": "67f9d385f3d4ab01035884c6e4c252ad687fa3d3a977706b8ecadb38daef8e86",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.07",
+      "side": "front",
+      "source_sha256": "4fddae734974619176e7d8a445ffcc49274c5f7db74007378bd14724e0b521e0",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.07",
+      "side": "front",
+      "source_sha256": "4fddae734974619176e7d8a445ffcc49274c5f7db74007378bd14724e0b521e0",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.07",
+      "side": "back",
+      "source_sha256": "4fddae734974619176e7d8a445ffcc49274c5f7db74007378bd14724e0b521e0",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.07",
+      "side": "back",
+      "source_sha256": "4fddae734974619176e7d8a445ffcc49274c5f7db74007378bd14724e0b521e0",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.08",
+      "side": "front",
+      "source_sha256": "742808d046f01f23a96c78578209a1e490d29964a5fcb0cba59bad679526d618",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.08",
+      "side": "front",
+      "source_sha256": "742808d046f01f23a96c78578209a1e490d29964a5fcb0cba59bad679526d618",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.08",
+      "side": "back",
+      "source_sha256": "742808d046f01f23a96c78578209a1e490d29964a5fcb0cba59bad679526d618",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.08",
+      "side": "back",
+      "source_sha256": "742808d046f01f23a96c78578209a1e490d29964a5fcb0cba59bad679526d618",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.09",
+      "side": "front",
+      "source_sha256": "aef5e099f89b94d0a045b9d82977f7f52fdde9fd00f2e80af7dc12ba7ddcbd12",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.09",
+      "side": "front",
+      "source_sha256": "aef5e099f89b94d0a045b9d82977f7f52fdde9fd00f2e80af7dc12ba7ddcbd12",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.09",
+      "side": "back",
+      "source_sha256": "aef5e099f89b94d0a045b9d82977f7f52fdde9fd00f2e80af7dc12ba7ddcbd12",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.09",
+      "side": "back",
+      "source_sha256": "aef5e099f89b94d0a045b9d82977f7f52fdde9fd00f2e80af7dc12ba7ddcbd12",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.10",
+      "side": "front",
+      "source_sha256": "bcf81f11a2ac56185bf6a6d3c4ed2a8269aaa2c49d89d5d250778a4ff8120844",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.10",
+      "side": "front",
+      "source_sha256": "bcf81f11a2ac56185bf6a6d3c4ed2a8269aaa2c49d89d5d250778a4ff8120844",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.10",
+      "side": "back",
+      "source_sha256": "bcf81f11a2ac56185bf6a6d3c4ed2a8269aaa2c49d89d5d250778a4ff8120844",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.10",
+      "side": "back",
+      "source_sha256": "bcf81f11a2ac56185bf6a6d3c4ed2a8269aaa2c49d89d5d250778a4ff8120844",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.11",
+      "side": "front",
+      "source_sha256": "b260db96dcbfc4d38f27f305646deead539a5cc89ac736ec117b11fb7d29b4ac",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.11",
+      "side": "front",
+      "source_sha256": "b260db96dcbfc4d38f27f305646deead539a5cc89ac736ec117b11fb7d29b4ac",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.11",
+      "side": "back",
+      "source_sha256": "b260db96dcbfc4d38f27f305646deead539a5cc89ac736ec117b11fb7d29b4ac",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.11",
+      "side": "back",
+      "source_sha256": "b260db96dcbfc4d38f27f305646deead539a5cc89ac736ec117b11fb7d29b4ac",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.12",
+      "side": "front",
+      "source_sha256": "516a13390abcf1237f3d76fc7abfd2a8eb45aec6c8f21974064e99a2cf651526",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.12",
+      "side": "front",
+      "source_sha256": "516a13390abcf1237f3d76fc7abfd2a8eb45aec6c8f21974064e99a2cf651526",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.12",
+      "side": "back",
+      "source_sha256": "516a13390abcf1237f3d76fc7abfd2a8eb45aec6c8f21974064e99a2cf651526",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.12",
+      "side": "back",
+      "source_sha256": "516a13390abcf1237f3d76fc7abfd2a8eb45aec6c8f21974064e99a2cf651526",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.13",
+      "side": "front",
+      "source_sha256": "f0d273e9077b4f458515d0747939ef8fe59e649b0eb1058a6e9e487620df4a82",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.0,
+      "point": "toe",
+      "pose": "walk.13",
+      "side": "front",
+      "source_sha256": "f0d273e9077b4f458515d0747939ef8fe59e649b0eb1058a6e9e487620df4a82",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.13",
+      "side": "back",
+      "source_sha256": "f0d273e9077b4f458515d0747939ef8fe59e649b0eb1058a6e9e487620df4a82",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.13",
+      "side": "back",
+      "source_sha256": "f0d273e9077b4f458515d0747939ef8fe59e649b0eb1058a6e9e487620df4a82",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.14",
+      "side": "front",
+      "source_sha256": "e85909a0a73203e8a09154b149c48d44bb41682e608f5c009b78b86887a8ce25",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.14",
+      "side": "front",
+      "source_sha256": "e85909a0a73203e8a09154b149c48d44bb41682e608f5c009b78b86887a8ce25",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.14",
+      "side": "back",
+      "source_sha256": "e85909a0a73203e8a09154b149c48d44bb41682e608f5c009b78b86887a8ce25",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.14",
+      "side": "back",
+      "source_sha256": "e85909a0a73203e8a09154b149c48d44bb41682e608f5c009b78b86887a8ce25",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.15",
+      "side": "front",
+      "source_sha256": "4a1bdb65ef9cfe8bd971a64a2f912f22933db0b627863060c97623273b46cf94",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.15",
+      "side": "front",
+      "source_sha256": "4a1bdb65ef9cfe8bd971a64a2f912f22933db0b627863060c97623273b46cf94",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.15",
+      "side": "back",
+      "source_sha256": "4a1bdb65ef9cfe8bd971a64a2f912f22933db0b627863060c97623273b46cf94",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.15",
+      "side": "back",
+      "source_sha256": "4a1bdb65ef9cfe8bd971a64a2f912f22933db0b627863060c97623273b46cf94",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.16",
+      "side": "front",
+      "source_sha256": "845e673d91983488779cdb9dcec6e4b5ce72e606bcc24a00553f35b92a26d574",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.16",
+      "side": "front",
+      "source_sha256": "845e673d91983488779cdb9dcec6e4b5ce72e606bcc24a00553f35b92a26d574",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.16",
+      "side": "back",
+      "source_sha256": "845e673d91983488779cdb9dcec6e4b5ce72e606bcc24a00553f35b92a26d574",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.16",
+      "side": "back",
+      "source_sha256": "845e673d91983488779cdb9dcec6e4b5ce72e606bcc24a00553f35b92a26d574",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.17",
+      "side": "front",
+      "source_sha256": "530d36513e5fd12b8e3e846570f11e9debbac1f7b9962591622702cdd9ba14df",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.414,
+      "point": "toe",
+      "pose": "walk.17",
+      "side": "front",
+      "source_sha256": "530d36513e5fd12b8e3e846570f11e9debbac1f7b9962591622702cdd9ba14df",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.0,
+      "point": "heel",
+      "pose": "walk.17",
+      "side": "back",
+      "source_sha256": "530d36513e5fd12b8e3e846570f11e9debbac1f7b9962591622702cdd9ba14df",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.17",
+      "side": "back",
+      "source_sha256": "530d36513e5fd12b8e3e846570f11e9debbac1f7b9962591622702cdd9ba14df",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.18",
+      "side": "front",
+      "source_sha256": "b6e1f1edd22a382ef463e8dd501d84f1a9d1eac6073129bdec066fcc8247822a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.236,
+      "point": "toe",
+      "pose": "walk.18",
+      "side": "front",
+      "source_sha256": "b6e1f1edd22a382ef463e8dd501d84f1a9d1eac6073129bdec066fcc8247822a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.18",
+      "side": "back",
+      "source_sha256": "b6e1f1edd22a382ef463e8dd501d84f1a9d1eac6073129bdec066fcc8247822a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.18",
+      "side": "back",
+      "source_sha256": "b6e1f1edd22a382ef463e8dd501d84f1a9d1eac6073129bdec066fcc8247822a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.19",
+      "side": "front",
+      "source_sha256": "c0e666dcc2b8b7a7b229663c04bde93c1b81a7f65441fb51725c56768cd0abac",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.828,
+      "point": "toe",
+      "pose": "walk.19",
+      "side": "front",
+      "source_sha256": "c0e666dcc2b8b7a7b229663c04bde93c1b81a7f65441fb51725c56768cd0abac",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.19",
+      "side": "back",
+      "source_sha256": "c0e666dcc2b8b7a7b229663c04bde93c1b81a7f65441fb51725c56768cd0abac",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.19",
+      "side": "back",
+      "source_sha256": "c0e666dcc2b8b7a7b229663c04bde93c1b81a7f65441fb51725c56768cd0abac",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.20",
+      "side": "front",
+      "source_sha256": "a5d7ed52c6cc0606d068398da6836ba7ff3b00304850e6ae114ef198f46d6307",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 6.708,
+      "point": "toe",
+      "pose": "walk.20",
+      "side": "front",
+      "source_sha256": "a5d7ed52c6cc0606d068398da6836ba7ff3b00304850e6ae114ef198f46d6307",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.20",
+      "side": "back",
+      "source_sha256": "a5d7ed52c6cc0606d068398da6836ba7ff3b00304850e6ae114ef198f46d6307",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.20",
+      "side": "back",
+      "source_sha256": "a5d7ed52c6cc0606d068398da6836ba7ff3b00304850e6ae114ef198f46d6307",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.21",
+      "side": "front",
+      "source_sha256": "7e762c0549aaca9896c1284bed0c484f4a8e6eaa9dc88ccab04b02bb3e13812a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.828,
+      "point": "toe",
+      "pose": "walk.21",
+      "side": "front",
+      "source_sha256": "7e762c0549aaca9896c1284bed0c484f4a8e6eaa9dc88ccab04b02bb3e13812a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.21",
+      "side": "back",
+      "source_sha256": "7e762c0549aaca9896c1284bed0c484f4a8e6eaa9dc88ccab04b02bb3e13812a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.21",
+      "side": "back",
+      "source_sha256": "7e762c0549aaca9896c1284bed0c484f4a8e6eaa9dc88ccab04b02bb3e13812a",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.22",
+      "side": "front",
+      "source_sha256": "b07d9490c4395796c586e891ca8541ef9690d8cdad5f88ccb619ca0e84785fa8",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.22",
+      "side": "front",
+      "source_sha256": "b07d9490c4395796c586e891ca8541ef9690d8cdad5f88ccb619ca0e84785fa8",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.22",
+      "side": "back",
+      "source_sha256": "b07d9490c4395796c586e891ca8541ef9690d8cdad5f88ccb619ca0e84785fa8",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.22",
+      "side": "back",
+      "source_sha256": "b07d9490c4395796c586e891ca8541ef9690d8cdad5f88ccb619ca0e84785fa8",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.23",
+      "side": "front",
+      "source_sha256": "0eb5e297062ece76d9d021009918537323d8b96035e539791e686953f38b44e6",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.23",
+      "side": "front",
+      "source_sha256": "0eb5e297062ece76d9d021009918537323d8b96035e539791e686953f38b44e6",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.23",
+      "side": "back",
+      "source_sha256": "0eb5e297062ece76d9d021009918537323d8b96035e539791e686953f38b44e6",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.23",
+      "side": "back",
+      "source_sha256": "0eb5e297062ece76d9d021009918537323d8b96035e539791e686953f38b44e6",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.0,
+      "point": "heel",
+      "pose": "walk.24",
+      "side": "front",
+      "source_sha256": "e78c9743b05b03d9ef47e979858f5ec39c6433bfadeda73302bc17a8c946ce53",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.0,
+      "point": "toe",
+      "pose": "walk.24",
+      "side": "front",
+      "source_sha256": "e78c9743b05b03d9ef47e979858f5ec39c6433bfadeda73302bc17a8c946ce53",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.24",
+      "side": "back",
+      "source_sha256": "e78c9743b05b03d9ef47e979858f5ec39c6433bfadeda73302bc17a8c946ce53",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.24",
+      "side": "back",
+      "source_sha256": "e78c9743b05b03d9ef47e979858f5ec39c6433bfadeda73302bc17a8c946ce53",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.0,
+      "point": "heel",
+      "pose": "walk.25",
+      "side": "front",
+      "source_sha256": "173fad95b76dd9a8ec0865ed46778db3db74ffb1b73791c4e889c747f3059895",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.0,
+      "point": "toe",
+      "pose": "walk.25",
+      "side": "front",
+      "source_sha256": "173fad95b76dd9a8ec0865ed46778db3db74ffb1b73791c4e889c747f3059895",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.25",
+      "side": "back",
+      "source_sha256": "173fad95b76dd9a8ec0865ed46778db3db74ffb1b73791c4e889c747f3059895",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "toe",
+      "pose": "walk.25",
+      "side": "back",
+      "source_sha256": "173fad95b76dd9a8ec0865ed46778db3db74ffb1b73791c4e889c747f3059895",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.26",
+      "side": "front",
+      "source_sha256": "2c4cd42d7a3ba063e2bb52be06c8769269b8c0ebfa3889d12e60890a6b48f5ea",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 1.0,
+      "point": "toe",
+      "pose": "walk.26",
+      "side": "front",
+      "source_sha256": "2c4cd42d7a3ba063e2bb52be06c8769269b8c0ebfa3889d12e60890a6b48f5ea",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 0.0,
+      "point": "heel",
+      "pose": "walk.26",
+      "side": "back",
+      "source_sha256": "2c4cd42d7a3ba063e2bb52be06c8769269b8c0ebfa3889d12e60890a6b48f5ea",
+      "status": "within-bound"
+    },
+    {
+      "distance_px": 2.0,
+      "point": "toe",
+      "pose": "walk.26",
+      "side": "back",
+      "source_sha256": "2c4cd42d7a3ba063e2bb52be06c8769269b8c0ebfa3889d12e60890a6b48f5ea",
+      "status": "within-bound"
+    }
+  ]
+}

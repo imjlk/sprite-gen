@@ -1,0 +1,31 @@
+{
+  "body": [
+    {
+      "digest": "c9cd5c50abda39c18e144d8b9335c8d81736515fefa665f8e8c013d52fe3ba22",
+      "id": "full-motion.body"
+    }
+  ],
+  "motion": {
+    "digest": "b2b3be93a5fab17fcb945e3d9f5ebe4b6d78b47c58e4d9d8c8e2b10b4f79206f",
+    "id": "full-motion.walk-run"
+  },
+  "appearance": {
+    "digest": "5e40625498a51c31a268a6fe5afe0ddb6990e27a990997ba8c2f376058f1d851",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "frames_reviewed_in_actual_composition": 50,
+  "visual_observation": "All walk and run contacts inspected. New lateral shoe silhouette retains rounded toe, heel and sole thickness while rotating; no major visible naked ankle or detached cuff. Hand hue stays peach in normal and half speed playback. Rear collars at crossing remain partly occluded, not automatically approved.",
+  "ui": {
+    "speeds": [
+      "1x",
+      "0.5x"
+    ],
+    "walk_wrap": "27/27 -> 1/27",
+    "run_wrap": "23/23 -> 1/23",
+    "shoe_toggle": "13/27 -> 13/27",
+    "position_correction_enabled": true,
+    "console_errors": []
+  },
+  "appearance_clips_baked": 0
+}

@@ -1,0 +1,6 @@
+{
+  "adopted": false,
+  "reason": "Review preview was started while evidence rendering was still writing run frames; it contains only 2/23 run frames. Never use as final playback.",
+  "replacement": "playback-r4",
+  "runtime_assets_generated": 0
+}

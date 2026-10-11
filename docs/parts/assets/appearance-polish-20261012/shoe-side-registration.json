@@ -1,0 +1,25 @@
+{
+  "source_sha256": "2be87ce22c098ec23c77da18a332632430bda374a130bc4b50c119af5060e409",
+  "source_size": [
+    1774,
+    887
+  ],
+  "sole_heel": [
+    94,
+    743
+  ],
+  "sole_toe": [
+    1682,
+    743
+  ],
+  "canonical_heel": [
+    120,
+    795
+  ],
+  "canonical_toe": [
+    1430,
+    795
+  ],
+  "observation": "Authored from the exact generated lateral native viewed at full size. Side-view only; no automatic 3D approval.",
+  "art_approved": false
+}

@@ -1,6 +1,6 @@
 # 걷기 원본 교체와 신발·양말 교정 — 2026-10-12
 
-최신 workspace는 `assets/parts-motion-natural-20261012/production-r5/library/assembly.json`이다. 걷기 27프레임과 뛰기 23프레임에 독립 헤어·양말·신발을 적용한다. 같은 공통 모션 위에서 파츠만 교체하며 코디별 런타임 클립은 생성하지 않는다. 아트 승인 0, release-ready false인 검수용 결과다.
+이 수정 당시 workspace는 `assets/parts-motion-natural-20261012/production-r5/library/assembly.json`이다. 현재 뷰어에 반영된 신발 옆모습·피부색 후속 수정은 [26](26-shoe-perspective-and-skin-colour.md)에 있다. 걷기 27프레임과 뛰기 23프레임에 독립 헤어·양말·신발을 적용한다. 같은 공통 모션 위에서 파츠만 교체하며 코디별 런타임 클립은 생성하지 않는다. 아트 승인 0, release-ready false인 검수용 결과다.
 
 ## 해결한 문제
 

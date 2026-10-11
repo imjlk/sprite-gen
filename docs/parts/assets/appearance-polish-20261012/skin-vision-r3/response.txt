@@ -1,0 +1,39 @@
+{
+  "poses": {
+    "walk.01": {
+      "color": "improved",
+      "issues": []
+    },
+    "walk.05": {
+      "color": "improved",
+      "issues": []
+    },
+    "walk.13": {
+      "color": "improved",
+      "issues": []
+    },
+    "run.02": {
+      "color": "improved",
+      "issues": []
+    },
+    "run.05": {
+      "color": "improved",
+      "issues": []
+    },
+    "run.09": {
+      "color": "improved",
+      "issues": []
+    },
+    "run.17": {
+      "color": "improved",
+      "issues": [
+        "Tiny pale-yellow tint remains along the top of the raised forward fist; uncertain source highlight versus residual color, without an obvious broad flash."
+      ]
+    }
+  },
+  "limits": [
+    "AFTER skin hues appear consistent overall, with no obvious hot-pink flashes, new grey garment contamination, or lost finger contours.",
+    "Fine finger creases and tiny edge shading cannot be fully resolved at this board scale. Unchanged original garment contour marks are not newly introduced damage.",
+    "This still board cannot assess timing or gait and does not grant art approval."
+  ]
+}

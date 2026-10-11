@@ -1,0 +1,39 @@
+{
+  "body": [
+    {
+      "digest": "5884ce550ababa6138a987307de9082f8113870b273b55921e2b1d62b99c77df",
+      "id": "full-motion.body"
+    }
+  ],
+  "motion": {
+    "digest": "b2b3be93a5fab17fcb945e3d9f5ebe4b6d78b47c58e4d9d8c8e2b10b4f79206f",
+    "id": "full-motion.walk-run"
+  },
+  "appearance": {
+    "digest": "e142449bed208dd4886c7b9dc80ab3e06c56c3fd0daf47403298570415859833",
+    "id": "full-motion.example"
+  },
+  "input_sha256": "f0807ee699703313d10147d5fe5639fe6cb2c31650e5c1286b234d876218d73e",
+  "actual_sha256": "f34b77919d7f025d4e662e4023e2670a6caa185612879e0bd8aba9233183127f",
+  "art_approved": false,
+  "status": "completed",
+  "answer": {
+    "calf": "improved",
+    "cuff": "improved",
+    "shoes": "pass",
+    "issues": [
+      "AFTER closes the visible grey gap below the crossing shoe with a continuous cream sock connection to the rear ankle.",
+      "Foreground sock’s upper projection is slightly lower and simpler than BEFORE, though its hem remains angular.",
+      "Visible toe-cap fullness and sole thickness are preserved; exposed ankle-to-shoe attachments show no obvious separation."
+    ],
+    "limits": [
+      "Occluded rear collar cannot be assessed.",
+      "Crossing shoe’s toe is only partially visible.",
+      "This crop cannot establish gait or timing."
+    ]
+  },
+  "transport": {
+    "transport": "codex-exec",
+    "auth_source": "codex-login"
+  }
+}

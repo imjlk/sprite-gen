@@ -1,0 +1,75 @@
+{
+  "body": [
+    {
+      "digest": "5884ce550ababa6138a987307de9082f8113870b273b55921e2b1d62b99c77df",
+      "id": "full-motion.body"
+    }
+  ],
+  "motion": {
+    "digest": "b2b3be93a5fab17fcb945e3d9f5ebe4b6d78b47c58e4d9d8c8e2b10b4f79206f",
+    "id": "full-motion.walk-run"
+  },
+  "appearance": {
+    "digest": "e142449bed208dd4886c7b9dc80ab3e06c56c3fd0daf47403298570415859833",
+    "id": "full-motion.example"
+  },
+  "unchanged_actual_frames_from_r3": [
+    "run.00",
+    "run.01",
+    "run.02",
+    "run.03",
+    "run.04",
+    "run.05",
+    "run.06",
+    "run.07",
+    "run.08",
+    "run.09",
+    "run.10",
+    "run.11",
+    "run.12",
+    "run.13",
+    "run.14",
+    "run.15",
+    "run.16",
+    "run.17",
+    "run.18",
+    "run.19",
+    "run.20",
+    "run.21",
+    "run.22",
+    "walk.00",
+    "walk.01",
+    "walk.02",
+    "walk.03",
+    "walk.04",
+    "walk.05",
+    "walk.06",
+    "walk.07",
+    "walk.08",
+    "walk.09",
+    "walk.10",
+    "walk.11",
+    "walk.13",
+    "walk.14",
+    "walk.15",
+    "walk.16",
+    "walk.17",
+    "walk.18",
+    "walk.19",
+    "walk.20",
+    "walk.21",
+    "walk.22",
+    "walk.23",
+    "walk.24",
+    "walk.25",
+    "walk.26"
+  ],
+  "changed_actual_frames": [
+    "walk.12"
+  ],
+  "native_final_walk12_exact_png_and_references": true,
+  "source_body_rgba_changed_by_ownership": false,
+  "protected_walk12_calf_missing_pixels": 0,
+  "art_approved": false,
+  "actual_playback": "Both states replayed at 1x and walk crossing at 0.5x after final viewer replacement; no major visible skin hue flash or ankle separation. Position correction active; console errors none."
+}

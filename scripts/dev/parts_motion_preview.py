@@ -16,6 +16,15 @@ from sprite_gen.video.repair import measure_jolt
 def preview(old, new, out):
     if out.exists():
         raise ValueError('preserve the previous review artifact')
+    for folder in (old,new):
+        receipt=folder/'evidence.json'
+        if not receipt.exists():
+            raise ValueError('complete rendered evidence required; generation is still in progress')
+        evidence=json.loads(receipt.read_text())
+        expected={row['pose']+'.png' for row in evidence['poses']}
+        actual={file.name for file in (folder/'frames').glob('*.png')}
+        if expected!=actual or len(expected)!=evidence['frames']:
+            raise ValueError('rendered evidence is incomplete or contains stale frames')
     out.mkdir(parents=True)
     metrics = {}
     ffmpeg = shutil.which('ffmpeg') or '/opt/homebrew/bin/ffmpeg'

@@ -85,6 +85,7 @@ def similarity(image, matrix):
 
 
 def foot_matrix(points, *, length=88):
+    length=points.get('footwear_length',length)
     ankle=np.asarray(points['ankle'],float)
     heel=np.asarray(points.get('footwear_heel',points['heel']),float)
     toe=np.asarray(points.get('footwear_toe',points['toe']),float)
@@ -143,7 +144,9 @@ def ear_registration(source_body, target_body, matrix):
     return result,{'offset':[dx,dy],'contour_overlap':round(score,4),'source_bound_search':True}
 
 
-def prepare_library(out, template, geometry, *, preserve_library=None, preserve_states=(),preserve_poses=()):
+def prepare_library(out, template, geometry, *, preserve_library=None, preserve_states=(),preserve_poses=(), preserve_ownership=False):
+    if preserve_ownership and (not preserve_library or not (preserve_states or preserve_poses)):
+        raise ValueError('preserving ownership needs a source library and selected states or poses')
     root=out/'library';assembly=root/'assembly.json'
     if root.exists():raise ValueError('use a fresh library')
     old,reg=w.read_workspace(template/'assembly.json');rig=reg[old['rig']['id']];top=reg[rig['topology']['id']]
@@ -213,6 +216,11 @@ def prepare_library(out, template, geometry, *, preserve_library=None, preserve_
             if preserve_library and (state in preserve_states or pose in preserve_poses):
                 preserved=preserve_library/f'inputs/body-segments/{node}/{pose}.png'
                 arr=np.asarray(Image.open(preserved).convert('RGBA'))
+                if preserve_ownership:
+                    # A common-body RGB revision must retain the reviewed
+                    # ownership, including manual crossing/calf corrections.
+                    assert np.all((arr[...,3] == 0) | (arr[...,3] == pixels[...,3]))
+                    arr=np.where((arr[...,3]>0)[...,None],pixels,0).astype('uint8')
             target=folder/node/(pose+'.png');target.parent.mkdir(parents=True,exist_ok=True);im=Image.fromarray(arr);im.save(target);images[node]=im
             maps[node][pose]={'image':{'file':target.relative_to(folder).as_posix(),'sha256':a.sha256(target.read_bytes())},'format':'full-canvas','pivot':[0,0],'target_socket':'root','visible':bool(im.getbbox())}
         merged=Image.new('RGBA',body.size)
@@ -574,11 +582,12 @@ if __name__ == '__main__':
     parser.add_argument('--template',type=Path);parser.add_argument('--master',type=Path);parser.add_argument('--revision',default='parts-r1');parser.add_argument('--only',nargs='+')
     parser.add_argument('--defer-check',action='store_true')
     parser.add_argument('--preserve-library',type=Path);parser.add_argument('--preserve-states',nargs='*',default=[])
+    parser.add_argument('--preserve-ownership',action='store_true')
     parser.add_argument('--preserve-poses',nargs='*',default=[]);parser.add_argument('--regenerate-poses',nargs='*',default=[])
     parser.add_argument('--evidence',type=Path)
     args=parser.parse_args()
     if args.stage=='register':result=register_source(args.out,args.state,args.loop,engine_strip=args.engine_strip)
-    elif args.stage=='library':result=prepare_library(args.out,args.template,args.geometry,preserve_library=args.preserve_library,preserve_states=args.preserve_states,preserve_poses=args.preserve_poses)
+    elif args.stage=='library':result=prepare_library(args.out,args.template,args.geometry,preserve_library=args.preserve_library,preserve_states=args.preserve_states,preserve_poses=args.preserve_poses,preserve_ownership=args.preserve_ownership)
     elif args.stage=='parts':result=author_parts(args.out,args.template,args.master,revision=args.revision,only=args.only,defer_check=args.defer_check,preserve_library=args.preserve_library,preserve_states=args.preserve_states,regenerate_poses=args.regenerate_poses)
     elif args.stage=='build':result=validate_build(args.out)
     else:result=evidence(args.out,args.evidence)

@@ -1,0 +1,38 @@
+{
+  "art_approved": false,
+  "body_rgba_identical": true,
+  "boundary_points": [
+    [
+      330,
+      660
+    ],
+    [
+      330,
+      676
+    ]
+  ],
+  "destination_sha256": "a8669d0c4ff803a2bd9a1bfad7af5f4826a0269ea930b9d60b28b33c93011e2b",
+  "from": "foot_front",
+  "independent_candidates_need_rebinding": true,
+  "moved_pixels": 83,
+  "pose": "walk.12",
+  "protected_calf_sha256": "ac5b1d54bed4e3e0e76ad11bfaf5c4e0f7b529e3d9d171235748fa8cc9bfdda2",
+  "protected_opaque_calf_pixels": 73,
+  "reason": "Small rear calf contour below overlapping lifted heel was assigned to replaceable front foot; preserve source drawing.",
+  "right_boundary_points": [
+    [
+      356,
+      660
+    ],
+    [
+      356,
+      676
+    ]
+  ],
+  "source_sha256": "0bb1582cb04a819842f68700523f00488e1c44d34628e524b1400a4658860a7c",
+  "to": "leg_back",
+  "y_range": [
+    660,
+    676
+  ]
+}

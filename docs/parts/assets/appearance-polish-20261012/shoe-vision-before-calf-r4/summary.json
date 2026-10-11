@@ -1,0 +1,116 @@
+{
+  "art_approved": false,
+  "frames_expected": 12,
+  "frames_observed": 12,
+  "pages": [
+    {
+      "error": null,
+      "required_poses": [
+        "run.12",
+        "run.13",
+        "run.14",
+        "run.15",
+        "run.16",
+        "run.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.12",
+        "walk.13",
+        "walk.14",
+        "walk.15",
+        "walk.16",
+        "walk.17"
+      ],
+      "status": "completed"
+    }
+  ],
+  "poses": {
+    "run.12": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.13": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.14": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.15": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.16": {
+      "hair": "pass",
+      "issues": [
+        "Front sock appears shorter along the calf than in neighboring frames, particularly run.17. Its cream ankle bridge remains visible; the uncertainty concerns cuff-height continuity, not an exposed-background hole."
+      ],
+      "shoes": "pass",
+      "socks": "unknown"
+    },
+    "run.17": {
+      "hair": "pass",
+      "issues": [
+        "Rear shoe's navy upper appears unusually narrow beside the long sole compared with neighboring frames. Attachment and downward toe direction are visible, but preservation of product volume is uncertain."
+      ],
+      "shoes": "unknown",
+      "socks": "pass"
+    },
+    "walk.12": {
+      "hair": "pass",
+      "issues": [
+        "The front sock cuff has a sharp cream point and stepped edge instead of a clean fitted band.",
+        "An apparent grey notch interrupts the front calf-to-sock join where the bare crop shows continuous skin; this suggests a missing ankle bridge.",
+        "The crossing front footwear obscures the rear collar and calf entry, preventing confirmation of rear shoe attachment."
+      ],
+      "shoes": "unknown",
+      "socks": "rework"
+    },
+    "walk.13": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.14": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.15": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.16": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.17": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    }
+  },
+  "release_ready": false,
+  "scope": "actual still-frame attachment and between-frame appearance observations; no timing, gait or human approval",
+  "status": "completed"
+}

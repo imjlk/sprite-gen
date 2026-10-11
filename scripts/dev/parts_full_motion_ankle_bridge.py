@@ -40,17 +40,27 @@ def bridge(assembly,revision,defer_build=False,include_lower_leg=False):
             across=(coords-ankle)@np.array([-axis[1],axis[0]])
             lower=np.where((along<=0)&(np.abs(across)<=points.get('cuff_half_width',30)),leg,0).astype('uint8') if include_lower_leg else np.zeros_like(leg)
             top=points.get('cuff_top_height')
-            upper=np.where((along>=0)&(along<=top)&(np.abs(across)<=points.get('cuff_half_width',30)),leg,0).astype('uint8') if top is not None else np.zeros_like(leg)
+            rounding=points.get('cuff_top_rounding',0)
+            if not 0<=rounding<=8:raise ValueError('cuff top rounding must stay within 8 source pixels')
+            if rounding and top is None:raise ValueError('cuff rounding needs an authored top height')
+            top_profile=top-rounding*np.minimum((across/25)**2,1) if top is not None else None
+            upper=np.where((along>=0)&(along<=top_profile)&(np.abs(across)<=points.get('cuff_half_width',30)),leg,0).astype('uint8') if top is not None else np.zeros_like(leg)
             if top is not None:
-                required &= along<=top+.5
+                required &= along<=top_profile+.5
             added=np.where(required,np.maximum(np.maximum(foot,lower),upper),0).astype('uint8');identity='sock_'+side+'_cuff';old=np.array(pieces[identity])
             # Shoe placement can change while the body stays the same. Retain
             # the authored calf, but rebuild its foot-sourced bridge against
             # the CURRENT sole instead of accumulating former bridge pixels.
             retained=np.minimum(old[...,3],leg);alpha=np.maximum(retained,added)
+            if rounding:
+                cap=np.clip(top_profile+.5-along,0,1)
+                alpha=np.rint(alpha.astype(float)*cap).astype('uint8')
+                added=np.rint(added.astype(float)*cap).astype('uint8')
             edge=(alpha.astype(float)-np.array(Image.fromarray(alpha).filter(ImageFilter.MinFilter(3))))/255
             rgb=np.array([245.,239.,221.])*(1-edge[...,None])+np.array([151,138,113])*edge[...,None]
-            new=np.dstack([np.rint(rgb).astype('uint8'),alpha]);kept=retained>0;new[kept,:3]=old[kept,:3];new[alpha==0]=0
+            new=np.dstack([np.rint(rgb).astype('uint8'),alpha]);kept=retained>0
+            if rounding:kept &= cap>=1
+            new[kept,:3]=old[kept,:3];new[alpha==0]=0
             changed |= not np.array_equal(new,old)
             pieces[identity]=Image.fromarray(new)
             guide=folder/f'{pose}.{side}.ankle-required.png';Image.fromarray(added).save(guide)
