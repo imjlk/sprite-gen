@@ -1,0 +1,26 @@
+{
+  "sources": [
+    {
+      "asset": "shoe-native-r2.png",
+      "provider": "native-imagegen",
+      "native_output": "/Users/imjlk/.codex/generated_images/01a10599-3777-70a3-a202-f7e2f6376246/exec-8d85e54c-b5fd-443d-a580-a6005862a250.png",
+      "input": "assets/parts-independent-qualified-20261011/library/inputs/shoe-replacement-r12/native-master.png",
+      "intent_summary": "Compact navy/ivory orthographic SD side sneaker; rounded short toe, 2.3:1 volume, three simple lace crossings, thin straight outsole, open collar, no body/sock/shadow. Native master is then rigidly registered and prefiltered per pose.",
+      "sha256": "0967d00e7127ea28d46c64431bb04bb46cb70b61cfe6a2a387bfd50795eebc6a",
+      "intent_is_verbatim_prompt": false
+    },
+    {
+      "asset": "walk-start-r2.png",
+      "provider": "native-imagegen",
+      "native_output": "/Users/imjlk/.codex/generated_images/01a10599-3777-70a3-a202-f7e2f6376246/exec-fa572cc8-5fad-4845-9bca-680640e37a72.png",
+      "input": "assets/parts-independent-qualified-20261011/library/inputs/body/000.png",
+      "intent_summary": "Same approved SD style in relaxed side walking contact, gray singlet/shorts, no hair/socks/shoes, transparent background. Used as common body-motion video reference.",
+      "sha256": "09939fecc2e554188fa59ec6c9aca4f3486518fdfb529482784166a3d0c9a47d",
+      "intent_is_verbatim_prompt": false
+    }
+  ],
+  "art_approved": false,
+  "hair_source": "previous qualified native R9 independent hair; see docs/parts/assets/socks-20261011/native-hair-generation.json",
+  "sock_method": "procedural cream cotton; native material is reference only",
+  "new_image_prompts": "native tool call records in task history; here retain descriptive intent, not fabricated exact request text"
+}

@@ -1,0 +1,51 @@
+{
+  "poses": {
+    "walk.06": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.07": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.08": {
+      "hair": "pass",
+      "socks": "rework",
+      "shoes": "unknown",
+      "issues": [
+        "Enlarged actual front ankle shows a pointed cream flap projecting left above the shoe heel, unlike the continuous contour of the bare ankle.",
+        "A grey recess beneath that flap appears to interrupt the ankle bridge. This is a possible body-ownership hole, not an opaque cream sock region.",
+        "Front shoe volume and sole are visible, but secure calf entry at the heel collar cannot be confirmed around that recess. The preceding and following frames show a more continuous connection."
+      ]
+    },
+    "walk.09": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.10": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.11": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "The walk.08 front-ankle recess is visibly suspicious, but this board alone cannot conclusively separate missing body pixels from a sock contour defect.",
+    "Occluded surfaces and incidental shoe fragments cropped by enlargement boundaries remain unassessed; visible passes do not approve hidden rear footwear.",
+    "Only these six labeled frames were assessed. The other 14 walk frames and all 23 run frames are outside this page.",
+    "Stills do not establish speed, timing or gait quality.",
+    "This observational audit grants no curator approval or release."
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "answer": {
+    "limits": [
+      "Only the six labeled frames shown were inspected; the remaining walk and run frames are unassessed.",
+      "Flattened compositions cannot establish hidden overlap geometry or original alpha-edge quality. Some neighboring footwear is cropped by the ankle enlargement boundaries.",
+      "Consecutive stills support attachment and design comparisons, but cannot establish animation timing, speed or biomechanical gait quality.",
+      "These observational part assessments grant no curator approval or release."
+    ],
+    "poses": {
+      "walk.06": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.07": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.08": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.09": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.10": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.11": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "5f2fa376dc0255c1967fd58ba6bedfccb0d12ef785d7fc945f00e4a42cb987cd",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "4638070a5fb2c4a6f4e8072444e3d8baace910e8a18a1e109fb3958f5cd6b816",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "c3906f93e6f447b5ee307e7e23264d6f08eebef68716c3cd3ff80175f3093cc1",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "a54e12593c1ccccba3a996ab8b6caf57ba9a9f250b57425125bf314fcab59521",
+  "release_ready": false,
+  "required_poses": [
+    "walk.06",
+    "walk.07",
+    "walk.08",
+    "walk.09",
+    "walk.10",
+    "walk.11"
+  ],
+  "response_sha256": "0563b56e2f7eaa491c9de9e0ecb047fbfd8b086a71a87575257ef48abc1c9dcb",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "art_approved": false,
+  "body": {
+    "digest": "c2a79d3f2770b5bff9399e3ba49ae16d014a881154d15ca6b24f3d09c29d56a8",
+    "id": "full-motion.body"
+  },
+  "poses": [
+    {
+      "body_rgba_changed": false,
+      "from": "leg_front",
+      "moved_pixels": 53,
+      "polygon": [
+        [
+          285,
+          677
+        ],
+        [
+          299,
+          677
+        ],
+        [
+          301,
+          686
+        ],
+        [
+          285,
+          686
+        ]
+      ],
+      "pose": "walk.08",
+      "protected_calf": "walk.08.protected-calf.png",
+      "source_body_sha256": "aa9e399ae5a7abad08efe921fe3762f01618ba704acb8cf183ca91762c1e1178",
+      "to": "foot_front"
+    }
+  ]
+}

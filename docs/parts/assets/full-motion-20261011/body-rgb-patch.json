@@ -1,0 +1,7 @@
+{
+  "patch_sha256": "3771660ff075d7cda7819ba51338560fa2e0682a4a171f17f46fb76ad120b0d0",
+  "frames": 43,
+  "includes_transparent_rgb_zeroing": true,
+  "scope": "exact recorded source-specific chroma RGB edit; alpha/order/timing unchanged; not a general outlier detector",
+  "art_approved": false
+}

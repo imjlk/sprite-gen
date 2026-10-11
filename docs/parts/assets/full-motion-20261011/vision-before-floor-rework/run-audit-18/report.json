@@ -1,0 +1,87 @@
+{
+  "answer": {
+    "limits": [
+      "Only run.18–run.22 are shown; other frames are unassessed.",
+      "Both back-foot and front-foot shoes are visible in the enlargements. Hidden surfaces and anatomy beneath opaque layers remain unobservable.",
+      "Stills cannot establish motion quality, speed or gait correctness.",
+      "These observational ratings do not grant curator approval or release."
+    ],
+    "poses": {
+      "run.18": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.19": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.20": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.21": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.22": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "6ef835bce1d86f8f9c5ef77fa6a6ab5a2eb8893e925f5051c36b39272465e394",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "bd5a4433257755690a3ec9234f391e67e1c7df6f4aef784d0fb007d9c0a575f5",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "694f00224fe09d3daf050f36a03bd6bde164486d3cfd9df257519222a19aa58b",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "fa7b7666eab2488a0ea443bf4df1b2c946d2892c2dcee7f5baa792ff4aa34dde",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "49eec7e2c4f3ad8224eacc05898b0621f0280e80f3fa53074e21ae4498562c83",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "880daac972a8286165694e0bc7fc9cd6e20d20249735d66700e5ec23f5751d63",
+  "release_ready": false,
+  "required_poses": [
+    "run.18",
+    "run.19",
+    "run.20",
+    "run.21",
+    "run.22"
+  ],
+  "response_sha256": "c4e004ccaf579351dcfed98135f60853ea36bcdddc2f00fc1f001a7943093e42",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

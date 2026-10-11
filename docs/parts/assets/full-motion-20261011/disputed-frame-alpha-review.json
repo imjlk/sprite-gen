@@ -1,0 +1,32 @@
+[
+  {
+    "pose": "run.02",
+    "retained_front_leg_missing": 0,
+    "source_ankle_region_missing": 0
+  },
+  {
+    "pose": "walk.08",
+    "retained_front_leg_missing": 0,
+    "source_ankle_region_missing": 0
+  },
+  {
+    "pose": "walk.11",
+    "retained_front_leg_missing": 0,
+    "source_ankle_region_missing": 0
+  },
+  {
+    "pose": "walk.14",
+    "retained_front_leg_missing": 0,
+    "source_ankle_region_missing": 0
+  },
+  {
+    "pose": "walk.15",
+    "retained_front_leg_missing": 0,
+    "source_ankle_region_missing": 0
+  },
+  {
+    "pose": "walk.16",
+    "retained_front_leg_missing": 0,
+    "source_ankle_region_missing": 0
+  }
+]

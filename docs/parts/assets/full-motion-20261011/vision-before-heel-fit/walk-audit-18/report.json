@@ -1,0 +1,67 @@
+{
+  "answer": {
+    "limits": [
+      "The walk.18 rear cuff wedge cannot be conclusively distinguished as transparency versus a cut-edge artifact at the supplied display scale.",
+      "Both rear shoes are visible, but these views do not establish hidden-surface construction.",
+      "Only walk.18 and walk.19 were inspected. Stills do not establish speed or gait quality; this audit grants no curator or release approval."
+    ],
+    "poses": {
+      "walk.18": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged rear sock-to-skin junction has a stepped notch and pointed edge rather than a clean, fitted cuff. A small background-colored wedge there makes ankle-bridge continuity uncertain. The bare ankle has a continuous contour at this transition."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.19": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "77911f8c97623cfc579f8531f9c39423cbfb5a2cea5cc92f608668082b49d934",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "3eade100391b4784e62ff55c13e38febb7b151038d6b2978226a9590f9f2481e",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "694f00224fe09d3daf050f36a03bd6bde164486d3cfd9df257519222a19aa58b",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "f37bcbf6779e5b4e28d371c00c5bca7e0543601e0f6963575e47d615438b5800",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "117fee89d9c12e74cea34b5af3b594e6487ca220e1727a90bad9f232081ae1ef",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "90b232ca48929050eb5f8199fd247163db26351194157f8483c57ffcef442a33",
+  "release_ready": false,
+  "required_poses": [
+    "walk.18",
+    "walk.19"
+  ],
+  "response_sha256": "20b574613f372aff1146666b8a38f7c8cfd708370b391d11fa5b7083ca775a44",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

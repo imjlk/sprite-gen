@@ -1,0 +1,48 @@
+{
+  "approval_copied": false,
+  "art_approved": false,
+  "parts": [
+    {
+      "art_approved": false,
+      "batch": "idb5ffbaa21bc",
+      "current_body": [
+        {
+          "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+          "id": "full-motion.body"
+        }
+      ],
+      "generation_calls": 0,
+      "layers_pixel_identical": 43,
+      "part": "full-motion.hair",
+      "poses": 43
+    },
+    {
+      "art_approved": false,
+      "batch": "i451b94fc2fcd",
+      "current_body": [
+        {
+          "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+          "id": "full-motion.body"
+        }
+      ],
+      "generation_calls": 0,
+      "layers_pixel_identical": 86,
+      "part": "full-motion.sneakers",
+      "poses": 43
+    },
+    {
+      "art_approved": false,
+      "batch": "i5b9628851f28",
+      "current_body": [
+        {
+          "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+          "id": "full-motion.body"
+        }
+      ],
+      "generation_calls": 0,
+      "layers_pixel_identical": 172,
+      "part": "full-motion.socks",
+      "poses": 43
+    }
+  ]
+}

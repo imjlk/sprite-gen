@@ -1,0 +1,54 @@
+{
+  "poses": {
+    "run.00": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.01": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.02": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "The crossing front shoe obscures part of the rear calf/cuff junction. The visible cream segments do not establish uninterrupted rear ankle attachment."
+      ]
+    },
+    "run.03": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.04": {
+      "hair": "pass",
+      "socks": "rework",
+      "shoes": "rework",
+      "issues": [
+        "An angular cream heel tab projects behind the front sneaker, leaving an abrupt sock-to-shoe transition.",
+        "The bare front ankle has a heel projection at that location; this is not evidence of fabric spilling outside the calf. The actual sneaker heel sits forward of that contour and does not cleanly enclose the sock-covered heel."
+      ]
+    },
+    "run.05": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "unknown",
+      "issues": [
+        "The rear sneaker tapers into a unusually narrow toe wedge compared with run.04. Its steep rotation contributes to the silhouette, but consistent toe volume cannot be confidently established."
+      ]
+    }
+  },
+  "limits": [
+    "Only run.00 through run.05 are shown. The remaining 17 run frames and all 20 walk frames are unassessed.",
+    "Hair is shown only at full-character scale; fine ear-edge seams and small skin halos remain difficult to resolve.",
+    "The obscured rear ankle junction in run.02 is not approved.",
+    "These stills do not establish speed, gait quality, or motion continuity.",
+    "This observational audit grants no curator approval or release authorization."
+  ]
+}

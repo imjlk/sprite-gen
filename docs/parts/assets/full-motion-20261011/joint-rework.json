@@ -1,0 +1,75 @@
+{
+  "previous": "production-r6, R7/R8 authoring intermediates preserved",
+  "changes": {
+    "run.02": {
+      "back": {
+        "ankle": [
+          294,
+          675
+        ],
+        "heel": [
+          262,
+          698
+        ],
+        "toe": [
+          350,
+          708
+        ]
+      },
+      "front": {
+        "ankle": [
+          337,
+          614
+        ],
+        "heel": [
+          318,
+          634
+        ],
+        "toe": [
+          337,
+          658
+        ]
+      }
+    },
+    "run.14": {
+      "back": {
+        "ankle": [
+          277,
+          676
+        ],
+        "heel": [
+          250,
+          695
+        ],
+        "toe": [
+          332,
+          709
+        ]
+      },
+      "front": {
+        "ankle": [
+          340,
+          605
+        ],
+        "heel": [
+          322,
+          622
+        ],
+        "toe": [
+          336,
+          655
+        ]
+      }
+    }
+  },
+  "reason": "Whole heel ownership and corrected crossing landmarks; forward forefoot volume above ankle plane must also belong to foot. Cuff follows authored near-ankle tangent on curved run.01 calf.",
+  "body_RGBA_changed": false,
+  "approval": false,
+  "extra_changes": {
+    "run.01.front.cuff_axis_point": [
+      350,
+      632
+    ]
+  },
+  "additional": "walk.03/04 foreground shin explicit source ownership, fully occluded rear cuff drawn blank; calf band uses full source width inside own limb alpha."
+}

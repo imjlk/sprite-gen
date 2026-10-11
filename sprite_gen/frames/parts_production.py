@@ -104,8 +104,9 @@ _INDEPENDENT_LAYER = contract._record({
     "straight_edges": contract._mapping(contract._records(_STRAIGHT_EDGE)),
     "cover_rule": contract._cover_rule,
     "provides": contract._ids, "masks": contract._mapping(contract._mask),
+    "visible": contract._mapping(contract._boolean),
     "fit": contract._enum("contain", "cover"), "margin": contract._string,
-}, {"source_bounds": {}, "body_nodes": [], "replaces": [], "landmarks": {}, "guides": {}, "straight_edges": {}, "fit": "contain", "margin": "1"}, optional=("cover_rule", "provides", "masks"))
+}, {"source_bounds": {}, "body_nodes": [], "replaces": [], "landmarks": {}, "guides": {}, "straight_edges": {}, "fit": "contain", "margin": "1"}, optional=("cover_rule", "provides", "masks", "visible"))
 _INDEPENDENT = contract._record({"layers": contract._records(_INDEPENDENT_LAYER),
     "require_vision": contract._boolean, "reference_previous": contract._boolean}, {"require_vision": True, "reference_previous": False})
 _CONFIG = contract._record({
@@ -148,6 +149,19 @@ def _load(root, part_id):
         production["tracks"] = {MAIN: {"poses": production.pop("poses", {}), "batches": production.pop("batches", [])}}
     for variant in production["config"]["variants"]:
         production["tracks"].setdefault(variant["id"], {"poses": {}, "batches": []})
+    for rows in production['tracks'].values():
+        hydrated=[]
+        for entry in rows['batches']:
+            if 'archive' not in entry:
+                hydrated.append(entry)
+                continue
+            ref=entry['archive']
+            data=assets.SourceReader(path.parent).read(ref['file'],ref['sha256'])
+            batch=workspace.decode_json(data)
+            if batch.get('id')!=entry['id']:
+                raise contract.PartsContractError('archived production batch ID differs')
+            hydrated.append(batch)
+        rows['batches']=hydrated
     if production.get("built") and "selection" in production["built"] and MAIN not in production["built"]["selection"]:
         production["built"]["selection"] = {MAIN: production["built"]["selection"]}
     return production
@@ -156,8 +170,34 @@ def _load(root, part_id):
 def _save(root, production):
     folder = _folder(root, production["config"]["part_id"])
     folder.mkdir(parents=True, exist_ok=True)
+    # Rework history grows independently of the current selections. Keep every
+    # batch in an immutable, hashed document rather than exceeding the same
+    # 4 MiB state bound on the next read. _load restores the existing API shape.
+    stored=deepcopy(production)
+    payloads={}
+    needs_archive=len(workspace.json_bytes(stored))>workspace.MAX_JSON_BYTES
+    for rows in stored['tracks'].values() if needs_archive else ():
+        archived=[]
+        for batch in rows['batches']:
+            data=workspace.json_bytes(batch)
+            workspace.decode_json(data)
+            digest=assets.sha256(data)
+            filename=f'batch-history/{digest}.json'
+            payloads[filename]=data
+            archived.append({'id':batch['id'],'archive':{'file':filename,'sha256':digest}})
+        rows['batches']=archived
+    encoded=workspace.json_bytes(stored)
+    workspace.decode_json(encoded)
     with publish_guard(root):
-        atomic_write_text(folder / "production.json", workspace.json_bytes(production).decode("utf-8"))
+        for name,data in payloads.items():
+            target=folder/name
+            target.parent.mkdir(parents=True,exist_ok=True)
+            if target.exists():
+                if target.read_bytes()!=data:
+                    raise contract.PartsContractError('changed immutable production batch history')
+            else:
+                atomic_write_text(target,data.decode('utf-8'))
+        atomic_write_text(folder / "production.json", encoded.decode("utf-8"))
 
 
 def _track(production, track):
@@ -965,6 +1005,7 @@ def _measure(root, config, settings, location, context):
             old = frozen.get(layer['id'], {})
             if (old.get('replaces', []) != layer.get('replaces', []) or
                 old.get('provides',old.get('replaces',[])) != layer.get('provides',layer.get('replaces',[])) or
+                old.get('visible',True) != layer.get('visible',{}).get(record['pose_id'],True) or
                 not parts_independent.mask_matches(record,layer,record['pose_id']) or
                 old.get('cover_rule') != layer.get('cover_rule') or
                 old.get('straight_edges', []) != layer.get('straight_edges', {}).get(record['pose_id'], [])):
@@ -1306,7 +1347,7 @@ def contact(frames, order, rows, *, scale=3, columns=8, crop=None):
 
 
 def _independent_semantics(config):
-    return contract.content_digest({layer['id']:{key:layer.get(key) for key in ('node','provides','replaces','cover_rule','masks')}
+    return contract.content_digest({layer['id']:{key:layer.get(key) for key in ('node','provides','replaces','cover_rule','masks') + (('visible',) if 'visible' in layer else ())}
                                     for layer in config['independent']['layers']})
 
 
@@ -1320,7 +1361,7 @@ def _current(production, registry, order):
     if any(binding.get('covers', []) != production['config']['covers'] for binding in bindings):
         return False
     if production['config']['independent']:
-        if any('masks' in layer or 'provides' in layer for layer in production['config']['independent']['layers']) and built.get('independent_semantics') != _independent_semantics(production['config']):
+        if any('masks' in layer or 'provides' in layer or 'visible' in layer for layer in production['config']['independent']['layers']) and built.get('independent_semantics') != _independent_semantics(production['config']):
             return False
         rules = {layer['id']: layer.get('cover_rule') for layer in production['config']['independent']['layers']}
         if any(piece.get('cover_rule') != rules.get(piece['id']) for binding in bindings for piece in binding['pieces']):

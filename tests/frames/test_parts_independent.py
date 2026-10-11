@@ -988,3 +988,103 @@ def test_wrong_body_ownership_is_blocked_before_generation(tmp_path):
     file.write_bytes(w.json_bytes(cfg))
     p.configure(assembly, "test.direct", file)
     p.sheet(assembly, "test.direct", poses=[pose])
+
+
+def test_required_interfaces_on_crossing_layers_keep_their_own_owner(tmp_path, monkeypatch):
+    from sprite_gen.frames import parts_independent as direct
+    from sprite_gen.compose import compose_parts
+
+    pose='walk.crossing'
+    images={}
+    for node,box in [('leg_back',(1,3,6,7)),('leg_front',(7,3,11,7)),('torso',(3,0,5,2))]:
+        image=Image.new('RGBA',(12,8));ImageDraw.Draw(image).rectangle(box,fill=(200,140,100,255));images[node]=image
+    sample={'id':'s0','draw':[{'role':'body','node':node,'pack':'body','placement':{'image':node},'offset':[0,0]} for node in images]}
+    monkeypatch.setattr(p,'_part_plan',lambda *args:{'clips':[{'id':'walk','samples':[sample]}]})
+    monkeypatch.setattr(p,'_poses',lambda *args:([pose],{pose:('walk',sample)}))
+    monkeypatch.setattr(compose_parts,'AssetLoader',lambda *args:lambda pack,image:images[image])
+    index={'motion':{'id':'motion'},'states':['walk']};registry={'motion':{}}
+    cfg={'states':['walk'],'pose_checks':{pose:{'required':'required.png'}},'independent':{'layers':[
+        {'id':'back','body_nodes':['leg_back'],'targets':{pose:[0,0,12,8]}},
+        {'id':'front','body_nodes':['leg_front'],'targets':{pose:[0,0,12,8]}},
+    ]}}
+    guard=Image.new('L',(12,8));draw=ImageDraw.Draw(guard)
+    draw.point((4,5),fill=255);draw.point((8,5),fill=255);guard.save(tmp_path/'required.png')
+    assert direct.body_ownership_errors(tmp_path,index,registry,cfg,pose)=={}
+    # Merely naming the correct node elsewhere cannot hide a target-bound defect.
+    cfg['independent']['layers'][1]['targets'][pose]=[9,0,12,8]
+    assert direct.body_ownership_errors(tmp_path,index,registry,cfg,pose)=={'back':1}
+    cfg['independent']['layers'][1]['targets'][pose]=[0,0,12,8]
+    draw.point((4,1),fill=255);guard.save(tmp_path/'required.png')
+    assert direct.body_ownership_errors(tmp_path,index,registry,cfg,pose)=={'back':1,'front':1}
+
+
+def test_explicitly_hidden_layer_is_frozen_and_revalidated(tmp_path):
+    from sprite_gen.curate import parts_motion
+    from sprite_gen.frames import parts_independent
+    assembly,order=setup(tmp_path)
+    root,index,registry,_=parts_motion._active(assembly)
+    config=p._load(root,'test.direct')['config']
+    config['independent']['layers'][0]['visible']={order[0]:False}
+    file=tmp_path/'visibility.json';file.write_bytes(w.json_bytes(config));p.configure(assembly,'test.direct',file)
+    batch=p.sheet(assembly,'test.direct',poses=order)
+    doc,_=parts_independent.read_reference(root,batch['reference'])
+    assert [j['visible'] for j in doc['jobs'] if j['pose']==order[0]]==[False,True]
+    assert 'entirely transparent empty image' in (root/Path(batch['reference']['file']).parent/doc['jobs'][0]['prompt']).read_text()
+    paths=[]
+    for n,job in enumerate(batch['pages']):
+        image=Image.new('RGBA',(128,128))
+        if job['visible']:
+            x,y,right,bottom=job['target'];ImageDraw.Draw(image).rectangle((x,y,right-1,bottom-1),fill=(50,100,150,255))
+        path=tmp_path/f'visibility-{n}.png';image.save(path);paths.append((Path(str(n)),path))
+    assert p.slice_batch(assembly,'test.direct',batch=batch['batch'],pages=paths,registered_canvas=True)['sliced']==len(order)
+    p.check(assembly,'test.direct');p.build(assembly,'test.direct')
+    _,index,registry,_=parts_motion._active(assembly)
+    part=registry['test.direct'];back=next(piece for piece in part['bindings'][0]['pieces'] if piece['id']=='back')
+    assert back['pose_map'][order[0]]['visible'] is False
+    scene=p._part_plan(index,registry,c.reference(part),index['states'])
+    assert not any(draw['role']=='part' and draw['node']=='hair_back' for draw in scene['clips'][0]['samples'][0]['draw'])
+    config['independent']['layers'][0]['visible'][order[0]]=True
+    file.write_bytes(w.json_bytes(config));p.configure(assembly,'test.direct',file)
+    assert not p._current(p._load(root,'test.direct'),registry,order)
+    with pytest.raises(c.PartsContractError,match='visibility changed'):
+        p.sheet(assembly,'test.direct',poses=[order[0]],layers=['front'])
+    p.check(assembly,'test.direct')
+    assert p._load(root,'test.direct')['tracks']['main']['poses'][order[0]]['check']['status']=='error'
+    with pytest.raises(c.PartsContractError):p.build(assembly,'test.direct')
+
+
+@pytest.mark.parametrize('explicit_hidden',[False,True])
+def test_hidden_layer_does_not_bypass_visible_art_contract(tmp_path,explicit_hidden):
+    from sprite_gen.curate import parts_motion
+    assembly,order=setup(tmp_path);root,_,_,_=parts_motion._active(assembly)
+    if explicit_hidden:
+        config=p._load(root,'test.direct')['config'];config['independent']['layers'][0]['visible']={order[0]:False}
+        file=tmp_path/'visibility.json';file.write_bytes(w.json_bytes(config));p.configure(assembly,'test.direct',file)
+    batch=p.sheet(assembly,'test.direct',poses=[order[0]])
+    paths=[]
+    for n,job in enumerate(batch['pages']):
+        image=Image.new('RGBA',(128,128))
+        if job['layer']=='front' or explicit_hidden:
+            x,y,right,bottom=job['target'];ImageDraw.Draw(image).rectangle((x,y,right-1,bottom-1),fill=(50,100,150,255))
+        path=tmp_path/f'art-{n}.png';image.save(path);paths.append((Path(str(n)),path))
+    with pytest.raises(c.PartsContractError,match='empty alpha' if explicit_hidden else 'nonempty'):
+        p.slice_batch(assembly,'test.direct',batch=batch['batch'],pages=paths,registered_canvas=True)
+
+
+def test_hidden_pose_draw_uses_no_image_provider(tmp_path,monkeypatch):
+    from sprite_gen.curate import parts_motion
+    from sprite_gen.frames import parts_independent
+    assembly,order=setup(tmp_path);root,_,_,_=parts_motion._active(assembly)
+    config=p._load(root,'test.direct')['config']
+    for layer in config['independent']['layers']:layer['visible']={order[0]:False}
+    file=tmp_path/'hidden.json';file.write_bytes(w.json_bytes(config));p.configure(assembly,'test.direct',file)
+    batch=p.sheet(assembly,'test.direct',poses=[order[0]])
+    entry=p._batch(p._track(p._load(root,'test.direct'),None),batch['batch'])
+    monkeypatch.setattr(parts_independent.subprocess,'run',lambda *args,**kw:pytest.fail('hidden layers must not call an image provider'))
+    planned=parts_independent.draw(assembly,'test.direct',entry,provider='codex',model=None,dry_run=True)
+    assert all(row['status']=='planned-empty' for row in planned['pages'])
+    assert not any((root/row['art']).exists() for row in planned['pages'])
+    result=parts_independent.draw(assembly,'test.direct',entry,provider='codex',model=None)
+    assert all(row['provider'] is None and row['method']=='authored-invisible' for row in result['pages'])
+    assert all(Image.open(root/row['art']).getchannel('A').getbbox() is None for row in result['pages'])
+    assert result['art_approved'] is False

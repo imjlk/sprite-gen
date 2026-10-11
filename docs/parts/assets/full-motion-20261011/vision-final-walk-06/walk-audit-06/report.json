@@ -1,0 +1,97 @@
+{
+  "answer": {
+    "limits": [
+      "The walk.08 cream heel region is opaque, but the composite does not conclusively distinguish exposed sock from enlarged cream shoe trim; its abrupt design change remains a visible concern.",
+      "Only the six requested frames were inspected. Hidden layer boundaries and occluded surfaces cannot be verified.",
+      "Still frames do not establish speed, gait quality or motion continuity.",
+      "These findings grant no curator approval or release."
+    ],
+    "poses": {
+      "walk.06": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.07": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.08": {
+        "hair": "pass",
+        "issues": [
+          "The front shoe has a conspicuous rounded cream bulge behind its navy heel, unlike walk.07 and walk.09. The navy upper appears forward of the heel, potentially leaving the socked heel exposed.",
+          "The bare front ankle also bends rearward at this location; the cream bulge alone does not establish sock fabric spilling outside the calf."
+        ],
+        "shoes": "rework",
+        "socks": "pass"
+      },
+      "walk.09": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.10": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.11": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "1453b85e20187c85fc41e9e0ae2c5112a5bc1b07001a9c3a15b15ebd878f958f",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "9bb9805788758510c3d2a4c664bf4b4a79a9f1efdafa741840c3f21508410a17",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "694f00224fe09d3daf050f36a03bd6bde164486d3cfd9df257519222a19aa58b",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "d664b9bc307d216f480a31ad7aaef73ee20196916e83cc454216a5333ec49d9e",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "7e66bf7ac79a2cc87bd888e2b91b862072fee5d24d30d4c274e0d40d02e99204",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "df690ca8acc16606cf279fb8c04f8e7c610e46213f410dea5056bd0be561e50a",
+  "release_ready": false,
+  "required_poses": [
+    "walk.06",
+    "walk.07",
+    "walk.08",
+    "walk.09",
+    "walk.10",
+    "walk.11"
+  ],
+  "response_sha256": "509c8d24277abfcbe3beed5c6fc0bca6be545b481de1396750477f0aa1d73b68",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

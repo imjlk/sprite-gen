@@ -1,0 +1,140 @@
+{
+  "art_approved": false,
+  "checked": {
+    "checked": 43,
+    "findings": {
+      "run.00": [
+        "6 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.01": [
+        "3 specks under 4 px",
+        "6 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.02": [
+        "1 specks under 4 px"
+      ],
+      "run.03": [
+        "1 specks under 4 px",
+        "4 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.04": [
+        "2 specks under 4 px",
+        "2 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.05": [
+        "1 specks under 4 px",
+        "6 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.06": [
+        "3 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.07": [
+        "2 specks under 4 px",
+        "5 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.08": [
+        "1 specks under 4 px",
+        "1 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.09": [
+        "5 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.11": [
+        "11 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.12": [
+        "1 specks under 4 px",
+        "4 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.13": [
+        "1 specks under 4 px",
+        "5 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.14": [
+        "4 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.15": [
+        "1 specks under 4 px",
+        "1 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.16": [
+        "1 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.17": [
+        "9 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.18": [
+        "2 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.20": [
+        "1 specks under 4 px",
+        "7 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.21": [
+        "8 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "run.22": [
+        "4 specks under 4 px",
+        "8 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "walk.00": [
+        "1 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "walk.01": [
+        "1 specks under 4 px"
+      ],
+      "walk.02": [
+        "2 specks under 4 px"
+      ],
+      "walk.03": [
+        "7 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "walk.04": [
+        "1 specks under 4 px"
+      ],
+      "walk.08": [
+        "3 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "walk.10": [
+        "1 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "walk.12": [
+        "1 specks under 4 px",
+        "3 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "walk.16": [
+        "2 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "walk.18": [
+        "2 px of pinholes (gaps of 12 px or less inside the part)"
+      ],
+      "walk.19": [
+        "2 px of pinholes (gaps of 12 px or less inside the part)"
+      ]
+    },
+    "part": "full-motion.socks",
+    "release_ready": false,
+    "summary": {
+      "error": 0,
+      "passed": 11,
+      "warning": 32
+    }
+  },
+  "sliced": {
+    "art_approved": false,
+    "batch": "id3d4de6098a0",
+    "missing": [],
+    "part": "full-motion.socks",
+    "poses": [
+      "walk.08",
+      "walk.12",
+      "walk.13",
+      "walk.14",
+      "walk.15",
+      "walk.16",
+      "walk.19"
+    ],
+    "release_ready": false,
+    "sliced": 7
+  }
+}

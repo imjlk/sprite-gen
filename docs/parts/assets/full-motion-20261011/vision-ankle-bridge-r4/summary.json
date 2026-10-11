@@ -1,0 +1,376 @@
+{
+  "art_approved": false,
+  "frames_observed": 43,
+  "pages": [
+    {
+      "error": null,
+      "required_poses": [
+        "run.00",
+        "run.01",
+        "run.02",
+        "run.03",
+        "run.04",
+        "run.05"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.06",
+        "run.07",
+        "run.08",
+        "run.09",
+        "run.10",
+        "run.11"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.12",
+        "run.13",
+        "run.14",
+        "run.15",
+        "run.16",
+        "run.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.18",
+        "run.19",
+        "run.20",
+        "run.21",
+        "run.22"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.00",
+        "walk.01",
+        "walk.02",
+        "walk.03",
+        "walk.04",
+        "walk.05"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.06",
+        "walk.07",
+        "walk.08",
+        "walk.09",
+        "walk.10",
+        "walk.11"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.12",
+        "walk.13",
+        "walk.14",
+        "walk.15",
+        "walk.16",
+        "walk.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.18",
+        "walk.19"
+      ],
+      "status": "completed"
+    }
+  ],
+  "poses": {
+    "run.00": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.01": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.02": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.03": {
+      "hair": "pass",
+      "issues": [
+        "The ACTUAL front-ankle enlargement contains a large pale angular patch extending into the neighboring back calf above its cuff. The corresponding BARE region has continuous skin; the composite visibly interrupts that calf."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "run.04": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.05": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.06": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.07": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.08": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.09": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.10": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.11": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.12": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.13": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.14": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.15": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.16": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.17": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.18": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.19": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.20": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.21": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.22": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.00": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.01": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.02": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.03": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.04": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.05": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.06": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.07": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.08": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged actual front ankle shows a pointed cream spur behind the shoe's heel-side collar, interrupting the fitted sock-to-shoe transition. The corresponding bare ankle has a rounded contour rather than this sharp triangular edge."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.09": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.10": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.11": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.12": {
+      "hair": "pass",
+      "issues": [
+        "Back cuff is inset from the heel-side calf contour visible in the bare reference. A tapering skin strip remains beside the cream sock shaft toward the shoe collar."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.13": {
+      "hair": "pass",
+      "issues": [
+        "Back sock again leaves a visible skin wedge along the heel-side calf below the cuff; the cream shaft does not wrap the complete calf entry."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.14": {
+      "hair": "pass",
+      "issues": [
+        "Back cuff remains slightly inset from the bare calf's heel-side contour, leaving a narrow exposed skin sliver beside the sock."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.15": {
+      "hair": "pass",
+      "issues": [
+        "Front cuff has a pointed cream tab and an angular notch at its junction with the calf, breaking the fitted cuff edge."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.16": {
+      "hair": "pass",
+      "issues": [
+        "Front sock has a small pointed flap on its heel-side edge and a stepped calf junction; the cuff silhouette remains uneven compared with neighboring frames."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.17": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.18": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.19": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged actual rear ankle leaves a detached skin-colored sliver above-left of the shoe collar. Comparing the bare ankle identifies this as exposed source heel contour; sock coverage fails to form a continuous heel-to-ankle bridge."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    }
+  },
+  "release_ready": false,
+  "scope": "actual still-frame attachment and between-frame appearance observations; no timing, gait or human approval",
+  "status": "completed"
+}

@@ -1,0 +1,99 @@
+{
+  "answer": {
+    "limits": [
+      "The small front-cuff recesses in walk.14–walk.16 are visibly suspect, but this board does not conclusively resolve transparency versus edge shading.",
+      "Shoe judgments cover the visible enlarged shoes; concealed surfaces and attachment underneath overlapping parts remain unverified.",
+      "Only walk.12–walk.17 were inspected. Stills do not establish speed or gait quality, and this audit grants no curator or release approval."
+    ],
+    "poses": {
+      "walk.12": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.13": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.14": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged actual front ankle has an irregular, pointed cuff edge and an apparent gray recess at the calf entry. The bare ankle is continuous in this region; a missing opaque ankle bridge is possible. The posterior extension overlaps the bare heel contour and is not sufficient evidence of fabric spill."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.15": {
+        "hair": "pass",
+        "issues": [
+          "The front cuff has a pronounced notch where it meets the diagonal calf, interrupting the fitted cuff outline. The adjoining gray wedge appears to expose background; possible body-ownership gap rather than opaque sock fabric."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.16": {
+        "hair": "pass",
+        "issues": [
+          "The front sock-to-calf connection remains jagged, with a pointed cream edge and an apparent gray recess beside it. Continuous ankle coverage is uncertain against the continuous bare reference. This cuff defect persists from the neighboring frames."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.17": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "6ef835bce1d86f8f9c5ef77fa6a6ab5a2eb8893e925f5051c36b39272465e394",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "b90a66d555a696b5c8fadb594c1a5fc8d15f7efea4046d90f7bc30566df5d889",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "694f00224fe09d3daf050f36a03bd6bde164486d3cfd9df257519222a19aa58b",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "fa7b7666eab2488a0ea443bf4df1b2c946d2892c2dcee7f5baa792ff4aa34dde",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "49eec7e2c4f3ad8224eacc05898b0621f0280e80f3fa53074e21ae4498562c83",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "c1ac063f75d1d55239ea8d94fa8a832eeb0646fcf906142965c4cad25e9ab677",
+  "release_ready": false,
+  "required_poses": [
+    "walk.12",
+    "walk.13",
+    "walk.14",
+    "walk.15",
+    "walk.16",
+    "walk.17"
+  ],
+  "response_sha256": "88e2614f39ac0d282e74268e8a8408ae711b4c0c89a910aadccb4e06acc024de",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "answer": {
+    "limits": [
+      "Only run.12 through run.17 are visible; the remaining run frames and all walk frames are unassessed.",
+      "Overlapping limbs and cropped enlargements limit inspection of hidden ankle and collar surfaces; crop boundaries are not treated as asset clipping.",
+      "These stills support attachment and appearance comparisons, not playback, speed or gait approval.",
+      "This observational audit grants no curator approval or release authorization."
+    ],
+    "poses": {
+      "run.12": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.13": {
+        "hair": "pass",
+        "issues": [
+          "The back sock forms a boxy cream block with straight corners at the calf entry.",
+          "The front sock has a broad, flat lower edge and a projecting rear corner above the shoe collar; its contour is noticeably less fitted than in run.12 and run.14."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "run.14": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.15": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.16": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.17": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "6f7f13930fe3ea6fe90c8a90fd60702f90dbff82fddc278b7542bcbb5f2d62a8",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "c3357c8123360dae63d2b719d40dcb703b5a3818d60c0ee6508fcd391df0c336",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "6927bc0e675b66fee02e37b6e2752d7521923159b633e59b32f9b0ff95e4764a",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "7276265539d4c0ea68f28919bcc3509b0e6f2b6d1bc148260c7457b495f80205",
+  "release_ready": false,
+  "required_poses": [
+    "run.12",
+    "run.13",
+    "run.14",
+    "run.15",
+    "run.16",
+    "run.17"
+  ],
+  "response_sha256": "efd72029d4870e3d9526a22d0b601eaf7937f6c51b41490e42ad894e86cbbbbd",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

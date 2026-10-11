@@ -1,0 +1,44 @@
+{
+  "appearance": {
+    "digest": "6f7f13930fe3ea6fe90c8a90fd60702f90dbff82fddc278b7542bcbb5f2d62a8",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "error": "Command '['/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex', 'exec', '--sandbox', 'read-only', '--skip-git-repo-check', '--ephemeral', '--color', 'never', '-C', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-full-motion-20261011/audit-r9-sock-fit-r2/vision-r1/run-audit-00/facing-970p6ap2', '-i', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-full-motion-20261011/audit-r9-sock-fit-r2/vision-r1/run-audit-00/input.png', '-o', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-full-motion-20261011/audit-r9-sock-fit-r2/vision-r1/run-audit-00/facing-970p6ap2/answer.txt', '-']' timed out after 180 seconds",
+  "input_sha256": "8f102c40c676a6ebc0a7827d721032c7c7202f7453502f8eeed330633ad627f9",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "6927bc0e675b66fee02e37b6e2752d7521923159b633e59b32f9b0ff95e4764a",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "3a1b6c56e815cd47fb0c451575c8ec71b977f1044e3d1a13ff3f9044912cbaa6",
+  "release_ready": false,
+  "required_poses": [
+    "run.00",
+    "run.01",
+    "run.02",
+    "run.03",
+    "run.04",
+    "run.05"
+  ],
+  "status": "failed"
+}

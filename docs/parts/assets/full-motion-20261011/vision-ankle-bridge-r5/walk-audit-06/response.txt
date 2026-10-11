@@ -1,0 +1,48 @@
+{
+  "poses": {
+    "walk.06": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.07": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.08": {
+      "hair": "pass",
+      "socks": "rework",
+      "shoes": "pass",
+      "issues": [
+        "The enlarged actual front ankle has a pointed cream tab behind the shoe collar and an abrupt lower sock edge. The corresponding bare ankle has a continuous rounded contour; this sharp fabric termination needs rework."
+      ]
+    },
+    "walk.09": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.10": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.11": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "Assessment covers only walk.06 through walk.11; the remaining walk frames and all run frames are absent.",
+    "Some enlarged crops truncate neighboring feet or shoe edges, limiting inspection of those portions; crop boundaries alone do not establish sprite defects.",
+    "Still frames cannot establish motion timing or approve gait biomechanics.",
+    "This observational audit grants no curator approval or release authorization."
+  ]
+}

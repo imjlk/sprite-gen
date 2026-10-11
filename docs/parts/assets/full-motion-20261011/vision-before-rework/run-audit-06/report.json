@@ -1,0 +1,102 @@
+{
+  "answer": {
+    "limits": [
+      "Only run.06 through run.11 are visible; the remaining walk and run frames were not assessed.",
+      "The flattened compositions show exposed foot contours but do not establish which underlying mask or placement causes them.",
+      "Stills cannot establish speed, gait quality or attachment throughout motion. These observations do not grant curator approval or release."
+    ],
+    "poses": {
+      "run.06": {
+        "hair": "pass",
+        "issues": [
+          "Front shoe leaves a peach-colored foot ridge exposed above the navy forefoot upper. The shallow vamp does not fully cover the bare foot."
+        ],
+        "shoes": "rework",
+        "socks": "pass"
+      },
+      "run.07": {
+        "hair": "pass",
+        "issues": [
+          "Front bare-foot contour remains visible above the laces toward the cream toe cap. Shoe coverage does not follow the raised forefoot."
+        ],
+        "shoes": "rework",
+        "socks": "pass"
+      },
+      "run.08": {
+        "hair": "pass",
+        "issues": [
+          "A peach-colored forefoot strip and pointed toe contour protrude above the front shoe's upper and cream toe cap.",
+          "The front toe cap appears flattened relative to run.06 and run.10."
+        ],
+        "shoes": "rework",
+        "socks": "pass"
+      },
+      "run.09": {
+        "hair": "pass",
+        "issues": [
+          "Front bare-foot contour remains exposed above the navy vamp near the toe cap, continuing the coverage defect in run.08."
+        ],
+        "shoes": "rework",
+        "socks": "pass"
+      },
+      "run.10": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.11": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "74c50ec04f3381a7f30f900bf99ba4971f638c53be53c2dcfd25fc66efabebf3",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "d67ed505c7e0acbcb43777336dc78a9f49afc04dbd8bfc086802a54aea0cf74b",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "9bb29470566fbe005f4e96d2cff944242553e44cc532a826ac8a92464ddbea84",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "370a2f1cccd13ef2752293d823c1aabcd1e298e8be6b4b7a55fedb51aadc2d0c",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "6ac398743918bea3f45e4e3a028d74b05dad2f93e72f92ece8edd62dcef570ee",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "827e464454d82d13734f38c53b0f2b669d649c5ca43e792bcd5522cd75c2befb",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "2ce8a9cde97d4005bb2cb6997926d238609cbdfd8d5372c743e6fb68fbe8897f",
+  "release_ready": false,
+  "required_poses": [
+    "run.06",
+    "run.07",
+    "run.08",
+    "run.09",
+    "run.10",
+    "run.11"
+  ],
+  "response_sha256": "d32115e6a5383a3bcf3cf03ddb71ce09acc7220a876db3a6c024937bb8f016f7",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

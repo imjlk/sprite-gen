@@ -1,0 +1,89 @@
+{
+  "answer": {
+    "limits": [
+      "Only run.18 through run.22 are shown; continuity with frames outside this subset cannot be assessed.",
+      "These stills cannot establish speed, gait quality or motion continuity between displayed poses.",
+      "Hidden body pixels beneath the layered parts cannot be inspected.",
+      "This observational audit grants no curator approval or release authorization."
+    ],
+    "poses": {
+      "run.18": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.19": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.20": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged back ankle shows a background gap between the angular cream sock end and the shoe collar. The ankle bridge is broken, making the rear shoe appear detached."
+        ],
+        "shoes": "rework",
+        "socks": "rework"
+      },
+      "run.21": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.22": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "6f7f13930fe3ea6fe90c8a90fd60702f90dbff82fddc278b7542bcbb5f2d62a8",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "db1d668848a758fbe37dafc3a8081d0f65cb4ce5615b931991fb9272778a665d",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "6927bc0e675b66fee02e37b6e2752d7521923159b633e59b32f9b0ff95e4764a",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "6704383d3fac30aac609b2f9aeaf714d5e1765f9a459e84652ea86314484c5a3",
+  "release_ready": false,
+  "required_poses": [
+    "run.18",
+    "run.19",
+    "run.20",
+    "run.21",
+    "run.22"
+  ],
+  "response_sha256": "b7074da077ccba8d648798631debd099f4f315fe4ce98f8a33e67c4e2927ca67",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

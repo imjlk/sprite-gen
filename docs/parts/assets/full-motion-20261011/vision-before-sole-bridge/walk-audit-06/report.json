@@ -1,0 +1,95 @@
+{
+  "answer": {
+    "limits": [
+      "The possible front-ankle bridge gap in walk.08 is too small on this board to distinguish confidently from an exterior contour notch.",
+      "Pass ratings cover visible surfaces only; obscured shoe and collar regions remain unverified.",
+      "Only walk.06 through walk.11 are assessed. These stills do not establish speed, gait quality, curator approval, or release readiness."
+    ],
+    "poses": {
+      "walk.06": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.07": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.08": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged actual front ankle shows a sharp cream corner behind the shoe collar, with an apparent small grey notch beneath it. The bare ankle continues into the heel here; opaque sock-to-shoe coverage is uncertain. The bare contour does not support calling this fabric spill beyond the calf."
+        ],
+        "shoes": "pass",
+        "socks": "unknown"
+      },
+      "walk.09": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.10": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.11": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "e67586bcb5bfaa1fcd3d8c5c3a98d5e0a18413029679ef4221ea8557c1b04aff",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "f3ffbdafb99913c7ad2cfaf678ccfe563939d649220a567e931e38de66dcea08",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "d07db1839ea9ceae00443a5a677891a29bf787c419ed4ce4701e0be550a070d6",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "df690ca8acc16606cf279fb8c04f8e7c610e46213f410dea5056bd0be561e50a",
+  "release_ready": false,
+  "required_poses": [
+    "walk.06",
+    "walk.07",
+    "walk.08",
+    "walk.09",
+    "walk.10",
+    "walk.11"
+  ],
+  "response_sha256": "031ecc7c25cf4cd07bd6fed61b905194a73d4347b4c6e71688c9ae95ca058c02",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "answer": {
+    "limits": [
+      "Only walk.00 through walk.05 are shown; the remaining 14 walk frames and all 23 run frames are unaudited.",
+      "Occlusion in walk.03 and walk.04 prevents confirming rear footwear continuity across those frames.",
+      "Enlargement boundaries crop some parts; those crop edges do not establish asset clipping.",
+      "Stills cannot establish speed, gait quality or motion timing.",
+      "These findings are an observational audit and grant no curator approval or release."
+    ],
+    "poses": {
+      "walk.00": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.01": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.02": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.03": {
+        "hair": "pass",
+        "issues": [
+          "The rear ankle is largely hidden behind the foreground calf, preventing verification of its sock cuff and ankle bridge.",
+          "Only a diagonal navy/cream portion of the rear shoe is visible; its collar, calf entry and full volume cannot be verified. The foreground shoe shows no obvious defect."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      },
+      "walk.04": {
+        "hair": "pass",
+        "issues": [
+          "The rear sock and ankle connection are obscured by the foreground calf.",
+          "The rear shoe is visible mainly as a near-vertical navy/cream strip. Occlusion prevents distinguishing a complete shoe from a thin or clipped asset; the foreground shoe retains its shape."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      },
+      "walk.05": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "6f7f13930fe3ea6fe90c8a90fd60702f90dbff82fddc278b7542bcbb5f2d62a8",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "55aea8e4fc42d89d03fbbfddd29a1f717248fa1ef89fc2c6030ffe02812d1a72",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "6927bc0e675b66fee02e37b6e2752d7521923159b633e59b32f9b0ff95e4764a",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "2507cfff06b6a54a852c78c82df7733cf3ec2f1ab8ad119cc4d3e73161708b33",
+  "release_ready": false,
+  "required_poses": [
+    "walk.00",
+    "walk.01",
+    "walk.02",
+    "walk.03",
+    "walk.04",
+    "walk.05"
+  ],
+  "response_sha256": "3ac91fd9f2fbf8a3e1a116f1b24f99f375cb0d8b79a3ea212405ded2cee59074",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

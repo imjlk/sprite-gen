@@ -1,0 +1,97 @@
+{
+  "answer": {
+    "limits": [
+      "The small boundaries at run.02's raised front ankle and run.04's front cuff remain uncertain at the supplied view; they should remain unresolved rather than approved.",
+      "Only run.00 through run.05 are assessed. No conclusions apply to the remaining walk or run frames.",
+      "Stills cannot establish motion continuity, speed, or gait quality. These observations do not grant curator or release approval."
+    ],
+    "poses": {
+      "run.00": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.01": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.02": {
+        "hair": "pass",
+        "issues": [
+          "The raised front ankle has an apparent gray notch inside the cream collar area. The bare counterpart shows continuous ankle anatomy; the composed ankle bridge may be interrupted. Sock coverage and calf entry cannot be confidently passed."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      },
+      "run.03": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.04": {
+        "hair": "pass",
+        "issues": [
+          "The front cuff's left edge has a small isolated-looking wedge and an abrupt diagonal boundary. Its connection to the calf is unclear; the bare comparison does not establish definite fabric spill."
+        ],
+        "shoes": "pass",
+        "socks": "unknown"
+      },
+      "run.05": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "e67586bcb5bfaa1fcd3d8c5c3a98d5e0a18413029679ef4221ea8557c1b04aff",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "41945566fc66ac0aa8402aa33aa70c06785f6d3671ebca900ea3da19da9ccd43",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "d07db1839ea9ceae00443a5a677891a29bf787c419ed4ce4701e0be550a070d6",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "b77eb7892ce1673549faa3cca75eff6c4a7206e0c09e09ac44c60eeba7a2df7d",
+  "release_ready": false,
+  "required_poses": [
+    "run.00",
+    "run.01",
+    "run.02",
+    "run.03",
+    "run.04",
+    "run.05"
+  ],
+  "response_sha256": "8cd429c96d45ce7cff2bd1cb89bccc858d86359a19837e59c02a0511a6087093",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

@@ -9,13 +9,16 @@ from PIL import Image, ImageDraw
 from sprite_gen.spec import parts_assets as assets, parts_contract as contract, parts_workspace as workspace
 
 
-def workspace_at(path, *, preset="human.sd.v1", size=None):
+def workspace_at(path, *, preset="human.sd.v1", size=None, sampling=None):
     workspace.initialize(path, preset)
     index, registry = workspace.read_workspace(path / "assembly.json")
-    if size is not None:
+    if size is not None or sampling is not None:
         rig = registry[index["rig"]["id"]]
         rig.pop("digest")
-        rig["canvas"] = {"width": size[0], "height": size[1]}
+        if size is not None:
+            rig["canvas"] = {"width": size[0], "height": size[1]}
+        if sampling is not None:
+            rig["sampling"] = sampling
         rig = contract.seal(rig)
         catalog = registry[index["catalog"]["id"]]
         catalog.pop("digest")
@@ -79,11 +82,11 @@ def tree_hashes(root):
     return {p.relative_to(root).as_posix(): assets.sha256(p.read_bytes()) for p in root.rglob("*") if p.is_file()}
 
 
-def frozen_workspace(base, *, preset="human.sd.v1", states=("walk",)):
+def frozen_workspace(base, *, preset="human.sd.v1", states=("walk",), sampling=None):
     from sprite_gen.curate import parts_motion
     base.mkdir(parents=True, exist_ok=True)
     root, source = base / "library", base / "motion-source"
-    assembly = workspace_at(root, preset=preset)
+    assembly = workspace_at(root, preset=preset, sampling=sampling)
     index, registry = workspace.read_workspace(assembly)
     rig = registry[index["rig"]["id"]]
     size = (rig["canvas"]["width"], rig["canvas"]["height"])

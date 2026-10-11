@@ -1,0 +1,479 @@
+{
+  "art_approved": false,
+  "poses": [
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        263,
+        124,
+        504,
+        365
+      ],
+      "pose": "run.00"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        262,
+        117,
+        502,
+        357
+      ],
+      "pose": "run.01"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        259,
+        106,
+        500,
+        347
+      ],
+      "pose": "run.02"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        258,
+        103,
+        499,
+        344
+      ],
+      "pose": "run.03"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        257,
+        97,
+        497,
+        337
+      ],
+      "pose": "run.04"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        256,
+        95,
+        496,
+        335
+      ],
+      "pose": "run.05"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        256,
+        97,
+        496,
+        337
+      ],
+      "pose": "run.06"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        256,
+        100,
+        496,
+        340
+      ],
+      "pose": "run.07"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        258,
+        108,
+        498,
+        348
+      ],
+      "pose": "run.08"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        258,
+        114,
+        499,
+        355
+      ],
+      "pose": "run.09"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        260,
+        123,
+        501,
+        364
+      ],
+      "pose": "run.10"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        261,
+        125,
+        502,
+        366
+      ],
+      "pose": "run.11"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        263,
+        118,
+        504,
+        359
+      ],
+      "pose": "run.12"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        264,
+        112,
+        504,
+        352
+      ],
+      "pose": "run.13"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        264,
+        101,
+        504,
+        341
+      ],
+      "pose": "run.14"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        265,
+        97,
+        505,
+        337
+      ],
+      "pose": "run.15"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        265,
+        93,
+        505,
+        333
+      ],
+      "pose": "run.16"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        265,
+        92,
+        505,
+        332
+      ],
+      "pose": "run.17"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        265,
+        96,
+        505,
+        336
+      ],
+      "pose": "run.18"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        266,
+        99,
+        505,
+        338
+      ],
+      "pose": "run.19"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        266,
+        108,
+        506,
+        348
+      ],
+      "pose": "run.20"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        265,
+        115,
+        505,
+        355
+      ],
+      "pose": "run.21"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        264,
+        123,
+        505,
+        364
+      ],
+      "pose": "run.22"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        267,
+        116,
+        501,
+        350
+      ],
+      "pose": "walk.00"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        264,
+        113,
+        497,
+        346
+      ],
+      "pose": "walk.01"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        264,
+        113,
+        497,
+        346
+      ],
+      "pose": "walk.02"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        260,
+        112,
+        494,
+        346
+      ],
+      "pose": "walk.03"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        260,
+        112,
+        494,
+        346
+      ],
+      "pose": "walk.04"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        257,
+        113,
+        491,
+        347
+      ],
+      "pose": "walk.05"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        257,
+        113,
+        490,
+        346
+      ],
+      "pose": "walk.06"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        255,
+        116,
+        488,
+        349
+      ],
+      "pose": "walk.07"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        255,
+        117,
+        488,
+        350
+      ],
+      "pose": "walk.08"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        252,
+        119,
+        486,
+        353
+      ],
+      "pose": "walk.09"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        252,
+        119,
+        485,
+        352
+      ],
+      "pose": "walk.10"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        252,
+        124,
+        486,
+        358
+      ],
+      "pose": "walk.11"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        252,
+        124,
+        486,
+        358
+      ],
+      "pose": "walk.12"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        255,
+        126,
+        489,
+        360
+      ],
+      "pose": "walk.13"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        258,
+        128,
+        492,
+        362
+      ],
+      "pose": "walk.14"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        262,
+        128,
+        496,
+        362
+      ],
+      "pose": "walk.15"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        266,
+        127,
+        500,
+        361
+      ],
+      "pose": "walk.16"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        269,
+        123,
+        502,
+        356
+      ],
+      "pose": "walk.17"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        269,
+        123,
+        502,
+        356
+      ],
+      "pose": "walk.18"
+    },
+    {
+      "body_pixel_identical": true,
+      "front_back_method": "authored source-bound lower-limb centerlines; head cutoff; upper body retained together",
+      "head": [
+        268,
+        118,
+        502,
+        352
+      ],
+      "pose": "walk.19"
+    }
+  ],
+  "upper_body_subdivision_reviewed": false
+}

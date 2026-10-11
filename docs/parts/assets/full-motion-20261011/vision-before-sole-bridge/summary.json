@@ -1,0 +1,390 @@
+{
+  "art_approved": false,
+  "frames_observed": 43,
+  "pages": [
+    {
+      "error": null,
+      "required_poses": [
+        "run.00",
+        "run.01",
+        "run.02",
+        "run.03",
+        "run.04",
+        "run.05"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.06",
+        "run.07",
+        "run.08",
+        "run.09",
+        "run.10",
+        "run.11"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.12",
+        "run.13",
+        "run.14",
+        "run.15",
+        "run.16",
+        "run.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.18",
+        "run.19",
+        "run.20",
+        "run.21",
+        "run.22"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.00",
+        "walk.01",
+        "walk.02",
+        "walk.03",
+        "walk.04",
+        "walk.05"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.06",
+        "walk.07",
+        "walk.08",
+        "walk.09",
+        "walk.10",
+        "walk.11"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.12",
+        "walk.13",
+        "walk.14",
+        "walk.15",
+        "walk.16",
+        "walk.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.18",
+        "walk.19"
+      ],
+      "status": "completed"
+    }
+  ],
+  "poses": {
+    "run.00": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.01": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.02": {
+      "hair": "pass",
+      "issues": [
+        "The raised front ankle has an apparent gray notch inside the cream collar area. The bare counterpart shows continuous ankle anatomy; the composed ankle bridge may be interrupted. Sock coverage and calf entry cannot be confidently passed."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "run.03": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.04": {
+      "hair": "pass",
+      "issues": [
+        "The front cuff's left edge has a small isolated-looking wedge and an abrupt diagonal boundary. Its connection to the calf is unclear; the bare comparison does not establish definite fabric spill."
+      ],
+      "shoes": "pass",
+      "socks": "unknown"
+    },
+    "run.05": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.06": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.07": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.08": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.09": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.10": {
+      "hair": "pass",
+      "issues": [
+        "A tiny pointed peach/brown sliver appears above the rear sock and shoe collar. Compared with the smooth bare ankle contour, this looks like a possible residual skin or interrupted collar edge; its continuity with the calf is unclear."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "run.11": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.12": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.13": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.14": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.15": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.16": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.17": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.18": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.19": {
+      "hair": "pass",
+      "issues": [
+        "Rear ankle: the bare heel/Achilles contour is replaced by a conspicuous board-grey cut-in above the shoe collar. The cream ankle bridge does not restore that region; this is an apparent BODY ownership defect.",
+        "Rear shoe volume and sole are visible, but its collar-to-ankle attachment cannot receive a confident pass across that cut-in."
+      ],
+      "shoes": "unknown",
+      "socks": "rework"
+    },
+    "run.20": {
+      "hair": "pass",
+      "issues": [
+        "Rear ankle: a grey triangular bite remains between the upper shoe collar and the calf-side cream bridge, where the bare reference has a continuous ankle contour.",
+        "Rear shoe attachment is uncertain at this missing contour, although its navy upper, cream trim and sole remain recognizable."
+      ],
+      "shoes": "unknown",
+      "socks": "rework"
+    },
+    "run.21": {
+      "hair": "pass",
+      "issues": [
+        "Rear ankle: a smaller grey notch above the heel-side collar appears to truncate the rounded contour visible in the bare reference. It is uncertain whether the cream bridge fully preserves the ankle.",
+        "The rear shoe is observable, but attachment at that notch remains uncertain."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "run.22": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.00": {
+      "hair": "pass",
+      "issues": [
+        "The raised rear ankle appears to contain a background-gray pocket inside the cream collar where the bare reference shows continuous skin. The sock bridge and shoe-to-calf attachment need rework; the visible front shoe retains its volume and rightward toe direction."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "walk.01": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.02": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.03": {
+      "hair": "pass",
+      "issues": [
+        "The rear ankle and shoe are substantially occluded by the nearer leg. Visible rear collar and sole fragments cannot establish a complete sock bridge, calf entry, or shoe shape. The visible front sock and shoe show no obvious defect."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "walk.04": {
+      "hair": "pass",
+      "issues": [
+        "The rear footwear is reduced to a narrow occluded strip. Its full collar attachment, ankle bridge, and product volume cannot be verified. The visible front sock and shoe remain consistent with neighboring frames."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "walk.05": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.06": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.07": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.08": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged actual front ankle shows a sharp cream corner behind the shoe collar, with an apparent small grey notch beneath it. The bare ankle continues into the heel here; opaque sock-to-shoe coverage is uncertain. The bare contour does not support calling this fabric spill beyond the calf."
+      ],
+      "shoes": "pass",
+      "socks": "unknown"
+    },
+    "walk.09": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.10": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.11": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.12": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.13": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.14": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.15": {
+      "hair": "pass",
+      "issues": [
+        "Enlarged actual front ankle shows a triangular grey notch between the sloping calf and cream cuff. The bare counterpart has continuous skin there, indicating missing calf ownership at the sock junction."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.16": {
+      "hair": "pass",
+      "issues": [
+        "Front calf-to-sock junction has a jagged cream edge with an adjacent grey gap where the bare counterpart contains skin. The ankle bridge is incomplete; the grey area is background, not sock fabric."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.17": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.18": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.19": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged rear ankle shows a pale triangular sliver projecting left above the shoe collar, with an apparently interrupted heel-side sock bridge. The corresponding bare ankle has a continuous contour there.",
+        "Rear shoe volume and sole remain broadly consistent with walk.18, but attachment at the irregular sock/collar junction is uncertain."
+      ],
+      "shoes": "unknown",
+      "socks": "rework"
+    }
+  },
+  "release_ready": false,
+  "scope": "actual still-frame attachment and between-frame appearance observations; no timing, gait or human approval",
+  "status": "completed"
+}

@@ -1,0 +1,416 @@
+{
+  "art_approved": false,
+  "frames_observed": 43,
+  "pages": [
+    {
+      "error": null,
+      "required_poses": [
+        "run.00",
+        "run.01",
+        "run.02",
+        "run.03",
+        "run.04",
+        "run.05"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.06",
+        "run.07",
+        "run.08",
+        "run.09",
+        "run.10",
+        "run.11"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.12",
+        "run.13",
+        "run.14",
+        "run.15",
+        "run.16",
+        "run.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.18",
+        "run.19",
+        "run.20",
+        "run.21",
+        "run.22"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.00",
+        "walk.01",
+        "walk.02",
+        "walk.03",
+        "walk.04",
+        "walk.05"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.06",
+        "walk.07",
+        "walk.08",
+        "walk.09",
+        "walk.10",
+        "walk.11"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.12",
+        "walk.13",
+        "walk.14",
+        "walk.15",
+        "walk.16",
+        "walk.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.18",
+        "walk.19"
+      ],
+      "status": "completed"
+    }
+  ],
+  "poses": {
+    "run.00": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.01": {
+      "hair": "pass",
+      "issues": [
+        "Front sock cuff forms a large pointed cream wedge extending beyond the calf contour instead of a fitted band; this changes abruptly from run.00."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "run.02": {
+      "hair": "pass",
+      "issues": [
+        "Front ankle has an exposed skin projection behind the collar and a sharply angular cream cuff; the sock does not cleanly enclose the ankle transition.",
+        "The diagonal front sneaker appears substantially longer and deeper through its lace panel than the rear sneaker and neighboring front sneakers, disrupting product-volume continuity."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "run.03": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.04": {
+      "hair": "pass",
+      "issues": [
+        "A pointed skin wedge protrudes behind the front sock and shoe collar; the cuff leaves part of the ankle uncovered.",
+        "Front shoe entry sits forward of the exposed heel contour, making the attachment visibly offset."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "run.05": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.06": {
+      "hair": "pass",
+      "issues": [
+        "Front shoe leaves a peach-colored foot ridge exposed above the navy forefoot upper. The shallow vamp does not fully cover the bare foot."
+      ],
+      "shoes": "rework",
+      "socks": "pass"
+    },
+    "run.07": {
+      "hair": "pass",
+      "issues": [
+        "Front bare-foot contour remains visible above the laces toward the cream toe cap. Shoe coverage does not follow the raised forefoot."
+      ],
+      "shoes": "rework",
+      "socks": "pass"
+    },
+    "run.08": {
+      "hair": "pass",
+      "issues": [
+        "A peach-colored forefoot strip and pointed toe contour protrude above the front shoe's upper and cream toe cap.",
+        "The front toe cap appears flattened relative to run.06 and run.10."
+      ],
+      "shoes": "rework",
+      "socks": "pass"
+    },
+    "run.09": {
+      "hair": "pass",
+      "issues": [
+        "Front bare-foot contour remains exposed above the navy vamp near the toe cap, continuing the coverage defect in run.08."
+      ],
+      "shoes": "rework",
+      "socks": "pass"
+    },
+    "run.10": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.11": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.12": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.13": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.14": {
+      "hair": "pass",
+      "issues": [
+        "The front ankle has a jagged cream-and-skin notch at the shoe collar instead of a continuous fitted sock bridge.",
+        "An angular skin-colored wedge with a cream edge protrudes behind the overlapping footwear; the original foot is not fully contained within the sock and shoe.",
+        "The overlapping collars leave the calf-to-shoe connections visibly clipped and unclear."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "run.15": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.16": {
+      "hair": "pass",
+      "issues": [
+        "At the front ankle, the cream cuff covers only part of the calf width; a triangular skin-colored heel projection remains exposed behind the shoe.",
+        "The front shoe collar sits forward of that exposed projection, leaving an incomplete ankle-to-footwear connection."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "run.17": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.18": {
+      "hair": "pass",
+      "issues": [
+        "A small peach-colored protrusion remains above the back shoe's heel edge, outside the cream sock coverage. The rear sock and collar do not fully enclose the source heel.",
+        "The front sock and shoe appear continuously attached."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "run.19": {
+      "hair": "pass",
+      "issues": [
+        "The back ankle has a conspicuous rounded skin-colored heel bulge above the navy heel edge, beside the sock. This is more exposed than in run.18.",
+        "The rear shoe sits below that bulge, leaving the heel visibly outside its enclosure."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "run.20": {
+      "hair": "pass",
+      "issues": [
+        "Skin-colored projections remain above and below the back sock-to-shoe junction; the lower projection forms a pointed extension beneath the cream bridge.",
+        "The rear shoe does not cleanly contain the source foot at the heel and ankle junction. The front shoe retains its navy upper and cream sole volume."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "run.21": {
+      "hair": "pass",
+      "issues": [
+        "A peach-colored heel bump projects above the back shoe collar beside the cream sock, continuing the rear attachment defect visible in run.20.",
+        "The back sock bridges to the shoe but leaves that protruding heel uncovered."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "run.22": {
+      "hair": "pass",
+      "issues": [
+        "A smaller skin-colored wedge remains above the back shoe collar at the sock junction. The rear heel enclosure is still incomplete despite the reduced exposure.",
+        "The front cuff and shoe appear attached, with no obvious crushed toe or sole deformation."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "walk.00": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.01": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.02": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.03": {
+      "hair": "pass",
+      "issues": [
+        "The rear sock presents a pointed cream flap with a visibly irregular, notched edge against the calf, losing the smooth fitted cuff appearance of walk.02.",
+        "The foreground shin and shoe obscure the rear collar and toe; the narrow visible rear shoe cannot establish intact product volume."
+      ],
+      "shoes": "unknown",
+      "socks": "rework"
+    },
+    "walk.04": {
+      "hair": "pass",
+      "issues": [
+        "The rear sock retains the small jagged cream flap beside the calf; a clean cuff-to-ankle wrap is not readable.",
+        "The rear shoe appears as a narrow vertical strip behind the foreground shin and shoe. Overlap prevents a reliable assessment of its collar, calf entry and toe volume."
+      ],
+      "shoes": "unknown",
+      "socks": "rework"
+    },
+    "walk.05": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.06": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.07": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.08": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged front ankle shows a pointed skin-colored sliver behind the sock and heel collar. The calf outline extends outside the covering, interrupting the ankle-to-shoe junction. This protrusion is absent in neighboring walk.07 and walk.09."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "walk.09": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.10": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.11": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.12": {
+      "hair": "pass",
+      "issues": [
+        "Enlarged back ankle: the sock cuff begins inside the calf silhouette, leaving a tapered strip of bare skin outside its heel-side edge down to the shoe collar."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.13": {
+      "hair": "pass",
+      "issues": [
+        "Enlarged back ankle: the narrow cuff again leaves bare calf visible beside the sock down to the heel collar; it does not wrap the full calf width."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.14": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.15": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.16": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.17": {
+      "hair": "pass",
+      "issues": [
+        "Enlarged front ankle: a tan strip extends outside the sock behind the heel and ends abruptly beside the collar. The cuff fails to cover the heel-side calf contour."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.18": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.19": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged back ankle shows a bare-skin heel crescent protruding behind the white sock and above the navy shoe collar, breaking continuous sock-to-shoe coverage.",
+        "The back shoe collar fails to contain the heel. This exposed heel is also visible in the full composition and differs visibly from the covered attachment in walk.18."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    }
+  },
+  "release_ready": false,
+  "scope": "actual still-frame attachment and between-frame appearance observations; no timing, gait or human approval",
+  "status": "completed"
+}

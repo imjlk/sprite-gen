@@ -1,0 +1,7 @@
+{
+  "all_file_sha256_equal": true,
+  "archive_sha256": "fb15fc7bb644d91655d033418ea7959c9c6ba39afcdf1d63cc39b07e899f39f5",
+  "files_restored": 55518,
+  "restored": "restore-final-r12",
+  "source": "production-r12/library"
+}

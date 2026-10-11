@@ -1,0 +1,96 @@
+{
+  "answer": {
+    "limits": [
+      "The composite does not establish which layer or mask causes the run.03 calf interruption.",
+      "Limb overlap partly obscures ankle boundaries in run.02 and run.03.",
+      "Only run.00–run.05 are assessed; these stills cannot establish full-cycle continuity, speed or gait quality.",
+      "This observational audit grants no curator or release approval."
+    ],
+    "poses": {
+      "run.00": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.01": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.02": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.03": {
+        "hair": "pass",
+        "issues": [
+          "The ACTUAL front-ankle enlargement contains a large pale angular patch extending into the neighboring back calf above its cuff. The corresponding BARE region has continuous skin; the composite visibly interrupts that calf."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "run.04": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.05": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "11fdbf23aad85019dbdf0ffdc6ee2165c79963691573140b912cc8e17b283e54",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "7d6d57d9ee894919fc3db0d6926099e36af3ea6a2ffb1e1047cea2dd10d1896d",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "ed8419e305dbdbdcebf9792c4f0ce98705f2c4b5c408136261e38b1d53ef85a0",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "29dbf02e002655931471cf56e0bce274d7bdc46f3a01c3c751ae2728fc396062",
+  "release_ready": false,
+  "required_poses": [
+    "run.00",
+    "run.01",
+    "run.02",
+    "run.03",
+    "run.04",
+    "run.05"
+  ],
+  "response_sha256": "8f612664e92242d568dfc504bf76b644ba71d5cde463e8d59f94d50cc8063b66",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

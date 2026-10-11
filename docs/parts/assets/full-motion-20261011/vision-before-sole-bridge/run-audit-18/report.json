@@ -1,0 +1,96 @@
+{
+  "answer": {
+    "limits": [
+      "Only run.18 through run.22 are assessed; this page does not establish continuity across the full 23-frame run or 20-frame walk sets.",
+      "The rear-ankle contour concerns are visible, but the board does not identify which compositing layer removes the anatomy.",
+      "Stills cannot establish speed, gait quality or motion stability. Hidden surfaces are not assessed.",
+      "These observations do not grant curator approval or release."
+    ],
+    "poses": {
+      "run.18": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.19": {
+        "hair": "pass",
+        "issues": [
+          "Rear ankle: the bare heel/Achilles contour is replaced by a conspicuous board-grey cut-in above the shoe collar. The cream ankle bridge does not restore that region; this is an apparent BODY ownership defect.",
+          "Rear shoe volume and sole are visible, but its collar-to-ankle attachment cannot receive a confident pass across that cut-in."
+        ],
+        "shoes": "unknown",
+        "socks": "rework"
+      },
+      "run.20": {
+        "hair": "pass",
+        "issues": [
+          "Rear ankle: a grey triangular bite remains between the upper shoe collar and the calf-side cream bridge, where the bare reference has a continuous ankle contour.",
+          "Rear shoe attachment is uncertain at this missing contour, although its navy upper, cream trim and sole remain recognizable."
+        ],
+        "shoes": "unknown",
+        "socks": "rework"
+      },
+      "run.21": {
+        "hair": "pass",
+        "issues": [
+          "Rear ankle: a smaller grey notch above the heel-side collar appears to truncate the rounded contour visible in the bare reference. It is uncertain whether the cream bridge fully preserves the ankle.",
+          "The rear shoe is observable, but attachment at that notch remains uncertain."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      },
+      "run.22": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "e67586bcb5bfaa1fcd3d8c5c3a98d5e0a18413029679ef4221ea8557c1b04aff",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "1d57d499ac6c7cae360efee043e9cf6c1e1f3293b42a7b94c87c4f60f2845f37",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "d07db1839ea9ceae00443a5a677891a29bf787c419ed4ce4701e0be550a070d6",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "880daac972a8286165694e0bc7fc9cd6e20d20249735d66700e5ec23f5751d63",
+  "release_ready": false,
+  "required_poses": [
+    "run.18",
+    "run.19",
+    "run.20",
+    "run.21",
+    "run.22"
+  ],
+  "response_sha256": "b7782b26e3c1573c7c9f3de5bc9554e9f89d6c83a054d4ea143cc36840312c7a",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

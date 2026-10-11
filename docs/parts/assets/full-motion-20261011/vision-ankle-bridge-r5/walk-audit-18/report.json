@@ -1,0 +1,67 @@
+{
+  "answer": {
+    "limits": [
+      "The composite does not establish which layer or mask causes the walk.19 rear-ankle discontinuity.",
+      "Only walk.18 and walk.19 are shown; other frames and motion continuity cannot be assessed.",
+      "This observational audit grants no curator approval or release approval."
+    ],
+    "poses": {
+      "walk.18": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.19": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged back ankle shows an isolated skin-colored, dark-outlined sliver above the rear shoe collar, with background separating it from the heel below. The corresponding bare heel is continuous; the sock/ankle bridge has a visible clipping discontinuity."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "844a351aef2651591c744d06ea88611af23c856480a1eabdd70f21f0762ae1ff",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "5331a59498e0dbe9830bb0892e167a99ea9b4210cb798735cced55341b01ad1e",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "f4cb0aa65e2b49d66c72e9ce8e5f67fdd60cd70eb43afc9dd42d0c3754bea57e",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "6c7fa55436787a94ea9664881e24be02f208e19a7aaf96053ac49b1a8acfcd5c",
+  "release_ready": false,
+  "required_poses": [
+    "walk.18",
+    "walk.19"
+  ],
+  "response_sha256": "4c04a82995ad0304297e7a9cf6d4e861dcf5b8dedf7befe9ead3d8f7ab4ff2f9",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "art_approved": false,
+  "frames_expected": 6,
+  "frames_observed": 6,
+  "pages": [
+    {
+      "error": null,
+      "required_poses": [
+        "walk.06",
+        "walk.07",
+        "walk.08",
+        "walk.09",
+        "walk.10",
+        "walk.11"
+      ],
+      "status": "completed"
+    }
+  ],
+  "poses": {
+    "walk.06": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.07": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.08": {
+      "hair": "pass",
+      "issues": [
+        "The front shoe has a conspicuous rounded cream bulge behind its navy heel, unlike walk.07 and walk.09. The navy upper appears forward of the heel, potentially leaving the socked heel exposed.",
+        "The bare front ankle also bends rearward at this location; the cream bulge alone does not establish sock fabric spilling outside the calf."
+      ],
+      "shoes": "rework",
+      "socks": "pass"
+    },
+    "walk.09": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.10": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.11": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    }
+  },
+  "release_ready": false,
+  "scope": "actual still-frame attachment and between-frame appearance observations; no timing, gait or human approval",
+  "status": "completed"
+}

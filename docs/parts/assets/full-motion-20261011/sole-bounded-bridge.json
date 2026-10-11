@@ -1,0 +1,694 @@
+{
+  "art_approved": false,
+  "method": "retain existing cuffs; add source-foot ankle interface strictly above rigid shoe sole",
+  "poses": [
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.00",
+      "required": "inputs/sole-bounded-bridge-r6/run.00.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "bda1e3fbfa869c393b4aa072af5396bac7fce2a9a78f46cc576a9c3a859782ba"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.00",
+      "required": "inputs/sole-bounded-bridge-r6/run.00.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "bf4bf032c715b2fa8172f0cf22e1081b0326e43f378e2448e345827d21195eae"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.01",
+      "required": "inputs/sole-bounded-bridge-r6/run.01.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "a7b5d55867f52aa1f2e4f4a753de10d2d694b9c13a4baf34b7d43670e80dee77"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.01",
+      "required": "inputs/sole-bounded-bridge-r6/run.01.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "4c52d7cc326db10f9cbfde856448bcf9d8622126ad1f68d2043943e16ccb0dd1"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.02",
+      "required": "inputs/sole-bounded-bridge-r6/run.02.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "1693bfa6fdddf26159c33aab013cf28df52299c08b02efb81a5d312a7cba70c3"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.02",
+      "required": "inputs/sole-bounded-bridge-r6/run.02.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "5a8eecabba0f58679da93d695dc0f52a01563bc67ce6d53a31223fe156b238ec"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.03",
+      "required": "inputs/sole-bounded-bridge-r6/run.03.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "ca2549c7bbdebbaa635a9cc0590bb0906d6c42f05269c9aa28b2a05aa424055c"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.03",
+      "required": "inputs/sole-bounded-bridge-r6/run.03.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "4f8dbc27056e11c00f92f2fe64f17a93832d3e28b43351ec659bd9d32ca0327d"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.04",
+      "required": "inputs/sole-bounded-bridge-r6/run.04.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "d7e7fc11cec72bc2605be153ea741155c44720b29df63769bdf27a3942660ab0"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.04",
+      "required": "inputs/sole-bounded-bridge-r6/run.04.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "10559aeb3b54519dfe3a46aca6b39e3ce4d06d55023a3f2339c69cce45f007a2"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.05",
+      "required": "inputs/sole-bounded-bridge-r6/run.05.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "06ae4b8ed6bc8b90ef7f9ff4f982c217bd2cd3f1f2d24726398ec8a231681e9b"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.05",
+      "required": "inputs/sole-bounded-bridge-r6/run.05.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "4d20f0bc63a35ecad9190628445efedeb1022d539ad578e63b3124fcc9c30c24"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.06",
+      "required": "inputs/sole-bounded-bridge-r6/run.06.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "3b2861e280ea91a71867557819b29af4389af380bbf2f4b4a25bc84eaef45523"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.06",
+      "required": "inputs/sole-bounded-bridge-r6/run.06.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "840942a14b5846c1b53d455a68e1f92f270f18e40f4447eb13ac5134d7f1e38a"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.07",
+      "required": "inputs/sole-bounded-bridge-r6/run.07.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "b1e7dd9fcd441e8df834b8fe346ba59ce088b42f87db6ceaa8aeac91a1404eb9"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.07",
+      "required": "inputs/sole-bounded-bridge-r6/run.07.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "94d8285d4f3f554f7153c285f87c043776d768d8f20c477cbeb39f6f5002c882"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.08",
+      "required": "inputs/sole-bounded-bridge-r6/run.08.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "60efd2eda0a75d81d5b93d68b5268ff9576a4e24b6aa500be181f1363322157c"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.08",
+      "required": "inputs/sole-bounded-bridge-r6/run.08.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "f55214528f4651a1145d135f6d3c06d994da6097e2ffc828d770985c12ed01cf"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.09",
+      "required": "inputs/sole-bounded-bridge-r6/run.09.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "29cec488de3c53d728303ef5da6663fc6e722a148a8ab25c298d9704cc6b74a2"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.09",
+      "required": "inputs/sole-bounded-bridge-r6/run.09.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "6042f40d89241979123972fbef1cfac9e0e7aa68e1b00da58170327e19c67719"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.10",
+      "required": "inputs/sole-bounded-bridge-r6/run.10.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "7d2ee42ca90a225ebbae5c10629dab395c8194e919e441ee4a397739797ca695"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.10",
+      "required": "inputs/sole-bounded-bridge-r6/run.10.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "2fea1f5b1270e470129b2f6cfade57696134d300cd1a214e2692d20e7c6b1e66"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.11",
+      "required": "inputs/sole-bounded-bridge-r6/run.11.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "80a02471d4fc1cfa042b24c6a53d0414cfb81c879973d1f2024e461aedeb75dc"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.11",
+      "required": "inputs/sole-bounded-bridge-r6/run.11.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "14d12ae745f8829da56b44e46df811213d8e5c3e1d9ac083ebabded07984b325"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.12",
+      "required": "inputs/sole-bounded-bridge-r6/run.12.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "973889b4d51b6db769472da73402e96dcc907b17369e1a2fbc49bbaea633450c"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.12",
+      "required": "inputs/sole-bounded-bridge-r6/run.12.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "082259321588ae8c623dd0da675d1e04973678b002865c99779877d902be1e93"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.13",
+      "required": "inputs/sole-bounded-bridge-r6/run.13.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "67bca3d46436e8d63741d92b611d7fd1ccda2d1c7a0b6e60f8202a503a691ea7"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.13",
+      "required": "inputs/sole-bounded-bridge-r6/run.13.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "a0b06d242377188e135d92bf242e554020ab7f9b5a5bfebf537dd8f8ba920406"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.14",
+      "required": "inputs/sole-bounded-bridge-r6/run.14.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "7acf11388201e2bcd081fadaf3a960499dc56fb84a565d03311561a00924251d"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.14",
+      "required": "inputs/sole-bounded-bridge-r6/run.14.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "7ed2b28fc61deaf753890a18d8d5a167a5e32f1d753b396b0bf4bc679c1f0a87"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.15",
+      "required": "inputs/sole-bounded-bridge-r6/run.15.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "2148c6cd721ffff1479a90449e2055215e67af52227756b6b3cebaa6d7c39a2e"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.15",
+      "required": "inputs/sole-bounded-bridge-r6/run.15.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "bf481062a9e01b95ead5e60764040f2c2ce680e2c85bd7713f97e1999205ce9f"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.16",
+      "required": "inputs/sole-bounded-bridge-r6/run.16.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "2cc421d049c37faac4c49616bab9239742060728237d85a6b3feb68294d6ce68"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.16",
+      "required": "inputs/sole-bounded-bridge-r6/run.16.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "2d1369fc7fa92c5fcf258e63b97d504267c4f827deb9331551d362b3278389f9"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.17",
+      "required": "inputs/sole-bounded-bridge-r6/run.17.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "67029d1173266c138377b350e9465fea8b3adc9bdf8bcbceae33aa2e1508bb3c"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.17",
+      "required": "inputs/sole-bounded-bridge-r6/run.17.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "0a3dc7b50fdabeaaa7ab6d8d7a585d6736aaab726624f003b27cf4f278a97205"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.18",
+      "required": "inputs/sole-bounded-bridge-r6/run.18.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "be7362fdb31c7964dd4f69f226fba574a89b75a9673e69b44973b764b19d7354"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.18",
+      "required": "inputs/sole-bounded-bridge-r6/run.18.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "484816d11cb3f206f98f85ba4bd032486ba0a9efd368bbe169f65e0cb8f714b7"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.19",
+      "required": "inputs/sole-bounded-bridge-r6/run.19.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "0db3256fffed1cb66f8a8714302bfd0ca185692921ba23e1eecb739f31e76969"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.19",
+      "required": "inputs/sole-bounded-bridge-r6/run.19.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "db0ddba7fd02908f1e03b43731b5ac6c6ec8030b0b4acda1c161da8e36c92796"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.20",
+      "required": "inputs/sole-bounded-bridge-r6/run.20.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "5ee0039880c75c6c6acf06d148fba04d04914afb9cd1c1ea25fd585264909f30"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.20",
+      "required": "inputs/sole-bounded-bridge-r6/run.20.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "067d182f5b392fa5ce483038ad3ff76ab7b439c9498a825cafc9de79648db762"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.21",
+      "required": "inputs/sole-bounded-bridge-r6/run.21.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "cc38c339500960c8ee0e944fa181acf6ff23082d8ea32531b1536e46e10a4606"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.21",
+      "required": "inputs/sole-bounded-bridge-r6/run.21.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "2df46dcab9c2c66ddfd0b214d80f46206f9ca7c64d0eb204c086adbea579d865"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.22",
+      "required": "inputs/sole-bounded-bridge-r6/run.22.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "54bf27e2714ea97c43f65b23f8dc4374dc7cac733a7d53f2eb81eca1f0a62430"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "run.22",
+      "required": "inputs/sole-bounded-bridge-r6/run.22.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "1be3da57fe1bbc66a90b0f4a02cd28d2eb15a9e2406828e77366b14e36524eea"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.00",
+      "required": "inputs/sole-bounded-bridge-r6/walk.00.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "d11491e7aed9d11fd6f4bae34759230d5a4bb74692d409ff32837a12e8156e09"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.00",
+      "required": "inputs/sole-bounded-bridge-r6/walk.00.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "6ccdcead8c850a01ae4c871ca1254a0703e4f6dae7937af98870709206fdd2cd"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.01",
+      "required": "inputs/sole-bounded-bridge-r6/walk.01.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "548b25796b58908bff3ef7123f7faefa019482b8f1644c233f3bb5dc2a321c92"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.01",
+      "required": "inputs/sole-bounded-bridge-r6/walk.01.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "b1c70d3a21fac1d987e3d91a06f368328fbac41543a3884ed3b2e6b12312d887"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.02",
+      "required": "inputs/sole-bounded-bridge-r6/walk.02.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "6fe52fa231b1b0df4a24702f370c9b9f895346ece378ce2e722467486b2049d4"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.02",
+      "required": "inputs/sole-bounded-bridge-r6/walk.02.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "483245fb6c962be9969d7c2f6ef3e0d7feb13cab27cfea9e2445fe323ee2aecc"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": true,
+      "pose": "walk.03",
+      "required": "inputs/sole-bounded-bridge-r6/walk.03.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "be0cefd9212c9eb150fea076d9b65f0ec672fd03653ad54fbd864695ca0ed8f4"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.03",
+      "required": "inputs/sole-bounded-bridge-r6/walk.03.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "5fdbcd62ece0b0cf6dbb84823b16559268dcce4a2276284230e4515fc64f5d69"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": true,
+      "pose": "walk.04",
+      "required": "inputs/sole-bounded-bridge-r6/walk.04.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "873046e5bb81622a646839a6b87c986c8b344ff2a04eebf39f6dff9d95bd2b6d"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.04",
+      "required": "inputs/sole-bounded-bridge-r6/walk.04.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "dd8a19b1dcede1ce560ad1d5d83ecf101c48a7d47dcb35a7a9c78eba18513940"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.05",
+      "required": "inputs/sole-bounded-bridge-r6/walk.05.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "bca232942a88a6e3ed8e62c47591179a6b6f92e1910e2b9a7a236f59b22a9c6b"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.05",
+      "required": "inputs/sole-bounded-bridge-r6/walk.05.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "032ca35eb260d33d9c5c1f49ec35e5be9f599a1093ea481bd247d1e0db43a2b3"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.06",
+      "required": "inputs/sole-bounded-bridge-r6/walk.06.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "dcc3e0c17794ac5c25eaf74b2c50dbbaf73eb87d8e5b7664c5dbd02729a0c373"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.06",
+      "required": "inputs/sole-bounded-bridge-r6/walk.06.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "4f0ce49dca1fdaa70554bb13d4280bf85820229c76b7bde322994283b635cf81"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.07",
+      "required": "inputs/sole-bounded-bridge-r6/walk.07.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "0cd84226c5453f57df04f93f606d273d0e5867df774aff6db19c2ffc559392fb"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.07",
+      "required": "inputs/sole-bounded-bridge-r6/walk.07.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "0c49275f2f851d92bfba3fb28f480cb01795b02c6ae704b79b8dd3a641309758"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.08",
+      "required": "inputs/sole-bounded-bridge-r6/walk.08.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "dead9a12accc7ce6f29850b782e1305f12f45069ef86b996982e82a972eb4e5e"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.08",
+      "required": "inputs/sole-bounded-bridge-r6/walk.08.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "9b12d6a04603555e8e365c033cc8ac50fa65b30cb06af1df1d4b84cd7d796a90"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.09",
+      "required": "inputs/sole-bounded-bridge-r6/walk.09.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "afdbd1d20ceafe20a649543ee4346c557de0d1733d4f7e23243c1355e5cb0b5a"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.09",
+      "required": "inputs/sole-bounded-bridge-r6/walk.09.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "970940b45238b2f1e1ecd7c27ab9db5f339ef6eff2018fa6f4dc5e63c303533b"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.10",
+      "required": "inputs/sole-bounded-bridge-r6/walk.10.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "80b32180e5bbfd4b2adb68d2777d892c5579316d4ec941f63f0281f7d943a950"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.10",
+      "required": "inputs/sole-bounded-bridge-r6/walk.10.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "a51b156973ac058975513a228adfb0972cfe994cc6d8dbe69124c81bce3f6f16"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.11",
+      "required": "inputs/sole-bounded-bridge-r6/walk.11.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "d31fb4fc327398a9f8910b05660c94035b3407c0779c4e0d780400cffe1843ae"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.11",
+      "required": "inputs/sole-bounded-bridge-r6/walk.11.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "e77b56b1b03d2bed5d06eb8c6c707af046fc3558189cdc99a5360b10372002b9"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.12",
+      "required": "inputs/sole-bounded-bridge-r6/walk.12.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "76c4e1d65a0830a2f152e51d1620a7a825a331b2ea6b5336378cece166896c2f"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.12",
+      "required": "inputs/sole-bounded-bridge-r6/walk.12.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "11d19df44b40897cd17c405eead5c0d77feaba8e0e29cdf93528e42ad6083994"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.13",
+      "required": "inputs/sole-bounded-bridge-r6/walk.13.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "e3539e03770cfd629369786906ef09e0faadd24a5d64ea6e80cd2a38b635fae0"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.13",
+      "required": "inputs/sole-bounded-bridge-r6/walk.13.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "107465b367ebc85d72840616a1f7902f903a4845acf732c915d1e8b46446ba3c"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.14",
+      "required": "inputs/sole-bounded-bridge-r6/walk.14.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "6b6dbdfd7cc55dcc326ff4a171f76a5a1cbe9f532a50f4abdf19404b2433f274"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.14",
+      "required": "inputs/sole-bounded-bridge-r6/walk.14.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "638b79fe61316c906ec5db00471ad74fd75a64b6adbc9bfd1852b9c3dba50dc8"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.15",
+      "required": "inputs/sole-bounded-bridge-r6/walk.15.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "76c94b3804be28bf87e8f68c51b8ac96dff096cae1b1bf735757307a62d45284"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.15",
+      "required": "inputs/sole-bounded-bridge-r6/walk.15.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "39715f3c862d3df7811490ab86f6bdeb9b3506b3dd3f4ee07adef18a485be210"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.16",
+      "required": "inputs/sole-bounded-bridge-r6/walk.16.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "7b2a2047219e390efdf2f95634f6efbb1b1568d250d8b1fc75e05442353589f0"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.16",
+      "required": "inputs/sole-bounded-bridge-r6/walk.16.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "61bec574eb1d0468662d959230009492666eaecdc66e3041da54d41ac91e4de7"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.17",
+      "required": "inputs/sole-bounded-bridge-r6/walk.17.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "b0e0eee7edc6251fe60078a127ac738e28d4decdaec7546bf8382efca05f6fda"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.17",
+      "required": "inputs/sole-bounded-bridge-r6/walk.17.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "5ed525427977d6c239e65b95a6c31e4db66d7ff3c5b717de36746f36e722102c"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.18",
+      "required": "inputs/sole-bounded-bridge-r6/walk.18.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "ff1a9c854eab054397902e59866b015d8ac9d32e067868753da7e04f6fb8adaf"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.18",
+      "required": "inputs/sole-bounded-bridge-r6/walk.18.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "52a919a0c36ea2d2ec8c35e730248614f8b8f83eae337dbac8677fa0e91aa185"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.19",
+      "required": "inputs/sole-bounded-bridge-r6/walk.19.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "e759b77d79aefe63ecb00650419f9ce12e7972176965b203bf0bd78da28a562e"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "pose": "walk.19",
+      "required": "inputs/sole-bounded-bridge-r6/walk.19.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "2a00558d2c57ffc7e9029331bcf62b7ce052275e027953869c42210ec14361d5"
+    }
+  ]
+}

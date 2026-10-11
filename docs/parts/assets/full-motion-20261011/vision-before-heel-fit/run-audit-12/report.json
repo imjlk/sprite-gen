@@ -1,0 +1,44 @@
+{
+  "appearance": {
+    "digest": "77911f8c97623cfc579f8531f9c39423cbfb5a2cea5cc92f608668082b49d934",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+      "id": "full-motion.body"
+    }
+  ],
+  "error": "Command '['/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex', 'exec', '--sandbox', 'read-only', '--skip-git-repo-check', '--ephemeral', '--color', 'never', '-C', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-full-motion-20261011/audit-r11-sole-bridge-final/vision-r1/run-audit-12/facing-5x2o4q8w', '-i', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-full-motion-20261011/audit-r11-sole-bridge-final/vision-r1/run-audit-12/input.png', '-o', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-full-motion-20261011/audit-r11-sole-bridge-final/vision-r1/run-audit-12/facing-5x2o4q8w/answer.txt', '-']' timed out after 180 seconds",
+  "input_sha256": "7e411e1d64baba4b47386154d5f282029db43b1482a7b43d77401cbda865bb86",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "694f00224fe09d3daf050f36a03bd6bde164486d3cfd9df257519222a19aa58b",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "f37bcbf6779e5b4e28d371c00c5bca7e0543601e0f6963575e47d615438b5800",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "117fee89d9c12e74cea34b5af3b594e6487ca220e1727a90bad9f232081ae1ef",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "b68e87cf4e73e7a68f6e923e85c7504ffda778a8128bd3141de610f203354d97",
+  "release_ready": false,
+  "required_poses": [
+    "run.12",
+    "run.13",
+    "run.14",
+    "run.15",
+    "run.16",
+    "run.17"
+  ],
+  "status": "failed"
+}

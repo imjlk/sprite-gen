@@ -1,0 +1,52 @@
+{
+  "poses": {
+    "walk.00": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.01": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.02": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.03": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "The rear sock cuff and ankle bridge are obscured by the nearer calf; their attachment cannot be verified.",
+        "The rear shoe appears as a narrow diagonal navy/cream sliver behind the nearer calf. Its apparent thinness cannot be distinguished from occlusion, and its complete collar, toe and sole are unobservable."
+      ]
+    },
+    "walk.04": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "The rear sock-to-calf connection is concealed; the visible nearer sock does not establish the rear ankle bridge.",
+        "Only a nearly vertical navy/cream strip of the rear shoe is visible beside the nearer calf. Complete product volume and sole continuity cannot be verified across walk.03–walk.04."
+      ]
+    },
+    "walk.05": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "Only walk.00–walk.05 are shown; the other 14 walk frames and all 23 run frames are unobserved.",
+    "Rear footwear in walk.03 and walk.04 remains unknown, not approved.",
+    "These stills cannot establish speed, gait or attachment continuity between frames.",
+    "This observational audit grants no curator approval or release."
+  ]
+}

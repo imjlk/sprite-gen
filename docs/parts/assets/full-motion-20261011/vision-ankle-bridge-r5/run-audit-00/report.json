@@ -1,0 +1,96 @@
+{
+  "answer": {
+    "limits": [
+      "Only run.00–run.05 are visible; the remaining run frames and all walk frames are unassessed.",
+      "Crossing limbs obscure portions of the cuff and shoe collar boundaries in run.02 and run.03.",
+      "Still images cannot establish animation timing, speed or gait quality.",
+      "These observational verdicts do not grant curator approval or release."
+    ],
+    "poses": {
+      "run.00": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.01": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.02": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.03": {
+        "hair": "pass",
+        "issues": [
+          "The actual front-ankle enlargement shows a large, sharply angular pale patch cutting into the trailing calf beside the crossing shoe. The bare enlargement shows continuous skin there. This creates a hard-clipped calf-to-sock transition."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "run.04": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.05": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "844a351aef2651591c744d06ea88611af23c856480a1eabdd70f21f0762ae1ff",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "43c052fab396f5ef48b2c7e986345a75cb7a92d0125ed145659d15574ed02b0c",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "f4cb0aa65e2b49d66c72e9ce8e5f67fdd60cd70eb43afc9dd42d0c3754bea57e",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "29dbf02e002655931471cf56e0bce274d7bdc46f3a01c3c751ae2728fc396062",
+  "release_ready": false,
+  "required_poses": [
+    "run.00",
+    "run.01",
+    "run.02",
+    "run.03",
+    "run.04",
+    "run.05"
+  ],
+  "response_sha256": "ed7080afdea9e8405424786e4f879ab0730ae8dbe25a748efa8c58278e565062",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

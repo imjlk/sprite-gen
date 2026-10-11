@@ -199,9 +199,11 @@ def import_pack(assembly: Path, spec: Path, source_root: Path, *, allow_incomple
                     raise contract.PartsContractError(f"{where}: piece palette region differs from image size; use sample-specific regions")
             # Native illustration frames otherwise retain a full canvas per limb.
             # Keep source provenance, but use only the occupied rectangle at runtime.
-            # Masks and palette regions have their own coordinate space: leave those
-            # inputs intact until they can be trimmed together.
-            if (rig.get("sampling") == "smooth" and normalized["mask"] is None
+            # A rig-canvas mask stays in rig coordinates when the raster/pivot
+            # are trimmed. Part-local masks and palette regions must stay with
+            # their original raster until they can be trimmed together.
+            rig_mask = normalized["mask"] is not None and normalized["mask"]["space"] == "rig-canvas"
+            if (rig.get("sampling") == "smooth" and (normalized["mask"] is None or rig_mask)
                     and not normalized["palette_regions"] and not piece["palette_regions"]):
                 box = image.getchannel("A").getbbox() or (0, 0, 1, 1)
                 if box != (0, 0, image.width, image.height):

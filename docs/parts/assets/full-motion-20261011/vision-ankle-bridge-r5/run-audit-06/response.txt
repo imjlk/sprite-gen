@@ -1,0 +1,48 @@
+{
+  "poses": {
+    "run.06": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.07": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.08": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.09": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.10": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.11": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "Only run.06 through run.11 are assessed; the other 17 run frames and all 20 walk frames are absent.",
+    "The narrow apparent back-shoe width in run.06 through run.08 accompanies the downward foot orientation visible in the bare references; the enlarged shoes retain discernible navy uppers and cream soles.",
+    "Small fragments along the upper crop boundaries in run.11 have counterparts in the bare panels and do not establish detached sock fabric.",
+    "The flattened compositions conceal anatomy beneath socks and shoes; hidden overlap and layer boundaries cannot be verified.",
+    "Stills do not establish speed, gait quality or biomechanical correctness.",
+    "These observational pass findings do not grant curator approval or release."
+  ]
+}

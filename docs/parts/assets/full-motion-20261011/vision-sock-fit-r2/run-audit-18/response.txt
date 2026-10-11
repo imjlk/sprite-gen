@@ -1,0 +1,42 @@
+{
+  "poses": {
+    "run.18": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.19": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.20": {
+      "hair": "pass",
+      "socks": "rework",
+      "shoes": "rework",
+      "issues": [
+        "The enlarged back ankle shows a background gap between the angular cream sock end and the shoe collar. The ankle bridge is broken, making the rear shoe appear detached."
+      ]
+    },
+    "run.21": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.22": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "Only run.18 through run.22 are shown; continuity with frames outside this subset cannot be assessed.",
+    "These stills cannot establish speed, gait quality or motion continuity between displayed poses.",
+    "Hidden body pixels beneath the layered parts cannot be inspected.",
+    "This observational audit grants no curator approval or release authorization."
+  ]
+}

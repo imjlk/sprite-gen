@@ -1,0 +1,48 @@
+{
+  "poses": {
+    "run.06": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.07": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.08": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.09": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.10": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "pass",
+      "issues": [
+        "A small pointed tan/cream projection appears immediately above the back sock collar. Its relationship to the calf and cuff is unclear, preventing a confident fitted-cuff pass."
+      ]
+    },
+    "run.11": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "The run.10 rear-cuff projection cannot confidently be distinguished as exposed source-body skin, overlapping fabric, or a separate fragment from this view.",
+    "Only run.06 through run.11 are visible; continuity with the remaining 17 run frames and all 20 walk frames is unassessed.",
+    "Still images support visible attachment and design comparisons, but do not establish movement speed or biomechanical gait validity.",
+    "These observational ratings do not grant curator approval or release authorization."
+  ]
+}

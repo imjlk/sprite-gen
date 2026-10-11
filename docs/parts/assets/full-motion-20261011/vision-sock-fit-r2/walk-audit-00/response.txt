@@ -1,0 +1,53 @@
+{
+  "poses": {
+    "walk.00": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.01": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.02": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.03": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "The rear ankle is largely hidden behind the foreground calf, preventing verification of its sock cuff and ankle bridge.",
+        "Only a diagonal navy/cream portion of the rear shoe is visible; its collar, calf entry and full volume cannot be verified. The foreground shoe shows no obvious defect."
+      ]
+    },
+    "walk.04": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "The rear sock and ankle connection are obscured by the foreground calf.",
+        "The rear shoe is visible mainly as a near-vertical navy/cream strip. Occlusion prevents distinguishing a complete shoe from a thin or clipped asset; the foreground shoe retains its shape."
+      ]
+    },
+    "walk.05": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "Only walk.00 through walk.05 are shown; the remaining 14 walk frames and all 23 run frames are unaudited.",
+    "Occlusion in walk.03 and walk.04 prevents confirming rear footwear continuity across those frames.",
+    "Enlargement boundaries crop some parts; those crop edges do not establish asset clipping.",
+    "Stills cannot establish speed, gait quality or motion timing.",
+    "These findings are an observational audit and grant no curator approval or release."
+  ]
+}

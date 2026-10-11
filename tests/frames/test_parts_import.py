@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from PIL import Image
+from PIL import Image,ImageDraw,ImageChops
 import pytest
 
 from parts_helpers import frozen_workspace, part_spec, tree_hashes
@@ -157,6 +157,32 @@ def test_mask_dimensions_are_checked_without_changing_part_geometry(tmp_path):
     spec.write_bytes(workspace.json_bytes(data))
     with pytest.raises(contract.PartsContractError, match="canvas differs"):
         parts_import.import_pack(assembly, spec, source)
+
+
+@pytest.mark.parametrize('space',['rig-canvas','part-local'])
+def test_native_masked_texture_trimming_preserves_mask_coordinates(tmp_path,space):
+    assembly=frozen_workspace(tmp_path,sampling='smooth')
+    source=tmp_path/'native-source';source.mkdir()
+    original=Image.new('RGBA',(5,4));ImageDraw.Draw(original).rectangle((1,1,3,2),fill=(50,100,150,128));original.save(source/'piece.png')
+    mask=Image.new('L',(128,128) if space=='rig-canvas' else original.size,255)
+    mask.putpixel((64,64) if space=='rig-canvas' else (2,2),0);mask.save(source/'mask.png')
+    spec=part_spec(tmp_path/'native-import.json',assembly,source)
+    data=json.loads(spec.read_text())
+    for placement in data['pieces'][0]['sample_map']['walk.right'].values():
+        placement['mask']={'image':{'file':'mask.png','sha256':library.sha256((source/'mask.png').read_bytes())},'target_node':'hair_front','space':space}
+    spec.write_bytes(workspace.json_bytes(data));before=tree_hashes(source)
+    result=parts_import.import_pack(assembly,spec,source);part,reader=loaded_part(assembly,result)
+    placement=part['bindings'][0]['pieces'][0]['sample_map']['walk.right']['sample.0']
+    assert library.load_image(reader,placement['image']).size==((3,2) if space=='rig-canvas' else (5,4))
+    assert library.load_image(reader,placement['mask']['image']).size==mask.size
+    actual=restored(assembly,result)
+    canvas_mask=mask if space=='rig-canvas' else Image.new('L',(128,128),0)
+    if space=='part-local':canvas_mask.paste(mask,(62,62))
+    actual.putalpha(ImageChops.multiply(actual.getchannel('A'),canvas_mask))
+    expected=Image.new('RGBA',(128,128));expected.alpha_composite(original,(62,62));expected.putalpha(ImageChops.multiply(expected.getchannel('A'),canvas_mask))
+    assert actual.tobytes()==expected.tobytes()
+    assert actual.getpixel((64,64))[3]==0
+    assert tree_hashes(source)==before
 
 
 def test_source_path_symlink_and_clipping_fail_before_activation(tmp_path):

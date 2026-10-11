@@ -1,0 +1,69 @@
+{
+  "answer": {
+    "limits": [
+      "Only walk.18 and walk.19 are shown; the remaining frames cannot be assessed.",
+      "The visible back-heel coverage defect does not establish whether layer placement or asset geometry caused it.",
+      "Stills cannot establish speed, timing or gait quality. Source-body biomechanics are not approved by these parts assessments.",
+      "This observational audit grants no curator approval or release authorization."
+    ],
+    "poses": {
+      "walk.18": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.19": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged back ankle shows a bare-skin heel crescent protruding behind the white sock and above the navy shoe collar, breaking continuous sock-to-shoe coverage.",
+          "The back shoe collar fails to contain the heel. This exposed heel is also visible in the full composition and differs visibly from the covered attachment in walk.18."
+        ],
+        "shoes": "rework",
+        "socks": "rework"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "74c50ec04f3381a7f30f900bf99ba4971f638c53be53c2dcfd25fc66efabebf3",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "d67ed505c7e0acbcb43777336dc78a9f49afc04dbd8bfc086802a54aea0cf74b",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "b216b1060b6a306b2cef94ee136bfbae94a267f086191958b2fb5f7bf9f4e336",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "370a2f1cccd13ef2752293d823c1aabcd1e298e8be6b4b7a55fedb51aadc2d0c",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "6ac398743918bea3f45e4e3a028d74b05dad2f93e72f92ece8edd62dcef570ee",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "827e464454d82d13734f38c53b0f2b669d649c5ca43e792bcd5522cd75c2befb",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "bd252156fcb1d21e3d8a13867b683ceab229c0003d741235ff8ca1a524d0a4a2",
+  "release_ready": false,
+  "required_poses": [
+    "walk.18",
+    "walk.19"
+  ],
+  "response_sha256": "c42b0a52b8ddf229208dae060d13283865325928b9e36e255b80211df92482ea",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

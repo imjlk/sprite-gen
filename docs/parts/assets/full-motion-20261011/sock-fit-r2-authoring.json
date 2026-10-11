@@ -1,0 +1,141 @@
+{
+  "art_approved": false,
+  "method": "source-bounded cuff contour; sparse calf KEEP masks, original body/shoe bytes retained",
+  "poses": [
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "986fd6e8e5f7ec638a07f279bba6bfe70c2769d1b8addc4229ef937d2a9a27b0",
+      "conditional_calf_pixels_affected": 43,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "run.02",
+      "side": "front",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "eb4404e4ac76cc14b9e0e7e436202bba8f3cf126ce628b5304d6330177717111",
+      "conditional_calf_pixels_affected": 274,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "run.03",
+      "side": "back",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "3d6d2695937966b1c1df2e32b7d53840f83addcf7b1e5b7e27f92a6a937dce42",
+      "conditional_calf_pixels_affected": 370,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "run.10",
+      "side": "back",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "8eae03bc792c5d4c522fcdc3ce086472a617f596bcb934c80790a1776e9361fe",
+      "conditional_calf_pixels_affected": 301,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "run.13",
+      "side": "front",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "c7182de140a1b44d2e9fca90e89ab0b6f06eda036d003fadc5683946a2fb97f1",
+      "conditional_calf_pixels_affected": 131,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "run.18",
+      "side": "back",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "ed4e79b165161fead6c09a685f3fc7239584b0d5fb5223c076153c64ba1b3b24",
+      "conditional_calf_pixels_affected": 166,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "run.19",
+      "side": "back",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "b2c3cafaf01bdd69ff3b87ebc53d3e4cba19955da0818e2f41ee17b0081fbc33",
+      "conditional_calf_pixels_affected": 106,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "run.20",
+      "side": "back",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "7e62e76427148f9cf2e4911e75b42cfd16d1b7133ffa3d37e1be7b4da77edc93",
+      "conditional_calf_pixels_affected": 263,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "run.21",
+      "side": "back",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "1028ffaa38e586de6984e44feb0484fb65366c313e18c064c0cceb188e4d31ad",
+      "conditional_calf_pixels_affected": 219,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "walk.08",
+      "side": "front",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "5e3163c4822f65b9dda64b99f840346b1eb9c25b2a23c95ae348e1c8ec4ec449",
+      "conditional_calf_pixels_affected": 301,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "walk.14",
+      "side": "front",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "1236d680aad884373da7433b9d02cc8a0cc8fa670e7f7373fca2abe22a412b73",
+      "conditional_calf_pixels_affected": 60,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "walk.15",
+      "side": "front",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "0bf96a3fe10e31e02e0b20aae567659d7cfddce19c076a9c36c8fb02a3244fbf",
+      "conditional_calf_pixels_affected": 127,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "walk.16",
+      "side": "front",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "27db98fe28136888b0486d4263bed45e5e3f07edc6c2dd83b1b36076d35dcb03",
+      "conditional_calf_pixels_affected": 148,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "walk.17",
+      "side": "back",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "0d6b0ed1df41bef4ecb3823c19b6681419a59ea7b8082a384f57bb6648efdc41",
+      "conditional_calf_pixels_affected": 175,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "walk.17",
+      "side": "front",
+      "whole_body_mask": false
+    },
+    {
+      "body_source_changed": false,
+      "body_source_sha256": "a0cca4d4d96d46d59eae66a5ba6d3808c8a792d50035c9a8924f623794cea4a4",
+      "conditional_calf_pixels_affected": 215,
+      "cuff_outside_source_body_pixels": 0,
+      "pose": "walk.19",
+      "side": "back",
+      "whole_body_mask": false
+    }
+  ]
+}

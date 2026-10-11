@@ -1,0 +1,2498 @@
+{
+  "art_approved": false,
+  "corrections": [
+    {
+      "correction": "50px source-grid tick read corrected on folded front limb and back toe",
+      "pose": "run.02"
+    },
+    {
+      "correction": "50px source-grid tick read corrected on folded front limb and back toe",
+      "pose": "run.14"
+    },
+    {
+      "after": [
+        397,
+        644
+      ],
+      "before": [
+        391,
+        644
+      ],
+      "distance": 6.0,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.05",
+      "side": "front"
+    },
+    {
+      "after": [
+        450,
+        671
+      ],
+      "before": [
+        448,
+        686
+      ],
+      "distance": 15.1,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.06",
+      "side": "front"
+    },
+    {
+      "after": [
+        529,
+        660
+      ],
+      "before": [
+        535,
+        664
+      ],
+      "distance": 7.2,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "toe",
+      "pose": "run.06",
+      "side": "front"
+    },
+    {
+      "after": [
+        127,
+        594
+      ],
+      "before": [
+        123,
+        590
+      ],
+      "distance": 5.7,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.07",
+      "side": "back"
+    },
+    {
+      "after": [
+        477,
+        679
+      ],
+      "before": [
+        474,
+        690
+      ],
+      "distance": 11.4,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.07",
+      "side": "front"
+    },
+    {
+      "after": [
+        479,
+        694
+      ],
+      "before": [
+        479,
+        707
+      ],
+      "distance": 13.0,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.08",
+      "side": "front"
+    },
+    {
+      "after": [
+        144,
+        531
+      ],
+      "before": [
+        137,
+        524
+      ],
+      "distance": 9.9,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.09",
+      "side": "back"
+    },
+    {
+      "after": [
+        114,
+        604
+      ],
+      "before": [
+        107,
+        606
+      ],
+      "distance": 7.3,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "toe",
+      "pose": "run.09",
+      "side": "back"
+    },
+    {
+      "after": [
+        181,
+        521
+      ],
+      "before": [
+        159,
+        506
+      ],
+      "distance": 26.6,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.10",
+      "side": "back"
+    },
+    {
+      "after": [
+        144,
+        584
+      ],
+      "before": [
+        138,
+        584
+      ],
+      "distance": 6.0,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "toe",
+      "pose": "run.10",
+      "side": "back"
+    },
+    {
+      "after": [
+        196,
+        587
+      ],
+      "before": [
+        201,
+        590
+      ],
+      "distance": 5.8,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "toe",
+      "pose": "run.11",
+      "side": "back"
+    },
+    {
+      "after": [
+        383,
+        705
+      ],
+      "before": [
+        389,
+        705
+      ],
+      "distance": 6.0,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "toe",
+      "pose": "run.13",
+      "side": "front"
+    },
+    {
+      "after": [
+        400,
+        634
+      ],
+      "before": [
+        391,
+        633
+      ],
+      "distance": 9.1,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.17",
+      "side": "front"
+    },
+    {
+      "after": [
+        139,
+        596
+      ],
+      "before": [
+        134,
+        594
+      ],
+      "distance": 5.4,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.18",
+      "side": "back"
+    },
+    {
+      "after": [
+        127,
+        568
+      ],
+      "before": [
+        122,
+        566
+      ],
+      "distance": 5.4,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.19",
+      "side": "back"
+    },
+    {
+      "after": [
+        146,
+        521
+      ],
+      "before": [
+        137,
+        513
+      ],
+      "distance": 12.0,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.20",
+      "side": "back"
+    },
+    {
+      "after": [
+        537,
+        663
+      ],
+      "before": [
+        543,
+        667
+      ],
+      "distance": 7.2,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "toe",
+      "pose": "run.20",
+      "side": "front"
+    },
+    {
+      "after": [
+        167,
+        511
+      ],
+      "before": [
+        158,
+        502
+      ],
+      "distance": 12.7,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.21",
+      "side": "back"
+    },
+    {
+      "after": [
+        426,
+        696
+      ],
+      "before": [
+        419,
+        698
+      ],
+      "distance": 7.3,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.21",
+      "side": "front"
+    },
+    {
+      "after": [
+        191,
+        585
+      ],
+      "before": [
+        196,
+        590
+      ],
+      "distance": 7.1,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "toe",
+      "pose": "run.22",
+      "side": "back"
+    },
+    {
+      "after": [
+        379,
+        688
+      ],
+      "before": [
+        360,
+        688
+      ],
+      "distance": 19.0,
+      "method": "bounded nearest source silhouette correction to authored contact marker",
+      "point": "heel",
+      "pose": "run.22",
+      "side": "front"
+    }
+  ],
+  "foot_cut_extension_px": 4,
+  "kind": "source-bound-manual-motion-annotations",
+  "method": "All 23 run frames visually read on registered source; explicit knees/ankles/heels/toes transferred through the declared engine-strip registration; never a general pose detector.; markers outside source silhouette corrected in a preserved revision. Walk: all 20 source frames read separately; no run-to-walk reuse.",
+  "poses": {
+    "run.00": {
+      "back": {
+        "ankle": [
+          274,
+          576
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          256,
+          545
+        ],
+        "knee": [
+          376,
+          581
+        ],
+        "toe": [
+          229,
+          621
+        ]
+      },
+      "body_sha256": "889bf7aa8b706307eae4d17389ac1eb5f7fe3716b8f782bb1fbbb74c8dd696b7",
+      "front": {
+        "ankle": [
+          356,
+          668
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          336,
+          699
+        ],
+        "knee": [
+          399,
+          588
+        ],
+        "toe": [
+          411,
+          705
+        ]
+      }
+    },
+    "run.01": {
+      "back": {
+        "ankle": [
+          298,
+          586
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          282,
+          558
+        ],
+        "knee": [
+          396,
+          572
+        ],
+        "toe": [
+          271,
+          636
+        ]
+      },
+      "body_sha256": "ef675d98253409b6379ef8a91e1377b73914b3092b043a8bb8bc3ab502fb1404",
+      "front": {
+        "ankle": [
+          336,
+          668
+        ],
+        "cuff_axis_point": [
+          350,
+          632
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          311,
+          696
+        ],
+        "knee": [
+          406,
+          585
+        ],
+        "toe": [
+          392,
+          705
+        ]
+      }
+    },
+    "run.02": {
+      "back": {
+        "ankle": [
+          294,
+          675
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          262,
+          698
+        ],
+        "knee": [
+          347,
+          581
+        ],
+        "toe": [
+          350,
+          708
+        ]
+      },
+      "body_sha256": "8fe26cbedf5867f15627584bc5957940b0a1ab92ee3b7a6575d2ab5b8c3f32fd",
+      "front": {
+        "ankle": [
+          337,
+          614
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          318,
+          634
+        ],
+        "knee": [
+          427,
+          542
+        ],
+        "toe": [
+          337,
+          658
+        ]
+      }
+    },
+    "run.03": {
+      "back": {
+        "ankle": [
+          252,
+          657
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          236,
+          682
+        ],
+        "knee": [
+          285,
+          576
+        ],
+        "toe": [
+          311,
+          706
+        ]
+      },
+      "body_sha256": "55838fd2af9ed849edf9bff542fd47802752985c1d1f18d8850f656de057c923",
+      "front": {
+        "ankle": [
+          370,
+          599
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          326,
+          596
+        ],
+        "knee": [
+          427,
+          528
+        ],
+        "toe": [
+          374,
+          665
+        ]
+      }
+    },
+    "run.04": {
+      "back": {
+        "ankle": [
+          227,
+          651
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          201,
+          648
+        ],
+        "knee": [
+          272,
+          565
+        ],
+        "toe": [
+          270,
+          703
+        ]
+      },
+      "body_sha256": "9efe8f284b32abffed98b8e08f3d02897d8247b4a22fa28da896d891a7f8583a",
+      "front": {
+        "ankle": [
+          414,
+          621
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          365,
+          620
+        ],
+        "knee": [
+          430,
+          543
+        ],
+        "toe": [
+          440,
+          666
+        ]
+      }
+    },
+    "run.05": {
+      "back": {
+        "ankle": [
+          210,
+          641
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          188,
+          650
+        ],
+        "knee": [
+          264,
+          553
+        ],
+        "toe": [
+          221,
+          702
+        ]
+      },
+      "body_sha256": "aa2a9557d6cbf9da53e75acb28ac59d0947f538a60afc8a9a164a9028b02f2f4",
+      "front": {
+        "ankle": [
+          417,
+          627
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          397,
+          644
+        ],
+        "knee": [
+          423,
+          531
+        ],
+        "toe": [
+          480,
+          664
+        ]
+      }
+    },
+    "run.06": {
+      "back": {
+        "ankle": [
+          168,
+          629
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          147,
+          621
+        ],
+        "knee": [
+          238,
+          571
+        ],
+        "toe": [
+          181,
+          685
+        ]
+      },
+      "body_sha256": "77d9049792d15fb53050bd02c6f2c9a948944bbf3547a620213701a42c4a758d",
+      "front": {
+        "ankle": [
+          452,
+          659
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          450,
+          671
+        ],
+        "knee": [
+          432,
+          538
+        ],
+        "toe": [
+          529,
+          660
+        ]
+      }
+    },
+    "run.07": {
+      "back": {
+        "ankle": [
+          144,
+          604
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          127,
+          594
+        ],
+        "knee": [
+          217,
+          546
+        ],
+        "toe": [
+          137,
+          665
+        ]
+      },
+      "body_sha256": "6bb316193f6589b595aa705aa07e7da8274ee39bb907767860f2cc48f973c346",
+      "front": {
+        "ankle": [
+          471,
+          655
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          477,
+          679
+        ],
+        "knee": [
+          420,
+          554
+        ],
+        "toe": [
+          551,
+          643
+        ]
+      }
+    },
+    "run.08": {
+      "back": {
+        "ankle": [
+          147,
+          571
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          123,
+          555
+        ],
+        "knee": [
+          252,
+          558
+        ],
+        "toe": [
+          124,
+          642
+        ]
+      },
+      "body_sha256": "2bf643fca5fda70a267757c77548296d34a567f1bce99e28b33704579b291ac6",
+      "front": {
+        "ankle": [
+          477,
+          663
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          479,
+          694
+        ],
+        "knee": [
+          426,
+          560
+        ],
+        "toe": [
+          551,
+          653
+        ]
+      }
+    },
+    "run.09": {
+      "back": {
+        "ankle": [
+          160,
+          548
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          144,
+          531
+        ],
+        "knee": [
+          277,
+          550
+        ],
+        "toe": [
+          114,
+          604
+        ]
+      },
+      "body_sha256": "68f63312a591742430eeff1c6e571b1f36eeab89e833f59fc7bc0f8ce2a23726",
+      "front": {
+        "ankle": [
+          443,
+          658
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          448,
+          700
+        ],
+        "knee": [
+          403,
+          582
+        ],
+        "toe": [
+          516,
+          665
+        ]
+      }
+    },
+    "run.10": {
+      "back": {
+        "ankle": [
+          201,
+          551
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          181,
+          521
+        ],
+        "knee": [
+          290,
+          569
+        ],
+        "toe": [
+          144,
+          584
+        ]
+      },
+      "body_sha256": "811b779e862c1d62e4899bb1fdf0ae4bbb51992c549606ff692cd718c9cfab20",
+      "front": {
+        "ankle": [
+          411,
+          665
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          396,
+          705
+        ],
+        "knee": [
+          414,
+          562
+        ],
+        "toe": [
+          485,
+          705
+        ]
+      }
+    },
+    "run.11": {
+      "back": {
+        "ankle": [
+          249,
+          545
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          225,
+          517
+        ],
+        "knee": [
+          325,
+          581
+        ],
+        "toe": [
+          196,
+          587
+        ]
+      },
+      "body_sha256": "860220dc3b2b039fb95ac6a87f40358a5455e53e395233e8ab81121218a8a037",
+      "front": {
+        "ankle": [
+          390,
+          664
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          370,
+          705
+        ],
+        "knee": [
+          398,
+          565
+        ],
+        "toe": [
+          453,
+          707
+        ]
+      }
+    },
+    "run.12": {
+      "back": {
+        "ankle": [
+          270,
+          571
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          254,
+          545
+        ],
+        "knee": [
+          357,
+          575
+        ],
+        "toe": [
+          229,
+          619
+        ]
+      },
+      "body_sha256": "c2300b02a8ccf136d42537e6571d2855e95252b3d97337c6e1e2a785e59e2590",
+      "front": {
+        "ankle": [
+          349,
+          665
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          329,
+          695
+        ],
+        "knee": [
+          391,
+          577
+        ],
+        "toe": [
+          408,
+          705
+        ]
+      }
+    },
+    "run.13": {
+      "back": {
+        "ankle": [
+          298,
+          581
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          282,
+          557
+        ],
+        "knee": [
+          408,
+          579
+        ],
+        "toe": [
+          269,
+          635
+        ]
+      },
+      "body_sha256": "99c84db79fe8935c594e55eeec63edd9a161fe635cfe3559eb90e53fab4aa3ca",
+      "front": {
+        "ankle": [
+          342,
+          667
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          301,
+          697
+        ],
+        "knee": [
+          368,
+          588
+        ],
+        "toe": [
+          383,
+          705
+        ]
+      }
+    },
+    "run.14": {
+      "back": {
+        "ankle": [
+          277,
+          676
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          250,
+          695
+        ],
+        "knee": [
+          334,
+          562
+        ],
+        "toe": [
+          332,
+          709
+        ]
+      },
+      "body_sha256": "e6454e680da574d08524f7d0d944f74dccb3cde99d04539bfaddb90108d2bb76",
+      "front": {
+        "ankle": [
+          340,
+          605
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          322,
+          622
+        ],
+        "knee": [
+          427,
+          540
+        ],
+        "toe": [
+          336,
+          655
+        ]
+      }
+    },
+    "run.15": {
+      "back": {
+        "ankle": [
+          237,
+          644
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          219,
+          666
+        ],
+        "knee": [
+          285,
+          556
+        ],
+        "toe": [
+          295,
+          705
+        ]
+      },
+      "body_sha256": "4ff426fd98b1377cb0a7f9744029beddf37bb7293817bd52fefa90f1ab71d43e",
+      "front": {
+        "ankle": [
+          371,
+          593
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          333,
+          591
+        ],
+        "knee": [
+          438,
+          519
+        ],
+        "toe": [
+          384,
+          665
+        ]
+      }
+    },
+    "run.16": {
+      "back": {
+        "ankle": [
+          213,
+          633
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          187,
+          643
+        ],
+        "knee": [
+          272,
+          544
+        ],
+        "toe": [
+          250,
+          698
+        ]
+      },
+      "body_sha256": "3211cc5f0b2e8b51a320fee6389768301f510feb7742dc97c9ad9144c3d5a109",
+      "front": {
+        "ankle": [
+          415,
+          617
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          376,
+          612
+        ],
+        "knee": [
+          436,
+          533
+        ],
+        "toe": [
+          455,
+          660
+        ]
+      }
+    },
+    "run.17": {
+      "back": {
+        "ankle": [
+          212,
+          620
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          187,
+          621
+        ],
+        "knee": [
+          264,
+          538
+        ],
+        "toe": [
+          199,
+          657
+        ]
+      },
+      "body_sha256": "4aaed9ff30214ff75a6c3b32ed124371bf34ad4112abe69410d9624b18074b3a",
+      "front": {
+        "ankle": [
+          415,
+          612
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          400,
+          634
+        ],
+        "knee": [
+          436,
+          512
+        ],
+        "toe": [
+          480,
+          657
+        ]
+      }
+    },
+    "run.18": {
+      "back": {
+        "ankle": [
+          163,
+          611
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          139,
+          596
+        ],
+        "knee": [
+          227,
+          540
+        ],
+        "toe": [
+          161,
+          667
+        ]
+      },
+      "body_sha256": "60d0be12d6809f6e0fbb1f5a75b23c564563b9851484a6733e1d36c5ee6b40e4",
+      "front": {
+        "ankle": [
+          450,
+          637
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          446,
+          665
+        ],
+        "knee": [
+          429,
+          540
+        ],
+        "toe": [
+          534,
+          648
+        ]
+      }
+    },
+    "run.19": {
+      "back": {
+        "ankle": [
+          143,
+          595
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          127,
+          568
+        ],
+        "knee": [
+          237,
+          534
+        ],
+        "toe": [
+          124,
+          644
+        ]
+      },
+      "body_sha256": "350b1b44905a80c918fc81b9d5632f85afb94b48639d54e7bbe25cbc9917e42a",
+      "front": {
+        "ankle": [
+          462,
+          644
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          468,
+          680
+        ],
+        "knee": [
+          422,
+          555
+        ],
+        "toe": [
+          551,
+          630
+        ]
+      }
+    },
+    "run.20": {
+      "back": {
+        "ankle": [
+          148,
+          542
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          146,
+          521
+        ],
+        "knee": [
+          270,
+          537
+        ],
+        "toe": [
+          109,
+          596
+        ]
+      },
+      "body_sha256": "40bd984dea5a70f32d1ade227d8f7af7acc6f9bf3682a8e3d168ebbb10db22f3",
+      "front": {
+        "ankle": [
+          471,
+          665
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          479,
+          707
+        ],
+        "knee": [
+          424,
+          563
+        ],
+        "toe": [
+          537,
+          663
+        ]
+      }
+    },
+    "run.21": {
+      "back": {
+        "ankle": [
+          179,
+          541
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          167,
+          511
+        ],
+        "knee": [
+          291,
+          549
+        ],
+        "toe": [
+          134,
+          577
+        ]
+      },
+      "body_sha256": "1d7e913f5ff2dbd690826410adfe35cd8889f4b41e59b9317a666066d4212058",
+      "front": {
+        "ankle": [
+          432,
+          665
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          426,
+          696
+        ],
+        "knee": [
+          406,
+          571
+        ],
+        "toe": [
+          503,
+          674
+        ]
+      }
+    },
+    "run.22": {
+      "back": {
+        "ankle": [
+          244,
+          540
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          226,
+          517
+        ],
+        "knee": [
+          313,
+          568
+        ],
+        "toe": [
+          191,
+          585
+        ]
+      },
+      "body_sha256": "a94f681278ac882e59dccce9f6f594fcdb0eaaaeff59a9966d2b177966b80350",
+      "front": {
+        "ankle": [
+          396,
+          655
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          379,
+          688
+        ],
+        "knee": [
+          386,
+          565
+        ],
+        "toe": [
+          453,
+          697
+        ]
+      }
+    },
+    "walk.00": {
+      "back": {
+        "ankle": [
+          288,
+          628
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          273,
+          620
+        ],
+        "knee": [
+          337,
+          590
+        ],
+        "toe": [
+          293,
+          690
+        ]
+      },
+      "body_sha256": "791f97765f941d376a70907a9f7c5ed901b325a97a5bf90b9a9de95a79bfaba2",
+      "front": {
+        "ankle": [
+          384,
+          679
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          369,
+          706
+        ],
+        "knee": [
+          382,
+          587
+        ],
+        "toe": [
+          451,
+          699
+        ]
+      }
+    },
+    "walk.01": {
+      "back": {
+        "ankle": [
+          323,
+          631
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          299,
+          630
+        ],
+        "knee": [
+          408,
+          584
+        ],
+        "toe": [
+          328,
+          691
+        ]
+      },
+      "body_sha256": "2279f475f99a46c6ce63fdfddb7b9f4d9b9025bb29fad37befa7844da2c2e7e0",
+      "front": {
+        "ankle": [
+          366,
+          679
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          360,
+          705
+        ],
+        "knee": [
+          361,
+          604
+        ],
+        "toe": [
+          433,
+          699
+        ]
+      }
+    },
+    "walk.02": {
+      "back": {
+        "ankle": [
+          323,
+          631
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          299,
+          630
+        ],
+        "knee": [
+          408,
+          584
+        ],
+        "toe": [
+          328,
+          691
+        ]
+      },
+      "body_sha256": "0b6c9c884c7796a91808d9438ecfae1b64c5893d2f705fcd1be8f801b7fee680",
+      "front": {
+        "ankle": [
+          366,
+          679
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          350,
+          706
+        ],
+        "knee": [
+          361,
+          604
+        ],
+        "toe": [
+          433,
+          699
+        ]
+      }
+    },
+    "walk.03": {
+      "back": {
+        "ankle": [
+          341,
+          630
+        ],
+        "cuff_fully_occluded": true,
+        "footwear_anchor": "heel",
+        "heel": [
+          320,
+          635
+        ],
+        "knee": [
+          428,
+          566
+        ],
+        "toe": [
+          340,
+          676
+        ],
+        "toe_visible": false
+      },
+      "body_sha256": "a3735f6c6baaba35ba69eb313d2e1bf38f6620709c4adcd8d6945c03c9e42c54",
+      "front": {
+        "ankle": [
+          346,
+          682
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          339,
+          705
+        ],
+        "knee": [
+          358,
+          592
+        ],
+        "toe": [
+          419,
+          705
+        ]
+      },
+      "leg_owner_polygons": {
+        "front": [
+          [
+            [
+              337,
+              581
+            ],
+            [
+              389,
+              579
+            ],
+            [
+              378,
+              664
+            ],
+            [
+              420,
+              706
+            ],
+            [
+              336,
+              716
+            ],
+            [
+              328,
+              660
+            ],
+            [
+              331,
+              628
+            ]
+          ]
+        ]
+      }
+    },
+    "walk.04": {
+      "back": {
+        "ankle": [
+          341,
+          630
+        ],
+        "cuff_fully_occluded": true,
+        "foot_fully_occluded": true,
+        "footwear_anchor": "heel",
+        "heel": [
+          327,
+          635
+        ],
+        "knee": [
+          428,
+          566
+        ],
+        "toe": [
+          332,
+          676
+        ],
+        "toe_visible": false
+      },
+      "body_sha256": "e55761a6c1e630395a82be1157c304f884e842e26c90e1115b50396333cd3cb6",
+      "front": {
+        "ankle": [
+          346,
+          682
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          328,
+          708
+        ],
+        "knee": [
+          358,
+          592
+        ],
+        "toe": [
+          419,
+          705
+        ]
+      },
+      "leg_owner_polygons": {
+        "front": [
+          [
+            [
+              332,
+              579
+            ],
+            [
+              382,
+              577
+            ],
+            [
+              373,
+              667
+            ],
+            [
+              415,
+              709
+            ],
+            [
+              328,
+              717
+            ],
+            [
+              326,
+              665
+            ],
+            [
+              326,
+              620
+            ]
+          ]
+        ]
+      }
+    },
+    "walk.05": {
+      "back": {
+        "ankle": [
+          401,
+          646
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          374,
+          651
+        ],
+        "knee": [
+          430,
+          552
+        ],
+        "toe": [
+          440,
+          684
+        ]
+      },
+      "body_sha256": "b244cfcfb3684cabf9a2164ada307f2c820aea09bf39683263c46d7332b283f5",
+      "front": {
+        "ankle": [
+          331,
+          678
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          318,
+          708
+        ],
+        "knee": [
+          346,
+          608
+        ],
+        "toe": [
+          409,
+          701
+        ]
+      }
+    },
+    "walk.06": {
+      "back": {
+        "ankle": [
+          401,
+          647
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          369,
+          655
+        ],
+        "knee": [
+          432,
+          551
+        ],
+        "toe": [
+          431,
+          688
+        ]
+      },
+      "body_sha256": "5f033a50cb404db7cd7204e5477cc379650b618cd813c2144b235fba77bc2a1b",
+      "front": {
+        "ankle": [
+          330,
+          681
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          311,
+          708
+        ],
+        "knee": [
+          344,
+          598
+        ],
+        "toe": [
+          397,
+          709
+        ]
+      }
+    },
+    "walk.07": {
+      "back": {
+        "ankle": [
+          417,
+          661
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          406,
+          681
+        ],
+        "knee": [
+          428,
+          544
+        ],
+        "toe": [
+          486,
+          675
+        ]
+      },
+      "body_sha256": "ae5cefeab9719e89bbc17b7c881426269ad7f7af13334e80e019c1f12fec6d78",
+      "front": {
+        "ankle": [
+          315,
+          681
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          300,
+          708
+        ],
+        "knee": [
+          321,
+          604
+        ],
+        "toe": [
+          389,
+          709
+        ]
+      }
+    },
+    "walk.08": {
+      "back": {
+        "ankle": [
+          417,
+          660
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          407,
+          681
+        ],
+        "knee": [
+          430,
+          548
+        ],
+        "toe": [
+          485,
+          677
+        ]
+      },
+      "body_sha256": "aa9e399ae5a7abad08efe921fe3762f01618ba704acb8cf183ca91762c1e1178",
+      "front": {
+        "ankle": [
+          318,
+          680
+        ],
+        "footwear_anchor": "heel",
+        "footwear_heel": [
+          299.34905285083954,
+          711.9139712244331
+        ],
+        "footwear_toe": [
+          370.9142739480866,
+          720.3649551495238
+        ],
+        "heel": [
+          305,
+          707
+        ],
+        "knee": [
+          322,
+          603
+        ],
+        "sock_bridge_u_min": 160,
+        "toe": [
+          377,
+          704
+        ]
+      }
+    },
+    "walk.09": {
+      "back": {
+        "ankle": [
+          444,
+          658
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          437,
+          693
+        ],
+        "knee": [
+          430,
+          568
+        ],
+        "toe": [
+          513,
+          660
+        ]
+      },
+      "body_sha256": "f43236654c4c9bd7f51231054b4bcd50f64f81223d7d05a3f6c7a3b51d2856e1",
+      "front": {
+        "ankle": [
+          295,
+          681
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          279,
+          704
+        ],
+        "knee": [
+          306,
+          605
+        ],
+        "toe": [
+          364,
+          710
+        ]
+      }
+    },
+    "walk.10": {
+      "back": {
+        "ankle": [
+          452,
+          660
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          446,
+          695
+        ],
+        "knee": [
+          440,
+          576
+        ],
+        "toe": [
+          523,
+          660
+        ]
+      },
+      "body_sha256": "bfeb96ae9ebc272b34d42cbdd076fe9fa18dab2318a296d66e3aeabbc2536627",
+      "front": {
+        "ankle": [
+          286,
+          681
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          273,
+          699
+        ],
+        "knee": [
+          299,
+          602
+        ],
+        "toe": [
+          357,
+          710
+        ]
+      }
+    },
+    "walk.11": {
+      "back": {
+        "ankle": [
+          455,
+          664
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          447,
+          692
+        ],
+        "knee": [
+          432,
+          586
+        ],
+        "toe": [
+          513,
+          663
+        ]
+      },
+      "body_sha256": "73b51fc191854ea733284d928b19d955e62446b921cc33bd12fd881926ebd348",
+      "front": {
+        "ankle": [
+          269,
+          676
+        ],
+        "footwear_anchor": "heel",
+        "footwear_heel": [
+          259.0586007854174,
+          702.9534654888596
+        ],
+        "footwear_toe": [
+          327.566935928543,
+          723.3153911325012
+        ],
+        "heel": [
+          259,
+          688
+        ],
+        "knee": [
+          275,
+          607
+        ],
+        "toe": [
+          327,
+          710
+        ]
+      }
+    },
+    "walk.12": {
+      "back": {
+        "ankle": [
+          453,
+          646
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          445,
+          680
+        ],
+        "knee": [
+          443,
+          577
+        ],
+        "toe": [
+          514,
+          655
+        ]
+      },
+      "body_sha256": "bb893b8dbcd0a49ade91e4c0cd28c94213b584feb960524dec65ad9a3f853db3",
+      "front": {
+        "ankle": [
+          274,
+          658
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          259,
+          674
+        ],
+        "knee": [
+          295,
+          603
+        ],
+        "toe": [
+          333,
+          711
+        ]
+      }
+    },
+    "walk.13": {
+      "back": {
+        "ankle": [
+          444,
+          649
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          431,
+          680
+        ],
+        "knee": [
+          439,
+          578
+        ],
+        "toe": [
+          510,
+          669
+        ]
+      },
+      "body_sha256": "946b72987a7bfc3a871246c96c119dcb0063e748d02712acb8f2e9018a0397ad",
+      "front": {
+        "ankle": [
+          263,
+          664
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          245,
+          678
+        ],
+        "knee": [
+          289,
+          606
+        ],
+        "toe": [
+          326,
+          711
+        ]
+      }
+    },
+    "walk.14": {
+      "back": {
+        "ankle": [
+          435,
+          673
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          429,
+          705
+        ],
+        "knee": [
+          425,
+          585
+        ],
+        "toe": [
+          511,
+          690
+        ]
+      },
+      "body_sha256": "194bae893402ef8c636cfdae388e4f96c580b7b751247ae49e43ebc994d0ef90",
+      "front": {
+        "ankle": [
+          254,
+          674
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          237,
+          695
+        ],
+        "knee": [
+          264,
+          610
+        ],
+        "toe": [
+          312,
+          710
+        ]
+      }
+    },
+    "walk.15": {
+      "back": {
+        "ankle": [
+          428,
+          681
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          419,
+          704
+        ],
+        "knee": [
+          415,
+          590
+        ],
+        "toe": [
+          497,
+          699
+        ]
+      },
+      "body_sha256": "80faaa7f8ca8c86fda7464d2e227d515bbd27fa76b85adf52b5ac4f887818baa",
+      "front": {
+        "ankle": [
+          251,
+          673
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          232,
+          675
+        ],
+        "knee": [
+          281,
+          605
+        ],
+        "toe": [
+          300,
+          710
+        ]
+      }
+    },
+    "walk.16": {
+      "back": {
+        "ankle": [
+          425,
+          681
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          410,
+          706
+        ],
+        "knee": [
+          417,
+          590
+        ],
+        "toe": [
+          495,
+          701
+        ]
+      },
+      "body_sha256": "68481a4de293a5bc7d16bcc7cd3d78ed6c6f324785203ecd746a4f77bf50eeb5",
+      "front": {
+        "ankle": [
+          253,
+          672
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          232,
+          675
+        ],
+        "knee": [
+          280,
+          605
+        ],
+        "toe": [
+          300,
+          710
+        ]
+      }
+    },
+    "walk.17": {
+      "back": {
+        "ankle": [
+          277,
+          645
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          251,
+          629
+        ],
+        "knee": [
+          364,
+          590
+        ],
+        "toe": [
+          282,
+          703
+        ]
+      },
+      "body_sha256": "1bb5175aed6e45b12a0ebffba4cedba8d03e13e7e9ed134c84cc6a768a40c7b3",
+      "front": {
+        "ankle": [
+          426,
+          685
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          412,
+          707
+        ],
+        "knee": [
+          418,
+          601
+        ],
+        "toe": [
+          486,
+          708
+        ]
+      }
+    },
+    "walk.18": {
+      "back": {
+        "ankle": [
+          255,
+          650
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          244,
+          644
+        ],
+        "knee": [
+          342,
+          592
+        ],
+        "toe": [
+          271,
+          703
+        ]
+      },
+      "body_sha256": "80b753e1f8443fed593a4d7425b81da26a154a31e232af4ed537df87f31bc5e7",
+      "front": {
+        "ankle": [
+          398,
+          680
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          389,
+          705
+        ],
+        "knee": [
+          398,
+          602
+        ],
+        "toe": [
+          472,
+          709
+        ]
+      }
+    },
+    "walk.19": {
+      "back": {
+        "ankle": [
+          292,
+          652
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          269,
+          641
+        ],
+        "knee": [
+          330,
+          594
+        ],
+        "toe": [
+          299,
+          703
+        ]
+      },
+      "body_sha256": "d9d6835385794097cbd262f5faa4ca51d45428d34607b12914869d167b45d2ba",
+      "front": {
+        "ankle": [
+          385,
+          680
+        ],
+        "footwear_anchor": "heel",
+        "heel": [
+          379,
+          706
+        ],
+        "knee": [
+          387,
+          594
+        ],
+        "toe": [
+          449,
+          710
+        ]
+      }
+    }
+  },
+  "revision_corrections": {
+    "run.03": {
+      "front": {
+        "ankle": [
+          370,
+          599
+        ]
+      }
+    },
+    "run.10": {
+      "back": {
+        "ankle": [
+          201,
+          551
+        ]
+      }
+    },
+    "run.15": {
+      "front": {
+        "ankle": [
+          371,
+          593
+        ]
+      }
+    },
+    "walk.05": {
+      "back": {
+        "ankle": [
+          401,
+          646
+        ],
+        "heel": [
+          374,
+          651
+        ],
+        "knee": [
+          430,
+          552
+        ],
+        "toe": [
+          440,
+          684
+        ]
+      }
+    },
+    "walk.17": {
+      "back": {
+        "ankle": [
+          277,
+          645
+        ],
+        "heel": [
+          251,
+          629
+        ],
+        "knee": [
+          364,
+          590
+        ],
+        "toe": [
+          282,
+          703
+        ]
+      }
+    }
+  },
+  "rigid_shoe_length_at_240px_head": 88,
+  "schema_version": 1,
+  "walk_corrections": [
+    {
+      "after": [
+        360,
+        705
+      ],
+      "before": [
+        350,
+        706
+      ],
+      "distance": 10.0,
+      "key": "heel",
+      "pose": "walk.01",
+      "side": "front"
+    },
+    {
+      "after": [
+        340,
+        676
+      ],
+      "before": [
+        332,
+        676
+      ],
+      "distance": 8.0,
+      "key": "toe",
+      "pose": "walk.03",
+      "side": "back"
+    },
+    {
+      "after": [
+        339,
+        705
+      ],
+      "before": [
+        328,
+        708
+      ],
+      "distance": 11.4,
+      "key": "heel",
+      "pose": "walk.03",
+      "side": "front"
+    },
+    {
+      "after": [
+        327,
+        635
+      ],
+      "before": [
+        320,
+        635
+      ],
+      "distance": 7.0,
+      "key": "heel",
+      "pose": "walk.04",
+      "side": "back"
+    },
+    {
+      "after": [
+        420,
+        658
+      ],
+      "before": [
+        425,
+        653
+      ],
+      "distance": 7.1,
+      "key": "heel",
+      "pose": "walk.05",
+      "side": "back"
+    },
+    {
+      "after": [
+        441,
+        684
+      ],
+      "before": [
+        478,
+        684
+      ],
+      "distance": 37.0,
+      "key": "toe",
+      "pose": "walk.05",
+      "side": "back"
+    },
+    {
+      "after": [
+        377,
+        704
+      ],
+      "before": [
+        390,
+        709
+      ],
+      "distance": 13.9,
+      "key": "toe",
+      "pose": "walk.08",
+      "side": "front"
+    },
+    {
+      "after": [
+        273,
+        699
+      ],
+      "before": [
+        268,
+        702
+      ],
+      "distance": 5.8,
+      "key": "heel",
+      "pose": "walk.10",
+      "side": "front"
+    },
+    {
+      "after": [
+        514,
+        655
+      ],
+      "before": [
+        514,
+        643
+      ],
+      "distance": 12.0,
+      "key": "toe",
+      "pose": "walk.12",
+      "side": "back"
+    },
+    {
+      "after": [
+        259,
+        674
+      ],
+      "before": [
+        254,
+        670
+      ],
+      "distance": 6.4,
+      "key": "heel",
+      "pose": "walk.12",
+      "side": "front"
+    },
+    {
+      "after": [
+        510,
+        669
+      ],
+      "before": [
+        511,
+        656
+      ],
+      "distance": 13.0,
+      "key": "toe",
+      "pose": "walk.13",
+      "side": "back"
+    },
+    {
+      "after": [
+        429,
+        705
+      ],
+      "before": [
+        423,
+        706
+      ],
+      "distance": 6.1,
+      "key": "heel",
+      "pose": "walk.14",
+      "side": "back"
+    },
+    {
+      "after": [
+        419,
+        704
+      ],
+      "before": [
+        413,
+        706
+      ],
+      "distance": 6.3,
+      "key": "heel",
+      "pose": "walk.15",
+      "side": "back"
+    },
+    {
+      "after": [
+        285,
+        703
+      ],
+      "before": [
+        318,
+        703
+      ],
+      "distance": 33.0,
+      "key": "toe",
+      "pose": "walk.17",
+      "side": "back"
+    },
+    {
+      "after": [
+        486,
+        708
+      ],
+      "before": [
+        498,
+        709
+      ],
+      "distance": 12.0,
+      "key": "toe",
+      "pose": "walk.17",
+      "side": "front"
+    },
+    {
+      "after": [
+        389,
+        705
+      ],
+      "before": [
+        382,
+        707
+      ],
+      "distance": 7.3,
+      "key": "heel",
+      "pose": "walk.18",
+      "side": "front"
+    },
+    {
+      "after": [
+        379,
+        706
+      ],
+      "before": [
+        369,
+        707
+      ],
+      "distance": 10.0,
+      "key": "heel",
+      "pose": "walk.19",
+      "side": "front"
+    }
+  ]
+}

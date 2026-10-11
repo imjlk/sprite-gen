@@ -1,0 +1,49 @@
+{
+  "poses": {
+    "walk.06": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.07": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.08": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "rework",
+      "issues": [
+        "The front shoe has a conspicuous rounded cream bulge behind its navy heel, unlike walk.07 and walk.09. The navy upper appears forward of the heel, potentially leaving the socked heel exposed.",
+        "The bare front ankle also bends rearward at this location; the cream bulge alone does not establish sock fabric spilling outside the calf."
+      ]
+    },
+    "walk.09": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.10": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.11": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "The walk.08 cream heel region is opaque, but the composite does not conclusively distinguish exposed sock from enlarged cream shoe trim; its abrupt design change remains a visible concern.",
+    "Only the six requested frames were inspected. Hidden layer boundaries and occluded surfaces cannot be verified.",
+    "Still frames do not establish speed, gait quality or motion continuity.",
+    "These findings grant no curator approval or release."
+  ]
+}

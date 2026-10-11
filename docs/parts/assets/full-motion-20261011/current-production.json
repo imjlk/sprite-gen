@@ -1,0 +1,34 @@
+{
+  "hair": {
+    "approved": 0,
+    "built": {
+      "digest": "46c2cf56d010abebb75cfcea4e7cba42ba27976749c20b2360518da3f69fdf12",
+      "id": "full-motion.hair"
+    },
+    "checks": {
+      "warning": 43
+    }
+  },
+  "sneakers": {
+    "approved": 0,
+    "built": {
+      "digest": "3839a0bb377739dc95d95f6eff61c85d43dae6533070460ee3a2628526400e33",
+      "id": "full-motion.sneakers"
+    },
+    "checks": {
+      "passed": 41,
+      "warning": 2
+    }
+  },
+  "socks": {
+    "approved": 0,
+    "built": {
+      "digest": "5c19fe44201d53a43b72c542aaf47c250918e364a5a5c9277c1a2404464fcc19",
+      "id": "full-motion.socks"
+    },
+    "checks": {
+      "passed": 6,
+      "warning": 37
+    }
+  }
+}

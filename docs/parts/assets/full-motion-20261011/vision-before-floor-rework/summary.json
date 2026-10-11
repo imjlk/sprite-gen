@@ -1,0 +1,385 @@
+{
+  "art_approved": false,
+  "frames_expected": 43,
+  "frames_observed": 43,
+  "pages": [
+    {
+      "error": null,
+      "required_poses": [
+        "run.00",
+        "run.01",
+        "run.02",
+        "run.03",
+        "run.04",
+        "run.05"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.06",
+        "run.07",
+        "run.08",
+        "run.09",
+        "run.10",
+        "run.11"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.12",
+        "run.13",
+        "run.14",
+        "run.15",
+        "run.16",
+        "run.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.18",
+        "run.19",
+        "run.20",
+        "run.21",
+        "run.22"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.00",
+        "walk.01",
+        "walk.02",
+        "walk.03",
+        "walk.04",
+        "walk.05"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.06",
+        "walk.07",
+        "walk.08",
+        "walk.09",
+        "walk.10",
+        "walk.11"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.12",
+        "walk.13",
+        "walk.14",
+        "walk.15",
+        "walk.16",
+        "walk.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.18",
+        "walk.19"
+      ],
+      "status": "completed"
+    }
+  ],
+  "poses": {
+    "run.00": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.01": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.02": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged actual front ankle retains a peach/pink foot-like projection immediately behind the descending shoe. The corresponding bare crop shows the downward-pointing foot here; its coverage appears incomplete.",
+        "A grey notch beside that projection makes the ankle-to-sock bridge uncertain. Overlapping limbs prevent confident attribution of the exposed edge."
+      ],
+      "shoes": "rework",
+      "socks": "unknown"
+    },
+    "run.03": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.04": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.05": {
+      "hair": "pass",
+      "issues": [
+        "The back shoe narrows into a pointed, thin forefoot with very little rounded cream toe-cap volume. Compared with the neighboring back shoes, its distal shape appears compressed; the rotation alone does not clearly explain the change."
+      ],
+      "shoes": "rework",
+      "socks": "pass"
+    },
+    "run.06": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.07": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.08": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.09": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.10": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.11": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.12": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.13": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.14": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.15": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.16": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.17": {
+      "hair": "pass",
+      "issues": [
+        "Rear ankle attachment is questionable: the actual sock/shoe transition appears inset toward the shin compared with the pronounced heel-side bend in the bare reference. Possible loss of source ankle contour needs checking; a background hole is not conclusively visible.",
+        "The rear sneaker presents a particularly narrow, near-vertical silhouette. Its heel placement and volume continuity cannot be confidently cleared from this view."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "run.18": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.19": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.20": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.21": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.22": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.00": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.01": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.02": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.03": {
+      "hair": "pass",
+      "issues": [
+        "The rear ankle and shoe are largely hidden behind the foreground calf and footwear; the rear sock bridge, collar entry and complete shoe volume cannot be verified.",
+        "A small cream triangular tab projects below the foreground shoe near its heel. The bare front-ankle view does not show a corresponding exposed anatomical projection there. It could be an occluded rear-shoe fragment, but its attachment is unclear."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "walk.04": {
+      "hair": "pass",
+      "issues": [
+        "The rear ankle and footwear are occluded by the foreground leg. The visible foreground cuff and shoe appear attached, but the rear sock bridge and rear shoe shape are unobservable."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "walk.05": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.06": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.07": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.08": {
+      "hair": "pass",
+      "issues": [
+        "Front ankle shows a board-grey notch at the sock-to-shoe join where the bare reference has continuous anatomy; possible missing ankle bridge.",
+        "Front sneaker heel sits forward of the bare heel contour, leaving a conspicuous cream heel lobe behind the navy shoe. Calf entry and heel coverage break continuity with walk.07 and walk.09."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "walk.09": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.10": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.11": {
+      "hair": "pass",
+      "issues": [
+        "Front sneaker sole pitches distinctly downward toward the toe, while the corresponding bare foot is approximately level to slightly toe-up. This rotation mismatch lifts the shoe heel relative to the source foot and breaks attachment continuity with walk.10."
+      ],
+      "shoes": "rework",
+      "socks": "pass"
+    },
+    "walk.12": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.13": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.14": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged actual front ankle has an irregular, pointed cuff edge and an apparent gray recess at the calf entry. The bare ankle is continuous in this region; a missing opaque ankle bridge is possible. The posterior extension overlaps the bare heel contour and is not sufficient evidence of fabric spill."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.15": {
+      "hair": "pass",
+      "issues": [
+        "The front cuff has a pronounced notch where it meets the diagonal calf, interrupting the fitted cuff outline. The adjoining gray wedge appears to expose background; possible body-ownership gap rather than opaque sock fabric."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.16": {
+      "hair": "pass",
+      "issues": [
+        "The front sock-to-calf connection remains jagged, with a pointed cream edge and an apparent gray recess beside it. Continuous ankle coverage is uncertain against the continuous bare reference. This cuff defect persists from the neighboring frames."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.17": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.18": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.19": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    }
+  },
+  "release_ready": false,
+  "scope": "actual still-frame attachment and between-frame appearance observations; no timing, gait or human approval",
+  "status": "completed"
+}

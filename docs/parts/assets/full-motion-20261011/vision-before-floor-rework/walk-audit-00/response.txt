@@ -1,0 +1,51 @@
+{
+  "poses": {
+    "walk.00": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.01": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.02": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.03": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "The rear ankle and shoe are largely hidden behind the foreground calf and footwear; the rear sock bridge, collar entry and complete shoe volume cannot be verified.",
+        "A small cream triangular tab projects below the foreground shoe near its heel. The bare front-ankle view does not show a corresponding exposed anatomical projection there. It could be an occluded rear-shoe fragment, but its attachment is unclear."
+      ]
+    },
+    "walk.04": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "The rear ankle and footwear are occluded by the foreground leg. The visible foreground cuff and shoe appear attached, but the rear sock bridge and rear shoe shape are unobservable."
+      ]
+    },
+    "walk.05": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "Pass applies to visible features at the supplied resolution. Occluded rear footwear in walk.03 and walk.04 is not approved.",
+    "The cream tab in walk.03 cannot be confidently assigned to sock fabric or shoe sole from this board.",
+    "Only walk.00 through walk.05 are shown; the remaining 14 walk frames and all 23 run frames are unassessed.",
+    "These stills do not establish animation speed or gait quality. This observational audit grants no curator or release approval."
+  ]
+}

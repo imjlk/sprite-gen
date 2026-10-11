@@ -1,0 +1,11 @@
+{
+  "pose": "walk.04",
+  "layer": "sock_back_foot",
+  "source_sha256": "19ba5ad341c2de5cc3f9dbc2a74823350cedf88e046189869f50829240f8877d",
+  "current_sha256": "b978218354b7e56382c542dfd08fd72658743721f0f59c29722ff163ee998c68",
+  "source_nonzero_alpha_pixels": 4,
+  "source_alpha_max": 2,
+  "reason": "explicitly invisible part must have exactly empty alpha. Four source-fringe pixels at alpha 2 are retained in the original bare body, while the hidden sock asset is blank. Visible-art threshold remains 16.",
+  "body_RGBA_changed": false,
+  "art_approved": false
+}

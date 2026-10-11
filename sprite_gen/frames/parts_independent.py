@@ -75,7 +75,13 @@ def body_ownership_errors(root, index, registry, config, pose, *, layers=None):
         node.alpha_composite(image, tuple(draw["offset"]))
     required = guide & (np.asarray(body)[..., 3] >= 16)
     targets = {item["id"]: item["target"] for item in layers or []}
-    errors = {}
+    # A pose check describes the whole part. Overlapping target rectangles do
+    # not assign all required pixels in that rectangle to every layer: socks on
+    # crossing legs legitimately contain the other sock's required pixels too.
+    # A pixel is legal only when a layer both references its owner and targets
+    # that pixel. A heel mislabeled as torso is still rejected.
+    legal = np.zeros(guide.shape, dtype=bool)
+    boxes = {}
     for layer in config["independent"]["layers"]:
         if not layer["body_nodes"]:
             continue
@@ -84,9 +90,13 @@ def body_ownership_errors(root, index, registry, config, pose, *, layers=None):
             if node in by_node:
                 owned |= np.asarray(by_node[node])[..., 3] >= 16
         x1, y1, x2, y2 = targets.get(layer["id"], layer["targets"][pose])
-        missing = int((required[y1:y2, x1:x2] & ~owned[y1:y2, x1:x2]).sum())
+        boxes[layer["id"]] = (x1,y1,x2,y2)
+        legal[y1:y2,x1:x2] |= owned[y1:y2,x1:x2]
+    errors = {}
+    for identity,(x1,y1,x2,y2) in boxes.items():
+        missing = int((required[y1:y2, x1:x2] & ~legal[y1:y2, x1:x2]).sum())
         if missing:
-            errors[layer["id"]] = missing
+            errors[identity] = missing
     return errors
 
 
@@ -157,6 +167,7 @@ def validate(config, index, registry):
         c._members(layer["guides"], layer["targets"], "guide poses")
         c._members(layer.get("straight_edges", {}), layer["targets"], "straight edge poses")
         c._members(layer.get('masks',{}),layer['targets'],'mask poses')
+        c._members(layer.get('visible',{}),layer['targets'],'visibility poses')
         for mask in layer.get('masks',{}).values():
             c._members([mask['target_node']],{node['id'] for node in topology['nodes']},'mask target node')
         for edges in layer.get("straight_edges", {}).values():
@@ -507,6 +518,9 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                         "preserved layer belongs to a different body image"
                     )
                 key = "piece." + layer["id"]
+                old_layer=next((item for item in prior.get('independent_layers',[]) if item['id']==layer['id']),{})
+                if old_layer.get('visible',True) != layer.get('visible',{}).get(pose,True):
+                    raise c.PartsContractError('preserved layer visibility changed; redraw that layer')
                 ref = prior["images"].get(key)
                 if not ref:
                     raise c.PartsContractError(
@@ -577,9 +591,13 @@ def prepare(assembly, part, wanted, *, track=None, layers=None):
                     "prompt": prompt_file,
                     "refs": references,
                     "checks": checks,
+                    "visible": layer.get('visible',{}).get(pose,True),
                     "reuse": reuse,
                 }
             )
+            if not jobs[-1]['visible']:
+                prompt += ' This layer is explicitly invisible in this exact pose. Return an entirely transparent empty image; do not invent hidden anatomy or paint another limb.'
+                keep(f"{pose}/{layer['id']}.prompt.txt",prompt.encode('utf-8'))
             if mask := layer.get('masks',{}).get(pose):
                 encoded = assets.SourceReader(root).read(mask['image']['file'],mask['image']['sha256'])
                 if Image.open(BytesIO(encoded)).size != body.size:
@@ -661,6 +679,16 @@ def draw(assembly, part, entry, *, provider, model, dry_run=False, track=None):
             )
             continue
         output = root / job["art"]
+        if not job.get('visible',True):
+            result={'art':job['art'],'layer':job['layer'],'provider':None,'method':'authored-invisible'}
+            if dry_run:result['status']='planned-empty'
+            elif output.exists():result['status']='exists'
+            else:
+                body=Image.open(BytesIO(assets.SourceReader(root/base).read(doc['files'][job['body']]['file'],doc['files'][job['body']]['sha256'])))
+                output.parent.mkdir(parents=True,exist_ok=True);Image.new('RGBA',body.size).save(output)
+                result.update(status='drawn',image_sha256=assets.sha256(output.read_bytes()))
+                state=p._load(root,part);p._batch(p._track(state,track),entry['id']).setdefault('attempts',[]).append(result);p._save(root,state)
+            results.append(result);continue
         command = [
             sys.executable,
             "-m",
@@ -825,10 +853,13 @@ def slice_batch(assembly, part, entry, *, pages=(), track=None, registered_canva
                 else path.read_bytes()
             )
             raw = Image.open(BytesIO(encoded)).convert("RGBA")
+            visible = job.get('visible',True)
+            if not visible and np.asarray(raw)[...,3].any():
+                raise c.PartsContractError('explicitly invisible independent layer must have empty alpha')
             registered = registered_canvas and n in supplied
             if registered:
                 alpha = np.asarray(raw)[...,3]
-                if raw.size != canvas or not (alpha == 0).any() or not (alpha >= 16).any() or (alpha > 0).mean() > .95:
+                if raw.size != canvas or not (alpha == 0).any() or (visible and not (alpha >= 16).any()) or (alpha > 0).mean() > .95:
                     raise c.PartsContractError('registered independent image must be a nonempty transparent native rig canvas')
                 a,b,x,y = job['target']
                 outside = alpha >= 16
@@ -843,6 +874,8 @@ def slice_batch(assembly, part, entry, *, pages=(), track=None, registered_canva
                 {"source.image": encoded},
             )
             cut, position, details = (
+                (Image.new('RGBA',canvas),[0,0],{'fit':'authored-invisible','visible':False})
+                if not visible else
                 (
                     raw,
                     [0, 0],
@@ -902,6 +935,7 @@ def slice_batch(assembly, part, entry, *, pages=(), track=None, registered_canva
                     "provides": job.get('provides',job.get('replaces',[])),
                     "cover_rule": job.get("cover_rule"),
                     "straight_edges": job.get("straight_edges", []),
+                    "visible": visible,
                     "image_key": key,
                     "target": job["target"],
                 }
@@ -1037,6 +1071,7 @@ def build_pieces(root, part, state, order):
                 and mask_matches(record,layer,pose)
                 and item.get("cover_rule") == layer.get("cover_rule")
                 and item.get("straight_edges", []) == layer.get("straight_edges", {}).get(pose, [])
+                and item.get('visible',True) == layer.get('visible',{}).get(pose,True)
                 for item in record.get("independent_layers", [])
             ):
                 raise c.PartsContractError(
@@ -1051,7 +1086,7 @@ def build_pieces(root, part, state, order):
                     .as_posix(),
                     "sha256": ref["sha256"],
                 },
-                "visible": True,
+                "visible": layer.get('visible',{}).get(pose,True),
             }
             item = next(item for item in record['independent_layers'] if item['id']==layer['id'])
             if mask := item.get('mask'):

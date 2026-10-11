@@ -1,0 +1,95 @@
+{
+  "art_approved": false,
+  "body": {
+    "digest": "d28ff42b323bf3db3020507d47160dcd7bbf9993eb5a1db2acc75f3cdec6b2dd",
+    "id": "full-motion.body"
+  },
+  "poses": [
+    {
+      "body_rgba_changed": false,
+      "from": "foot_front",
+      "moved_pixels": 241,
+      "polygon": [
+        [
+          260,
+          550
+        ],
+        [
+          303,
+          550
+        ],
+        [
+          320,
+          575
+        ],
+        [
+          314,
+          590
+        ],
+        [
+          300,
+          612
+        ],
+        [
+          275,
+          645
+        ],
+        [
+          240,
+          635
+        ],
+        [
+          267,
+          580
+        ]
+      ],
+      "pose": "run.03",
+      "protected_calf": "run.03.protected-calf.png",
+      "source_body_sha256": "55838fd2af9ed849edf9bff542fd47802752985c1d1f18d8850f656de057c923",
+      "to": "leg_back"
+    },
+    {
+      "body_rgba_changed": false,
+      "from": "foot_front",
+      "moved_pixels": 193,
+      "polygon": [
+        [
+          260,
+          536
+        ],
+        [
+          310,
+          536
+        ],
+        [
+          325,
+          557
+        ],
+        [
+          317,
+          576
+        ],
+        [
+          301,
+          596
+        ],
+        [
+          269,
+          636
+        ],
+        [
+          230,
+          625
+        ],
+        [
+          259,
+          570
+        ]
+      ],
+      "pose": "run.15",
+      "protected_calf": "run.15.protected-calf.png",
+      "source_body_sha256": "4ff426fd98b1377cb0a7f9744029beddf37bb7293817bd52fefa90f1ab71d43e",
+      "to": "leg_back"
+    }
+  ]
+}

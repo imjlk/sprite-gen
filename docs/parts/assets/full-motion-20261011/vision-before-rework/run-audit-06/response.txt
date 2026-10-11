@@ -1,0 +1,54 @@
+{
+  "poses": {
+    "run.06": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "rework",
+      "issues": [
+        "Front shoe leaves a peach-colored foot ridge exposed above the navy forefoot upper. The shallow vamp does not fully cover the bare foot."
+      ]
+    },
+    "run.07": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "rework",
+      "issues": [
+        "Front bare-foot contour remains visible above the laces toward the cream toe cap. Shoe coverage does not follow the raised forefoot."
+      ]
+    },
+    "run.08": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "rework",
+      "issues": [
+        "A peach-colored forefoot strip and pointed toe contour protrude above the front shoe's upper and cream toe cap.",
+        "The front toe cap appears flattened relative to run.06 and run.10."
+      ]
+    },
+    "run.09": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "rework",
+      "issues": [
+        "Front bare-foot contour remains exposed above the navy vamp near the toe cap, continuing the coverage defect in run.08."
+      ]
+    },
+    "run.10": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.11": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "Only run.06 through run.11 are visible; the remaining walk and run frames were not assessed.",
+    "The flattened compositions show exposed foot contours but do not establish which underlying mask or placement causes them.",
+    "Stills cannot establish speed, gait quality or attachment throughout motion. These observations do not grant curator approval or release."
+  ]
+}

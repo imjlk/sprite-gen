@@ -35,6 +35,33 @@ def draw_batch(assembly, made):
         drawn_sheet(guide, root / page["art"], body=body)
 
 
+def test_large_rework_history_is_bounded_and_losslessly_reloaded(tmp_path,monkeypatch):
+    assembly=setup(tmp_path)
+    state=production._load(assembly.parent,'test.badge')
+    state['tracks']['main']['batches']=[{'id':f'batch.{n}','attempts':[{'note':'x'*2000}]} for n in range(12)]
+    monkeypatch.setattr(workspace,'MAX_JSON_BYTES',16_000)
+    assert len(workspace.json_bytes(state))>workspace.MAX_JSON_BYTES
+    production._save(assembly.parent,state)
+    file=assembly.parent/'productions/test.badge/production.json'
+    assert file.stat().st_size<=workspace.MAX_JSON_BYTES
+    assert production._load(assembly.parent,'test.badge')==state
+    first=json.loads(file.read_text())['tracks']['main']['batches'][0]['archive']
+    archived=file.parent/first['file']
+    archived.write_bytes(archived.read_bytes()+b' ')
+    with pytest.raises(contract.PartsContractError,match='changed|sha256|digest|hash'):
+        production._load(assembly.parent,'test.badge')
+
+
+def test_oversized_single_batch_never_replaces_readable_state(tmp_path,monkeypatch):
+    assembly=setup(tmp_path);file=assembly.parent/'productions/test.badge/production.json';before=file.read_bytes()
+    state=production._load(assembly.parent,'test.badge')
+    state['tracks']['main']['batches']=[{'id':'batch.large','attempts':[{'note':'x'*20_000}]}]
+    monkeypatch.setattr(workspace,'MAX_JSON_BYTES',16_000)
+    with pytest.raises(contract.PartsContractError,match='limit'):
+        production._save(assembly.parent,state)
+    assert file.read_bytes()==before
+
+
 def test_a_part_goes_from_sheet_to_an_approved_part_review(tmp_path):
     assembly = setup(tmp_path)
     made = production.sheet(assembly, "test.badge")

@@ -1,0 +1,65 @@
+{
+  "answer": {
+    "limits": [
+      "The exposed back sock shape follows the corresponding bare ankle/heel contour; no obvious detached fabric or missing ankle bridge is visible.",
+      "Continuity was assessed only between walk.18 and walk.19; the other walk and run frames are not shown.",
+      "Stills cannot establish speed, gait quality or biomechanical validity. These observational results grant no curator approval or release."
+    ],
+    "poses": {
+      "walk.18": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.19": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "9a9b0c0d099b12537ffcf3949c0630898886c11049da913b894eeb6c984d6177",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "680a5a92a41f1e98b98a90d4411adc9edebd522677121ac20de9e4aaa0519d34",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "124fc466827cd36ab7955ffc1ceb4d72f1b1373dfaa6653d7b744eadd9337264",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "6c7fa55436787a94ea9664881e24be02f208e19a7aaf96053ac49b1a8acfcd5c",
+  "release_ready": false,
+  "required_poses": [
+    "walk.18",
+    "walk.19"
+  ],
+  "response_sha256": "3408fd7d70bb7a22f1c21a76bcb7429cb2cd3b54ee18495aa3f7029f5ddb7841",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

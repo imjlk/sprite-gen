@@ -1,0 +1,101 @@
+{
+  "answer": {
+    "limits": [
+      "Only walk.00 through walk.05 are visible here; the remaining walk frames and all 23 run frames were not inspected.",
+      "Rear ankle overlap in walk.03 and walk.04 prevents confirming whether the obscured sock bridge is present or whether the rear shoe is actually compressed.",
+      "The enlargement boundaries crop footwear; those crop boundaries alone are not evidence of truncated sprite layers.",
+      "Stills do not establish speed, gait quality or biomechanical validity. Source-body pose concerns must be assessed separately.",
+      "This observational audit grants no curator approval or release authorization."
+    ],
+    "poses": {
+      "walk.00": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.01": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.02": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.03": {
+        "hair": "pass",
+        "issues": [
+          "The rear sock presents a pointed cream flap with a visibly irregular, notched edge against the calf, losing the smooth fitted cuff appearance of walk.02.",
+          "The foreground shin and shoe obscure the rear collar and toe; the narrow visible rear shoe cannot establish intact product volume."
+        ],
+        "shoes": "unknown",
+        "socks": "rework"
+      },
+      "walk.04": {
+        "hair": "pass",
+        "issues": [
+          "The rear sock retains the small jagged cream flap beside the calf; a clean cuff-to-ankle wrap is not readable.",
+          "The rear shoe appears as a narrow vertical strip behind the foreground shin and shoe. Overlap prevents a reliable assessment of its collar, calf entry and toe volume."
+        ],
+        "shoes": "unknown",
+        "socks": "rework"
+      },
+      "walk.05": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "74c50ec04f3381a7f30f900bf99ba4971f638c53be53c2dcfd25fc66efabebf3",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "d67ed505c7e0acbcb43777336dc78a9f49afc04dbd8bfc086802a54aea0cf74b",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "9f73fb041d3f02bbb41013f451e29bf421711fd35648b513eeb2322776694595",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "370a2f1cccd13ef2752293d823c1aabcd1e298e8be6b4b7a55fedb51aadc2d0c",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "6ac398743918bea3f45e4e3a028d74b05dad2f93e72f92ece8edd62dcef570ee",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "827e464454d82d13734f38c53b0f2b669d649c5ca43e792bcd5522cd75c2befb",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "2507cfff06b6a54a852c78c82df7733cf3ec2f1ab8ad119cc4d3e73161708b33",
+  "release_ready": false,
+  "required_poses": [
+    "walk.00",
+    "walk.01",
+    "walk.02",
+    "walk.03",
+    "walk.04",
+    "walk.05"
+  ],
+  "response_sha256": "82fa85659d7bf4ac232e14473b4e7d74ab5911ec8525b2172ab7c0f916f561bb",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

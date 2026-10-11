@@ -1,0 +1,100 @@
+{
+  "answer": {
+    "limits": [
+      "Only walk.12 through walk.17 are visible; the remaining walk and run frames are unassessed.",
+      "These stills cannot establish speed, gait quality or motion smoothness.",
+      "Hidden ankle surfaces and underlying layer boundaries cannot be inspected.",
+      "This observational audit grants no curator approval or release approval."
+    ],
+    "poses": {
+      "walk.12": {
+        "hair": "pass",
+        "issues": [
+          "Enlarged back ankle: the sock cuff begins inside the calf silhouette, leaving a tapered strip of bare skin outside its heel-side edge down to the shoe collar."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.13": {
+        "hair": "pass",
+        "issues": [
+          "Enlarged back ankle: the narrow cuff again leaves bare calf visible beside the sock down to the heel collar; it does not wrap the full calf width."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.14": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.15": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.16": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.17": {
+        "hair": "pass",
+        "issues": [
+          "Enlarged front ankle: a tan strip extends outside the sock behind the heel and ends abruptly beside the collar. The cuff fails to cover the heel-side calf contour."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "74c50ec04f3381a7f30f900bf99ba4971f638c53be53c2dcfd25fc66efabebf3",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "d67ed505c7e0acbcb43777336dc78a9f49afc04dbd8bfc086802a54aea0cf74b",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "09a6c2ffaeafe4e6074359fbd8e911c5ee032e1561ffd028d7541cd9c54d1019",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "370a2f1cccd13ef2752293d823c1aabcd1e298e8be6b4b7a55fedb51aadc2d0c",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "6ac398743918bea3f45e4e3a028d74b05dad2f93e72f92ece8edd62dcef570ee",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "827e464454d82d13734f38c53b0f2b669d649c5ca43e792bcd5522cd75c2befb",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "fe7b27b342910c28c1181d51f4ecbd396d09cb3759a99674684bd89cc9264cc6",
+  "release_ready": false,
+  "required_poses": [
+    "walk.12",
+    "walk.13",
+    "walk.14",
+    "walk.15",
+    "walk.16",
+    "walk.17"
+  ],
+  "response_sha256": "93b3b6d6ac5f536ec78c738230d56f29706496f88fe47336f84f828d10753ec7",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

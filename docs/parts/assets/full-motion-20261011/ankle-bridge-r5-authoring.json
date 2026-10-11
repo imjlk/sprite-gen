@@ -1,0 +1,51 @@
+{
+  "art_approved": false,
+  "method": "source-bounded cuff contour; sparse calf KEEP masks, original body/shoe bytes retained",
+  "poses": [
+    {
+      "axis": [
+        0.3772968873135194,
+        -0.9260923597695476
+      ],
+      "axis_source": "annotated calf",
+      "body_source_changed": false,
+      "body_source_sha256": "eb4404e4ac76cc14b9e0e7e436202bba8f3cf126ce628b5304d6330177717111",
+      "conditional_calf_pixels_affected": 0,
+      "cuff_outside_source_body_pixels": 0,
+      "includes_proximal_foot": true,
+      "pose": "run.03",
+      "side": "back",
+      "whole_body_mask": false
+    },
+    {
+      "axis": [
+        -0.14342907231889207,
+        -0.9896605990003554
+      ],
+      "axis_source": "annotated calf",
+      "body_source_changed": false,
+      "body_source_sha256": "080f61b53db27ee876c831cfc89838aecbfe9da1665a43376abb0abbf3135160",
+      "conditional_calf_pixels_affected": 0,
+      "cuff_outside_source_body_pixels": 0,
+      "includes_proximal_foot": true,
+      "pose": "walk.12",
+      "side": "back",
+      "whole_body_mask": false
+    },
+    {
+      "axis": [
+        -0.07024855763629784,
+        -0.9975295184354294
+      ],
+      "axis_source": "annotated calf",
+      "body_source_changed": false,
+      "body_source_sha256": "3819e20282e4ae2e8fd727555783ee92be2bd41d23af30194f74d60890f19cdc",
+      "conditional_calf_pixels_affected": 0,
+      "cuff_outside_source_body_pixels": 0,
+      "includes_proximal_foot": true,
+      "pose": "walk.13",
+      "side": "back",
+      "whole_body_mask": false
+    }
+  ]
+}

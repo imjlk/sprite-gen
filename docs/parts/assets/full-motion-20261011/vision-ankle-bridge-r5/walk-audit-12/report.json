@@ -1,0 +1,98 @@
+{
+  "answer": {
+    "limits": [
+      "Only walk.12 through walk.17 are visible; the remaining walk frames and all run frames were not inspected.",
+      "The front cuff tabs in walk.15 and walk.16 are visibly irregular, but their complete separation from the sock cannot be established from this composite.",
+      "Static frames cannot establish speed, gait quality, or motion continuity between frames.",
+      "This observational audit grants no curator approval or release authorization."
+    ],
+    "poses": {
+      "walk.12": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.13": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.14": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.15": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged actual front sock has a pointed cream tab and a notch at the upper-right cuff junction. The corresponding bare calf contour is smooth; the cuff does not form a clean fitted band."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.16": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged actual front sock retains an angular, stepped cuff junction beside the skin, interrupting the fitted band. The lower left heel flare corresponds to the bare ankle contour and is not itself evidence of fabric spill."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.17": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "844a351aef2651591c744d06ea88611af23c856480a1eabdd70f21f0762ae1ff",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "cb4e59d07928d6087ec10d69769a8ed65ba3f3ef2e07e58448a454c6d85cf78d",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "f4cb0aa65e2b49d66c72e9ce8e5f67fdd60cd70eb43afc9dd42d0c3754bea57e",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "2cd50acbf6b731fde8c45729bace5b69d74ce1f9519487c55d40f8f025e22eaf",
+  "release_ready": false,
+  "required_poses": [
+    "walk.12",
+    "walk.13",
+    "walk.14",
+    "walk.15",
+    "walk.16",
+    "walk.17"
+  ],
+  "response_sha256": "25701cca373b08a2c68f5420e5ea3600d0c5b6dfdbaaef32bbbf741f98147439",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

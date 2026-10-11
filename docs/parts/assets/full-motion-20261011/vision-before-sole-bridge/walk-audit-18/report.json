@@ -1,0 +1,68 @@
+{
+  "answer": {
+    "limits": [
+      "The apparent rear ankle gap in walk.19 may expose board-grey transparency; this view does not establish its precise boundary confidently.",
+      "Only walk.18 and walk.19 are shown. Stills do not establish motion quality or gait.",
+      "This observational audit grants no curator approval or release."
+    ],
+    "poses": {
+      "walk.18": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.19": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged rear ankle shows a pale triangular sliver projecting left above the shoe collar, with an apparently interrupted heel-side sock bridge. The corresponding bare ankle has a continuous contour there.",
+          "Rear shoe volume and sole remain broadly consistent with walk.18, but attachment at the irregular sock/collar junction is uncertain."
+        ],
+        "shoes": "unknown",
+        "socks": "rework"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "e67586bcb5bfaa1fcd3d8c5c3a98d5e0a18413029679ef4221ea8557c1b04aff",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "94b25b0a0fcb39bbc39608fc73c2930c2153251cd9b855c27030757b91febe42",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "d07db1839ea9ceae00443a5a677891a29bf787c419ed4ce4701e0be550a070d6",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "90b232ca48929050eb5f8199fd247163db26351194157f8483c57ffcef442a33",
+  "release_ready": false,
+  "required_poses": [
+    "walk.18",
+    "walk.19"
+  ],
+  "response_sha256": "6b3bb5034c912eb44526f708bcc5e8f5c27bf5ab4c1b95c5c7aeb67f349005d9",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

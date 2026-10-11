@@ -1,0 +1,102 @@
+{
+  "answer": {
+    "limits": [
+      "Only these six labeled walk frames are visible; continuity across the remaining 14 walk frames and 23 run frames cannot be assessed.",
+      "The cuff projections are visible, but this flattened page cannot establish whether their narrow connections contain actual transparency gaps.",
+      "Still images cannot establish motion timing or gait quality. These ratings are observational and confer no curator approval or release authorization."
+    ],
+    "poses": {
+      "walk.12": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.13": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.14": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged front cuff has a squared cream projection at its upper-right edge that interrupts the fit against the slanted calf."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.15": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged front cuff forms a jutting cream flap; the connection from cuff to shoe collar is pinched and irregular compared with walk.12–walk.13."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.16": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged front cuff reads as an offset cream block with an abrupt notch toward the shoe collar, rather than a continuous fitted ankle covering.",
+          "This repeats the front-cuff discontinuity visible in walk.15."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.17": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged back cuff projects as an angular cream flap beside the bent calf; its transition into the shoe collar is sharply constricted."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "6f7f13930fe3ea6fe90c8a90fd60702f90dbff82fddc278b7542bcbb5f2d62a8",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "449eb0b7650a94a0e271d56684b12fb5485d236ccceae3a2501fab1f81547c41",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "6927bc0e675b66fee02e37b6e2752d7521923159b633e59b32f9b0ff95e4764a",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "fe7b27b342910c28c1181d51f4ecbd396d09cb3759a99674684bd89cc9264cc6",
+  "release_ready": false,
+  "required_poses": [
+    "walk.12",
+    "walk.13",
+    "walk.14",
+    "walk.15",
+    "walk.16",
+    "walk.17"
+  ],
+  "response_sha256": "8ba5be2dd9fb150da280cdad929a6b7481e1b87c77a2f17cad35ee3faba75006",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

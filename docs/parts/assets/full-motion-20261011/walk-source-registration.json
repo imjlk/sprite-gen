@@ -1,0 +1,813 @@
+{
+  "art_approved": false,
+  "cycle": {
+    "best_score": 0.9732794992369238,
+    "candidate_count": 56,
+    "candidates": [
+      {
+        "context_motion_over_step": [
+          1.0353625877399026,
+          0.9474274004214926
+        ],
+        "context_pair_range": [
+          25,
+          36
+        ],
+        "context_repeat_over_step": 0.801351860152923,
+        "drift_line_residual_analysis_px": 0.10448150375939844,
+        "half_period_guard": {
+          "applied": false
+        },
+        "length": 20,
+        "period_local": 20,
+        "periodicity": 0.7642867834238352,
+        "ratio": 0.7986596043544336,
+        "score": 0.9732794992369238,
+        "start": 30
+      },
+      {
+        "context_motion_over_step": [
+          1.0068100676298846,
+          0.9124577835123829
+        ],
+        "context_pair_range": [
+          23,
+          34
+        ],
+        "context_repeat_over_step": 0.7432185110137918,
+        "drift_line_residual_analysis_px": 0.1636210526315789,
+        "half_period_guard": {
+          "applied": false
+        },
+        "length": 20,
+        "period_local": 20,
+        "periodicity": 0.7739697553272551,
+        "ratio": 0.7776065378722459,
+        "score": 0.9822999490794911,
+        "start": 28
+      },
+      {
+        "context_motion_over_step": [
+          0.9445561244053629,
+          1.0053745714610285
+        ],
+        "context_pair_range": [
+          5,
+          16
+        ],
+        "context_repeat_over_step": 0.8203005449214338,
+        "drift_line_residual_analysis_px": 0.11051835913895398,
+        "half_period_guard": {
+          "applied": false
+        },
+        "length": 20,
+        "period_local": 20,
+        "periodicity": 0.7514731501104205,
+        "ratio": 0.7110546526611039,
+        "score": 1.0331206995057403,
+        "start": 10
+      },
+      {
+        "context_motion_over_step": [
+          0.9506467317690306,
+          1.015390548480725
+        ],
+        "context_pair_range": [
+          3,
+          14
+        ],
+        "context_repeat_over_step": 0.8710519298425459,
+        "drift_line_residual_analysis_px": 0.10499682622705822,
+        "half_period_guard": {
+          "applied": false
+        },
+        "length": 20,
+        "period_local": 20,
+        "periodicity": 0.7349885811761386,
+        "ratio": 0.7626626575973767,
+        "score": 1.0573305976129552,
+        "start": 8
+      },
+      {
+        "context_motion_over_step": [
+          1.0212684221528063,
+          0.9582852050481179
+        ],
+        "context_pair_range": [
+          22,
+          33
+        ],
+        "context_repeat_over_step": 0.7790740831030664,
+        "drift_line_residual_analysis_px": 0.1943187969924812,
+        "half_period_guard": {
+          "applied": false
+        },
+        "length": 20,
+        "period_local": 20,
+        "periodicity": 0.7765341913766236,
+        "ratio": 1.36279938880554,
+        "score": 1.0662551675916174,
+        "start": 27
+      },
+      {
+        "context_motion_over_step": [
+          0.9196606224264773,
+          0.9930911307013257
+        ],
+        "context_pair_range": [
+          7,
+          18
+        ],
+        "context_repeat_over_step": 0.8990956533220605,
+        "drift_line_residual_analysis_px": 0.14450526315789464,
+        "half_period_guard": {
+          "applied": false
+        },
+        "length": 20,
+        "period_local": 20,
+        "periodicity": 0.7316267255861073,
+        "ratio": 0.9270370161351292,
+        "score": 1.0663294514122503,
+        "start": 12
+      },
+      {
+        "context_motion_over_step": [
+          0.9483454777289461,
+          0.8736379301778221
+        ],
+        "context_pair_range": [
+          19,
+          30
+        ],
+        "context_repeat_over_step": 0.8414667172606914,
+        "drift_line_residual_analysis_px": 0.20068360902255633,
+        "half_period_guard": {
+          "applied": false
+        },
+        "length": 20,
+        "period_local": 20,
+        "periodicity": 0.7449714408408383,
+        "ratio": 0.9164305378518844,
+        "score": 1.0683310278563307,
+        "start": 24
+      },
+      {
+        "context_motion_over_step": [
+          1.0330332512349827,
+          0.9434642313924066
+        ],
+        "context_pair_range": [
+          27,
+          38
+        ],
+        "context_repeat_over_step": 0.9403824049308042,
+        "drift_line_residual_analysis_px": 0.12121894736842098,
+        "half_period_guard": {
+          "applied": false
+        },
+        "length": 20,
+        "period_local": 20,
+        "periodicity": 0.7272951581683408,
+        "ratio": 0.9391205803093626,
+        "score": 1.0804447706441818,
+        "start": 32
+      },
+      {
+        "context_motion_over_step": [
+          0.950141985766976,
+          0.8974540366610724
+        ],
+        "context_pair_range": [
+          21,
+          32
+        ],
+        "context_repeat_over_step": 0.7461110239738654,
+        "drift_line_residual_analysis_px": 0.20946225563909776,
+        "half_period_guard": {
+          "applied": false
+        },
+        "length": 20,
+        "period_local": 20,
+        "periodicity": 0.7728988513311077,
+        "ratio": 0.6409996298524868,
+        "score": 1.0889911994674188,
+        "start": 26
+      },
+      {
+        "context_motion_over_step": [
+          1.0923337619168474,
+          0.9932287378258239
+        ],
+        "context_pair_range": [
+          24,
+          35
+        ],
+        "context_repeat_over_step": 0.8149980458549402,
+        "drift_line_residual_analysis_px": 0.1274667669172932,
+        "half_period_guard": {
+          "applied": false
+        },
+        "length": 20,
+        "period_local": 20,
+        "periodicity": 0.771184265446321,
+        "ratio": 1.7181332775871796,
+        "score": 1.104836332090759,
+        "start": 29
+      },
+      {
+        "context_motion_over_step": [
+          0.9460796006226688,
+          0.9596266136890689
+        ],
+        "context_pair_range": [
+          1,
+          12
+        ],
+        "context_repeat_over_step": 0.9727882356495925,
+        "drift_line_residual_analysis_px": 0.10792216511590118,
+        "half_period_guard": {
+          "applied": false
+        },
+        "length": 20,
+        "period_local": 20,
+        "periodicity": 0.7026790382129129,
+        "ratio": 0.9180902991843596,
+        "score": 1.1063482591878748,
+        "start": 6
+      },
+      {
+        "context_motion_over_step": [
+          0.9695143946764163,
+          0.9129402802953288
+        ],
+        "context_pair_range": [
+          17,
+          28
+        ],
+        "context_repeat_over_step": 0.9585740590824847,
+        "drift_line_residual_analysis_px": 0.16079368421052634,
+        "half_period_guard": {
+          "applied": false
+        },
+        "length": 20,
+        "period_local": 20,
+        "periodicity": 0.7146260919180887,
+        "ratio": 0.9370655460626287,
+        "score": 1.1388683571175684,
+        "start": 22
+      }
+    ],
+    "context_motion_over_step": [
+      0.9460796006226688,
+      0.9596266136890689
+    ],
+    "context_pair_range": [
+      1,
+      12
+    ],
+    "context_repeat_over_step": 0.9727882356495925,
+    "coverage": 2.65,
+    "drift_line_residual_analysis_px": 0.10792216511590118,
+    "equivalent_score_tolerance": 0.15,
+    "fundamental": {
+      "checked": [],
+      "legs": {
+        "by": "stride",
+        "feet_apart": 0.726,
+        "reach_swing": 0.0075,
+        "stride_swing": 0.3392
+      },
+      "period": 20,
+      "suspects": []
+    },
+    "half_period_guard": {
+      "applied": false
+    },
+    "kind": "periodic",
+    "length": 20,
+    "method": "local-repeat-drift-v1",
+    "period_global": null,
+    "period_local": 20,
+    "periodicity": 0.7026790382129129,
+    "periodicity_min": 0.15,
+    "ratio": 0.9180902991843596,
+    "review_recommended": true,
+    "score": 1.1063482591878748,
+    "seam_pop": {
+      "applied": false,
+      "first_choice": {
+        "length": 20,
+        "pop": 0.0,
+        "start": 6
+      },
+      "method": "top-band-wrap-v1",
+      "reference": 10.0
+    },
+    "start": 6,
+    "step_screen": {
+      "coverage": 0.825,
+      "depth": 0.7886,
+      "lag": 40,
+      "leg_peaks": {
+        "by": "stride",
+        "count": 0
+      },
+      "length": 20,
+      "method": "two-cut-lengths-v1",
+      "pairs": 33,
+      "periodicity_min": 0.15,
+      "ratio": 0.6514,
+      "ratio_max": 0.85,
+      "searched": [
+        37,
+        43
+      ],
+      "suspect": true,
+      "why": "40 frames on repeats 0.65x as far as the cut's own 20 (at most 0.85) and dips 0.79 under the clip's profile: the cut may be one step of a cycle 40 frames long, or a cycle that repeats better at its double \u2014 pixels cannot tell; count the steps in the loop (video-loop --steps)"
+    },
+    "steps": {
+      "by": "given",
+      "count": 2,
+      "given": 2
+    }
+  },
+  "fps": 24,
+  "frames": [
+    {
+      "file": "frame-000.png",
+      "sha256": "a7438c01afc3a643cb83b5878ac51c7c60b2f6569e70808489d73e1d91c0c421"
+    },
+    {
+      "file": "frame-001.png",
+      "sha256": "4346244a3d888e9db85137e0b9632e8c6583eef66e4c15631078f5e4ccbd31ec"
+    },
+    {
+      "file": "frame-002.png",
+      "sha256": "512ad0dbe2620281dc2ce55b8daa7e1f7011ae86bef913c452c990fe30a9d0be"
+    },
+    {
+      "file": "frame-003.png",
+      "sha256": "3ad59474106eeabc3e9fb551e7b5ff09b5cdde52cb42fe5d5c13fa0f18f37ac1"
+    },
+    {
+      "file": "frame-004.png",
+      "sha256": "b3b5130a8271c9d342969baf7b34067d60172d493c4ae04fdf04faab71760d9c"
+    },
+    {
+      "file": "frame-005.png",
+      "sha256": "ba0fb78643af857b6081aff8e1793bc38d482c495aefc70370f7fcbe3a70a5e5"
+    },
+    {
+      "file": "frame-006.png",
+      "sha256": "29f3101aac1b144bc3ef73768d3a32968251d1ce6d41ef86a2ea32be9ce761f9"
+    },
+    {
+      "file": "frame-007.png",
+      "sha256": "fface1680684e369832834fe044ad04b49a3dc2a45605c473a7ceeaae286e83f"
+    },
+    {
+      "file": "frame-008.png",
+      "sha256": "312e82a493793e1a03dbd9d391a93e18cf2dfe220358415c054e363b92da852f"
+    },
+    {
+      "file": "frame-009.png",
+      "sha256": "8028125a93ac6f362a55c2e3aeb9d18f737ffaba32d95732be85d9351bb2763f"
+    },
+    {
+      "file": "frame-010.png",
+      "sha256": "a3ccf3b08bc29228b4844569b6edfd0874c5becea3e5f3a5fa91befd63fee6cf"
+    },
+    {
+      "file": "frame-011.png",
+      "sha256": "592dcf5685b5287e69a277e5d6ad91e8c28988019b6a6dde9658f9da38a02e9d"
+    },
+    {
+      "file": "frame-012.png",
+      "sha256": "33bd28518cdf1cad04b09c8979234e3f4f77d17da8c8ee2ada92f8dbf084dde5"
+    },
+    {
+      "file": "frame-013.png",
+      "sha256": "6796eff6ed570325a0d25fc78fa46625e96c691fe460ea363eef906c871fd11a"
+    },
+    {
+      "file": "frame-014.png",
+      "sha256": "dc94ad4c6ffef105634715a7bf3d5312c91a61deb8937820d517336969f771fd"
+    },
+    {
+      "file": "frame-015.png",
+      "sha256": "afa27d5f04435e946a5fca06ee67fd6877db0c6a78ecfd4bb4085f15e6b6c782"
+    },
+    {
+      "file": "frame-016.png",
+      "sha256": "7e823ff67dd36ec304b1b3bb7187d2136fe1ec64665f1368bc051df41536eb47"
+    },
+    {
+      "file": "frame-017.png",
+      "sha256": "782befd409b1a62c6a9d91adab10907c4c335bb5d2718e31c855b473bd7a7686"
+    },
+    {
+      "file": "frame-018.png",
+      "sha256": "5400c943ecbacbb919f3c20b5a578784b9e487f7ee9df2ccd50b914bd5138317"
+    },
+    {
+      "file": "frame-019.png",
+      "sha256": "8fac4ede725da064b8079d17cada226917f5497b1cd3c62e138e8bfb368a916a"
+    }
+  ],
+  "loop": "assets/parts-full-motion-20261011/walk-video-r3/loop",
+  "offset": [
+    224,
+    105
+  ],
+  "report_sha256": "d0353e20379d05d9b65ae69234f62e2953ca037ba720e6de094657cabc009b6f",
+  "scale": 0.7966804979253111,
+  "source_size": [
+    962,
+    964
+  ],
+  "strip": {
+    "metadata": {
+      "body_h": 590,
+      "body_height_target": 590,
+      "body_ref": "first-frame",
+      "body_src_h": 787,
+      "cell_cap": 64,
+      "cell_height_cap": 768,
+      "cycle_drawings": {
+        "contrast": {
+          "2": 0.1109,
+          "3": 0.1809
+        },
+        "drawings_per_second": 12.0,
+        "hold": 2,
+        "length": 20,
+        "start": 6,
+        "steps": 20
+      },
+      "cycle_frames": 20,
+      "cycle_seconds": 0.8333,
+      "delay_ms": 41.67,
+      "drawings": {
+        "contrast": {
+          "2": 0.1178,
+          "3": 0.8313
+        },
+        "drawings_per_second": 12.164,
+        "frames": 73,
+        "hold": 2
+      },
+      "drift_px": 0,
+      "foot_anchor": "motion-auto",
+      "foot_sway_px": 0,
+      "foot_x": null,
+      "frames": 20,
+      "h": 615,
+      "kind": "periodic",
+      "loop": true,
+      "motion_anchor": {
+        "boundary_measurements": [
+          {
+            "cost": 0.0,
+            "dx": 0,
+            "dy": 0,
+            "k": 0,
+            "region_costs": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "cost": 0.06460517644882202,
+            "dx": 3,
+            "dy": 4,
+            "k": 1,
+            "region_costs": [
+              0.021857380867004395,
+              0.16435003280639648
+            ]
+          },
+          {
+            "cost": 0.06676343083381653,
+            "dx": 4,
+            "dy": 4,
+            "k": 2,
+            "region_costs": [
+              0.03044283390045166,
+              0.15151149034500122
+            ]
+          },
+          {
+            "cost": 0.08870916366577147,
+            "dx": 1,
+            "dy": -4,
+            "k": 17,
+            "region_costs": [
+              0.042992591857910156,
+              0.19538116455078125
+            ]
+          },
+          {
+            "cost": 0.08817304372787475,
+            "dx": 1,
+            "dy": -4,
+            "k": 18,
+            "region_costs": [
+              0.0431138277053833,
+              0.19331121444702148
+            ]
+          },
+          {
+            "cost": 0.07249951362609863,
+            "dx": 1,
+            "dy": 2,
+            "k": 19,
+            "region_costs": [
+              0.03732341527938843,
+              0.1545770764350891
+            ]
+          }
+        ],
+        "coarse_dx_px": 1,
+        "endpoint_float_xy": [
+          1.9,
+          4.275
+        ],
+        "endpoint_xy": [
+          2,
+          4
+        ],
+        "method": "masked-ncc-boundary-velocity-v1",
+        "padding_ltrb": [
+          0,
+          0,
+          2,
+          4
+        ],
+        "raw_end_velocity_xy": [
+          0.0,
+          -3.0
+        ],
+        "raw_start_velocity_xy": [
+          -2.0,
+          -2.0
+        ],
+        "region_weights": [
+          0.7,
+          0.3
+        ],
+        "regions": [
+          [
+            384,
+            210,
+            540,
+            372
+          ],
+          [
+            480,
+            348,
+            636,
+            510
+          ]
+        ],
+        "search_radius_xy": [
+          14,
+          28
+        ],
+        "shifts_xy": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            2,
+            4
+          ]
+        ]
+      },
+      "sample_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "scale": 0.7497,
+      "source_cut": {
+        "length": 20,
+        "samples": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25
+        ],
+        "source": {
+          "fps": 24.0,
+          "frames": 73,
+          "kind": "keyed-frame-sequence",
+          "sha256": "0329036cf3176f49d410aef9eacdec507a8038d6b2eba59c71c96e2f07421258"
+        },
+        "start": 6
+      },
+      "source_rect": [
+        280,
+        69,
+        693,
+        890
+      ],
+      "state": "walk",
+      "steps": 2,
+      "subsampled": false,
+      "top_margin_px": 69,
+      "w": 310
+    },
+    "sha256": "066dfee2dc8e985f4335546d507c1d3c4a90d7a764300f6dad97c109f791336c"
+  },
+  "engine_registration_method": "engine strip pixels placed on rig; no extra resizing",
+  "method": "engine registered sequence followed by explicit common-body chroma RGB repair; alpha, geometry and timing unchanged",
+  "body_rgb_repair": "../../body-colour-repair.json",
+  "canonical_registered_frames": [
+    {
+      "file": "000.png",
+      "sha256": "791f97765f941d376a70907a9f7c5ed901b325a97a5bf90b9a9de95a79bfaba2"
+    },
+    {
+      "file": "001.png",
+      "sha256": "2279f475f99a46c6ce63fdfddb7b9f4d9b9025bb29fad37befa7844da2c2e7e0"
+    },
+    {
+      "file": "002.png",
+      "sha256": "0b6c9c884c7796a91808d9438ecfae1b64c5893d2f705fcd1be8f801b7fee680"
+    },
+    {
+      "file": "003.png",
+      "sha256": "a3735f6c6baaba35ba69eb313d2e1bf38f6620709c4adcd8d6945c03c9e42c54"
+    },
+    {
+      "file": "004.png",
+      "sha256": "e55761a6c1e630395a82be1157c304f884e842e26c90e1115b50396333cd3cb6"
+    },
+    {
+      "file": "005.png",
+      "sha256": "b244cfcfb3684cabf9a2164ada307f2c820aea09bf39683263c46d7332b283f5"
+    },
+    {
+      "file": "006.png",
+      "sha256": "5f033a50cb404db7cd7204e5477cc379650b618cd813c2144b235fba77bc2a1b"
+    },
+    {
+      "file": "007.png",
+      "sha256": "ae5cefeab9719e89bbc17b7c881426269ad7f7af13334e80e019c1f12fec6d78"
+    },
+    {
+      "file": "008.png",
+      "sha256": "aa9e399ae5a7abad08efe921fe3762f01618ba704acb8cf183ca91762c1e1178"
+    },
+    {
+      "file": "009.png",
+      "sha256": "f43236654c4c9bd7f51231054b4bcd50f64f81223d7d05a3f6c7a3b51d2856e1"
+    },
+    {
+      "file": "010.png",
+      "sha256": "bfeb96ae9ebc272b34d42cbdd076fe9fa18dab2318a296d66e3aeabbc2536627"
+    },
+    {
+      "file": "011.png",
+      "sha256": "73b51fc191854ea733284d928b19d955e62446b921cc33bd12fd881926ebd348"
+    },
+    {
+      "file": "012.png",
+      "sha256": "bb893b8dbcd0a49ade91e4c0cd28c94213b584feb960524dec65ad9a3f853db3"
+    },
+    {
+      "file": "013.png",
+      "sha256": "946b72987a7bfc3a871246c96c119dcb0063e748d02712acb8f2e9018a0397ad"
+    },
+    {
+      "file": "014.png",
+      "sha256": "194bae893402ef8c636cfdae388e4f96c580b7b751247ae49e43ebc994d0ef90"
+    },
+    {
+      "file": "015.png",
+      "sha256": "80faaa7f8ca8c86fda7464d2e227d515bbd27fa76b85adf52b5ac4f887818baa"
+    },
+    {
+      "file": "016.png",
+      "sha256": "68481a4de293a5bc7d16bcc7cd3d78ed6c6f324785203ecd746a4f77bf50eeb5"
+    },
+    {
+      "file": "017.png",
+      "sha256": "1bb5175aed6e45b12a0ebffba4cedba8d03e13e7e9ed134c84cc6a768a40c7b3"
+    },
+    {
+      "file": "018.png",
+      "sha256": "80b753e1f8443fed593a4d7425b81da26a154a31e232af4ed537df87f31bc5e7"
+    },
+    {
+      "file": "019.png",
+      "sha256": "d9d6835385794097cbd262f5faa4ca51d45428d34607b12914869d167b45d2ba"
+    }
+  ]
+}

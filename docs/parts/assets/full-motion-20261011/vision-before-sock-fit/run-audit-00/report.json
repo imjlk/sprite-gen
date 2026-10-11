@@ -1,0 +1,98 @@
+{
+  "answer": {
+    "limits": [
+      "Only run.00–run.05 are visible; the remaining run frames and all walk frames are unassessed.",
+      "Overlapping ankles in run.02 and run.03 obscure some inner sock and shoe boundaries.",
+      "These stills do not establish speed, gait quality or biomechanical validity of the unchanged body poses.",
+      "This observational audit grants no curator approval or release approval."
+    ],
+    "poses": {
+      "run.00": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.01": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.02": {
+        "hair": "pass",
+        "issues": [
+          "The front sock has a pointed cream flap projecting beside the bent ankle; the cuff does not read as a fitted band, and the bridge into the shoe is pinched."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "run.03": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged back ankle shows a peach/red wedge reaching the shoe collar beside the cream sock, interrupting continuous sock coverage."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "run.04": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.05": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "5de000cd315c94366b8f6ad02b41f23ac950f1119cb5672790c0a05a040100a4",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "0bdd2087836f98e8b8f22bd71facf5731f9de9bac24c835c3e6cc76fc1bb6433",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "e2fbaf090319176eaeb32dfd31bb6ed46b4a7dcaed98b700462542faa5527db3",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "3a1b6c56e815cd47fb0c451575c8ec71b977f1044e3d1a13ff3f9044912cbaa6",
+  "release_ready": false,
+  "required_poses": [
+    "run.00",
+    "run.01",
+    "run.02",
+    "run.03",
+    "run.04",
+    "run.05"
+  ],
+  "response_sha256": "d4434ee83099198d2d1601005e0478368c994d29f83e842f363229529b4df16f",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

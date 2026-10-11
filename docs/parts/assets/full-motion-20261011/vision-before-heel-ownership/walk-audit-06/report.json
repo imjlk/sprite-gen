@@ -1,0 +1,99 @@
+{
+  "answer": {
+    "limits": [
+      "The walk.08 front-ankle recess is visibly suspicious, but this board alone cannot conclusively separate missing body pixels from a sock contour defect.",
+      "Occluded surfaces and incidental shoe fragments cropped by enlargement boundaries remain unassessed; visible passes do not approve hidden rear footwear.",
+      "Only these six labeled frames were assessed. The other 14 walk frames and all 23 run frames are outside this page.",
+      "Stills do not establish speed, timing or gait quality.",
+      "This observational audit grants no curator approval or release."
+    ],
+    "poses": {
+      "walk.06": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.07": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.08": {
+        "hair": "pass",
+        "issues": [
+          "Enlarged actual front ankle shows a pointed cream flap projecting left above the shoe heel, unlike the continuous contour of the bare ankle.",
+          "A grey recess beneath that flap appears to interrupt the ankle bridge. This is a possible body-ownership hole, not an opaque cream sock region.",
+          "Front shoe volume and sole are visible, but secure calf entry at the heel collar cannot be confirmed around that recess. The preceding and following frames show a more continuous connection."
+        ],
+        "shoes": "unknown",
+        "socks": "rework"
+      },
+      "walk.09": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.10": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.11": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "93b37228e388952a94e4b43666566bbea451a83930f825163e37d860b277c1ce",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "55dab6fe5fb8de556f4dfbe075b6d72b6fd09360cb9365e014728b19b277de29",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "694f00224fe09d3daf050f36a03bd6bde164486d3cfd9df257519222a19aa58b",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "d664b9bc307d216f480a31ad7aaef73ee20196916e83cc454216a5333ec49d9e",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "54280490be9c7476a925481bc0efa0c9f2c055d85ca1287214c19d7b50502c8f",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "df690ca8acc16606cf279fb8c04f8e7c610e46213f410dea5056bd0be561e50a",
+  "release_ready": false,
+  "required_poses": [
+    "walk.06",
+    "walk.07",
+    "walk.08",
+    "walk.09",
+    "walk.10",
+    "walk.11"
+  ],
+  "response_sha256": "1974949ae43ac8d40b6b9286c51c62c652a3ea122230d67e6a71a782622c636d",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

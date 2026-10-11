@@ -1,0 +1,103 @@
+{
+  "art_approved": false,
+  "body": {
+    "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+    "id": "full-motion.body"
+  },
+  "poses": [
+    {
+      "body_rgba_changed": false,
+      "from": "foot_front",
+      "moved_pixels": 933,
+      "polygon": [
+        [
+          280,
+          545
+        ],
+        [
+          344,
+          545
+        ],
+        [
+          349,
+          569
+        ],
+        [
+          342,
+          583
+        ],
+        [
+          327,
+          600
+        ],
+        [
+          310,
+          621
+        ],
+        [
+          291,
+          645
+        ],
+        [
+          245,
+          645
+        ],
+        [
+          265,
+          592
+        ]
+      ],
+      "pose": "run.03",
+      "protected_calf": "run.03.protected-calf.png",
+      "source_body_sha256": "55838fd2af9ed849edf9bff542fd47802752985c1d1f18d8850f656de057c923",
+      "to": "leg_back"
+    },
+    {
+      "body_rgba_changed": false,
+      "from": "foot_front",
+      "moved_pixels": 673,
+      "polygon": [
+        [
+          280,
+          530
+        ],
+        [
+          354,
+          530
+        ],
+        [
+          355,
+          554
+        ],
+        [
+          347,
+          571
+        ],
+        [
+          334,
+          590
+        ],
+        [
+          314,
+          614
+        ],
+        [
+          292,
+          635
+        ],
+        [
+          230,
+          635
+        ],
+        [
+          265,
+          581
+        ]
+      ],
+      "pose": "run.15",
+      "protected_calf": "run.15.protected-calf.png",
+      "source_body_sha256": "4ff426fd98b1377cb0a7f9744029beddf37bb7293817bd52fefa90f1ab71d43e",
+      "to": "leg_back"
+    }
+  ]
+}

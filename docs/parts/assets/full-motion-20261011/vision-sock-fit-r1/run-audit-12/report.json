@@ -1,0 +1,94 @@
+{
+  "answer": {
+    "limits": [
+      "Only run.12 through run.17 are shown; the remaining 37 frames are unassessed.",
+      "Ankle enlargements truncate surrounding limbs and occasionally adjacent footwear at their crop boundaries; these truncations do not establish source-asset clipping.",
+      "Fine seams in the smaller full-character compositions remain uncertain at the displayed scale.",
+      "These stills support visible attachment and design-continuity checks only, not speed, gait or motion-quality approval. Part passes do not grant curator approval or release."
+    ],
+    "poses": {
+      "run.12": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.13": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.14": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.15": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.16": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.17": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "5f2fa376dc0255c1967fd58ba6bedfccb0d12ef785d7fc945f00e4a42cb987cd",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "982a5c73b4f766366c399ffa79a1e7475e211295083c885bf51a3f5fe40eee7a",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "c3906f93e6f447b5ee307e7e23264d6f08eebef68716c3cd3ff80175f3093cc1",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "7276265539d4c0ea68f28919bcc3509b0e6f2b6d1bc148260c7457b495f80205",
+  "release_ready": false,
+  "required_poses": [
+    "run.12",
+    "run.13",
+    "run.14",
+    "run.15",
+    "run.16",
+    "run.17"
+  ],
+  "response_sha256": "10bc7426788a5107bf4e1372be551075b7136338ba4b5633849a2fd24feaaffd",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

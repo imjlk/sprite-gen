@@ -1,0 +1,102 @@
+{
+  "answer": {
+    "limits": [
+      "Only run.00 through run.05 are visible; the other 17 run frames and all 20 walk frames are unassessed.",
+      "Overlapping footwear in run.02 obscures the rear collar and much of its upper; overlap alone is not a parts defect.",
+      "Enlarged crops truncate some calves and adjacent footwear, limiting assessment beyond their boundaries.",
+      "Stills cannot establish speed, timing or gait quality. Source-pose biomechanics remain BODY issues. These observational ratings grant no curator approval or release."
+    ],
+    "poses": {
+      "run.00": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.01": {
+        "hair": "pass",
+        "issues": [
+          "Front sock cuff forms a large pointed cream wedge extending beyond the calf contour instead of a fitted band; this changes abruptly from run.00."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "run.02": {
+        "hair": "pass",
+        "issues": [
+          "Front ankle has an exposed skin projection behind the collar and a sharply angular cream cuff; the sock does not cleanly enclose the ankle transition.",
+          "The diagonal front sneaker appears substantially longer and deeper through its lace panel than the rear sneaker and neighboring front sneakers, disrupting product-volume continuity."
+        ],
+        "shoes": "rework",
+        "socks": "rework"
+      },
+      "run.03": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.04": {
+        "hair": "pass",
+        "issues": [
+          "A pointed skin wedge protrudes behind the front sock and shoe collar; the cuff leaves part of the ankle uncovered.",
+          "Front shoe entry sits forward of the exposed heel contour, making the attachment visibly offset."
+        ],
+        "shoes": "rework",
+        "socks": "rework"
+      },
+      "run.05": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "74c50ec04f3381a7f30f900bf99ba4971f638c53be53c2dcfd25fc66efabebf3",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "d67ed505c7e0acbcb43777336dc78a9f49afc04dbd8bfc086802a54aea0cf74b",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "7cd124d47091f7123488bfd3d792a5eb075271e197407176512325d589a71cfd",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "370a2f1cccd13ef2752293d823c1aabcd1e298e8be6b4b7a55fedb51aadc2d0c",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "6ac398743918bea3f45e4e3a028d74b05dad2f93e72f92ece8edd62dcef570ee",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "827e464454d82d13734f38c53b0f2b669d649c5ca43e792bcd5522cd75c2befb",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "3a1b6c56e815cd47fb0c451575c8ec71b977f1044e3d1a13ff3f9044912cbaa6",
+  "release_ready": false,
+  "required_poses": [
+    "run.00",
+    "run.01",
+    "run.02",
+    "run.03",
+    "run.04",
+    "run.05"
+  ],
+  "response_sha256": "5fab87bf6deb433f1c0c58b73b40c881985bcc70e5359bb2b50bb6b14fbb9cda",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

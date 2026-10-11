@@ -1,0 +1,48 @@
+{
+  "poses": {
+    "run.00": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.01": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.02": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.03": {
+      "hair": "pass",
+      "socks": "rework",
+      "shoes": "pass",
+      "issues": [
+        "Back ankle: a pointed cream flap protrudes beneath the shoe's midsole, separate from the fitted calf cuff. The bare comparison places this area along the source foot underside.",
+        "Front ankle: a large cream polygon extends behind the diagonal shoe into the space between the legs. Compared with the bare anatomy, it exceeds the entering ankle contour and obscures part of the neighboring limb."
+      ]
+    },
+    "run.04": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.05": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "Only run.00 through run.05 are shown; the other 17 run frames and all 20 walk frames are unassessed.",
+    "Occlusion hides some ankle joins. The precise layer or mask responsible for the run.03 cream artifacts cannot be established from the composite.",
+    "These stills do not establish speed, gait validity or complete animation continuity. This observational audit grants no curator or release approval."
+  ]
+}

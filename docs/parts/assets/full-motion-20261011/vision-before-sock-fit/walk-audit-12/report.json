@@ -1,0 +1,102 @@
+{
+  "answer": {
+    "limits": [
+      "Only walk.12 through walk.17 are shown; the remaining walk frames and all run frames are unassessed.",
+      "The composite shows ankle-edge artifacts but does not establish which underlying layer produced them.",
+      "Still frames cannot establish animation timing or gait quality. This observational audit grants no curator approval or release authorization."
+    ],
+    "poses": {
+      "walk.12": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.13": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.14": {
+        "hair": "pass",
+        "issues": [
+          "Front/right ankle enlargement shows a pointed cream projection extending left of the calf at the sock entry, interrupting the fitted cuff silhouette."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.15": {
+        "hair": "pass",
+        "issues": [
+          "Front/right sock entry has an angular cream flap projecting beyond the calf, with a thin stray contour extending left of the junction."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.16": {
+        "hair": "pass",
+        "issues": [
+          "Front/right calf-to-sock junction has a conspicuous pointed flap and a thin outline projecting left, rather than a clean attached cuff. This defect persists from the preceding frames."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.17": {
+        "hair": "pass",
+        "issues": [
+          "Front/right ankle enlargement shows a thin dangling cream spur outside the sock's left edge near the heel collar.",
+          "Back/left ankle enlargement also shows a small curled cream edge projecting outside the heel collar."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "5de000cd315c94366b8f6ad02b41f23ac950f1119cb5672790c0a05a040100a4",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "e65d21db58087d5505c5abe13b7d6a3b067492269ff62d0482cdb45deb756481",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "02eea0b2097f8a3ac6f8f7a250ceec986e801ca323775eb42a728e18ea093e91",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "b11623a3a41786e7fa9008eda80a3cbc505f9df89bd4e4037fc306a5b4bfd0f1",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "c0f1e5063ccc3864ff2b265a288ab746d17099fc3f697e561b975a8d52b72d57",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "e2fbaf090319176eaeb32dfd31bb6ed46b4a7dcaed98b700462542faa5527db3",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "fe7b27b342910c28c1181d51f4ecbd396d09cb3759a99674684bd89cc9264cc6",
+  "release_ready": false,
+  "required_poses": [
+    "walk.12",
+    "walk.13",
+    "walk.14",
+    "walk.15",
+    "walk.16",
+    "walk.17"
+  ],
+  "response_sha256": "e616f50d0003d9fb5c980642d7085f90a588d5c476da46fc486d786767ecf7be",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

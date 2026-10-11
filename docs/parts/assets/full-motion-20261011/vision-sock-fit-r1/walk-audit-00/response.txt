@@ -1,0 +1,53 @@
+{
+  "poses": {
+    "walk.00": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.01": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.02": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.03": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "The rear foot is largely concealed behind the planted calf. Only a small navy/cream shoe segment remains visible; the rear sock bridge, calf entry and complete shoe volume cannot be verified.",
+        "The visible front cuff and shoe remain attached and retain the neighboring frames' navy/cream design."
+      ]
+    },
+    "walk.04": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "The rear shoe appears as a narrow vertical strip behind the planted calf. Occlusion prevents distinguishing a complete rotated shoe from a compressed or clipped asset.",
+        "The rear sock-to-ankle connection is concealed. The visible front cuff and shoe remain continuous."
+      ]
+    },
+    "walk.05": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "Pass judgments apply to visible regions; concealed surfaces cannot be checked.",
+    "Some ankle enlargements truncate neighboring limbs or footwear at their image boundaries; those boundaries alone do not establish asset clipping.",
+    "Only walk.00 through walk.05 were inspected. The other 14 walk frames and all 23 run frames are absent.",
+    "Still images do not establish speed, gait quality or motion continuity between frames. Source-body occlusion is not evidence that concealed parts are correct.",
+    "This observational audit grants no curator approval or release authorization."
+  ]
+}

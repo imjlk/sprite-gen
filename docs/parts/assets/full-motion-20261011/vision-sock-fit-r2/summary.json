@@ -1,0 +1,308 @@
+{
+  "art_approved": false,
+  "frames_observed": 31,
+  "pages": [
+    {
+      "error": "Command '['/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex', 'exec', '--sandbox', 'read-only', '--skip-git-repo-check', '--ephemeral', '--color', 'never', '-C', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-full-motion-20261011/audit-r9-sock-fit-r2/vision-r1/run-audit-00/facing-970p6ap2', '-i', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-full-motion-20261011/audit-r9-sock-fit-r2/vision-r1/run-audit-00/input.png', '-o', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-full-motion-20261011/audit-r9-sock-fit-r2/vision-r1/run-audit-00/facing-970p6ap2/answer.txt', '-']' timed out after 180 seconds",
+      "required_poses": [
+        "run.00",
+        "run.01",
+        "run.02",
+        "run.03",
+        "run.04",
+        "run.05"
+      ],
+      "status": "failed"
+    },
+    {
+      "error": "Command '['/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex', 'exec', '--sandbox', 'read-only', '--skip-git-repo-check', '--ephemeral', '--color', 'never', '-C', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-full-motion-20261011/audit-r9-sock-fit-r2/vision-r1/run-audit-06/facing-y4fr2vjn', '-i', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-full-motion-20261011/audit-r9-sock-fit-r2/vision-r1/run-audit-06/input.png', '-o', '/Users/imjlk/.codex/worktrees/parts-production-v243/sprite-gen/assets/parts-full-motion-20261011/audit-r9-sock-fit-r2/vision-r1/run-audit-06/facing-y4fr2vjn/answer.txt', '-']' timed out after 180 seconds",
+      "required_poses": [
+        "run.06",
+        "run.07",
+        "run.08",
+        "run.09",
+        "run.10",
+        "run.11"
+      ],
+      "status": "failed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.12",
+        "run.13",
+        "run.14",
+        "run.15",
+        "run.16",
+        "run.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.18",
+        "run.19",
+        "run.20",
+        "run.21",
+        "run.22"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.00",
+        "walk.01",
+        "walk.02",
+        "walk.03",
+        "walk.04",
+        "walk.05"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.06",
+        "walk.07",
+        "walk.08",
+        "walk.09",
+        "walk.10",
+        "walk.11"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.12",
+        "walk.13",
+        "walk.14",
+        "walk.15",
+        "walk.16",
+        "walk.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.18",
+        "walk.19"
+      ],
+      "status": "completed"
+    }
+  ],
+  "poses": {
+    "run.12": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.13": {
+      "hair": "pass",
+      "issues": [
+        "The back sock forms a boxy cream block with straight corners at the calf entry.",
+        "The front sock has a broad, flat lower edge and a projecting rear corner above the shoe collar; its contour is noticeably less fitted than in run.12 and run.14."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "run.14": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.15": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.16": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.17": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.18": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.19": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.20": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged back ankle shows a background gap between the angular cream sock end and the shoe collar. The ankle bridge is broken, making the rear shoe appear detached."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "run.21": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.22": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.00": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.01": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.02": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.03": {
+      "hair": "pass",
+      "issues": [
+        "The rear ankle is largely hidden behind the foreground calf, preventing verification of its sock cuff and ankle bridge.",
+        "Only a diagonal navy/cream portion of the rear shoe is visible; its collar, calf entry and full volume cannot be verified. The foreground shoe shows no obvious defect."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "walk.04": {
+      "hair": "pass",
+      "issues": [
+        "The rear sock and ankle connection are obscured by the foreground calf.",
+        "The rear shoe is visible mainly as a near-vertical navy/cream strip. Occlusion prevents distinguishing a complete shoe from a thin or clipped asset; the foreground shoe retains its shape."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "walk.05": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.06": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.07": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.08": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.09": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.10": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.11": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.12": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.13": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.14": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged front cuff has a squared cream projection at its upper-right edge that interrupts the fit against the slanted calf."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.15": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged front cuff forms a jutting cream flap; the connection from cuff to shoe collar is pinched and irregular compared with walk.12–walk.13."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.16": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged front cuff reads as an offset cream block with an abrupt notch toward the shoe collar, rather than a continuous fitted ankle covering.",
+        "This repeats the front-cuff discontinuity visible in walk.15."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.17": {
+      "hair": "pass",
+      "issues": [
+        "The enlarged back cuff projects as an angular cream flap beside the bent calf; its transition into the shoe collar is sharply constricted."
+      ],
+      "shoes": "pass",
+      "socks": "rework"
+    },
+    "walk.18": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.19": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    }
+  },
+  "release_ready": false,
+  "scope": "actual still-frame attachment and between-frame appearance observations; no timing, gait or human approval",
+  "status": "incomplete"
+}

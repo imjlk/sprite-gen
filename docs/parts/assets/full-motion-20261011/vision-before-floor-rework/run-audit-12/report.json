@@ -1,0 +1,97 @@
+{
+  "answer": {
+    "limits": [
+      "Assessment covers only run.12 through run.17, not the complete walk/run set.",
+      "Crossing limbs in run.14 obscure portions of the ankle boundaries; hidden surfaces remain unassessed.",
+      "Some enlarged crops truncate neighboring limb or shoe fragments; crop boundaries alone do not establish part defects.",
+      "Still images do not establish speed, gait quality, curator approval, or release readiness."
+    ],
+    "poses": {
+      "run.12": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.13": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.14": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.15": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.16": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.17": {
+        "hair": "pass",
+        "issues": [
+          "Rear ankle attachment is questionable: the actual sock/shoe transition appears inset toward the shin compared with the pronounced heel-side bend in the bare reference. Possible loss of source ankle contour needs checking; a background hole is not conclusively visible.",
+          "The rear sneaker presents a particularly narrow, near-vertical silhouette. Its heel placement and volume continuity cannot be confidently cleared from this view."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "6ef835bce1d86f8f9c5ef77fa6a6ab5a2eb8893e925f5051c36b39272465e394",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "0f6d47f5714bf53d7f1201c981d882a01cf28ce6bf694e70440027e93d96b190",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "9bda815b0fe87dbc5a5e5ff4acd9e7334342fd3cbb2c0cd84987efe48ee02179",
+  "motion": {
+    "digest": "e5d4ce84d9023c7e3a0ed72222b183ba1c488b66d6e33c4a7b4635ef950da75c",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "694f00224fe09d3daf050f36a03bd6bde164486d3cfd9df257519222a19aa58b",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "fa7b7666eab2488a0ea443bf4df1b2c946d2892c2dcee7f5baa792ff4aa34dde",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "49eec7e2c4f3ad8224eacc05898b0621f0280e80f3fa53074e21ae4498562c83",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "b68e87cf4e73e7a68f6e923e85c7504ffda778a8128bd3141de610f203354d97",
+  "release_ready": false,
+  "required_poses": [
+    "run.12",
+    "run.13",
+    "run.14",
+    "run.15",
+    "run.16",
+    "run.17"
+  ],
+  "response_sha256": "bfef26dfaa3acc48ce3272bb262b85e04293e3ee4e027562d2dccc4319d62fbf",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

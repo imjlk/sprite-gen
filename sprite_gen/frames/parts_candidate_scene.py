@@ -135,6 +135,7 @@ def scene(
                         "offset": placement.get("offset", [0, 0]),
                         "mask": candidate_mask,
                         "visible": s["pose_id"] == pose
+                        and configured.get(name,{}).get('visible',True)
                         and raster.getbbox() is not None,
                     },
                     "candidate placement",
