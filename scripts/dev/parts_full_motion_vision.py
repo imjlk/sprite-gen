@@ -27,8 +27,8 @@ not cream fabric: a missing calf exposing background is a body-ownership defect.
 Distinguish such a hole from an opaque sock by the actual bare/composed pair.
 Report visible uncertain defects; never declare an unobservable rear shoe approved.
 Do not invent speed or gait approval from stills; a biomechanically questionable source pose is a BODY
-issue, not something to hide by approving parts. There are exactly 20 walk and
-23 run frames in the full set; this page contains only its labeled subset.
+issue, not something to hide by approving parts. This page contains only the
+labeled subset of the active motion's actual frame sequence.
 Return strict JSON, no Markdown: {"poses": {FRAME: {"hair":"pass|rework|unknown",
 "socks":"pass|rework|unknown","shoes":"pass|rework|unknown","issues":[specific
 visible observations]}},"limits":[specific uncertainties]}. No tools or code.
@@ -44,7 +44,7 @@ def inspect(evidence, *, revision='vision-r1', pages=None):
     def page(file):
         scope=history/file.stem;scope.mkdir();shutil.copy2(file,scope/'input.png')
         name,start=file.stem.split('-audit-');start=int(start)
-        count=20 if name=='walk' else 23
+        count=state.get('motion_pose_counts',{}).get(name) or sum(row['pose'].startswith(name+'.') for row in state['poses'])
         poses=[f'{name}.{n:02}' for n in range(start,min(start+6,count))]
         prompt=PROMPT+json.dumps(poses);(scope/'prompt.txt').write_text(prompt)
         report={'appearance':state['appearance'],'body':state['body'],'motion':state['motion'],'parts':state['parts'],

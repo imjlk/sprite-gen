@@ -1,0 +1,74 @@
+{
+  "answer": {
+    "limits": [
+      "The walk.26 overlap does not conclusively identify which layer removes the skin; sock masking and body ownership require inspection.",
+      "These stills establish neither motion timing nor gait quality. This audit grants no curator or release approval."
+    ],
+    "poses": {
+      "walk.24": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.25": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.26": {
+        "hair": "pass",
+        "issues": [
+          "Below the diagonal rear sock cuff, a grey triangular opening appears where the corresponding bare crop contains skin. The ankle bridge is interrupted; this is a body-ownership/compositing defect.",
+          "The rear shoe is mostly occluded, leaving a narrow navy fragment. Its complete toe, sole and collar attachment cannot be verified. The visible front shoe maintains the preceding frames' design."
+        ],
+        "shoes": "unknown",
+        "socks": "rework"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "bf99bc763f2c2312cecce43d3335d69be0fed6f78f2cd8432431b59e0828da10",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "3ef8e62d7d7d13d9b2c8b8332a9e675b21f8d87a9d436f3e1ec10154167790af",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "f47caf4714ccede54013f70a03cc1d6e9ccdaa3c73660e7b47f20a58c6509166",
+  "motion": {
+    "digest": "ee22479feda0ce26c4ab926a733a47e6bd0d3d7d21773b46b20af8c5059c86ec",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "367ec8fd77ca184bbd31fa5d9bf8553575c391f5f8435041f33565baefc0a1ad",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "91693f47dad3388a58a2c797c5d6a92a0c8e37c1a23a80f1253624caa83c45ce",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "ca96253e87acf537e52e380e1c0b467daf3853d3cc8d5a4c00e757503ed9955c",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "a4d3322540ffcf3eaade2b2bb03842e7f90a8d90629b7d925e63b46b005415cb",
+  "release_ready": false,
+  "required_poses": [
+    "walk.24",
+    "walk.25",
+    "walk.26"
+  ],
+  "response_sha256": "99b476532979659429fc21f8badfd0c5a523c623b6793c5b0d8b5d5697460075",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

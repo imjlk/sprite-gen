@@ -1,0 +1,1286 @@
+{
+  "scope": "visible endpoint-to-source-body distance; not joint identity approval",
+  "threshold_px": 8,
+  "points": [
+    {
+      "pose": "run.00",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.00",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.00",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.00",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.01",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.01",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 1.0
+    },
+    {
+      "pose": "run.01",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.01",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.02",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.02",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 1.0
+    },
+    {
+      "pose": "run.02",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 1.0
+    },
+    {
+      "pose": "run.02",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.03",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.03",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.03",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.03",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.04",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.04",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.04",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 5.0
+    },
+    {
+      "pose": "run.04",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.05",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.05",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.05",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.05",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.06",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.06",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.06",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.06",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.07",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.07",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.07",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.07",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.08",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.08",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.0
+    },
+    {
+      "pose": "run.08",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 2.828
+    },
+    {
+      "pose": "run.08",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.09",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.09",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.09",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.09",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.10",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 5.0
+    },
+    {
+      "pose": "run.10",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.10",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.10",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.11",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.11",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.11",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.11",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.12",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.12",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.12",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.12",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.13",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.13",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.13",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.13",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.14",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.14",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.14",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 1.0
+    },
+    {
+      "pose": "run.14",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.15",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 5.0
+    },
+    {
+      "pose": "run.15",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.15",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.15",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.16",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.16",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.236
+    },
+    {
+      "pose": "run.16",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.16",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.17",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.17",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.17",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.17",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.18",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.18",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.18",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.18",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.19",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 1.0
+    },
+    {
+      "pose": "run.19",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.236
+    },
+    {
+      "pose": "run.19",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.19",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 1.414
+    },
+    {
+      "pose": "run.20",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 3.0
+    },
+    {
+      "pose": "run.20",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.20",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.20",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.828
+    },
+    {
+      "pose": "run.21",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.21",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.21",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.21",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.22",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.22",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.22",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "run.22",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.00",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.00",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.00",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.00",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.01",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 2.236
+    },
+    {
+      "pose": "walk.01",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.01",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.01",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.02",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.02",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.02",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.02",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.03",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 2.236
+    },
+    {
+      "pose": "walk.03",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.03",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.03",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.0
+    },
+    {
+      "pose": "walk.04",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.04",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.04",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.04",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.828
+    },
+    {
+      "pose": "walk.05",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 2.236
+    },
+    {
+      "pose": "walk.05",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.236
+    },
+    {
+      "pose": "walk.05",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.05",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.236
+    },
+    {
+      "pose": "walk.06",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.06",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 1.414
+    },
+    {
+      "pose": "walk.06",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 3.0
+    },
+    {
+      "pose": "walk.06",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 38.0
+    },
+    {
+      "pose": "walk.07",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 8.0
+    },
+    {
+      "pose": "walk.07",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.07",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 10.0
+    },
+    {
+      "pose": "walk.07",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 1.0
+    },
+    {
+      "pose": "walk.08",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 6.325
+    },
+    {
+      "pose": "walk.08",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.08",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 8.944
+    },
+    {
+      "pose": "walk.08",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 1.0
+    },
+    {
+      "pose": "walk.09",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 8.0
+    },
+    {
+      "pose": "walk.09",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 1.414
+    },
+    {
+      "pose": "walk.09",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 12.083
+    },
+    {
+      "pose": "walk.09",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.236
+    },
+    {
+      "pose": "walk.10",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 6.708
+    },
+    {
+      "pose": "walk.10",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.10",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 5.0
+    },
+    {
+      "pose": "walk.10",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.11",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 10.05
+    },
+    {
+      "pose": "walk.11",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.11",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 5.657
+    },
+    {
+      "pose": "walk.11",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.12",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.12",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.12",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.12",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.13",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.13",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.13",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 7.0
+    },
+    {
+      "pose": "walk.13",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.14",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 5.385
+    },
+    {
+      "pose": "walk.14",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.14",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 13.454
+    },
+    {
+      "pose": "walk.14",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.15",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 5.0
+    },
+    {
+      "pose": "walk.15",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.15",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 14.142
+    },
+    {
+      "pose": "walk.15",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.16",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 21.401
+    },
+    {
+      "pose": "walk.16",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 8.944
+    },
+    {
+      "pose": "walk.16",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 13.892
+    },
+    {
+      "pose": "walk.16",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.17",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 7.0
+    },
+    {
+      "pose": "walk.17",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 17.493
+    },
+    {
+      "pose": "walk.17",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 12.649
+    },
+    {
+      "pose": "walk.17",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.18",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.18",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.236
+    },
+    {
+      "pose": "walk.18",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.18",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.19",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.19",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.828
+    },
+    {
+      "pose": "walk.19",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.19",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.20",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.20",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 6.708
+    },
+    {
+      "pose": "walk.20",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.20",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.21",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.21",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.828
+    },
+    {
+      "pose": "walk.21",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.21",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.22",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.22",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.22",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.22",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.23",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.23",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.23",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.23",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.24",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 1.0
+    },
+    {
+      "pose": "walk.24",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 1.0
+    },
+    {
+      "pose": "walk.24",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.24",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.25",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 1.0
+    },
+    {
+      "pose": "walk.25",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 1.0
+    },
+    {
+      "pose": "walk.25",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.25",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.26",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 8.246
+    },
+    {
+      "pose": "walk.26",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 1.0
+    },
+    {
+      "pose": "walk.26",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 0.0
+    },
+    {
+      "pose": "walk.26",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 2.0
+    }
+  ],
+  "failed": [
+    {
+      "pose": "walk.06",
+      "side": "back",
+      "point": "toe",
+      "distance_to_opaque_body_px": 38.0
+    },
+    {
+      "pose": "walk.07",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 10.0
+    },
+    {
+      "pose": "walk.08",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 8.944
+    },
+    {
+      "pose": "walk.09",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 12.083
+    },
+    {
+      "pose": "walk.11",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 10.05
+    },
+    {
+      "pose": "walk.14",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 13.454
+    },
+    {
+      "pose": "walk.15",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 14.142
+    },
+    {
+      "pose": "walk.16",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 21.401
+    },
+    {
+      "pose": "walk.16",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 8.944
+    },
+    {
+      "pose": "walk.16",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 13.892
+    },
+    {
+      "pose": "walk.17",
+      "side": "front",
+      "point": "toe",
+      "distance_to_opaque_body_px": 17.493
+    },
+    {
+      "pose": "walk.17",
+      "side": "back",
+      "point": "heel",
+      "distance_to_opaque_body_px": 12.649
+    },
+    {
+      "pose": "walk.26",
+      "side": "front",
+      "point": "heel",
+      "distance_to_opaque_body_px": 8.246
+    }
+  ]
+}

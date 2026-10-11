@@ -1,0 +1,10 @@
+{
+  "native_observation_input_frames": 15,
+  "all_input_png_and_context_refs_equal_final": true,
+  "run_body_node_pngs_rgba_identical": 161,
+  "frames": 50,
+  "source_coordinate_points": 200,
+  "outside_bound_points": 0,
+  "art_approved": false,
+  "release_ready": false
+}

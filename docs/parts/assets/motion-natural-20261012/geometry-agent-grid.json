@@ -1,0 +1,489 @@
+{
+  "art_approved": false,
+  "inputs": [
+    {
+      "file": "assets/parts-motion-natural-20261012/geometry-vision-r1/page-06/input.png",
+      "sha256": "c83590b3680b721b7fb088e8a518b5310081746bd687e9dec6830fd5f0c3f82c"
+    },
+    {
+      "file": "assets/parts-motion-natural-20261012/geometry-vision-r1/page-12/input.png",
+      "sha256": "d15bd8e0f27ca696119262704d1561ca5b80a5261e7539a061c7137b03697f7d"
+    }
+  ],
+  "poses": {
+    "walk.06": {
+      "back": {
+        "ankle": [
+          486,
+          672
+        ],
+        "heel": [
+          478,
+          709
+        ],
+        "knee": [
+          446,
+          608
+        ],
+        "toe": [
+          559,
+          686
+        ]
+      },
+      "front": {
+        "ankle": [
+          263,
+          668
+        ],
+        "heel": [
+          230,
+          671
+        ],
+        "knee": [
+          306,
+          614
+        ],
+        "toe": [
+          287,
+          712
+        ]
+      },
+      "identity_note": "foreground leg follows the planted-left foot from walk.00 through backward swing and forward return; screen position is not identity",
+      "landmark_source": "Codex agent inspection of global coordinate grid after native coordinate call timeout"
+    },
+    "walk.07": {
+      "back": {
+        "ankle": [
+          435,
+          670
+        ],
+        "heel": [
+          412,
+          709
+        ],
+        "knee": [
+          419,
+          602
+        ],
+        "toe": [
+          493,
+          711
+        ]
+      },
+      "front": {
+        "ankle": [
+          258,
+          665
+        ],
+        "heel": [
+          216,
+          648
+        ],
+        "knee": [
+          328,
+          617
+        ],
+        "toe": [
+          263,
+          708
+        ]
+      },
+      "identity_note": "foreground leg follows the planted-left foot from walk.00 through backward swing and forward return; screen position is not identity",
+      "landmark_source": "Codex agent inspection of global coordinate grid after native coordinate call timeout"
+    },
+    "walk.08": {
+      "back": {
+        "ankle": [
+          416,
+          677
+        ],
+        "heel": [
+          397,
+          709
+        ],
+        "knee": [
+          420,
+          602
+        ],
+        "toe": [
+          476,
+          713
+        ]
+      },
+      "front": {
+        "ankle": [
+          258,
+          659
+        ],
+        "heel": [
+          240,
+          621
+        ],
+        "knee": [
+          362,
+          610
+        ],
+        "toe": [
+          273,
+          690
+        ]
+      },
+      "identity_note": "foreground leg follows the planted-left foot from walk.00 through backward swing and forward return; screen position is not identity",
+      "landmark_source": "Codex agent inspection of global coordinate grid after native coordinate call timeout"
+    },
+    "walk.09": {
+      "back": {
+        "ankle": [
+          402,
+          681
+        ],
+        "heel": [
+          378,
+          710
+        ],
+        "knee": [
+          411,
+          598
+        ],
+        "toe": [
+          461,
+          715
+        ]
+      },
+      "front": {
+        "ankle": [
+          278,
+          652
+        ],
+        "heel": [
+          259,
+          620
+        ],
+        "knee": [
+          361,
+          608
+        ],
+        "toe": [
+          278,
+          688
+        ]
+      },
+      "identity_note": "foreground leg follows the planted-left foot from walk.00 through backward swing and forward return; screen position is not identity",
+      "landmark_source": "Codex agent inspection of global coordinate grid after native coordinate call timeout"
+    },
+    "walk.10": {
+      "back": {
+        "ankle": [
+          390,
+          672
+        ],
+        "heel": [
+          368,
+          705
+        ],
+        "knee": [
+          390,
+          595
+        ],
+        "toe": [
+          451,
+          709
+        ]
+      },
+      "front": {
+        "ankle": [
+          305,
+          643
+        ],
+        "heel": [
+          286,
+          607
+        ],
+        "knee": [
+          387,
+          598
+        ],
+        "toe": [
+          314,
+          674
+        ]
+      },
+      "identity_note": "foreground leg follows the planted-left foot from walk.00 through backward swing and forward return; screen position is not identity",
+      "landmark_source": "Codex agent inspection of global coordinate grid after native coordinate call timeout"
+    },
+    "walk.11": {
+      "back": {
+        "ankle": [
+          371,
+          678
+        ],
+        "heel": [
+          353,
+          707
+        ],
+        "knee": [
+          386,
+          603
+        ],
+        "toe": [
+          432,
+          711
+        ]
+      },
+      "front": {
+        "ankle": [
+          336,
+          644
+        ],
+        "heel": [
+          306,
+          607
+        ],
+        "knee": [
+          406,
+          571
+        ],
+        "toe": [
+          350,
+          670
+        ]
+      },
+      "identity_note": "foreground leg follows the planted-left foot from walk.00 through backward swing and forward return; screen position is not identity",
+      "landmark_source": "Codex agent inspection of global coordinate grid after native coordinate call timeout"
+    },
+    "walk.12": {
+      "back": {
+        "ankle": [
+          368,
+          675
+        ],
+        "heel": [
+          343,
+          704
+        ],
+        "knee": [
+          367,
+          590
+        ],
+        "toe": [
+          420,
+          706
+        ]
+      },
+      "front": {
+        "ankle": [
+          364,
+          626
+        ],
+        "heel": [
+          337,
+          615
+        ],
+        "knee": [
+          430,
+          550
+        ],
+        "toe": [
+          384,
+          672
+        ]
+      },
+      "landmark_source": "Codex agent inspection of global coordinate grid after native coordinate call timeout"
+    },
+    "walk.13": {
+      "back": {
+        "ankle": [
+          348,
+          673
+        ],
+        "heel": [
+          317,
+          694
+        ],
+        "knee": [
+          350,
+          597
+        ],
+        "toe": [
+          393,
+          707
+        ]
+      },
+      "front": {
+        "ankle": [
+          367,
+          622
+        ],
+        "heel": [
+          347,
+          603
+        ],
+        "knee": [
+          433,
+          545
+        ],
+        "toe": [
+          408,
+          665
+        ]
+      },
+      "landmark_source": "Codex agent inspection of global coordinate grid after native coordinate call timeout"
+    },
+    "walk.14": {
+      "back": {
+        "ankle": [
+          325,
+          683
+        ],
+        "heel": [
+          297,
+          704
+        ],
+        "knee": [
+          332,
+          594
+        ],
+        "toe": [
+          377,
+          711
+        ]
+      },
+      "front": {
+        "ankle": [
+          397,
+          629
+        ],
+        "heel": [
+          365,
+          620
+        ],
+        "knee": [
+          444,
+          551
+        ],
+        "toe": [
+          431,
+          663
+        ]
+      },
+      "landmark_source": "Codex agent inspection of global coordinate grid after native coordinate call timeout"
+    },
+    "walk.15": {
+      "back": {
+        "ankle": [
+          313,
+          680
+        ],
+        "heel": [
+          284,
+          704
+        ],
+        "knee": [
+          318,
+          606
+        ],
+        "toe": [
+          367,
+          712
+        ]
+      },
+      "front": {
+        "ankle": [
+          405,
+          625
+        ],
+        "heel": [
+          382,
+          632
+        ],
+        "knee": [
+          444,
+          558
+        ],
+        "toe": [
+          460,
+          660
+        ]
+      },
+      "landmark_source": "Codex agent inspection of global coordinate grid after native coordinate call timeout"
+    },
+    "walk.16": {
+      "back": {
+        "ankle": [
+          290,
+          681
+        ],
+        "heel": [
+          264,
+          695
+        ],
+        "knee": [
+          306,
+          609
+        ],
+        "toe": [
+          347,
+          712
+        ]
+      },
+      "front": {
+        "ankle": [
+          429,
+          661
+        ],
+        "heel": [
+          400,
+          680
+        ],
+        "knee": [
+          439,
+          581
+        ],
+        "toe": [
+          479,
+          682
+        ]
+      },
+      "landmark_source": "Codex agent inspection of global coordinate grid after native coordinate call timeout"
+    },
+    "walk.17": {
+      "back": {
+        "ankle": [
+          284,
+          678
+        ],
+        "heel": [
+          249,
+          686
+        ],
+        "knee": [
+          300,
+          612
+        ],
+        "toe": [
+          320,
+          710
+        ]
+      },
+      "front": {
+        "ankle": [
+          455,
+          677
+        ],
+        "heel": [
+          438,
+          691
+        ],
+        "knee": [
+          432,
+          597
+        ],
+        "toe": [
+          521,
+          678
+        ]
+      },
+      "landmark_source": "Codex agent inspection of global coordinate grid after native coordinate call timeout"
+    }
+  }
+}

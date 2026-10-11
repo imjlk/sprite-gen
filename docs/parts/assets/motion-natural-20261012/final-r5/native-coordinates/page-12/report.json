@@ -1,0 +1,103 @@
+{
+  "answer": {
+    "poses": {
+      "walk.12": {
+        "back": {
+          "ankle": [
+            360,
+            681
+          ],
+          "heel": [
+            343,
+            703
+          ],
+          "knee": [
+            352,
+            610
+          ],
+          "toe": [
+            424,
+            708
+          ]
+        },
+        "front": {
+          "ankle": [
+            367,
+            652
+          ],
+          "heel": [
+            357,
+            665
+          ],
+          "knee": [
+            447,
+            552
+          ],
+          "toe": [
+            390,
+            672
+          ]
+        },
+        "uncertainties": [
+          "Back knee center is partly obscured by the lifted leg."
+        ]
+      },
+      "walk.13": {
+        "back": {
+          "ankle": [
+            345,
+            682
+          ],
+          "heel": [
+            326,
+            701
+          ],
+          "knee": [
+            344,
+            613
+          ],
+          "toe": [
+            406,
+            708
+          ]
+        },
+        "front": {
+          "ankle": [
+            391,
+            649
+          ],
+          "heel": [
+            388,
+            663
+          ],
+          "knee": [
+            449,
+            542
+          ],
+          "toe": [
+            417,
+            668
+          ]
+        },
+        "uncertainties": [
+          "Back knee center is partly obscured by the lifted calf."
+        ]
+      }
+    }
+  },
+  "art_approved": false,
+  "input_sha256": "81aae2e1db7f8e89529d29bcf61a302270ad4d2405bb1d5fb4d8be461fb754ce",
+  "required_poses": [
+    "walk.12",
+    "walk.13"
+  ],
+  "source_frames": {
+    "walk.12": "45a149dd54eb35b894264cf824c803da05d5d496a23227dc75ee5e8f0de6b8a7",
+    "walk.13": "6d8d9febe30dc50297fd4965da290ee1193ab0598dc5c31cc8027276041740cb"
+  },
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "art_approved": false,
+  "body_rgba_identical": true,
+  "from": "leg_back",
+  "moved_pixels": 480,
+  "pose": "walk.26",
+  "required_opaque_calf_pixels": 1240,
+  "source_contour_left": [
+    [
+      351,
+      590
+    ],
+    [
+      346,
+      600
+    ],
+    [
+      343,
+      610
+    ],
+    [
+      341,
+      620
+    ],
+    [
+      345,
+      650
+    ],
+    [
+      344,
+      675
+    ]
+  ],
+  "source_contour_right": [
+    [
+      399,
+      590
+    ],
+    [
+      392,
+      600
+    ],
+    [
+      389,
+      610
+    ],
+    [
+      386,
+      620
+    ],
+    [
+      382,
+      630
+    ],
+    [
+      377,
+      650
+    ],
+    [
+      376,
+      675
+    ]
+  ],
+  "to": "leg_front"
+}

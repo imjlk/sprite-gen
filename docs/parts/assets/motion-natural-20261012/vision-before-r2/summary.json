@@ -1,0 +1,203 @@
+{
+  "art_approved": false,
+  "frames_expected": 21,
+  "frames_observed": 21,
+  "pages": [
+    {
+      "error": null,
+      "required_poses": [
+        "run.00",
+        "run.01",
+        "run.02",
+        "run.03",
+        "run.04",
+        "run.05"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "run.12",
+        "run.13",
+        "run.14",
+        "run.15",
+        "run.16",
+        "run.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.06",
+        "walk.07",
+        "walk.08",
+        "walk.09",
+        "walk.10",
+        "walk.11"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.24",
+        "walk.25",
+        "walk.26"
+      ],
+      "status": "completed"
+    }
+  ],
+  "poses": {
+    "run.00": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.01": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.02": {
+      "hair": "pass",
+      "issues": [
+        "Crossing footwear obscures the rear sock bridge and shoe collar; their attachment cannot be fully verified.",
+        "A grey notch beside the raised/front cream collar is visible. Comparison with the crossed bare ankles does not clearly establish whether it is outside the calf or interrupts the ankle bridge."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "run.03": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.04": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.05": {
+      "hair": "pass",
+      "issues": [
+        "Back shoe appears compressed through the forefoot, tapering to a very narrow cream tip with little navy toe-box volume compared with run.04. Rotation explains its orientation, but consistent product volume is doubtful."
+      ],
+      "shoes": "rework",
+      "socks": "pass"
+    },
+    "run.12": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.13": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.14": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.15": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.16": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "run.17": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.06": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.07": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.08": {
+      "hair": "pass",
+      "issues": [
+        "The lifted ankle has a small grey wedge inside the cream-edged shoe opening, in a region occupied by continuous tissue in the bare counterpart. The sock-to-ankle bridge appears incomplete.",
+        "The lifted shoe's collar attachment is uncertain at that gap."
+      ],
+      "shoes": "unknown",
+      "socks": "rework"
+    },
+    "walk.09": {
+      "hair": "pass",
+      "issues": [
+        "The lifted ankle shows a conspicuous grey triangular gap between the calf and shoe opening. The corresponding bare ankle is filled, indicating missing body or sock coverage.",
+        "The lifted sneaker's forefoot and cream toe appear pinched compared with walk.08; the calf entry also lacks a visibly continuous ankle bridge."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "walk.10": {
+      "hair": "pass",
+      "issues": [
+        "The lifted ankle repeats the grey gap seen in walk.09 where the bare counterpart has continuous ankle tissue.",
+        "The lifted sneaker retains the narrow, tapered forefoot and questionable calf entry seen in walk.09."
+      ],
+      "shoes": "rework",
+      "socks": "rework"
+    },
+    "walk.11": {
+      "hair": "pass",
+      "issues": [
+        "A possible grey gap remains at the lifted shoe's cream-edged opening, but the overlapping limb prevents a confident ownership assessment.",
+        "Crossing limbs and cropped enlargements obscure portions of the rear shoe and sock; their complete attachment and collar continuity cannot be verified."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "walk.24": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.25": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.26": {
+      "hair": "pass",
+      "issues": [
+        "Below the diagonal rear sock cuff, a grey triangular opening appears where the corresponding bare crop contains skin. The ankle bridge is interrupted; this is a body-ownership/compositing defect.",
+        "The rear shoe is mostly occluded, leaving a narrow navy fragment. Its complete toe, sole and collar attachment cannot be verified. The visible front shoe maintains the preceding frames' design."
+      ],
+      "shoes": "unknown",
+      "socks": "rework"
+    }
+  },
+  "release_ready": false,
+  "scope": "actual still-frame attachment and between-frame appearance observations; no timing, gait or human approval",
+  "status": "completed"
+}

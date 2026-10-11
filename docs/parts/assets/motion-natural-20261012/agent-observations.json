@@ -1,0 +1,88 @@
+{
+  "reviewer": "Codex primary agent, actual image inspection",
+  "body": [
+    {
+      "digest": "3ef8e62d7d7d13d9b2c8b8332a9e675b21f8d87a9d436f3e1ec10154167790af",
+      "id": "full-motion.body"
+    }
+  ],
+  "motion": {
+    "digest": "ee22479feda0ce26c4ab926a733a47e6bd0d3d7d21773b46b20af8c5059c86ec",
+    "id": "full-motion.walk-run"
+  },
+  "appearance": {
+    "digest": "bf99bc763f2c2312cecce43d3335d69be0fed6f78f2cd8432431b59e0828da10",
+    "id": "full-motion.example"
+  },
+  "frames_observed": [
+    "walk.00",
+    "walk.01",
+    "walk.02",
+    "walk.03",
+    "walk.04",
+    "walk.05",
+    "walk.06",
+    "walk.07",
+    "walk.08",
+    "walk.09",
+    "walk.10",
+    "walk.11",
+    "walk.12",
+    "walk.13",
+    "walk.14",
+    "walk.15",
+    "walk.16",
+    "walk.17",
+    "walk.18",
+    "walk.19",
+    "walk.20",
+    "walk.21",
+    "walk.22",
+    "walk.23",
+    "walk.24",
+    "walk.25",
+    "walk.26",
+    "run.00",
+    "run.01",
+    "run.02",
+    "run.03",
+    "run.04",
+    "run.05",
+    "run.06",
+    "run.07",
+    "run.08",
+    "run.09",
+    "run.10",
+    "run.11",
+    "run.12",
+    "run.13",
+    "run.14",
+    "run.15",
+    "run.16",
+    "run.17",
+    "run.18",
+    "run.19",
+    "run.20",
+    "run.21",
+    "run.22"
+  ],
+  "inputs": {
+    "walk-all-frames.png": "422eaab2905a92c85c86fca8907166b6758f7d4cbe21c61dfd918026f61cb7d6",
+    "run-all-frames.png": "f8a9795e85c4ef472c399522f9de5987456dabb6552279c4f16edb77b0fbaef3",
+    "walk-audit-00.png": "f1cac8fb02d99d2207a62c3a7bb94e4434a45a5f01b80e4f059455bc83c8b842",
+    "walk-audit-06.png": "ec45a2242f25ea9451b405f0e67b97bb70abefaeed7f4c39c4b1d7795985537d",
+    "walk-audit-12.png": "997118d628dfbe88b9f080a13d11536fdaf26c2f278727324d7343e2a6a1e57b",
+    "walk-audit-24.png": "f47caf4714ccede54013f70a03cc1d6e9ccdaa3c73660e7b47f20a58c6509166",
+    "run-audit-00.png": "ae9b1093e9a1c668f4b17c8802ce75017f1fa128312b4ed67ef1d662f584cd30",
+    "run-audit-12.png": "c366fab3a147613dab1ece71365753bf167c688171b83ac37720a9064599f5f0"
+  },
+  "findings": [
+    "All 50 composed frames inspected on labeled contact sheets; critical ankle-entry frames also inspected on bare/actual enlarged pairs.",
+    "run.02/14 foreground and run.05/17 rear shoe entries now sit at the annotated ankle; product volume is rigid, not sheared.",
+    "walk.26 rear footwear is partly occluded by the foreground leg; its appearance is not an independently approved shoe drawing.",
+    "Source skin-colour flicker remains visible on hands in both motion takes; RGB-only correction is partial and does not certify art consistency."
+  ],
+  "art_approved": false,
+  "release_ready": false,
+  "scope": "still-frame attachment observations; native inspection recorded separately, motion inspected through browser playback"
+}

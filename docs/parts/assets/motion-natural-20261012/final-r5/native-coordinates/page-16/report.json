@@ -1,0 +1,14 @@
+{
+  "art_approved": false,
+  "error": "Expecting ',' delimiter: line 1 column 383 (char 382)",
+  "input_sha256": "9d4bb217a0338a55a5b09df42ea179e1750750861019d656ad7cdeed98872135",
+  "required_poses": [
+    "walk.16",
+    "walk.17"
+  ],
+  "source_frames": {
+    "walk.16": "6dd49f69bc5f8f660664adc69c88abb33bb5d2900f04caebffd74d7c0a39ee2c",
+    "walk.17": "0cd8bdb64f4f16b97e83ab54782e2d93867300e26f44958f6adc7b51ad28dd28"
+  },
+  "status": "failed"
+}

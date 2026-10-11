@@ -1,0 +1,54 @@
+{
+  "preserved_run_layers": {
+    "hair": 23,
+    "sneakers": 36,
+    "socks": 92
+  },
+  "changed_run_layers": {
+    "hair": [],
+    "sneakers": [
+      [
+        "run.02",
+        "shoe_front"
+      ],
+      [
+        "run.03",
+        "shoe_front"
+      ],
+      [
+        "run.04",
+        "shoe_back"
+      ],
+      [
+        "run.05",
+        "shoe_back"
+      ],
+      [
+        "run.06",
+        "shoe_back"
+      ],
+      [
+        "run.14",
+        "shoe_front"
+      ],
+      [
+        "run.15",
+        "shoe_front"
+      ],
+      [
+        "run.16",
+        "shoe_back"
+      ],
+      [
+        "run.17",
+        "shoe_back"
+      ],
+      [
+        "run.18",
+        "shoe_back"
+      ]
+    ],
+    "socks": []
+  },
+  "art_approved": false
+}

@@ -1,0 +1,26 @@
+{
+  "pose": "walk.26",
+  "from": "foot_back",
+  "to": "leg_front",
+  "source_sha256": "2f7081b0f47765da926c8f3ed847435dd53f4c23c5e768f77dde8f39932dc569",
+  "destination_sha256": "be22c4897ae161d1a6117cded0bfdc25ba77763d4f9b09f32aa2ed79a485baa1",
+  "boundary_points": [
+    [
+      351,
+      590
+    ],
+    [
+      346,
+      600
+    ],
+    [
+      343,
+      610
+    ],
+    [
+      341,
+      620
+    ]
+  ],
+  "cut_y": 621
+}

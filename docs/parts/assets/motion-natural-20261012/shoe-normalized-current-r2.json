@@ -1,0 +1,90 @@
+{
+  "art_approved": false,
+  "poses": [
+    {
+      "body": [
+        {
+          "digest": "fef5a128da379b98ee9f4106abe703fbfbac9a97d3db4a053ee96f954646d4a1",
+          "id": "full-motion.body"
+        }
+      ],
+      "input_sha256": "501dfa9e9ba7e63442e33340cb771b03184bb4634a5fa68481a7fe201a92d6d1",
+      "matrix": [
+        [
+          0.052529500064458425,
+          -0.04187134063109005,
+          226.52060752558435
+        ],
+        [
+          0.04187134063109005,
+          0.052529500064458425,
+          604.5781065320232
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "pose": "run.04",
+      "selected": "productions/full-motion.sneakers/candidates/run.04/b198262d0b7810f5d45201edd1f40ff8a64a366122a61eb7b984853f1f85fae0"
+    },
+    {
+      "body": [
+        {
+          "digest": "fef5a128da379b98ee9f4106abe703fbfbac9a97d3db4a053ee96f954646d4a1",
+          "id": "full-motion.body"
+        }
+      ],
+      "input_sha256": "4d8127ec35ef6ad917fc839db6eb1c7b6496d62bc51e3ae6c9425559e0b4e51c",
+      "matrix": [
+        [
+          0.035994313508679376,
+          -0.05671831219549477,
+          220.08495220306816
+        ],
+        [
+          0.05671831219549477,
+          0.035994313508679376,
+          601.9799826830456
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "pose": "run.05",
+      "selected": "productions/full-motion.sneakers/candidates/run.05/0c8e934c0cb4e6128efca36427b570a59932d0653f0222a32fdb96d7110b9dca"
+    },
+    {
+      "body": [
+        {
+          "digest": "fef5a128da379b98ee9f4106abe703fbfbac9a97d3db4a053ee96f954646d4a1",
+          "id": "full-motion.body"
+        }
+      ],
+      "input_sha256": "a77d3fb6f4a23855f5b8702ae7a90465a70f9364000475ad9c7475b56358acb9",
+      "matrix": [
+        [
+          0.03151577090430072,
+          -0.059323804055154306,
+          187.11917165185352
+        ],
+        [
+          0.059323804055154306,
+          0.03151577090430072,
+          589.5426351073565
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "pose": "run.06",
+      "selected": "productions/full-motion.sneakers/candidates/run.06/618659dc9c3b6da0220e86a3789cea84af84445c2265aa563528fc6eb51df808"
+    }
+  ],
+  "scope": "current independent shoe design, no body occlusion or ankle attachment approval"
+}

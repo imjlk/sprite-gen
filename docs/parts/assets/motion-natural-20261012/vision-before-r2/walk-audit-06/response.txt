@@ -1,0 +1,58 @@
+{
+  "poses": {
+    "walk.06": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.07": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.08": {
+      "hair": "pass",
+      "socks": "rework",
+      "shoes": "unknown",
+      "issues": [
+        "The lifted ankle has a small grey wedge inside the cream-edged shoe opening, in a region occupied by continuous tissue in the bare counterpart. The sock-to-ankle bridge appears incomplete.",
+        "The lifted shoe's collar attachment is uncertain at that gap."
+      ]
+    },
+    "walk.09": {
+      "hair": "pass",
+      "socks": "rework",
+      "shoes": "rework",
+      "issues": [
+        "The lifted ankle shows a conspicuous grey triangular gap between the calf and shoe opening. The corresponding bare ankle is filled, indicating missing body or sock coverage.",
+        "The lifted sneaker's forefoot and cream toe appear pinched compared with walk.08; the calf entry also lacks a visibly continuous ankle bridge."
+      ]
+    },
+    "walk.10": {
+      "hair": "pass",
+      "socks": "rework",
+      "shoes": "rework",
+      "issues": [
+        "The lifted ankle repeats the grey gap seen in walk.09 where the bare counterpart has continuous ankle tissue.",
+        "The lifted sneaker retains the narrow, tapered forefoot and questionable calf entry seen in walk.09."
+      ]
+    },
+    "walk.11": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "A possible grey gap remains at the lifted shoe's cream-edged opening, but the overlapping limb prevents a confident ownership assessment.",
+        "Crossing limbs and cropped enlargements obscure portions of the rear shoe and sock; their complete attachment and collar continuity cannot be verified."
+      ]
+    }
+  },
+  "limits": [
+    "The suspected small ankle gap in walk.08 and the overlapping entry in walk.11 are less certain than the visible gaps in walk.09 and walk.10.",
+    "Only walk.06 through walk.11 are shown; continuity outside this subset is unassessed.",
+    "Stills do not establish speed, gait quality, or motion stability.",
+    "These observational statuses do not grant curator approval or release."
+  ]
+}

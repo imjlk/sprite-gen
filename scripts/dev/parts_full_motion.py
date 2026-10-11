@@ -96,6 +96,10 @@ def foot_matrix(points, *, length=88):
     anchor=points.get('footwear_anchor','ankle')
     if anchor=='heel':
         matrix[:2,2]=heel-matrix[:2,:2]@np.array([120,795])
+        weight=points.get('footwear_entry_weight',0)
+        assert 0<=weight<=1,'entry fit weight must be bounded'
+        entry=matrix[:2,:2]@np.array([410,438])+matrix[:2,2]
+        matrix[:2,2]+=(ankle-entry)*weight
     else:
         matrix[:2,2]=ankle-matrix[:2,:2]@np.array([410,438])
     return matrix
@@ -139,7 +143,7 @@ def ear_registration(source_body, target_body, matrix):
     return result,{'offset':[dx,dy],'contour_overlap':round(score,4),'source_bound_search':True}
 
 
-def prepare_library(out, template, geometry):
+def prepare_library(out, template, geometry, *, preserve_library=None, preserve_states=(),preserve_poses=()):
     root=out/'library';assembly=root/'assembly.json'
     if root.exists():raise ValueError('use a fresh library')
     old,reg=w.read_workspace(template/'assembly.json');rig=reg[old['rig']['id']];top=reg[rig['topology']['id']]
@@ -206,6 +210,9 @@ def prepare_library(out, template, geometry):
         images={}
         for node in nodes:
             arr=np.where((owners==nodes.index(node))[...,None],pixels,0).astype('uint8')
+            if preserve_library and (state in preserve_states or pose in preserve_poses):
+                preserved=preserve_library/f'inputs/body-segments/{node}/{pose}.png'
+                arr=np.asarray(Image.open(preserved).convert('RGBA'))
             target=folder/node/(pose+'.png');target.parent.mkdir(parents=True,exist_ok=True);im=Image.fromarray(arr);im.save(target);images[node]=im
             maps[node][pose]={'image':{'file':target.relative_to(folder).as_posix(),'sha256':a.sha256(target.read_bytes())},'format':'full-canvas','pivot':[0,0],'target_socket':'root','visible':bool(im.getbbox())}
         merged=Image.new('RGBA',body.size)
@@ -213,6 +220,11 @@ def prepare_library(out, template, geometry):
         assert np.array_equal(np.asarray(merged),pixels),'ownership changed body RGBA'
         opaque=np.argwhere(pixels[...,3]>=128)[:,::-1]
         for side in ('back','front'):
+            for landmark in ('heel','toe'):
+                if values[side].get('foot_fully_occluded') or values[side].get(landmark+'_visible') is False:
+                    continue
+                point=np.array(values[side][landmark]);distance=float(np.sqrt(((opaque-point)**2).sum(-1).min()))
+                assert distance<=8,(pose,side,landmark,'outside actual source body',round(distance,3))
             if values[side].get('toe_visible') is False:
                 continue
             point=np.array(values[side]['toe']);nearest=opaque[((opaque-point)**2).sum(-1).argmin()]
@@ -226,7 +238,8 @@ def prepare_library(out, template, geometry):
     return {'assembly':str(assembly),'frames':len(proofs)}
 
 
-def author_parts(out, template, master, *, revision='parts-r1', only=None, defer_check=False):
+def author_parts(out, template, master, *, revision='parts-r1', only=None, defer_check=False,
+                 preserve_library=None, preserve_states=(),regenerate_poses=()):
     from scripts.dev.parts_sock_author import attached_cuff
     from sprite_gen.frames.parts_segments import _components
     assembly=out/'library/assembly.json';root,index,reg,_=parts_motion._active(assembly)
@@ -248,8 +261,19 @@ def author_parts(out, template, master, *, revision='parts-r1', only=None, defer
     for values in layers.values():
         for layer in values:layer.update(targets={},source_bounds={},guides={},landmarks={},masks={})
     files={};proof=[];checks={name:{} for name in layers}
+    preserved_states={name:p._load(preserve_library,'full-motion.'+name) for name in layers} if preserve_library else {}
     for pose,values in geom['poses'].items():
         state,n=pose.split('.');body=Image.open(root/f'inputs/body/{state}/{int(n):03}.png').convert('RGBA')
+        preserved={}
+        if preserve_library and state in preserve_states:
+            for name,old in preserved_states.items():
+                row=old['tracks']['main']['poses'][pose]
+                record=p.candidate_record(preserve_library,old,pose,row['selected'])
+                for layer in record['independent_layers']:
+                    ref=record['images'][layer['image_key']]
+                    im=Image.open(preserve_library/row['selected']/ref['file']).convert('RGBA')
+                    assert im.size==(768,768),(pose,layer['id'],'preserved candidate must use rig canvas')
+                    preserved[layer['id']]=im
         head=head_box(body);scale=(head[2]-head[0])/240
         matrix=np.eye(3);matrix[:2,:2]*=scale;matrix[:2,2]=np.array(head[:2])-np.array([257,101])*scale
         # One clean source palette/strand design; source-bound frame registration.
@@ -273,7 +297,9 @@ def author_parts(out, template, master, *, revision='parts-r1', only=None, defer
             # this calf's annotated corridor; connectivity alone cannot decide.
             corridor=np.clip(values_side.get('cuff_half_width',30)-np.abs(across),0,1)*np.clip(along+10,0,1)
             cuff=np.rint(leg.astype(float)*np.clip(28-along+.5,0,1)*local*corridor).astype('uint8')
-            if values_side.get('cuff_fully_occluded'):
+            if preserved and pose not in regenerate_poses:
+                cuff=np.asarray(preserved['sock_'+side+'_cuff'].getchannel('A'));dropped=0
+            elif values_side.get('cuff_fully_occluded'):
                 dropped=int((cuff>0).sum());cuff=np.zeros_like(cuff)
             else:
                 try:cuff,dropped=attached_cuff(cuff,foot)
@@ -301,6 +327,32 @@ def author_parts(out, template, master, *, revision='parts-r1', only=None, defer
             source_meta['feet'][side]={'matrix':matrix.tolist(),'cuff_detached_pixels_removed':dropped,
                 'ankle':values_side['ankle'],'calf_axis':axis.tolist(),'sock_cuff_pixels':int((cuff>=16).sum()),
                 'sock_foot_pixels':int((foot>=16).sum())}
+        if preserved:
+            if pose in regenerate_poses:
+                preserved={key:image for key,image in preserved.items() if key=='hair'}
+            for side in ('back','front'):
+                if values[side].get('footwear_entry_weight',0)>0:
+                    preserved.pop('shoe_'+side,None)
+            made.update(preserved)
+            source_meta['preserved_layers_pixel_identical']=sorted(preserved)
+            source_meta['preserved_library']=str(preserve_library)
+            for name,part_layers in layers.items():
+                old_layers={l['id']:l for l in preserved_states[name]['config']['independent']['layers']}
+                for layer in part_layers:
+                    old=old_layers[layer['id']]
+                    if pose in regenerate_poses and layer['id']!='hair':
+                        continue
+                    if layer['id'].startswith('shoe_') and values[layer['id'].split('_')[1]].get('footwear_entry_weight',0)>0:
+                        continue
+                    for key in ('straight_edges','landmarks'):
+                        if pose in old.get(key,{}):layer.setdefault(key,{})[pose]=deepcopy(old[key][pose])
+                    if pose in old.get('visible',{}):layer.setdefault('visible',{})[pose]=old['visible'][pose]
+                    mask=old.get('masks',{}).get(pose)
+                    if mask:
+                        mask=deepcopy(mask);file=folder/f'{pose}.{layer["id"]}.preserved-mask.png'
+                        shutil.copy2(preserve_library/mask['image']['file'],file)
+                        assert a.sha256(file.read_bytes())==mask['image']['sha256']
+                        mask['image']['file']=file.relative_to(root).as_posix();layer['masks'][pose]=mask
         for name,part_layers in layers.items():
             required=np.zeros((768,768),dtype='uint8');allowed=required.copy()
             for layer in part_layers:
@@ -521,11 +573,13 @@ if __name__ == '__main__':
     parser.add_argument('--engine-strip',action='store_true');parser.add_argument('--geometry',type=Path)
     parser.add_argument('--template',type=Path);parser.add_argument('--master',type=Path);parser.add_argument('--revision',default='parts-r1');parser.add_argument('--only',nargs='+')
     parser.add_argument('--defer-check',action='store_true')
+    parser.add_argument('--preserve-library',type=Path);parser.add_argument('--preserve-states',nargs='*',default=[])
+    parser.add_argument('--preserve-poses',nargs='*',default=[]);parser.add_argument('--regenerate-poses',nargs='*',default=[])
     parser.add_argument('--evidence',type=Path)
     args=parser.parse_args()
     if args.stage=='register':result=register_source(args.out,args.state,args.loop,engine_strip=args.engine_strip)
-    elif args.stage=='library':result=prepare_library(args.out,args.template,args.geometry)
-    elif args.stage=='parts':result=author_parts(args.out,args.template,args.master,revision=args.revision,only=args.only,defer_check=args.defer_check)
+    elif args.stage=='library':result=prepare_library(args.out,args.template,args.geometry,preserve_library=args.preserve_library,preserve_states=args.preserve_states,preserve_poses=args.preserve_poses)
+    elif args.stage=='parts':result=author_parts(args.out,args.template,args.master,revision=args.revision,only=args.only,defer_check=args.defer_check,preserve_library=args.preserve_library,preserve_states=args.preserve_states,regenerate_poses=args.regenerate_poses)
     elif args.stage=='build':result=validate_build(args.out)
     else:result=evidence(args.out,args.evidence)
     print(json.dumps(result))

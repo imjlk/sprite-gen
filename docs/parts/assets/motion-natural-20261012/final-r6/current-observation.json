@@ -1,0 +1,224 @@
+{
+  "art_approved": false,
+  "release_ready": false,
+  "all_50_frames_inspected_in_contact_sheets": true,
+  "unchanged_final_frames": [
+    "run.00",
+    "run.01",
+    "run.02",
+    "run.03",
+    "run.04",
+    "run.05",
+    "run.06",
+    "run.07",
+    "run.08",
+    "run.09",
+    "run.10",
+    "run.11",
+    "run.12",
+    "run.13",
+    "run.14",
+    "run.15",
+    "run.16",
+    "run.17",
+    "run.18",
+    "run.19",
+    "run.20",
+    "run.21",
+    "run.22",
+    "walk.00",
+    "walk.01",
+    "walk.02",
+    "walk.03",
+    "walk.04",
+    "walk.05",
+    "walk.06",
+    "walk.07",
+    "walk.08",
+    "walk.09",
+    "walk.10",
+    "walk.11",
+    "walk.13",
+    "walk.14",
+    "walk.15",
+    "walk.16",
+    "walk.17",
+    "walk.18",
+    "walk.19",
+    "walk.20",
+    "walk.21",
+    "walk.22",
+    "walk.23",
+    "walk.24",
+    "walk.25",
+    "walk.26"
+  ],
+  "changed_final_frames": [
+    "walk.12"
+  ],
+  "native_observations_reused_only_with_same_image_bytes": {
+    "walk.06": {
+      "image_sha256": "8fc56e38870f20d02f06ba25e36a21d31b05acf1756af2e923a67f0b614d21ae",
+      "observation": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "approval": "unverified"
+    },
+    "walk.07": {
+      "image_sha256": "70c325b88ab7a84159364a51e6a88b80f5e5e71e69f78d2c30091a1f82fdc3aa",
+      "observation": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "approval": "unverified"
+    },
+    "walk.08": {
+      "image_sha256": "1ecbd0ff50bf7e2f35151c4eba1b5253f560d88c99a37fa190b2950f414983e4",
+      "observation": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "approval": "unverified"
+    },
+    "walk.09": {
+      "image_sha256": "1e0198a21cffad3abd6e681efe422fdf109be6e125a117bf22255263c4aef0d8",
+      "observation": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "approval": "unverified"
+    },
+    "walk.10": {
+      "image_sha256": "a8a40c1722c393de2f2f512cef91915666c5aa1588718af5b7684a39b1bd015f",
+      "observation": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "approval": "unverified"
+    },
+    "walk.11": {
+      "image_sha256": "82fb3b5f3b8b7ed358321d44f50386cde5dcaa19cea8e98416c4b74ed5a93d78",
+      "observation": {
+        "hair": "pass",
+        "issues": [
+          "The raised shoe overlaps the supporting ankle and shoe heel. The supporting sock's inner bridge and shoe collar are partly concealed, preventing a complete attachment check.",
+          "The exposed shoe toes and soles retain the neighboring frames' navy/cream design; no definite deformation is visible."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      },
+      "approval": "unverified"
+    },
+    "walk.13": {
+      "image_sha256": "dd0ae1e3e125bb5c97035837869729c702d583190d3a984ac5e08f92e2cb785e",
+      "observation": {
+        "hair": "pass",
+        "issues": [
+          "Possible gray interruption at the lifted front calf-to-sock junction: the bare ankle is continuous, while the composed junction beside the diagonal cream cuff is difficult to trace.",
+          "Visible shoe bodies retain toe and sole volume, but the lifted shoe's calf entry remains uncertain at this junction."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      },
+      "approval": "unverified"
+    },
+    "walk.14": {
+      "image_sha256": "d02a9477e09602d727a38664e7211ee0e18d7cc255bb3d4ac11a8a1703b7cfbd",
+      "observation": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "approval": "unverified"
+    },
+    "walk.15": {
+      "image_sha256": "f083ea519095e5d22733d194e75a17db0ae58c42151a8820d88d41dfed655aa6",
+      "observation": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "approval": "unverified"
+    },
+    "walk.16": {
+      "image_sha256": "aa88ea17652b25d2dd1cd7ea162a8d243ed10d344699b34aab6d2e8a1db23266",
+      "observation": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "approval": "unverified"
+    },
+    "walk.17": {
+      "image_sha256": "4706c7cbc49dc75deb782901de6bdccaff25b36d848b94e374115523874d6fb8",
+      "observation": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "approval": "unverified"
+    },
+    "walk.24": {
+      "image_sha256": "1ab563e21df6264e776eb9dc4450d529639678df308af666e171e98b6f63ec2f",
+      "observation": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "approval": "unverified"
+    },
+    "walk.25": {
+      "image_sha256": "7584643e65c1e871c35333c4b982ecf60411b1477cb5c97ce6e88bf0d733968e",
+      "observation": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "approval": "unverified"
+    },
+    "walk.26": {
+      "image_sha256": "f6da45dd905e7b0d264fa0ce2458140e164e5edffbda69fa7a5d406acfa9afd9",
+      "observation": {
+        "hair": "pass",
+        "issues": [
+          "The rear shoe appears as a narrow strip behind the foreground calf. Occlusion prevents confirming its full volume, collar entry and sock-to-ankle bridge; the bare rear ankle is also substantially obscured.",
+          "The visible front sock and shoe remain attached and retain the neighboring frames' cuff fit, navy/cream design and sole thickness."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      },
+      "approval": "unverified"
+    }
+  },
+  "walk.12": {
+    "image_sha256": "3940b54ef40d4746bedfb292e9adb9147dd1c096d48b5505d14b37de231df4ff",
+    "observer": "Codex direct image inspection",
+    "observation": "Before/after enlarged cuff and final viewer: pointed projections replaced by straight diagonal cuff; overlapping rear attachment remains unverified.",
+    "approval": "unverified"
+  },
+  "runtime_ui": {
+    "walk_wrap": "27/27 -> 1/27",
+    "run_wrap": "23/23 -> 1/23",
+    "shoe_toggle_preserves_frame": "1/27 -> 1/27",
+    "review_position_x_enabled": true,
+    "console_errors": []
+  },
+  "runtime_appearance_clips_baked": 0
+}

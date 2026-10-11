@@ -1,0 +1,92 @@
+{
+  "old_walk": {
+    "frames": 20,
+    "distinct_rgba_frames": 20,
+    "jolt": {
+      "index": 1.04,
+      "hair_index": 1.0167,
+      "step_max_over_median": 1.9006,
+      "head": {
+        "body_height_px": 607,
+        "x": {
+          "step_max_pct": 0.659,
+          "step_median_pct": 0.255,
+          "max_over_median": 2.585,
+          "range_pct": 2.757,
+          "worst_into_frame": 16
+        },
+        "y": {
+          "step_max_pct": 0.824,
+          "step_median_pct": 0.165,
+          "max_over_median": 5.0,
+          "range_pct": 2.471,
+          "worst_into_frame": 17
+        }
+      },
+      "seam_pop": {
+        "body_height_px": 607,
+        "reference": 10.0,
+        "x": {
+          "wrap_pct": 0.116,
+          "step_median_pct": 0.255,
+          "wrap_over_median": 0.456,
+          "wrap_is_largest": false
+        },
+        "y": {
+          "wrap_pct": 0.165,
+          "step_median_pct": 0.165,
+          "wrap_over_median": 1.0,
+          "wrap_is_largest": false
+        },
+        "pop": 0.0,
+        "pops": false
+      }
+    },
+    "scope": "registered common body alpha; no aesthetics approval"
+  },
+  "new_walk": {
+    "frames": 27,
+    "distinct_rgba_frames": 27,
+    "jolt": {
+      "index": 0.0834,
+      "hair_index": 0.1962,
+      "step_max_over_median": 1.2799,
+      "head": {
+        "body_height_px": 614,
+        "x": {
+          "step_max_pct": 0.562,
+          "step_median_pct": 0.247,
+          "max_over_median": 2.274,
+          "range_pct": 2.024,
+          "worst_into_frame": 21
+        },
+        "y": {
+          "step_max_pct": 1.629,
+          "step_median_pct": 0.977,
+          "max_over_median": 1.667,
+          "range_pct": 6.189,
+          "worst_into_frame": 25
+        }
+      },
+      "seam_pop": {
+        "body_height_px": 614,
+        "reference": 10.0,
+        "x": {
+          "wrap_pct": 0.207,
+          "step_median_pct": 0.247,
+          "wrap_over_median": 0.839,
+          "wrap_is_largest": false
+        },
+        "y": {
+          "wrap_pct": 0.489,
+          "step_median_pct": 0.977,
+          "wrap_over_median": 0.5,
+          "wrap_is_largest": false
+        },
+        "pop": 0.0,
+        "pops": false
+      }
+    },
+    "scope": "registered common body alpha; no aesthetics approval"
+  }
+}

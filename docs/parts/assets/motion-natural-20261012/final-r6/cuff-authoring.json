@@ -1,0 +1,1006 @@
+{
+  "art_approved": false,
+  "method": "retain existing cuffs; add own source-foot and optional distal-calf interface strictly above rigid shoe sole",
+  "poses": [
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.00",
+      "required": "inputs/cuff-top-r6/run.00.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "bda1e3fbfa869c393b4aa072af5396bac7fce2a9a78f46cc576a9c3a859782ba",
+      "source_leg_sha256": "6b9d533d0861b589bc7442632fdf4e3b599dc74ecb6a3a0b5bdbe4957ac72294"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.00",
+      "required": "inputs/cuff-top-r6/run.00.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "bf4bf032c715b2fa8172f0cf22e1081b0326e43f378e2448e345827d21195eae",
+      "source_leg_sha256": "6d3cf51c754ad0b9b1fd917e15f37278a70ab1c4376d26db86c21478efa19bd5"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.01",
+      "required": "inputs/cuff-top-r6/run.01.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "a7b5d55867f52aa1f2e4f4a753de10d2d694b9c13a4baf34b7d43670e80dee77",
+      "source_leg_sha256": "2d11d925e8c812bfda54ab649ae1e81dc19aae0f7712921fdfa24f1e537222de"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.01",
+      "required": "inputs/cuff-top-r6/run.01.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "4c52d7cc326db10f9cbfde856448bcf9d8622126ad1f68d2043943e16ccb0dd1",
+      "source_leg_sha256": "ba6c9d8ae288d8e4dbf0a2a89f49c6ba489b22c5ad3ac673e8a56719fea963de"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.02",
+      "required": "inputs/cuff-top-r6/run.02.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "1693bfa6fdddf26159c33aab013cf28df52299c08b02efb81a5d312a7cba70c3",
+      "source_leg_sha256": "1a5efb2828e9ecaa1c9b359dd09b1d98b6500962ab4246fed01766984ff7ee4d"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.02",
+      "required": "inputs/cuff-top-r6/run.02.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "5a8eecabba0f58679da93d695dc0f52a01563bc67ce6d53a31223fe156b238ec",
+      "source_leg_sha256": "986fd6e8e5f7ec638a07f279bba6bfe70c2769d1b8addc4229ef937d2a9a27b0"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.03",
+      "required": "inputs/cuff-top-r6/run.03.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "ca2549c7bbdebbaa635a9cc0590bb0906d6c42f05269c9aa28b2a05aa424055c",
+      "source_leg_sha256": "aff079d768127e038cb79247cab0744e43d42a61587be72a1e0e0fa72a85836b"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.03",
+      "required": "inputs/cuff-top-r6/run.03.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "4f8dbc27056e11c00f92f2fe64f17a93832d3e28b43351ec659bd9d32ca0327d",
+      "source_leg_sha256": "d85dc60a1c0f898c65d8f54edeadeccaa8e5cb687152376762944bb62cec336e"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.04",
+      "required": "inputs/cuff-top-r6/run.04.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "d7e7fc11cec72bc2605be153ea741155c44720b29df63769bdf27a3942660ab0",
+      "source_leg_sha256": "1249098e2185bca756dd9df2a100a74ec3e4acb5a2dc54755250e0dc9ecb720e"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.04",
+      "required": "inputs/cuff-top-r6/run.04.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "10559aeb3b54519dfe3a46aca6b39e3ce4d06d55023a3f2339c69cce45f007a2",
+      "source_leg_sha256": "1c51b1992c19e5e830afaff1c717fc6d5f20ba55ebe7fa02b4a5e774b91b4ea7"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.05",
+      "required": "inputs/cuff-top-r6/run.05.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "06ae4b8ed6bc8b90ef7f9ff4f982c217bd2cd3f1f2d24726398ec8a231681e9b",
+      "source_leg_sha256": "2703f5fc40593e7f61012dd49d96832178903abefb772b7c3a677aca2f19a407"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.05",
+      "required": "inputs/cuff-top-r6/run.05.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "4d20f0bc63a35ecad9190628445efedeb1022d539ad578e63b3124fcc9c30c24",
+      "source_leg_sha256": "96543987aa852f116e9ded7880373dc456b815fd21fc66f0c2d262bd08eccff0"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.06",
+      "required": "inputs/cuff-top-r6/run.06.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "3b2861e280ea91a71867557819b29af4389af380bbf2f4b4a25bc84eaef45523",
+      "source_leg_sha256": "de2376147107738f6afeb3e1b22bf2e095c1e93a32fad4857251673519c0229a"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.06",
+      "required": "inputs/cuff-top-r6/run.06.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "840942a14b5846c1b53d455a68e1f92f270f18e40f4447eb13ac5134d7f1e38a",
+      "source_leg_sha256": "ec098d1cda47eb1bfe268cbc8ca86c58bf5fb60573943b2237c624916d9b1fa9"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.07",
+      "required": "inputs/cuff-top-r6/run.07.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "b1e7dd9fcd441e8df834b8fe346ba59ce088b42f87db6ceaa8aeac91a1404eb9",
+      "source_leg_sha256": "6603c9aff4b8941e8358aebc0c0db8a8108391516dbf8de3350addb2d66f4a05"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.07",
+      "required": "inputs/cuff-top-r6/run.07.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "94d8285d4f3f554f7153c285f87c043776d768d8f20c477cbeb39f6f5002c882",
+      "source_leg_sha256": "596bd4670b3e21315018a61bfab49f03ee7002a2dade56370e4bb887513af49e"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.08",
+      "required": "inputs/cuff-top-r6/run.08.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "60efd2eda0a75d81d5b93d68b5268ff9576a4e24b6aa500be181f1363322157c",
+      "source_leg_sha256": "8a732b35209461fe485c225c0659a483613799a6921ecd25618f1e9763af9771"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.08",
+      "required": "inputs/cuff-top-r6/run.08.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "f55214528f4651a1145d135f6d3c06d994da6097e2ffc828d770985c12ed01cf",
+      "source_leg_sha256": "a527aabf40a04f6301dce76ee34c5e7549b869a46fa09479ec4a4e9873356815"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.09",
+      "required": "inputs/cuff-top-r6/run.09.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "29cec488de3c53d728303ef5da6663fc6e722a148a8ab25c298d9704cc6b74a2",
+      "source_leg_sha256": "350552316e013fccd9256843f8e8cf488be20aaabb35c11cf380a88c92e9cbc7"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.09",
+      "required": "inputs/cuff-top-r6/run.09.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "6042f40d89241979123972fbef1cfac9e0e7aa68e1b00da58170327e19c67719",
+      "source_leg_sha256": "84394af06f21daabead9f87cc7ae3addb4a944f6fb6d0c13a0a37f0a4ded37aa"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.10",
+      "required": "inputs/cuff-top-r6/run.10.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "7d2ee42ca90a225ebbae5c10629dab395c8194e919e441ee4a397739797ca695",
+      "source_leg_sha256": "3d6d2695937966b1c1df2e32b7d53840f83addcf7b1e5b7e27f92a6a937dce42"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.10",
+      "required": "inputs/cuff-top-r6/run.10.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "2fea1f5b1270e470129b2f6cfade57696134d300cd1a214e2692d20e7c6b1e66",
+      "source_leg_sha256": "6d0c865685781a37855500784e5d9a39bfdea65dd7371a921d3b961789868bc7"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.11",
+      "required": "inputs/cuff-top-r6/run.11.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "80a02471d4fc1cfa042b24c6a53d0414cfb81c879973d1f2024e461aedeb75dc",
+      "source_leg_sha256": "e2b6fb593ca7763f084230149378e3958933ab88633ef0ba82090b6b13263da6"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.11",
+      "required": "inputs/cuff-top-r6/run.11.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "14d12ae745f8829da56b44e46df811213d8e5c3e1d9ac083ebabded07984b325",
+      "source_leg_sha256": "838eb9ffe567462545d3f6e45992135c9e96b7a5a19268b9f545c69ea282ee19"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.12",
+      "required": "inputs/cuff-top-r6/run.12.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "973889b4d51b6db769472da73402e96dcc907b17369e1a2fbc49bbaea633450c",
+      "source_leg_sha256": "6c9c5b5cae29b95d44bd4a039ebd89bb0e3ef21e945466e84e7d60e19743aadd"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.12",
+      "required": "inputs/cuff-top-r6/run.12.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "082259321588ae8c623dd0da675d1e04973678b002865c99779877d902be1e93",
+      "source_leg_sha256": "6904d9ec39cf27850b2d09280e3bce2e82dc7342e07025a340257d92fe98b248"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.13",
+      "required": "inputs/cuff-top-r6/run.13.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "67bca3d46436e8d63741d92b611d7fd1ccda2d1c7a0b6e60f8202a503a691ea7",
+      "source_leg_sha256": "f2098d2e6891cc7f5f91b37d963363191c2dd90b82bd26eb8151a232ae957885"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.13",
+      "required": "inputs/cuff-top-r6/run.13.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "a0b06d242377188e135d92bf242e554020ab7f9b5a5bfebf537dd8f8ba920406",
+      "source_leg_sha256": "8eae03bc792c5d4c522fcdc3ce086472a617f596bcb934c80790a1776e9361fe"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.14",
+      "required": "inputs/cuff-top-r6/run.14.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "7acf11388201e2bcd081fadaf3a960499dc56fb84a565d03311561a00924251d",
+      "source_leg_sha256": "57f75b4ac51dd11636859a922b246d34a1eb50514aea1d3910d06dca1aed8eb4"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.14",
+      "required": "inputs/cuff-top-r6/run.14.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "7ed2b28fc61deaf753890a18d8d5a167a5e32f1d753b396b0bf4bc679c1f0a87",
+      "source_leg_sha256": "41831258e8e638a4eebce5763dd7dcb847d8d9d14407920db808bc51bc70d0c8"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.15",
+      "required": "inputs/cuff-top-r6/run.15.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "2148c6cd721ffff1479a90449e2055215e67af52227756b6b3cebaa6d7c39a2e",
+      "source_leg_sha256": "828f84e5a9cb237fa92920f84268d440c7ea73a62bfc9248659f3932febd2207"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.15",
+      "required": "inputs/cuff-top-r6/run.15.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "bf481062a9e01b95ead5e60764040f2c2ce680e2c85bd7713f97e1999205ce9f",
+      "source_leg_sha256": "9f5b5ab633022aef424e0b05d939be17eec6ae2e4135f5117498db04c7fc09cb"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.16",
+      "required": "inputs/cuff-top-r6/run.16.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "2cc421d049c37faac4c49616bab9239742060728237d85a6b3feb68294d6ce68",
+      "source_leg_sha256": "5efd2b1de3f61625da5a64e49fa88968bda385fd79eec2871ebd0586581c101f"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.16",
+      "required": "inputs/cuff-top-r6/run.16.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "2d1369fc7fa92c5fcf258e63b97d504267c4f827deb9331551d362b3278389f9",
+      "source_leg_sha256": "abce3dacc1bbd81cbe67a0b21bf4dfc4c6c6385ee955d8ec1f955993b797f7f6"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.17",
+      "required": "inputs/cuff-top-r6/run.17.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "67029d1173266c138377b350e9465fea8b3adc9bdf8bcbceae33aa2e1508bb3c",
+      "source_leg_sha256": "4b03cb36fd80c14b4ffe0fe5b8f972102c8494f1e68bd651684565a86d176095"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.17",
+      "required": "inputs/cuff-top-r6/run.17.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "0a3dc7b50fdabeaaa7ab6d8d7a585d6736aaab726624f003b27cf4f278a97205",
+      "source_leg_sha256": "67ac1d9513510f80b61894d6a0037ecfa8463688efd922bed1c7513fe08acbcb"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.18",
+      "required": "inputs/cuff-top-r6/run.18.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "be7362fdb31c7964dd4f69f226fba574a89b75a9673e69b44973b764b19d7354",
+      "source_leg_sha256": "c7182de140a1b44d2e9fca90e89ab0b6f06eda036d003fadc5683946a2fb97f1"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.18",
+      "required": "inputs/cuff-top-r6/run.18.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "484816d11cb3f206f98f85ba4bd032486ba0a9efd368bbe169f65e0cb8f714b7",
+      "source_leg_sha256": "0cec9138e855aded291ad0fe7154ec9aaf8f01cc1465146502f96cc21c46984e"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.19",
+      "required": "inputs/cuff-top-r6/run.19.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "0db3256fffed1cb66f8a8714302bfd0ca185692921ba23e1eecb739f31e76969",
+      "source_leg_sha256": "ed4e79b165161fead6c09a685f3fc7239584b0d5fb5223c076153c64ba1b3b24"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.19",
+      "required": "inputs/cuff-top-r6/run.19.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "db0ddba7fd02908f1e03b43731b5ac6c6ec8030b0b4acda1c161da8e36c92796",
+      "source_leg_sha256": "bf013627c9fceefaa69ad28f268143cb31cb28fa73da606be4207188a8f09311"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.20",
+      "required": "inputs/cuff-top-r6/run.20.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "5ee0039880c75c6c6acf06d148fba04d04914afb9cd1c1ea25fd585264909f30",
+      "source_leg_sha256": "b2c3cafaf01bdd69ff3b87ebc53d3e4cba19955da0818e2f41ee17b0081fbc33"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.20",
+      "required": "inputs/cuff-top-r6/run.20.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "067d182f5b392fa5ce483038ad3ff76ab7b439c9498a825cafc9de79648db762",
+      "source_leg_sha256": "108b6ef040133f1467da7cfba853f320bae3bc97be7a7e0fff47a629859b47fd"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.21",
+      "required": "inputs/cuff-top-r6/run.21.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "cc38c339500960c8ee0e944fa181acf6ff23082d8ea32531b1536e46e10a4606",
+      "source_leg_sha256": "7e62e76427148f9cf2e4911e75b42cfd16d1b7133ffa3d37e1be7b4da77edc93"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.21",
+      "required": "inputs/cuff-top-r6/run.21.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "2df46dcab9c2c66ddfd0b214d80f46206f9ca7c64d0eb204c086adbea579d865",
+      "source_leg_sha256": "92f7a5937665318b53bdb845db32d44290c3b12fbb03a3ddac713fb839f339d5"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.22",
+      "required": "inputs/cuff-top-r6/run.22.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "54bf27e2714ea97c43f65b23f8dc4374dc7cac733a7d53f2eb81eca1f0a62430",
+      "source_leg_sha256": "acdbdbb521edf59fdceb683654623a18250efa37529191e7a21dd1d68418cc19"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "run.22",
+      "required": "inputs/cuff-top-r6/run.22.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "1be3da57fe1bbc66a90b0f4a02cd28d2eb15a9e2406828e77366b14e36524eea",
+      "source_leg_sha256": "caa979d52c716aca9e129957f0a9cddcd885dd53147d7269d5ac0c1cf2272f25"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.00",
+      "required": "inputs/cuff-top-r6/walk.00.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "ae5a3f32134437107a25c369877cec05fbe9ae845b85385fd86b37281c36d651",
+      "source_leg_sha256": "6d545836b29b7400a661e75a8785f70d0c6a2562d064f30d4ebed80eb1b724ee"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.00",
+      "required": "inputs/cuff-top-r6/walk.00.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "d04744d0961101cfe330d1e0a7997e5858825eba10c5bac0a06808151058c142",
+      "source_leg_sha256": "eaa2491790442aea28817de384cd6f7f4b8c9f249b7b934f98c4606b4b5fabc8"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.01",
+      "required": "inputs/cuff-top-r6/walk.01.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "f131f23713d84e4ddcbfdaa14426e9ae3c62f25cf362ba274a6e37f80ea4286b",
+      "source_leg_sha256": "de39a174e0a3d89bfdbaf16772767cabc47cdea22a7a2c896e7b944deb44ab18"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.01",
+      "required": "inputs/cuff-top-r6/walk.01.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "6ee52e914b5432258948b509b838aee791ed8140fdf48cefee46951667f3a608",
+      "source_leg_sha256": "54396f8ec7b4ca2e8b6085c18dec0d0d05a21737588ef259184a4392d5dcf48a"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.02",
+      "required": "inputs/cuff-top-r6/walk.02.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "9b696ed83bfabe357f09cbf194387919244cfd8da838e49e0ba3b00e48157412",
+      "source_leg_sha256": "b36c28be1be4bfaeb17bd2c31405e2bbab85dd2478884786e18253f6ef82eac1"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.02",
+      "required": "inputs/cuff-top-r6/walk.02.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "2a6741e557c74b4f448e51f9d266a4384d7c2eb21c129b537baa0de64bb9dc00",
+      "source_leg_sha256": "550dcccfdbc593c99f88a51135d46f9a46a8c2d5d9b0f62f124b4711510fbd5a"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.03",
+      "required": "inputs/cuff-top-r6/walk.03.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "01593f77d30612d5897ac0a1befbc04e8d577f884ccc5c71fcf3d3adfc7f03ec",
+      "source_leg_sha256": "812804e5a6ea16143e0c4029f89939dfdaea7f7aa29cd522a9423e6d166cb057"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.03",
+      "required": "inputs/cuff-top-r6/walk.03.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "640fdb2f33d94c5a506ffc451b3c696e7e56d71001c2697507bae1eaeb9c98b8",
+      "source_leg_sha256": "5d0bfa8a00cbd1dcfc6e37b79331569fe26b7907b05cada69ebb30b8dc00d088"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.04",
+      "required": "inputs/cuff-top-r6/walk.04.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "7a14258214f43113a0b12ca15682f0504e4c5c731bb89ba4362f558f57b450ef",
+      "source_leg_sha256": "80245a281310a8f19a648332124780cbefb308fedfb65fae28cc256f681f52f3"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.04",
+      "required": "inputs/cuff-top-r6/walk.04.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "95703600d0f5da7ae041b7c275188ad7930491c6975096b7bbb7fef1b78b859a",
+      "source_leg_sha256": "8dff0157982cd1cec7dfc04cc8b38bc3331cf30b281432da96e09f524eb7a814"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.05",
+      "required": "inputs/cuff-top-r6/walk.05.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "9bf961bcfe3a57752d7c7a4249c7a41b942f938b28c67eb05d58b67a151cf38a",
+      "source_leg_sha256": "ccec7fff6c29fe75d8ca8431630465442c93f1bc76c4c90dbb384e306d435cbd"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.05",
+      "required": "inputs/cuff-top-r6/walk.05.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "cead36cfe0cbf73460f6bea68cdbe5b251a0401269f584b72ca8b9330a83e8b7",
+      "source_leg_sha256": "7917c31d56cc00006b47e8401e027ab94bde5fe47ceec443b45d6f9defe83824"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.06",
+      "required": "inputs/cuff-top-r6/walk.06.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "086dfbd1a6873962509e9827a937ab2f1bccfb785423647aaa0aff3d3d1f8ca3",
+      "source_leg_sha256": "f51251d5c85974a389e1557cdc6db0269a96a97cb4aa47c072dde12f8bcac2e2"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.06",
+      "required": "inputs/cuff-top-r6/walk.06.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "f3a90d5c4282707f14e1c41e8fbadff726f9be1fedfe7141fbe4030f6005416a",
+      "source_leg_sha256": "771c6ebf97ab5f3a2efd211e038af0a532ef34d35e580843701b113aaf6f9a1b"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.07",
+      "required": "inputs/cuff-top-r6/walk.07.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "0dede22dd86309a43550e371374ce5c3b3e4f5b2f7cbef12b1cc0bf2f96c7512",
+      "source_leg_sha256": "a602b44f57f720e87ed038dd86f333f757e454585a1773b6d88d44cec8e6d258"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.07",
+      "required": "inputs/cuff-top-r6/walk.07.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "67a5e39de423552ab25f7ab26395c4ffe8e1ac9d580fb83048d4dece92832f0a",
+      "source_leg_sha256": "14d2f23b2156deffed9ed908c084b1d456d872a38cdd33d2db8d4a8103439c0a"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.08",
+      "required": "inputs/cuff-top-r6/walk.08.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "1de440f7d39d55c57b00fbef442284ca8ed5bd6d43f448efa09eccafafd9386a",
+      "source_leg_sha256": "8e725c512118dc61cfa8963e132596daa279686385f75875dbf6924d58601644"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.08",
+      "required": "inputs/cuff-top-r6/walk.08.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "2c0585aaaee5089144e6518d084056d3af3530ab3533bb3af1d9a424bb399b1e",
+      "source_leg_sha256": "6b05edf7b88842d1ff8da2c480952daa080663452f6a53ee54867496e2a96d88"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.09",
+      "required": "inputs/cuff-top-r6/walk.09.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "1441c60dca9dc8159a841fba4aac748f67256d585e895d47bcc68256f9dce72e",
+      "source_leg_sha256": "ad48cc58fa8ac316ec486ffe6e2d5d55660118c5a072f3ea5e8eb5c22c3f971d"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.09",
+      "required": "inputs/cuff-top-r6/walk.09.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "48fc3ebc08c3a5df2cf0f17e7ef74c93f88ae61b6334662344f59d43a1bc3880",
+      "source_leg_sha256": "56d1d7e7e182f962d3578f0f74023506b0a415a0c1093acce94a3713196f7ff1"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.10",
+      "required": "inputs/cuff-top-r6/walk.10.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "c7006d90ecbda34b5f8136d0b2f50340ab1e4ef364d6a0f08f401238f24afa1f",
+      "source_leg_sha256": "7e96165671a294e313cb724fb850e1f51553b75f12ce92ed293883b9669488a6"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.10",
+      "required": "inputs/cuff-top-r6/walk.10.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "393ee6604dc8eb2996d55c5e8856425fff601191a9b34d19a2535e63bd3659bc",
+      "source_leg_sha256": "2846c0d3696feb58e983d985217c0c45a160855864c49e3bb708b54ed58dac6b"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.11",
+      "required": "inputs/cuff-top-r6/walk.11.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "13853eabfe5975be01f67fcaae7301eeae07a25c449833942289712981abcd2e",
+      "source_leg_sha256": "3685c225b426e68b8db19749afafa1c2e9a623702908d03f809acb1ba52742f5"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.11",
+      "required": "inputs/cuff-top-r6/walk.11.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "3dba195c91111ddc53744ac270acdbe8839450cb47401d6019b59bfba3ea1ffc",
+      "source_leg_sha256": "85843f08b30b96f89e21f089310a127126b1fa3b2fbc1def87a075f9973fea59"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.12",
+      "required": "inputs/cuff-top-r6/walk.12.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "259b85acebade274220d17cd64b392ea1002ce05fdf1c688f8056a101ce93eac",
+      "source_leg_sha256": "7c6d6802447cb8e554758341f4c47f200fb0f77ce0a3d4586b3d2854d7054245"
+    },
+    {
+      "added_pixels": 92,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.12",
+      "required": "inputs/cuff-top-r6/walk.12.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "675ae54d20ed08249b4e6913e0a8775664892de08753d1c7a0ae98ea48ec6109",
+      "source_leg_sha256": "8fae854273f445a6b0d655d1f59146ef2626e49752c6e704a97ead9c3290b713"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.13",
+      "required": "inputs/cuff-top-r6/walk.13.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "dec5bb3900202900b4385b14c7903d746266adfd0d93a4b9cf015176fbccd2ce",
+      "source_leg_sha256": "e12e41364fd88627dd63a7ed054026033b8830a8f582d69627483757c3c18687"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.13",
+      "required": "inputs/cuff-top-r6/walk.13.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "50569008375934092e27d788146c14dc91103aa633d4a7b9f6da7fa88dec6cd7",
+      "source_leg_sha256": "ce59731e695dc9ebdff9bffbab1abd0f5e05eccf8a0d32ef51bf2306102b2c3a"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.14",
+      "required": "inputs/cuff-top-r6/walk.14.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "bcfbf9bc3d1e1cd628603ef0362538153d02627098bfff1d6faa75fd3206b0cc",
+      "source_leg_sha256": "9bddd57bb496bb98025c0c32300cfe247b042394c2a827b3028cf20396ded923"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.14",
+      "required": "inputs/cuff-top-r6/walk.14.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "99de18558c71a13aaf51986fa77ec3b203d5291eb71527abd0f935ef5715e566",
+      "source_leg_sha256": "ce81bb9015dbedae5b6709798955f09d4cd968c70a8dbe92a50302068574c90d"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.15",
+      "required": "inputs/cuff-top-r6/walk.15.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "bd36b92dee350c065d22cc09f9f4e06682186d8d6e12938d3fec1dea4a1b6ee7",
+      "source_leg_sha256": "44022fd5bf0d1c1035065615ea77a6032efa254103db1ddae3feaed10e04fde7"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.15",
+      "required": "inputs/cuff-top-r6/walk.15.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "d1bfe79c779447d1ddd6e33968d0a6a90e892296227b2e62bb8c961f1c869910",
+      "source_leg_sha256": "259b52847d6fad35afde9723565ae1e4b245a6084d56eca5038ba724b90a1d0e"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.16",
+      "required": "inputs/cuff-top-r6/walk.16.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "8b31909a6059830bfffdbc2a7b199533b0a017b1774baedf96fa8c919cca6e0e",
+      "source_leg_sha256": "4ddd75378412b61138be59eba3dc02ce546a49b6cb543472c49d2b1793cfbe7c"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.16",
+      "required": "inputs/cuff-top-r6/walk.16.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "9a4e3c2bc5fbfa50d9d4687cbc9ae4f6371639fe116afac924644a64fe295131",
+      "source_leg_sha256": "bc6b0c1635e1744289ae55aef0b9f81436dc2ecc3715c64588754495a05d2df8"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.17",
+      "required": "inputs/cuff-top-r6/walk.17.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "39b0efb217e0c9bbcff9bda9f2d0259d5bcb9a5f31a4549bc8533f59097f6929",
+      "source_leg_sha256": "998e4e3f963243d1d67dcfcac4e960942105a4fdbbb0a3e57f373772b26ea66e"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.17",
+      "required": "inputs/cuff-top-r6/walk.17.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "43f4e315c0a74cc97041678496d7eb0b28d0781a6c3757b96a3acef0c3c984c1",
+      "source_leg_sha256": "439678f01925dd772845627a14f3deb092263bc852288dab3bf3f18f9209a5cf"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.18",
+      "required": "inputs/cuff-top-r6/walk.18.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "0fbc41a1caf6ed4e05475e5702db2a6287d0c95f535625999703d1062f114faa",
+      "source_leg_sha256": "e741d14d93bb3a81e0316cf674e3039249139a98cab0b6a2f89cc95c717886db"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.18",
+      "required": "inputs/cuff-top-r6/walk.18.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "41fd5ee5f40d31e589663d89d2126a84c736581493193f5e51cd293c4e175d05",
+      "source_leg_sha256": "9b8748dddcbeea645507f190835e6e22af378b9f1d297f33dc7878cab8c5a1b6"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.19",
+      "required": "inputs/cuff-top-r6/walk.19.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "5930e913e33147d3ebe89fd6f3e616f4a0825d2789ac2c3031ecb57427d3cdae",
+      "source_leg_sha256": "d60c5f9e61b89bc02506f504ef064cfe56f96a8b38cab226395529b2c0aa6af4"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.19",
+      "required": "inputs/cuff-top-r6/walk.19.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "831e1bc040ca64268c6179b325a00a99b214a31d7f275db7a6017154c688a5e8",
+      "source_leg_sha256": "2a9b8558f1168615f7ff98d963ac3851ca9b2a9cd04c63f9d78b83136ccbcd95"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.20",
+      "required": "inputs/cuff-top-r6/walk.20.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "71e304c05159e19c778524c34253d7939fdf65fc69f1cde5c0f158ffe41c55ba",
+      "source_leg_sha256": "c10febd3435290995e8a559711fd40d3e4b67fc5ff8b8623faa14639dc64b304"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.20",
+      "required": "inputs/cuff-top-r6/walk.20.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "1c74a9a8d0192faf951dbcdf5533ffa816dd7185c1d9bb394c74756c8792b41d",
+      "source_leg_sha256": "6add8a10c67b426a013d55bb5146055c0a404101f4065fb9385dc5e86d1204f3"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.21",
+      "required": "inputs/cuff-top-r6/walk.21.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "dc2abedab9f29e707654f98346663262bf144ad5d54f50019c374c28914f45d7",
+      "source_leg_sha256": "978412e131f7e1c0b8c0f26bfd0d85018f06ce47d667dc37e415bdff3ef9dc4e"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.21",
+      "required": "inputs/cuff-top-r6/walk.21.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "deafb12d8d3b1cb0a760eacc4dc7aeae1bd94578ca47b3a743106a2f9d2f76ed",
+      "source_leg_sha256": "e308ac90b18be6f306a4945449be19f609bdc47de0c0a06d1aa8d2ea1c56fdc7"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.22",
+      "required": "inputs/cuff-top-r6/walk.22.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "e87d8204916524758073fb35270847332cf2518e363af67806944e8e86a03add",
+      "source_leg_sha256": "0ed23f5985bc46ebf664b255e95b2401f4d3ec32f6a2354fd6c1f046b40b1e13"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.22",
+      "required": "inputs/cuff-top-r6/walk.22.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "15eb9600167a21f7d35ba9ef5b0a5e5294679595b3c4e8b1e2369622bb3f4dbb",
+      "source_leg_sha256": "a9727e443ab2dd99c2a137bf618909a0523df92ece1d1602b412e316ac6ea3d2"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.23",
+      "required": "inputs/cuff-top-r6/walk.23.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "9194080dce8c85bc0c72daaedcca1684c642efde2efb5b630e768f5a112dde13",
+      "source_leg_sha256": "f06eb36d53250cc3cb73a8c47182ea45e14f21ba5d5a49899607fdafe1772fb0"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.23",
+      "required": "inputs/cuff-top-r6/walk.23.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "5d4d914b79e54395df7e6486a0878e6b4de7d46368391ec222bb11b552ab0eb7",
+      "source_leg_sha256": "712f95577d6d361f0572c47c1d01aaf9609d258774a8901f07a1bf45dc12555d"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.24",
+      "required": "inputs/cuff-top-r6/walk.24.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "f1fff94c3dbe47b1af5b73d5fcca609334a314029d56704da06d744f731e112e",
+      "source_leg_sha256": "f05e506447a3a8cc2f8e982d8ca06e9070dbfc70d71c2773d684237cc6235d08"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.24",
+      "required": "inputs/cuff-top-r6/walk.24.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "7370f3fb2110810711b833e0cd5644fb143c3549113cf9033e4dddde7dfe6956",
+      "source_leg_sha256": "5a196bcbbe483a2c5edc690cd6cb17984a1ea2d61056b286adff9d71583f3cfc"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.25",
+      "required": "inputs/cuff-top-r6/walk.25.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "15e220581f5ffee923f54e16b778003a58a9b4b3c65b1f7633ac5d202e341e38",
+      "source_leg_sha256": "ee20c5f4ff182a72197f089eed97877e59e08e3d6f3e896b4869d81fcc74fbcc"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.25",
+      "required": "inputs/cuff-top-r6/walk.25.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "7835ac7f3fe7e086fb1397793341410739db36e0426b970ae4e8065235829b69",
+      "source_leg_sha256": "384892141fdc4283a4a6ba879fa5386600aa55d21f65866504ec10adf56f5aa0"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.26",
+      "required": "inputs/cuff-top-r6/walk.26.back.ankle-required.png",
+      "side": "back",
+      "source_foot_sha256": "96ee9108dc8e1165964726dce7d324f30bbdb20d39175ecc7f65fdb706229695",
+      "source_leg_sha256": "5ffca3a88f17967c270397b36b7c8f1f6481d76cf165e8b8a1ce28d0f00e26d4"
+    },
+    {
+      "added_pixels": 0,
+      "hidden": false,
+      "include_lower_leg": true,
+      "pose": "walk.26",
+      "required": "inputs/cuff-top-r6/walk.26.front.ankle-required.png",
+      "side": "front",
+      "source_foot_sha256": "b4f96b421337566f2437095b89ea19d45cd2f8ea9c958d6367ca7869c2199223",
+      "source_leg_sha256": "fdbbbf838594d1da2b1c8b5aefac17cfdbad527ff200c1bf2d006ac2200357d5"
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "art_approved": false,
+  "frames_expected": 15,
+  "frames_observed": 15,
+  "pages": [
+    {
+      "error": null,
+      "required_poses": [
+        "walk.06",
+        "walk.07",
+        "walk.08",
+        "walk.09",
+        "walk.10",
+        "walk.11"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.12",
+        "walk.13",
+        "walk.14",
+        "walk.15",
+        "walk.16",
+        "walk.17"
+      ],
+      "status": "completed"
+    },
+    {
+      "error": null,
+      "required_poses": [
+        "walk.24",
+        "walk.25",
+        "walk.26"
+      ],
+      "status": "completed"
+    }
+  ],
+  "poses": {
+    "walk.06": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.07": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.08": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.09": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.10": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.11": {
+      "hair": "pass",
+      "issues": [
+        "The raised shoe overlaps the supporting ankle and shoe heel. The supporting sock's inner bridge and shoe collar are partly concealed, preventing a complete attachment check.",
+        "The exposed shoe toes and soles retain the neighboring frames' navy/cream design; no definite deformation is visible."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "walk.12": {
+      "hair": "pass",
+      "issues": [
+        "Lifted front sock has a jagged cuff with pointed cream projections; it does not cleanly follow the smooth calf contour in the bare enlargement.",
+        "The overlapping ankles obscure part of the rear shoe collar and calf entry. Visible navy uppers and cream soles retain volume, but attachment cannot be fully verified."
+      ],
+      "shoes": "unknown",
+      "socks": "rework"
+    },
+    "walk.13": {
+      "hair": "pass",
+      "issues": [
+        "Possible gray interruption at the lifted front calf-to-sock junction: the bare ankle is continuous, while the composed junction beside the diagonal cream cuff is difficult to trace.",
+        "Visible shoe bodies retain toe and sole volume, but the lifted shoe's calf entry remains uncertain at this junction."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    },
+    "walk.14": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.15": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.16": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.17": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.24": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.25": {
+      "hair": "pass",
+      "issues": [],
+      "shoes": "pass",
+      "socks": "pass"
+    },
+    "walk.26": {
+      "hair": "pass",
+      "issues": [
+        "The rear shoe appears as a narrow strip behind the foreground calf. Occlusion prevents confirming its full volume, collar entry and sock-to-ankle bridge; the bare rear ankle is also substantially obscured.",
+        "The visible front sock and shoe remain attached and retain the neighboring frames' cuff fit, navy/cream design and sole thickness."
+      ],
+      "shoes": "unknown",
+      "socks": "unknown"
+    }
+  },
+  "release_ready": false,
+  "scope": "actual still-frame attachment and between-frame appearance observations; no timing, gait or human approval",
+  "status": "completed"
+}

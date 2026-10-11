@@ -1,0 +1,94 @@
+{
+  "answer": {
+    "limits": [
+      "Pass judgments cover visible surfaces. Overlapping limbs obscure some ankle and collar contours, particularly in run.13 and run.14; hidden portions remain unverified.",
+      "The enlarged crops truncate upper calves and portions of the opposite limb. Crop boundaries alone do not establish missing anatomy or cutoff footwear.",
+      "Only run.12–run.17 are shown. These stills cannot establish speed, gait quality, or continuity beyond this subset.",
+      "This observational audit grants no curator approval or release authorization."
+    ],
+    "poses": {
+      "run.12": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.13": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.14": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.15": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.16": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.17": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "bf99bc763f2c2312cecce43d3335d69be0fed6f78f2cd8432431b59e0828da10",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "3ef8e62d7d7d13d9b2c8b8332a9e675b21f8d87a9d436f3e1ec10154167790af",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "c366fab3a147613dab1ece71365753bf167c688171b83ac37720a9064599f5f0",
+  "motion": {
+    "digest": "ee22479feda0ce26c4ab926a733a47e6bd0d3d7d21773b46b20af8c5059c86ec",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "367ec8fd77ca184bbd31fa5d9bf8553575c391f5f8435041f33565baefc0a1ad",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "91693f47dad3388a58a2c797c5d6a92a0c8e37c1a23a80f1253624caa83c45ce",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "ca96253e87acf537e52e380e1c0b467daf3853d3cc8d5a4c00e757503ed9955c",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "aca83e2f4506e2c1f75751c7cfb93809247d69105f087a04422b020654b44e38",
+  "release_ready": false,
+  "required_poses": [
+    "run.12",
+    "run.13",
+    "run.14",
+    "run.15",
+    "run.16",
+    "run.17"
+  ],
+  "response_sha256": "f7fb00e096951f5c9a429deb1ffbade84435f060eae79b50eac5a8638d3b03d3",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

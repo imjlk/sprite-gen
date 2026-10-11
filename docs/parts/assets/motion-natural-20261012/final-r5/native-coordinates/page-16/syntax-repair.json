@@ -1,0 +1,6 @@
+{
+  "art_approved": false,
+  "original_sha256": "c7eacc80bc5f324e44143038e5c4f0fe72f3c6ee581a08e3c69021c46c028cc7",
+  "original_status": "failed JSON parse, retained unchanged",
+  "repair": "append one missing terminal object brace only; no numeric or semantic edits"
+}

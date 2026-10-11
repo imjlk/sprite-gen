@@ -1,0 +1,106 @@
+{
+  "answer": {
+    "limits": [
+      "The suspected small ankle gap in walk.08 and the overlapping entry in walk.11 are less certain than the visible gaps in walk.09 and walk.10.",
+      "Only walk.06 through walk.11 are shown; continuity outside this subset is unassessed.",
+      "Stills do not establish speed, gait quality, or motion stability.",
+      "These observational statuses do not grant curator approval or release."
+    ],
+    "poses": {
+      "walk.06": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.07": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.08": {
+        "hair": "pass",
+        "issues": [
+          "The lifted ankle has a small grey wedge inside the cream-edged shoe opening, in a region occupied by continuous tissue in the bare counterpart. The sock-to-ankle bridge appears incomplete.",
+          "The lifted shoe's collar attachment is uncertain at that gap."
+        ],
+        "shoes": "unknown",
+        "socks": "rework"
+      },
+      "walk.09": {
+        "hair": "pass",
+        "issues": [
+          "The lifted ankle shows a conspicuous grey triangular gap between the calf and shoe opening. The corresponding bare ankle is filled, indicating missing body or sock coverage.",
+          "The lifted sneaker's forefoot and cream toe appear pinched compared with walk.08; the calf entry also lacks a visibly continuous ankle bridge."
+        ],
+        "shoes": "rework",
+        "socks": "rework"
+      },
+      "walk.10": {
+        "hair": "pass",
+        "issues": [
+          "The lifted ankle repeats the grey gap seen in walk.09 where the bare counterpart has continuous ankle tissue.",
+          "The lifted sneaker retains the narrow, tapered forefoot and questionable calf entry seen in walk.09."
+        ],
+        "shoes": "rework",
+        "socks": "rework"
+      },
+      "walk.11": {
+        "hair": "pass",
+        "issues": [
+          "A possible grey gap remains at the lifted shoe's cream-edged opening, but the overlapping limb prevents a confident ownership assessment.",
+          "Crossing limbs and cropped enlargements obscure portions of the rear shoe and sock; their complete attachment and collar continuity cannot be verified."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "bf99bc763f2c2312cecce43d3335d69be0fed6f78f2cd8432431b59e0828da10",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "3ef8e62d7d7d13d9b2c8b8332a9e675b21f8d87a9d436f3e1ec10154167790af",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "ec45a2242f25ea9451b405f0e67b97bb70abefaeed7f4c39c4b1d7795985537d",
+  "motion": {
+    "digest": "ee22479feda0ce26c4ab926a733a47e6bd0d3d7d21773b46b20af8c5059c86ec",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "367ec8fd77ca184bbd31fa5d9bf8553575c391f5f8435041f33565baefc0a1ad",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "91693f47dad3388a58a2c797c5d6a92a0c8e37c1a23a80f1253624caa83c45ce",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "ca96253e87acf537e52e380e1c0b467daf3853d3cc8d5a4c00e757503ed9955c",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "1787d6c98b09fcc63803e7933a41df4afc058f3cb095746507939b4f391177ac",
+  "release_ready": false,
+  "required_poses": [
+    "walk.06",
+    "walk.07",
+    "walk.08",
+    "walk.09",
+    "walk.10",
+    "walk.11"
+  ],
+  "response_sha256": "0a219341d6d5fd5a98a75a6350db99c2afaee2525b06d62c2f6a31527a9da528",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

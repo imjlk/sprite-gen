@@ -1,0 +1,1 @@
+{"poses":{"walk.16":{"front":{"knee":[444,548],"ankle":[435,637],"heel":[410,659],"toe":[489,665]},"back":{"knee":[332,587],"ankle":[308,666],"heel":[278,688],"toe":[351,708]},"uncertainties":[]},"walk.17":{"front":{"knee":[438,558],"ankle":[450,646],"heel":[428,676],"toe":[507,667]},"back":{"knee":[321,591],"ankle":[295,666],"heel":[264,687],"toe":[333,709]},"uncertainties":[]}}

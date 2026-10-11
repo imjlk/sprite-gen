@@ -1,0 +1,99 @@
+{
+  "answer": {
+    "poses": {
+      "walk.14": {
+        "back": {
+          "ankle": [
+            405,
+            620
+          ],
+          "heel": [
+            374,
+            628
+          ],
+          "knee": [
+            454,
+            532
+          ],
+          "toe": [
+            440,
+            663
+          ]
+        },
+        "front": {
+          "ankle": [
+            332,
+            665
+          ],
+          "heel": [
+            309,
+            695
+          ],
+          "knee": [
+            351,
+            578
+          ],
+          "toe": [
+            388,
+            707
+          ]
+        },
+        "uncertainties": []
+      },
+      "walk.15": {
+        "back": {
+          "ankle": [
+            421,
+            625
+          ],
+          "heel": [
+            390,
+            636
+          ],
+          "knee": [
+            454,
+            533
+          ],
+          "toe": [
+            467,
+            659
+          ]
+        },
+        "front": {
+          "ankle": [
+            324,
+            664
+          ],
+          "heel": [
+            294,
+            694
+          ],
+          "knee": [
+            336,
+            578
+          ],
+          "toe": [
+            371,
+            707
+          ]
+        },
+        "uncertainties": []
+      }
+    }
+  },
+  "art_approved": false,
+  "input_sha256": "82d1ba60d31a8235f120a0a264e42264e6f4263f1e02672f915c8af7e69668f0",
+  "required_poses": [
+    "walk.14",
+    "walk.15"
+  ],
+  "source_frames": {
+    "walk.14": "e664ef0b317183a157f5baaf393439f8bcf60e8f94308b5c874a1e295f776db5",
+    "walk.15": "ec6a3d5817990e5d171b8dc0b232bf6df65e5727bd7c99e8eb8ae16f5f4973dc"
+  },
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

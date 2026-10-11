@@ -1,0 +1,96 @@
+{
+  "run_body_node_pngs_pixel_identical": 161,
+  "changed_shoe_layers": 10,
+  "interfaces": [
+    {
+      "pose": "run.02",
+      "side": "front",
+      "entry_weight": 1,
+      "before_px": 23.671,
+      "after_px": 0.0,
+      "rotation_and_scale_equal": true
+    },
+    {
+      "pose": "run.03",
+      "side": "front",
+      "entry_weight": 0.35,
+      "before_px": 13.0785,
+      "after_px": 8.501,
+      "rotation_and_scale_equal": true
+    },
+    {
+      "pose": "run.04",
+      "side": "back",
+      "entry_weight": 0.35,
+      "before_px": 10.4807,
+      "after_px": 6.8124,
+      "rotation_and_scale_equal": true
+    },
+    {
+      "pose": "run.05",
+      "side": "back",
+      "entry_weight": 1,
+      "before_px": 15.3029,
+      "after_px": 0.0,
+      "rotation_and_scale_equal": true
+    },
+    {
+      "pose": "run.06",
+      "side": "back",
+      "entry_weight": 0.35,
+      "before_px": 9.5404,
+      "after_px": 6.2013,
+      "rotation_and_scale_equal": true
+    },
+    {
+      "pose": "run.14",
+      "side": "front",
+      "entry_weight": 1,
+      "before_px": 28.1115,
+      "after_px": 0.0,
+      "rotation_and_scale_equal": true
+    },
+    {
+      "pose": "run.15",
+      "side": "front",
+      "entry_weight": 0.35,
+      "before_px": 7.2117,
+      "after_px": 4.6876,
+      "rotation_and_scale_equal": true
+    },
+    {
+      "pose": "run.16",
+      "side": "back",
+      "entry_weight": 0.35,
+      "before_px": 6.5039,
+      "after_px": 4.2275,
+      "rotation_and_scale_equal": true
+    },
+    {
+      "pose": "run.17",
+      "side": "back",
+      "entry_weight": 1,
+      "before_px": 12.524,
+      "after_px": 0.0,
+      "rotation_and_scale_equal": true
+    },
+    {
+      "pose": "run.18",
+      "side": "back",
+      "entry_weight": 0.35,
+      "before_px": 5.8324,
+      "after_px": 3.7911,
+      "rotation_and_scale_equal": true
+    }
+  ],
+  "art_approved": false,
+  "run_body_nodes": [
+    "foot_back",
+    "foot_front",
+    "head",
+    "leg_back",
+    "leg_front",
+    "root",
+    "torso"
+  ]
+}

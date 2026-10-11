@@ -1,0 +1,99 @@
+{
+  "answer": {
+    "limits": [
+      "The obscured rear collar and ankle connection in run.02 remain unverified; visible toe and sole portions do not establish complete attachment.",
+      "The run.05 back-shoe volume concern is visible but partly confounded by its rotated view.",
+      "Only these six labeled frames were inspected. Stills cannot establish speed, gait quality or continuity across the complete sequence.",
+      "These observational labels do not grant curator approval or release authorization."
+    ],
+    "poses": {
+      "run.00": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.01": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.02": {
+        "hair": "pass",
+        "issues": [
+          "Crossing footwear obscures the rear sock bridge and shoe collar; their attachment cannot be fully verified.",
+          "A grey notch beside the raised/front cream collar is visible. Comparison with the crossed bare ankles does not clearly establish whether it is outside the calf or interrupts the ankle bridge."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      },
+      "run.03": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.04": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.05": {
+        "hair": "pass",
+        "issues": [
+          "Back shoe appears compressed through the forefoot, tapering to a very narrow cream tip with little navy toe-box volume compared with run.04. Rotation explains its orientation, but consistent product volume is doubtful."
+        ],
+        "shoes": "rework",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "bf99bc763f2c2312cecce43d3335d69be0fed6f78f2cd8432431b59e0828da10",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "3ef8e62d7d7d13d9b2c8b8332a9e675b21f8d87a9d436f3e1ec10154167790af",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "ae9b1093e9a1c668f4b17c8802ce75017f1fa128312b4ed67ef1d662f584cd30",
+  "motion": {
+    "digest": "ee22479feda0ce26c4ab926a733a47e6bd0d3d7d21773b46b20af8c5059c86ec",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "367ec8fd77ca184bbd31fa5d9bf8553575c391f5f8435041f33565baefc0a1ad",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "91693f47dad3388a58a2c797c5d6a92a0c8e37c1a23a80f1253624caa83c45ce",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "ca96253e87acf537e52e380e1c0b467daf3853d3cc8d5a4c00e757503ed9955c",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "da40c6695bc2ecdcc6d8eeeff615e0673346eccb17b0b413e74c7359dac8e050",
+  "release_ready": false,
+  "required_poses": [
+    "run.00",
+    "run.01",
+    "run.02",
+    "run.03",
+    "run.04",
+    "run.05"
+  ],
+  "response_sha256": "c4953cccc6bcc4034389388069584f18a4b1653e17f7714a63ee3049035cd6d1",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

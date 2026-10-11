@@ -1,0 +1,27 @@
+{
+  "art_approved": false,
+  "body_rgba_identical": true,
+  "boundary_points": [
+    [
+      351,
+      590
+    ],
+    [
+      346,
+      600
+    ],
+    [
+      343,
+      610
+    ],
+    [
+      341,
+      620
+    ]
+  ],
+  "from": "foot_back",
+  "method": "foreground calf contour in actual source; rear foot keeps only its visible bulb",
+  "moved_pixels": 821,
+  "pose": "walk.26",
+  "to": "leg_front"
+}

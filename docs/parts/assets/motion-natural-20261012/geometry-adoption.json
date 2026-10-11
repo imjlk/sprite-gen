@@ -1,0 +1,33 @@
+{
+  "agent_annotation_file": "geometry-agent-grid-r1.json",
+  "agent_annotation_sha256": "a7beed11d41d8cd42b0482bd98536ffcce2ea8b3f9e630af67b08aba7d512ff1",
+  "approved": false,
+  "native_pages": [
+    {
+      "file": "assets/parts-motion-natural-20261012/geometry-vision-r1/page-00/report.json",
+      "sha256": "85c641feb265e53169cdb2223895ce3a03edac4e4de7b346b9be04a6a266ea3c",
+      "status": "completed"
+    },
+    {
+      "file": "assets/parts-motion-natural-20261012/geometry-vision-r1/page-06/report.json",
+      "sha256": "9d1ec3597bd0e87f1617b42483df79be4a5c366b294db3d66241caecc975821d",
+      "status": "failed"
+    },
+    {
+      "file": "assets/parts-motion-natural-20261012/geometry-vision-r1/page-12/report.json",
+      "sha256": "5f693ec116a2d6ddf48b196babf86907caf74792ccbdaf78521a11a3b8fcc6db",
+      "status": "failed"
+    },
+    {
+      "file": "assets/parts-motion-natural-20261012/geometry-vision-r1/page-18/report.json",
+      "sha256": "0eae9c49c1166c4e646b4cd3e431c6887b07543a0ed69ecf8bd40bd6f3ad5be5",
+      "status": "completed"
+    },
+    {
+      "file": "assets/parts-motion-natural-20261012/geometry-vision-r1/page-24/report.json",
+      "sha256": "9b4120105e9cce914477fd75c57f84df605f227670d577dee181192c3ee26ca3",
+      "status": "completed"
+    }
+  ],
+  "source_alpha_preserved_by_rgb_patch": true
+}
