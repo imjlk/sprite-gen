@@ -66,6 +66,57 @@ popover, click two cards to pick the pair (blue border), choose GPT/Grok, Genera
 While the follow-up full-batch re-extraction runs, `/api/run` reports busy (503)
 instead of a manifest-consistency error.
 
+## Cross-state in-betweens (`sprite-gen tween`)
+
+`interpolate` works inside one state's primary strip, one frame per call. Chained states
+(`attack -> idle` recovery, `skill -> idle`, an `idle -> attack` wind-up) need frames between
+two frames of *different* states, often several, and often across a large height change.
+`sprite-gen tween` (`sprite_gen/effects/tween.py`, `scripts/tween_frames.py`) covers that.
+
+Clips that a video source films whole keep their existing paths: `video-stop` for walk/run
+stops, one-shot cuts for recovery inside one clip, `video --image --last-frame` for pinned
+clips. `tween` is for joining frames that already exist.
+
+```bash
+# run mode: endpoints from two states of a run (negative index = from the end)
+sprite-gen tween <run> --from attack:-1 --to idle:0 --n 2 [--label attack_recover]
+# file mode: endpoints from PNGs, or from cells of a sheet
+sprite-gen tween --from-file a.png --to-file sheet.png:0 --cell 448x448 --n 3 --out-dir out/
+```
+
+| flag | meaning |
+| --- | --- |
+| `--n` | in-betweens to draw, 1..6 (default 2), all in one call |
+| `--method strip` (default) | one keyframe strip: slot 1 = A, last slot = B, grey onion-skin ghosts of both in the slots between; the provider fills every slot at once |
+| `--method video` | films a first-last clip through the existing `video --image --last-frame` path (grok login), samples N+2 frames evenly, same checks |
+| `--provider codex\|grok` | the one provider used; no retry on another (No silent fallback). Default `grok` |
+| `--anchor foot\|bottom-center` | horizontal anchor: mean x of the bottom 6 % of opaque rows, or bbox centre |
+| `--margin` | safe margin around each slot as a fraction of the figure size (default 0.12) |
+| `--min-endpoint-iou` | refusal threshold for drawn endpoints (default 0.6) |
+| `--ref` | extra identity reference for the strip method (repeatable) |
+| `--description` | character text for the prompt (run mode reads `character.description`) |
+
+What it does with the result:
+
+- **Endpoint check.** The drawn slot 1 and last slot are compared with A and B (silhouette
+  IoU at the keyframes' height, foot anchors aligned), and the scale the provider drew the
+  two ends at must agree (`scale_agree >= 0.85`). Under either threshold the command exits
+  non-zero with the numbers and keeps `keyframe-strip.png`, `raw.png` and `tween.json`.
+- **Scale and feet.** The provider often draws the strip at its own scale. The scale measured
+  on the two drawn ends is interpolated across the slots, each in-between is rescaled by it and
+  clamped to the A..B height range, and its foot anchor goes on the shared ground row.
+- **Slicing by component.** The drawn strip is cut by connected component (each goes to the
+  slot holding its centre), not by fixed columns, so a long prop reaching over a slot border
+  stays with its owner instead of showing up as a second prop next door. Components over a
+  border are reported as warnings, and so is a source cell whose content touches its own
+  cell border (a sign the source sheet was mis-sliced).
+- **Pose jump warning.** `step_iou` (consecutive silhouette IoU across A, tweens, B) under
+  0.45 is warned: usually a pose that is in neither keyframe.
+- **Record.** Run mode writes one take strip on the destination state
+  (`raw/<to>.takes/<label>.png`) with `takes[].transition = {from_state, from_index,
+  to_state, to_index, n, method, provider, endpoint_match}`; re-running a label overwrites it.
+  File mode writes `tween-<k>.png` (RGBA, one canvas size) and `tween.json`.
+
 ## Pipeline internals
 
 1. Chroma-remove the primary strip, extract components, tighten to solid bbox.
