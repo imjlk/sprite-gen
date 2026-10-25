@@ -49,6 +49,8 @@ ANCHORS = ("foot", "bottom-center")
 DEFAULT_MIN_ENDPOINT_IOU = 0.6
 DEFAULT_MARGIN = 0.12
 MIN_SCALE_AGREE = 0.85
+OUT_PAD = 8
+VIDEO_MIN_MARGIN = 0.3
 STEP_IOU_WARN = 0.45
 ALPHA_MIN = 24
 # Aspect ratios the image providers accept for a multi-ref edit; the strip is padded to the
@@ -390,6 +392,7 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
         warnings += crossings
         figures = [_largest_figure(c) for c in cells]
     else:
+        lay = plan_layout(a.image, b.image, n, max(margin, VIDEO_MIN_MARGIN), anchor)
         ends = []
         for tag, ep in (("first", a), ("last", b)):
             canvas = Image.new("RGBA", (lay.slot_w, lay.slot_h), chroma_rgb + (255,))
@@ -400,7 +403,12 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
         (video_runner or video_runner_default)(ends[0], ends[1], prompt, clip)
         frames = video_frames(clip, workdir)
         picks = [round(k * (len(frames) - 1) / (slots - 1)) for k in range(slots)]
-        figures = [_largest_figure(_keyed(frames[i].resize((lay.slot_w, lay.slot_h)), chroma_rgb)) for i in picks]
+        keyed = [_keyed(frames[i].resize((lay.slot_w, lay.slot_h)), chroma_rgb) for i in picks]
+        for k, im in enumerate(keyed):
+            if border_touches(im):
+                warnings.append(f"clip frame {picks[k]} touches the clip border ({', '.join(border_touches(im))}): "
+                                "the figure may be cut by the video frame")
+        figures = [_largest_figure(im) for im in keyed]
     # The model draws at its own scale (it often fills a padded strip). Measure that scale on the
     # two drawn endpoints, compare silhouettes at the keyframes' scale, and refuse when the two
     # ends disagree on scale: a strip whose ends were redrawn at different sizes has drifted.
@@ -433,16 +441,27 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
     figs = [_scaled(figures[k], h) for k, h in zip(range(1, slots - 1), heights)]
     # Grow the output canvas (same for every frame) when an in-between is drawn wider or taller
     # than the slot, so nothing is clipped; the foot anchor keeps its distance from the bottom.
-    left = max([lay.foot] + [round(foot_x(f, anchor)) for f in figs])
-    right = max([lay.slot_w - lay.foot] + [f.width - round(foot_x(f, anchor)) for f in figs])
-    top = max([lay.ground] + [f.height for f in figs])
-    out_lay = Layout(left + right, top + lay.slot_h - lay.ground, top, left, lay.heights, lay.aspect)
+    # The output canvas is the union of A, B and every in-between placed on one foot anchor,
+    # plus OUT_PAD on every side, so no frame of the set ever touches or leaves its canvas.
+    every = [a.image, *figs, b.image]
+    left = max(round(foot_x(f, anchor)) for f in every) + OUT_PAD
+    right = max(f.width - round(foot_x(f, anchor)) for f in every) + OUT_PAD
+    top = max(f.height for f in every) + OUT_PAD
+    out_lay = Layout(left + right, top + OUT_PAD, top, left, lay.heights, lay.aspect)
     outs = []
     for fig in figs:
         canvas = Image.new("RGBA", (out_lay.slot_w, out_lay.slot_h), (0, 0, 0, 0))
         place(canvas, fig, 0, out_lay, anchor)
         outs.append(canvas)
     lay = out_lay
+    ends = []
+    for fig in (a.image, b.image):
+        canvas = Image.new("RGBA", (out_lay.slot_w, out_lay.slot_h), (0, 0, 0, 0))
+        place(canvas, fig, 0, out_lay, anchor)
+        ends.append(canvas)
+    report["canvas"] = [out_lay.slot_w, out_lay.slot_h]
+    report["anchor_px"] = [out_lay.foot, out_lay.ground]
+    report["_ends"] = ends
     chain = [a.image] + [_tight(o) for o in outs] + [b.image]
     steps = [round(silhouette_iou(x, y, anchor), 3) for x, y in zip(chain, chain[1:])]
     report["step_iou"] = steps
@@ -450,7 +469,7 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
         warnings.append(f"pose jump: silhouette IoU between consecutive frames {steps} "
                         f"(lowest under {STEP_IOU_WARN}); check for poses that are in neither keyframe")
     report["foot_error_px"] = [round(abs(foot_x(_tight(o), anchor) + _tight_box(o)[0] - lay.foot), 1) for o in outs]
-    (workdir / "tween.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    (workdir / "tween.json").write_text(json.dumps({k: v for k, v in report.items() if k != "_ends"}, indent=2), encoding="utf-8")
     for w in warnings:
         print(f"[tween] warning: {w}")
     return outs, report
@@ -548,6 +567,7 @@ def _run(args: argparse.Namespace) -> int:
                                     anchor=args.anchor, margin=args.margin,
                                     min_endpoint_iou=args.min_endpoint_iou, description=desc, chroma=chroma,
                                     extra_refs=args.ref)
+        report.pop("_ends", None)
         meta = {"from_state": fs, "from_index": fi, "to_state": ts, "to_index": ti, "n": args.n,
                 "method": args.method, "provider": args.provider, "endpoint_match": report["endpoint_match"]}
         target = record_transition_take(args.run_dir, request, label, frames, meta)
@@ -563,6 +583,9 @@ def _run(args: argparse.Namespace) -> int:
     frames, report = make_tween(a, b, args.n, workdir=args.out_dir, method=args.method, provider=args.provider,
                                 anchor=args.anchor, margin=args.margin, min_endpoint_iou=args.min_endpoint_iou,
                                 description=args.description, chroma=(name, hexv, rgb), extra_refs=args.ref)
+    ends = report.pop("_ends")
+    ends[0].save(args.out_dir / "from.png")
+    ends[1].save(args.out_dir / "to.png")
     for k, f in enumerate(frames):
         f.save(args.out_dir / f"tween-{k}.png")
     report["frames"] = [f"tween-{k}.png" for k in range(len(frames))]
