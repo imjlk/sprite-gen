@@ -167,3 +167,31 @@ def test_mode_arguments_fail_loudly(tmp_path):
         tween.run()
     with pytest.raises(SystemExit, match="--n"):
         tween.make_tween(endpoint(figure(4, 4), "a"), endpoint(figure(4, 4), "b"), 0, workdir=tmp_path)
+
+
+@pytest.mark.parametrize("method", ["strip", "video"])
+def test_no_frame_touches_its_canvas_and_ends_share_it(tmp_path, monkeypatch, method):
+    """Regression: in-betweens drawn wider than the keyframes (a long blade reaching out) must not
+    be clipped; the canvas is the union of A, B and the in-betweens with padding on every side."""
+    a, b = figure(30, 60, sword=50), figure(24, 80)
+
+    def wide(strip, prompt, out, aspect):
+        fill_ghosts(strip, prompt, out, aspect)
+        im = Image.open(out).convert("RGB")
+        w = im.width // 4
+        for x in range(w + w // 2, w + w - 2):  # blade to the slot's right edge
+            for y in range(im.height // 2, im.height // 2 + 4):
+                im.putpixel((x, y), (200, 200, 210))
+        im.save(out)
+
+    calls = []
+    def runner(first, last, prompt, out):
+        calls.append((first, last)); out.write_bytes(b"mp4")
+    monkeypatch.setattr(tween, "video_frames", lambda clip, wd: [
+        Image.blend(Image.open(calls[0][0]).convert("RGB"), Image.open(calls[0][1]).convert("RGB"), t / 6)
+        for t in range(7)])
+    frames, report = tween.make_tween(endpoint(a, "a"), endpoint(b, "b"), 2, workdir=tmp_path, method=method,
+                                      generator=wide, video_runner=runner, min_endpoint_iou=0.3)
+    for f in [*frames, *report["_ends"]]:
+        assert f.size == tuple(report["canvas"])
+        assert tween.border_touches(f, band=tween.OUT_PAD - 1) == []
