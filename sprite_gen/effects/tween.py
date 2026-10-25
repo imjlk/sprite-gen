@@ -52,6 +52,9 @@ MIN_SCALE_AGREE = 0.85
 OUT_PAD = 8
 VIDEO_MIN_MARGIN = 0.3
 STEP_IOU_WARN = 0.45
+STEP_IOU_REFUSE = 0.3
+FRAME_SCALE_MIN = 0.85
+FRAME_SCALE_MAX = 1.18
 ALPHA_MIN = 24
 # Aspect ratios the image providers accept for a multi-ref edit; the strip is padded to the
 # nearest one at or below its natural ratio so slots are never squeezed.
@@ -278,31 +281,57 @@ def slice_slots(image: Image.Image, slots: int, chroma_rgb: tuple[int, int, int]
                 ) -> tuple[list[Image.Image], list[str]]:
     """Cut a drawn strip into slot figures by connected component, not by fixed columns.
 
-    Each component goes to the slot holding its centre, so a blade that reaches over a slot
-    border stays with the figure holding it instead of being cut off there and showing up as a
-    second blade in the neighbour slot. Components spanning a border are reported."""
+    Ownership rule: in each slot the largest component whose centre lies in it is that slot's
+    main figure. Every other component (a blade, a cape tip, a hand cut loose from the body)
+    goes to the main figure it is horizontally closest to, measured bbox to bbox, so a long
+    weapon reaching over a slot border stays with the figure holding it. Only ambiguous cases
+    are reported (a piece about equally close to two figures, or a main figure spilling more
+    than a quarter slot into its neighbour), as one summarised warning."""
     from sprite_gen.frames.extract import connected_components
     keyed = _keyed(image, chroma_rgb)
     arr = np.asarray(keyed)
     w = keyed.width / slots
     comps = [c for c in connected_components(keyed) if c["area"] >= 24]
-    masks = [np.zeros(keyed.width * keyed.height, bool) for _ in range(slots)]
-    warnings = []
+    mains: list[dict | None] = [None] * slots
     for c in comps:
         k = min(slots - 1, int(c["center_x"] // w))
-        masks[k][np.asarray(c["pixels"])] = True
+        if mains[k] is None or c["area"] > mains[k]["area"]:
+            mains[k] = c
+    if any(m is None for m in mains):
+        raise SystemExit("tween: a slot came back empty in the drawn strip")
+    masks = [np.zeros(keyed.width * keyed.height, bool) for _ in range(slots)]
+    ambiguous, spills = [], []
+    for k, m in enumerate(mains):
+        masks[k][np.asarray(m["pixels"])] = True
+        x0, _, x1, _ = m["bbox"]
+        over = max(k * w - x0, x1 - (k + 1) * w)
+        if over > w / 4:
+            spills.append(k + 1)
+    main_ids = {id(m) for m in mains}
+    for c in comps:
+        if id(c) in main_ids:
+            continue
         x0, _, x1, _ = c["bbox"]
-        if (x0 < k * w - 1 or x1 > (k + 1) * w + 1) and c["area"] >= 200:
-            warnings.append(f"slot {k + 1} content crosses the slot border "
-                            f"({'left' if x0 < k * w - 1 else 'right'}, {c['area']} px)")
+        dist = [max(0.0, m["bbox"][0] - x1, x0 - m["bbox"][2]) for m in mains]
+        order = sorted(range(slots), key=lambda j: (dist[j], abs(c["center_x"] - mains[j]["center_x"])))
+        k = order[0]
+        masks[k][np.asarray(c["pixels"])] = True
+        if len(order) > 1 and c["area"] >= 200 and dist[order[1]] - dist[k] < 4:
+            ambiguous.append(k + 1)
+    warnings = []
+    if spills or ambiguous:
+        parts = []
+        if spills:
+            parts.append(f"figure spills over a slot border in slot(s) {sorted(set(spills))}")
+        if ambiguous:
+            parts.append(f"a detached piece was about equally close to two figures, given to slot(s) "
+                         f"{sorted(set(ambiguous))}")
+        warnings.append("slot slicing: " + "; ".join(parts) + "; check those frames")
     out = []
     for m in masks:
         cell = arr.copy()
         cell[..., 3] = np.where(m.reshape(keyed.height, keyed.width), cell[..., 3], 0)
-        img = Image.fromarray(cell, "RGBA")
-        if img.getbbox() is None:
-            raise SystemExit("tween: a slot came back empty in the drawn strip")
-        out.append(img)
+        out.append(Image.fromarray(cell, "RGBA"))
     return out, warnings
 
 
@@ -359,6 +388,18 @@ def video_frames(clip: Path, workdir: Path) -> list[Image.Image]:
 
 # ---------------------------------------------------------------- main flow
 
+def _call_provider(workdir: Path, method: str, provider: str, n: int, a: Endpoint, b: Endpoint,
+                   call: Callable[[], None]) -> None:
+    """Run the provider call; on any failure (timeout, auth, crash) leave a tween.json saying so."""
+    try:
+        call()
+    except BaseException as exc:  # noqa: BLE001 - recorded, then re-raised unchanged
+        report = {"kind": "sprite-gen-tween", "method": method, "provider": provider, "n": n,
+                  "from": a.source, "to": b.source, "status": "error",
+                  "error": f"{type(exc).__name__}: {exc}"}
+        (workdir / "tween.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+        raise
+
 def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str = "strip",
                provider: str = "grok", anchor: str = "foot", margin: float = DEFAULT_MARGIN,
                min_endpoint_iou: float = DEFAULT_MIN_ENDPOINT_IOU, description: str | None = None,
@@ -385,7 +426,8 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
         strip = keyframe_strip(a.image, b.image, lay, n, anchor, chroma_rgb)
         strip.convert("RGB").save(workdir / "keyframe-strip.png")
         raw = workdir / "raw.png"
-        (generator or gen_generator(provider, extra_refs))(workdir / "keyframe-strip.png", prompt, raw, lay.aspect)
+        _call_provider(workdir, method, provider, n, a, b, lambda: (generator or gen_generator(provider, extra_refs))(
+            workdir / "keyframe-strip.png", prompt, raw, lay.aspect))
         with Image.open(raw) as im:
             drawn = im.convert("RGB").resize(strip.size, Image.Resampling.LANCZOS)
         cells, crossings = slice_slots(drawn, slots, chroma_rgb)
@@ -400,7 +442,8 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
             canvas.convert("RGB").save(workdir / f"{tag}.png")
             ends.append(workdir / f"{tag}.png")
         clip = workdir / "clip.mp4"
-        (video_runner or video_runner_default)(ends[0], ends[1], prompt, clip)
+        _call_provider(workdir, method, provider, n, a, b,
+                       lambda: (video_runner or video_runner_default)(ends[0], ends[1], prompt, clip))
         frames = video_frames(clip, workdir)
         picks = [round(k * (len(frames) - 1) / (slots - 1)) for k in range(slots)]
         keyed = [_keyed(frames[i].resize((lay.slot_w, lay.slot_h)), chroma_rgb) for i in picks]
@@ -418,26 +461,54 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
     iou_a = silhouette_iou(_scaled(figures[0], a.image.height), a.image, anchor)
     iou_b = silhouette_iou(_scaled(figures[-1], b.image.height), b.image, anchor)
     lo, hi = min(a.image.height, b.image.height), max(a.image.height, b.image.height)
-    heights = []
+    # Every in-between is rescaled to the lerped keyframe height. Its size relative to what the
+    # provider drew is measured against the lerp of the two drawn endpoint heights: that ratio
+    # is how much bigger or smaller the model drew this frame than its neighbours.
+    heights, rel = [], []
     for k in range(1, slots - 1):
         t = k / (slots - 1)
-        heights.append(min(max(figures[k].height * (k_a + (k_b - k_a) * t), lo), hi))
+        heights.append(a.image.height + (b.image.height - a.image.height) * t)
+        drawn_ref = figures[0].height + (figures[-1].height - figures[0].height) * t
+        rel.append(figures[k].height / drawn_ref)
+    bad_scale = [k + 1 for k, r in enumerate(rel) if not FRAME_SCALE_MIN <= r <= FRAME_SCALE_MAX]
+    # Step IoU on the drawn frames at one common scale (the keyframes'), before any rescale hides
+    # a frame that was drawn at the wrong size.
+    drawn_chain = [_scaled(f, f.height * (k_a + (k_b - k_a) * j / (slots - 1))) for j, f in enumerate(figures)]
+    drawn_steps = [round(silhouette_iou(x, y, anchor), 3) for x, y in zip(drawn_chain, drawn_chain[1:])]
     report: dict[str, Any] = {
         "kind": "sprite-gen-tween", "method": method, "provider": provider, "n": n, "anchor": anchor,
         "from": a.source, "to": b.source, "slot": [lay.slot_w, lay.slot_h], "aspect": lay.aspect,
         "endpoint_match": {"iou_from": round(iou_a, 3), "iou_to": round(iou_b, 3), "min": min_endpoint_iou,
                            "scale_from": round(k_a, 3), "scale_to": round(k_b, 3),
                            "scale_agree": round(scale_agree, 3), "min_scale_agree": MIN_SCALE_AGREE},
-        "heights": [round(h, 1) for h in heights], "keyframe_heights": [a.image.height, b.image.height],
+        "heights": [round(h, 1) for h in heights],
+        "frame_scale": {"drawn_vs_endpoints": [round(r, 3) for r in rel], "min": FRAME_SCALE_MIN,
+                        "max": FRAME_SCALE_MAX},
+        "drawn_step_iou": drawn_steps, "status": "ok", "keyframe_heights": [a.image.height, b.image.height],
         "warnings": warnings,
     }
-    (workdir / "tween.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    def refuse(msg: str) -> None:
+        report["status"] = "refused"
+        report["error"] = msg
+        (workdir / "tween.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+        raise SystemExit(msg)
     if min(iou_a, iou_b) < min_endpoint_iou or scale_agree < MIN_SCALE_AGREE:
-        raise SystemExit(
+        refuse(
             f"tween: refused — drawn endpoints do not match the keyframes (IoU from {iou_a:.2f}, "
             f"to {iou_b:.2f}, need >= {min_endpoint_iou}; end scales agree {scale_agree:.2f}, need >= "
             f"{MIN_SCALE_AGREE}); the strip drifted. Raw kept in {workdir}. "
             "Re-run, lower --n, or try --method video / another --provider explicitly.")
+    if bad_scale:
+        msg = (f"tween: refused — in-between(s) {bad_scale} drawn at {[round(rel[k - 1], 2) for k in bad_scale]}x the "
+               f"size of the drawn endpoints (allowed {FRAME_SCALE_MIN}..{FRAME_SCALE_MAX})")
+        if method == "video":
+            refuse(msg + f"; the clip zoomed or shrank the figure. Raw kept in {workdir}. Re-run, or try "
+                   "--method strip explicitly.")
+        warnings.append(msg.replace("refused — ", "") + "; rescaled to the keyframe height")
+    if method == "video" and min(drawn_steps) < STEP_IOU_REFUSE:
+        refuse(f"tween: refused — consecutive clip frames jump (silhouette IoU {drawn_steps}, need >= "
+               f"{STEP_IOU_REFUSE}); the clip passes through a pose in neither keyframe. Raw kept in "
+               f"{workdir}. Re-run, or try --method strip explicitly.")
     figs = [_scaled(figures[k], h) for k, h in zip(range(1, slots - 1), heights)]
     # Grow the output canvas (same for every frame) when an in-between is drawn wider or taller
     # than the slot, so nothing is clipped; the foot anchor keeps its distance from the bottom.

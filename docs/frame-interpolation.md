@@ -102,16 +102,24 @@ What it does with the result:
   IoU at the keyframes' height, foot anchors aligned), and the scale the provider drew the
   two ends at must agree (`scale_agree >= 0.85`). Under either threshold the command exits
   non-zero with the numbers and keeps `keyframe-strip.png`, `raw.png` and `tween.json`.
-- **Scale and feet.** The provider often draws the strip at its own scale. The scale measured
-  on the two drawn ends is interpolated across the slots, each in-between is rescaled by it and
-  clamped to the A..B height range, and its foot anchor goes on the shared ground row.
-- **Slicing by component.** The drawn strip is cut by connected component (each goes to the
-  slot holding its centre), not by fixed columns, so a long prop reaching over a slot border
-  stays with its owner instead of showing up as a second prop next door. Components over a
-  border are reported as warnings, and so is a source cell whose content touches its own
-  cell border (a sign the source sheet was mis-sliced).
-- **Pose jump warning.** `step_iou` (consecutive silhouette IoU across A, tweens, B) under
-  0.45 is warned: usually a pose that is in neither keyframe.
+- **Scale and feet.** Every in-between is rescaled to the lerped keyframe height
+  (A height to B height), and its foot anchor goes on the shared ground row. How big the
+  provider drew it is measured against the lerp of the two *drawn* endpoint heights and kept
+  in `tween.json` as `frame_scale.drawn_vs_endpoints`. Outside 0.85..1.18 it is a warning for
+  `--method strip` and a refusal for `--method video` (a clip that zooms or shrinks the figure).
+- **Slicing by component, with an ownership rule.** The drawn strip is cut by connected
+  component, not by fixed columns. The largest component in each slot is that slot's figure;
+  every other piece (a blade, a cape tip) goes to the figure it is horizontally closest to, so
+  a long prop reaching over a slot border stays with its owner. One summarised warning is
+  given only for a figure spilling more than a quarter slot into its neighbour or a piece
+  about equally close to two figures; a source cell whose content touches its own cell
+  border is also warned (a sign the source sheet was mis-sliced).
+- **Pose jumps.** `step_iou` (consecutive silhouette IoU across A, tweens, B) under 0.45 is
+  warned. `drawn_step_iou` measures the same before rescaling; for `--method video` under 0.3
+  is a refusal.
+- **Status.** `tween.json` always carries `status`: `ok`, `refused` (with `error`), or
+  `error` when the provider call itself failed (timeout, auth, crash) — the folder is never
+  left without a record.
 - **Record.** Run mode writes one take strip on the destination state
   (`raw/<to>.takes/<label>.png`) with `takes[].transition = {from_state, from_index,
   to_state, to_index, n, method, provider, endpoint_match}`; re-running a label overwrites it.
