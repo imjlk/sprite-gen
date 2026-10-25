@@ -92,7 +92,7 @@ def test_content_crossing_slot_border_warns(tmp_path):
         im.save(out)
     frames, report = tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
                                       workdir=tmp_path, generator=spill)
-    assert any("slot 2 content crosses the slot border (right" in w for w in report["warnings"])
+    assert not any("slot slicing" in w for w in report["warnings"])  # a short reach is not worth a warning
     blade = lambda f: (np.asarray(f)[..., :3] == (200, 200, 210)).all(axis=2).sum()
     assert blade(frames[0]) > 0 and blade(frames[1]) == 0  # stays with its owner, no second blade next door
 
@@ -153,8 +153,16 @@ def test_video_method_samples_clip_and_verifies(tmp_path, monkeypatch):
         out.write_bytes(b"mp4")
 
     def fake_frames(clip, workdir):
-        f0, f1 = Image.open(calls[0][0]).convert("RGB"), Image.open(calls[0][1]).convert("RGB")
-        return [Image.blend(f0, f1, t / 8) for t in range(9)]
+        f0 = Image.open(calls[0][0]).convert("RGB")
+        box = Image.fromarray(((np.abs(np.asarray(f0).astype(int) - MAGENTA).sum(axis=2) > 60) * 255
+                               ).astype("uint8")).getbbox()
+        out = []
+        for t in range(9):  # the figure grows from A to B, feet on the ground row
+            fig = figure(round(30 - 6 * t / 8), round(40 + 40 * t / 8))
+            im = Image.new("RGBA", f0.size, MAGENTA + (255,))
+            im.alpha_composite(fig, (box[0], box[3] - fig.height))
+            out.append(im.convert("RGB"))
+        return out
 
     monkeypatch.setattr(tween, "video_frames", fake_frames)
     frames, report = tween.make_tween(endpoint(a, "a"), endpoint(b, "b"), 2, workdir=tmp_path,
@@ -195,3 +203,108 @@ def test_no_frame_touches_its_canvas_and_ends_share_it(tmp_path, monkeypatch, me
     for f in [*frames, *report["_ends"]]:
         assert f.size == tuple(report["canvas"])
         assert tween.border_touches(f, band=tween.OUT_PAD - 1) == []
+
+
+def _scale_slots(out: Path, slots: int, factor: float, which: list[int]) -> None:
+    """Redraw the figure in the given slots `factor` times as tall, feet on the same row."""
+    im = Image.open(out).convert("RGBA")
+    w = im.width // slots
+    for k in which:
+        cell = im.crop((k * w, 0, (k + 1) * w, im.height))
+        fig = tween._tight(tween._keyed(cell, MAGENTA))
+        box = tween._tight_box(tween._keyed(cell, MAGENTA))
+        big = tween._scaled(fig, fig.height * factor)
+        blank = Image.new("RGBA", cell.size, MAGENTA + (255,))
+        blank.alpha_composite(big, (max(0, (w - big.width) // 2), box[3] - big.height))
+        im.paste(blank, (k * w, 0))
+    im.convert("RGB").save(out)
+
+
+def test_inbetweens_drawn_too_big_are_rescaled_to_the_lerped_height(tmp_path):
+    """Regression: the provider drew in-betweens ~12 % bigger than its own endpoints."""
+    a, b = figure(30, 60), figure(30, 90)
+
+    def big(strip, prompt, out, aspect):
+        fill_ghosts(strip, prompt, out, aspect)
+        _scale_slots(out, 4, 1.12, [1, 2])
+    frames, report = tween.make_tween(endpoint(a, "a"), endpoint(b, "b"), 2, workdir=tmp_path, generator=big)
+    for k, f in enumerate(frames):
+        target = 60 + 30 * (k + 1) / 3
+        assert abs(tween._tight(f).height - target) <= 1.5
+    assert all(r > 1.05 for r in report["frame_scale"]["drawn_vs_endpoints"])
+
+
+def test_detached_blade_goes_to_the_nearest_figure_not_the_slot_of_its_centre(tmp_path):
+    def blade(strip, prompt, out, aspect):
+        fill_ghosts(strip, prompt, out, aspect)
+        im = Image.open(out).convert("RGB")
+        arr = np.asarray(im)
+        w = im.width // 4
+        ink = (np.abs(arr.astype(int) - MAGENTA).sum(axis=2) > 60).any(axis=0)
+        body2 = w + np.nonzero(ink[w:2 * w])[0].max()
+        body3 = 2 * w + np.nonzero(ink[2 * w:3 * w])[0].min()
+        start, end = body2 + 3, body3 - 10   # nearer slot 2's figure than slot 3's
+        y = im.height // 2
+        for x in range(start, end):  # blade from the hand of slot 2 ...
+            for yy in range(y, y + 3):
+                im.putpixel((x, yy), (200, 200, 210))
+        for x in range(end - 12, end):  # ... with a heavy tip that pulls its centre into slot 3
+            for yy in range(y - 6, y + 9):
+                im.putpixel((x, yy), (200, 200, 210))
+        im.save(out)
+    frames, report = tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
+                                      workdir=tmp_path, generator=blade, margin=0.5)
+    grey = lambda f: (np.asarray(f)[..., :3] == (200, 200, 210)).all(axis=2).sum()
+    assert grey(frames[0]) > 0 and grey(frames[1]) == 0
+
+
+def _video(tmp_path, monkeypatch, mutate):
+    calls = []
+    def runner(first, last, prompt, out):
+        calls.append((first, last)); out.write_bytes(b"mp4")
+    def frames(clip, wd):
+        f0, f1 = Image.open(calls[0][0]).convert("RGB"), Image.open(calls[0][1]).convert("RGB")
+        seq = [f0] * 3 + [f1] * 4   # picks 0, 3, 6 for n=1
+        return mutate(seq)
+    monkeypatch.setattr(tween, "video_frames", frames)
+    return tween.make_tween(endpoint(figure(30, 70), "a"), endpoint(figure(30, 70), "b"), 1,
+                            workdir=tmp_path, method="video", video_runner=runner)
+
+
+def test_video_frame_drawn_at_wrong_scale_is_refused(tmp_path, monkeypatch):
+    """Regression: a clip shrank the middle figure to ~0.6x and only the endpoints were checked."""
+    def shrink(seq):
+        im = seq[3].copy()
+        small = im.resize((round(im.width * 0.6), round(im.height * 0.6)))
+        canvas = Image.new("RGB", im.size, MAGENTA)
+        canvas.paste(small, ((im.width - small.width) // 2, im.height - small.height - 20))
+        seq[3] = canvas
+        return seq
+    with pytest.raises(SystemExit, match="size of the drawn endpoints"):
+        _video(tmp_path, monkeypatch, shrink)
+    saved = json.loads((tmp_path / "tween.json").read_text())
+    assert saved["status"] == "refused" and "error" in saved
+
+
+def test_video_pose_jump_is_refused(tmp_path, monkeypatch):
+    def lie_down(seq):
+        im = seq[3].copy()
+        arr = np.asarray(im).copy()
+        box = Image.fromarray(((np.abs(arr.astype(int) - MAGENTA).sum(axis=2) > 60) * 255).astype("uint8")).getbbox()
+        arr[:, :] = MAGENTA
+        arr[box[1]:box[3], box[0] - 40:box[0] - 34] = BODY[:3]  # a thin pole, same height, elsewhere
+        seq[3] = Image.fromarray(arr)
+        return seq
+    with pytest.raises(SystemExit, match="refused"):
+        _video(tmp_path, monkeypatch, lie_down)
+    assert json.loads((tmp_path / "tween.json").read_text())["status"] == "refused"
+
+
+def test_provider_timeout_leaves_a_tween_json_with_the_error(tmp_path):
+    def timeout(strip, prompt, out, aspect):
+        raise TimeoutError("provider took too long")
+    with pytest.raises(TimeoutError):
+        tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
+                         workdir=tmp_path, generator=timeout)
+    saved = json.loads((tmp_path / "tween.json").read_text())
+    assert saved["status"] == "error" and "TimeoutError" in saved["error"]
