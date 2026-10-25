@@ -308,3 +308,134 @@ def test_provider_timeout_leaves_a_tween_json_with_the_error(tmp_path):
                          workdir=tmp_path, generator=timeout)
     saved = json.loads((tmp_path / "tween.json").read_text())
     assert saved["status"] == "error" and "TimeoutError" in saved["error"]
+
+
+# ---------------------------------------------------------------- slot ownership (unit)
+
+def test_slice_slots_gives_a_detached_piece_to_the_nearest_figure_not_its_centre_slot():
+    """Regression for the ownership rule. The old rule gave each component to the slot holding
+    its centre, so a blade whose heavy tip sits past the border went to the neighbour slot."""
+    slots, w, h = 3, 100, 80
+    strip = Image.new("RGB", (slots * w, h), MAGENTA)
+    px = strip.load()
+    for k, x0 in enumerate((40, 175, 240)):    # one body per slot; slot 2's sits right of centre
+        for x in range(x0, x0 + 20):
+            for y in range(20, 80):
+                px[x, y] = BODY[:3]
+    for x in range(63, 115):                   # blade from slot 1's body (gap 3 px) ...
+        for y in range(40, 43):
+            px[x, y] = (200, 200, 210)
+    for x in range(115, 140):                  # ... whose heavy tip pulls its centre into slot 2
+        for y in range(30, 52):
+            px[x, y] = (200, 200, 210)
+    cells, _ = tween.slice_slots(strip, slots, MAGENTA)
+    grey = lambda im: (np.asarray(im)[..., 3] > 0) & (np.asarray(im)[..., :3] == (200, 200, 210)).all(axis=2)
+    assert grey(cells[0]).sum() > 0, "blade must stay with the figure it is attached to"
+    assert grey(cells[1]).sum() == 0
+    assert all(np.asarray(c)[..., 3].any() for c in cells)
+
+
+# ---------------------------------------------------------------- asset pipeline
+
+from sprite_gen.effects import tween_pipeline as P  # noqa: E402
+
+
+def _pair(tmp_path, a=(30, 40), b=(24, 80), name="p"):
+    fa, fb = tmp_path / f"{name}-a.png", tmp_path / f"{name}-b.png"
+    for path, (w, h) in ((fa, a), (fb, b)):
+        im = Image.new("RGBA", (w + 20, h + 20), (0, 0, 0, 0))
+        im.alpha_composite(figure(w, h), (10, 10))
+        im.save(path)
+    return fa, fb
+
+
+def _cfg(tmp_path, **kw):
+    fa, fb = _pair(tmp_path)
+    return P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb), **kw}, tmp_path)
+
+
+def test_fixed_frame_size_puts_every_foot_on_the_pivot(tmp_path):
+    cfg = _cfg(tmp_path, n=3, frame_size="96x128", include_ends=True, fps=10)
+    res = P.run_boundary(cfg, tmp_path / "out", generator=fill_ghosts)
+    assert res["status"] == "ok" and res["exit"] == 0
+    rep = json.loads((tmp_path / "out" / "tween.json").read_text())
+    assert rep["schema"] == "sprite-gen-tween/2" and rep["frame_size"] == [96, 128]
+    assert rep["pivot"] == {"x": 48, "y": 128, "nx": 0.5, "ny": 1.0}
+    assert [f["role"] for f in rep["frames"]] == ["from", "tween", "tween", "tween", "to"]
+    assert all(f["duration_ms"] == 100 for f in rep["frames"])
+    for f in rep["frames"]:
+        im = Image.open(tmp_path / "out" / f["file"])
+        assert im.size == (96, 128)
+        box = im.getchannel("A").getbbox()
+        assert box[3] == 128                      # baseline on the bottom row
+        assert abs((box[0] + box[2]) / 2 - 48) <= 2  # foot anchor on the pivot column
+
+
+def test_set_that_does_not_fit_is_refused_or_shrunk(tmp_path):
+    cfg = _cfg(tmp_path, frame_size="40x40")
+    res = P.run_boundary(cfg, tmp_path / "a", generator=fill_ghosts)
+    assert res["status"] == "refused" and res["exit"] == tween.EXIT_REFUSED
+    assert json.loads((tmp_path / "a" / "tween.json").read_text())["status"] == "refused"
+    cfg = _cfg(tmp_path, frame_size="40x40", fit="shrink", resample="nearest")
+    res = P.run_boundary(cfg, tmp_path / "b", generator=fill_ghosts)
+    assert res["status"] == "ok" and res["report"]["fit_scale"] < 1
+    for f in res["report"]["frames"]:
+        box = Image.open(tmp_path / "b" / f["file"]).getchannel("A").getbbox()
+        assert box[0] >= 0 and box[1] >= 0 and box[2] <= 40 and box[3] <= 40
+
+
+def test_second_run_is_cached_until_inputs_change(tmp_path):
+    calls = []
+    def gen(*a):
+        calls.append(1); fill_ghosts(*a)
+    cfg = _cfg(tmp_path, frame_size="96x128")
+    assert P.run_boundary(cfg, tmp_path / "o", generator=gen)["status"] == "ok"
+    assert P.run_boundary(cfg, tmp_path / "o", generator=gen)["status"] == "cached"
+    assert P.run_boundary(cfg, tmp_path / "o", generator=gen, force=True)["status"] == "ok"
+    cfg2 = P.normalise({**cfg, "n": 3, "cell": None}, tmp_path)
+    assert P.run_boundary(cfg2, tmp_path / "o", generator=gen)["status"] == "ok"
+    assert len(calls) == 3
+
+
+def test_manifest_batch_continues_past_a_refusal_and_exports_one_sheet(tmp_path):
+    _pair(tmp_path, name="good")
+    _pair(tmp_path, a=(30, 60), b=(30, 60), name="bad")
+    manifest = tmp_path / "tweens.json"
+    manifest.write_text(json.dumps({
+        "defaults": {"n": 2, "frame_size": "96x128", "export": "sheet", "fps": 8},
+        "boundaries": [
+            {"id": "good", "from_file": "good-a.png", "to_file": "good-b.png"},
+            {"id": "bad", "from_file": "bad-a.png", "to_file": "bad-b.png"},
+            {"id": "good2", "from_file": "good-b.png", "to_file": "good-a.png", "include_ends": True},
+        ]}))
+    def gen(strip, prompt, out, aspect):
+        fill_ghosts(strip, prompt, out, aspect, keep_ends="bad" not in str(strip))
+    out = tmp_path / "out"
+    code = P.run_manifest(manifest, out, generator=gen)
+    assert code == tween.EXIT_REFUSED
+    batch = json.loads((out / "batch.json").read_text())
+    assert [b["status"] for b in batch["boundaries"]] == ["ok", "refused", "ok"]
+    meta = json.loads((out / "sheet.json").read_text())
+    assert set(meta["animation"]["rows"]) == {"good", "good2"}
+    assert meta["animation"]["rows"]["good"]["durations_ms"] == [125, 125]
+    assert len(meta["frame_layout"]["rows"]["good2"]) == 4
+    assert meta["cell"] == {"width": 96, "height": 128}
+    assert Image.open(out / "sheet.png").size == (4 * 96, 2 * 128)
+    # resumable: the good ones are cached, the refused one is retried
+    def gen_ok(*a):
+        fill_ghosts(*a)
+    assert P.run_manifest(manifest, out, generator=gen_ok) == 0
+    batch = json.loads((out / "batch.json").read_text())
+    assert [b["status"] for b in batch["boundaries"]] == ["cached", "ok", "cached"]
+
+
+def test_cli_exit_codes(tmp_path, monkeypatch, capsys):
+    fa, fb = _pair(tmp_path)
+    monkeypatch.setattr(tween, "gen_generator", lambda provider, refs=None: fill_ghosts)
+    base = ["--from-file", str(fa), "--to-file", str(fb), "--out-dir", str(tmp_path / "o")]
+    assert tween.main(base + ["--frame-size", "96x128", "--export", "sheet"]) == 0
+    assert (tmp_path / "o" / "sheet.json").is_file()
+    assert tween.main(base + ["--frame-size", "20x20", "--force"]) == tween.EXIT_REFUSED
+    with pytest.raises(SystemExit) as exc:
+        tween.main(base + ["--frame-size", "nope"])
+    assert exc.value.code == tween.EXIT_USAGE and "WxH" in capsys.readouterr().err

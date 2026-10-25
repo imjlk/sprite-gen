@@ -60,6 +60,30 @@ ALPHA_MIN = 24
 # nearest one at or below its natural ratio so slots are never squeezed.
 STRIP_ASPECTS = ((21, 9), (20, 9), (5, 2), (2, 1), (16, 9), (3, 2), (4, 3), (1, 1))
 
+EXIT_OK, EXIT_ERROR, EXIT_USAGE, EXIT_REFUSED = 0, 1, 2, 3
+
+
+class TweenError(SystemExit):
+    """A tween failure with a stable process exit code; str() is the message."""
+    exit_code = EXIT_ERROR
+
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.message = message
+        self.code = self.exit_code
+
+    def __str__(self) -> str:
+        return self.message
+
+
+class TweenUsage(TweenError):
+    exit_code = EXIT_USAGE
+
+
+class TweenRefused(TweenError):
+    exit_code = EXIT_REFUSED
+
+
 # generator signature: (strip_png, prompt, out_png, aspect "w:h") -> None. Tests inject a stub.
 Generator = Callable[[Path, str, Path, str], None]
 # video runner signature: (first_png, last_png, prompt, out_mp4) -> None.
@@ -78,17 +102,17 @@ class Endpoint:
 def parse_ref(spec: str) -> tuple[str, int]:
     """`state:idx` -> (state, idx); idx may be negative. The state may itself contain `/`."""
     if ":" not in spec:
-        raise SystemExit(f"tween: expected <state>:<index>, got {spec!r}")
+        raise TweenUsage(f"tween: expected <state>:<index>, got {spec!r}")
     state, _, idx = spec.rpartition(":")
     try:
         return state, int(idx)
     except ValueError:
-        raise SystemExit(f"tween: frame index must be an integer in {spec!r}") from None
+        raise TweenUsage(f"tween: frame index must be an integer in {spec!r}") from None
 
 
 def _pick(items: list, index: int, what: str):
     if not -len(items) <= index < len(items):
-        raise SystemExit(f"tween: {what} index {index} out of range ({len(items)} frames)")
+        raise TweenUsage(f"tween: {what} index {index} out of range ({len(items)} frames)")
     return items[index]
 
 
@@ -114,7 +138,7 @@ def border_touches(rgba: Image.Image, band: int = 1) -> list[str]:
 def _tight(rgba: Image.Image) -> Image.Image:
     box = Image.fromarray(((_alpha(rgba) >= ALPHA_MIN) * 255).astype("uint8")).getbbox()
     if box is None:
-        raise SystemExit("tween: endpoint frame is empty (no opaque content)")
+        raise TweenUsage("tween: endpoint frame is empty (no opaque content)")
     return rgba.crop(box)
 
 
@@ -127,12 +151,12 @@ def endpoint_from_file(spec: str, cell: tuple[int, int] | None,
         path_s, idx = head, int(tail)
     path = Path(path_s)
     if not path.is_file():
-        raise SystemExit(f"tween: endpoint file missing: {path}")
+        raise TweenUsage(f"tween: endpoint file missing: {path}")
     image = Image.open(path)
     image.load()
     if idx is not None:
         if cell is None:
-            raise SystemExit(f"tween: {spec!r} names a cell index; pass --cell WxH")
+            raise TweenUsage(f"tween: {spec!r} names a cell index; pass --cell WxH")
         cw, ch = cell
         cols, rows = image.width // cw, image.height // ch
         boxes = [(c * cw, r * ch, (c + 1) * cw, (r + 1) * ch) for r in range(rows) for c in range(cols)]
@@ -146,16 +170,16 @@ def endpoint_from_run(run_dir: Path, request: dict[str, Any], state: str, index:
                                            tighten_components)
     from sprite_gen.spec.layout import raw_rel
     if state not in request.get("states", {}):
-        raise SystemExit(f"tween: unknown state: {state}")
+        raise TweenUsage(f"tween: unknown state: {state}")
     strip_path = run_dir / raw_rel(request, state)
     if not strip_path.is_file():
-        raise SystemExit(f"tween: raw strip missing: {strip_path}")
+        raise TweenUsage(f"tween: raw strip missing: {strip_path}")
     chroma_rgb = tuple(request["chroma_key"]["rgb"])
     frames = int(request["states"][state]["frames"])
     cleaned = remove_chroma_background_ycbcr(Image.open(strip_path).convert("RGBA"), chroma_rgb)
     components = extract_component_images(cleaned, frames)
     if not components:
-        raise SystemExit(f"tween: could not extract {frames} components from {strip_path}")
+        raise TweenUsage(f"tween: could not extract {frames} components from {strip_path}")
     image = _pick(tighten_components(components), index, state)
     return Endpoint(_tight(image), f"{state}:{index}", [])
 
@@ -298,7 +322,7 @@ def slice_slots(image: Image.Image, slots: int, chroma_rgb: tuple[int, int, int]
         if mains[k] is None or c["area"] > mains[k]["area"]:
             mains[k] = c
     if any(m is None for m in mains):
-        raise SystemExit("tween: a slot came back empty in the drawn strip")
+        raise TweenRefused("tween: a slot came back empty in the drawn strip")
     masks = [np.zeros(keyed.width * keyed.height, bool) for _ in range(slots)]
     ambiguous, spills = [], []
     for k, m in enumerate(mains):
@@ -356,7 +380,7 @@ def _largest_figure(rgba: Image.Image) -> Image.Image:
 
 def gen_generator(provider: str, extra_refs: list[Path] | None = None) -> Generator:
     if provider not in PROVIDERS:
-        raise SystemExit(f"tween: unknown provider {provider!r} (choose from {PROVIDERS})")
+        raise TweenUsage(f"tween: unknown provider {provider!r} (choose from {PROVIDERS})")
     from sprite_gen.gen import generate_image
 
     def run(strip: Path, prompt: str, out: Path, aspect: str) -> None:
@@ -373,7 +397,7 @@ def video_runner_default(first: Path, last: Path, prompt: str, out: Path) -> Non
 
 def video_frames(clip: Path, workdir: Path) -> list[Image.Image]:
     if shutil.which("ffmpeg") is None:
-        raise SystemExit("tween --method video needs ffmpeg on PATH")
+        raise TweenError("tween --method video needs ffmpeg on PATH")
     frames = workdir / "clip-frames"
     frames.mkdir(exist_ok=True)
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(clip), str(frames / "%04d.png")], check=True)
@@ -382,7 +406,7 @@ def video_frames(clip: Path, workdir: Path) -> list[Image.Image]:
         with Image.open(p) as im:
             out.append(im.convert("RGB").copy())
     if len(out) < 3:
-        raise SystemExit(f"tween: clip {clip} has {len(out)} frames; need at least 3")
+        raise TweenError(f"tween: clip {clip} has {len(out)} frames; need at least 3")
     return out
 
 
@@ -408,11 +432,11 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
                extra_refs: list[Path] | None = None) -> tuple[list[Image.Image], dict[str, Any]]:
     """Return N in-between RGBA frames (slot-sized canvases) and the report. Raises SystemExit on refusal."""
     if not 1 <= n <= 6:
-        raise SystemExit(f"tween: --n must be 1..6, got {n}")
+        raise TweenUsage(f"tween: --n must be 1..6, got {n}")
     if method not in METHODS:
-        raise SystemExit(f"tween: unknown method {method!r}")
+        raise TweenUsage(f"tween: unknown method {method!r}")
     if anchor not in ANCHORS:
-        raise SystemExit(f"tween: unknown anchor {anchor!r}")
+        raise TweenUsage(f"tween: unknown anchor {anchor!r}")
     name, hexv, chroma_rgb = chroma
     workdir.mkdir(parents=True, exist_ok=True)
     warnings = [f"source {ep.source} touches its cell border ({', '.join(ep.touches_border)}): "
@@ -491,7 +515,7 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
         report["status"] = "refused"
         report["error"] = msg
         (workdir / "tween.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
-        raise SystemExit(msg)
+        raise TweenRefused(msg)
     if min(iou_a, iou_b) < min_endpoint_iou or scale_agree < MIN_SCALE_AGREE:
         refuse(
             f"tween: refused — drawn endpoints do not match the keyframes (IoU from {iou_a:.2f}, "
@@ -580,7 +604,7 @@ def record_transition_take(run_dir: Path, request: dict[str, Any], label: str, f
 
 def _safe_label(label: str) -> str:
     if not label or "/" in label or label.startswith("."):
-        raise SystemExit(f"tween: label must be filesystem-safe: {label!r}")
+        raise TweenUsage(f"tween: label must be filesystem-safe: {label!r}")
     return label
 
 
@@ -591,7 +615,7 @@ def _cell(value: str | None) -> tuple[int, int] | None:
         w, h = (int(v) for v in value.lower().split("x"))
         return w, h
     except ValueError:
-        raise SystemExit(f"tween: --cell must be WxH, got {value!r}") from None
+        raise TweenUsage(f"tween: --cell must be WxH, got {value!r}") from None
 
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
@@ -613,17 +637,43 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--ref", action="append", type=Path, default=[],
                         help="extra identity reference image for the strip method (repeatable)")
     parser.add_argument("--label", help="take label (default <from>_to_<to>)")
+    pipe = parser.add_argument_group("asset pipeline (file and manifest mode)")
+    pipe.add_argument("--manifest", type=Path,
+                      help="batch: JSON file listing many boundaries (see docs/frame-interpolation.md)")
+    pipe.add_argument("--only", action="append", default=[], help="manifest mode: run only these ids")
+    pipe.add_argument("--frame-size", help="fixed output frame WxH (every frame, every boundary)")
+    pipe.add_argument("--pivot", default="bottom-center",
+                      help="where the foot anchor lands in a fixed frame: bottom-center (default) or X,Y px")
+    pipe.add_argument("--fit", choices=("error", "shrink"), default="error",
+                      help="when the set does not fit --frame-size: refuse (default) or shrink uniformly")
+    pipe.add_argument("--resample", choices=("lanczos", "nearest"), default="lanczos",
+                      help="filter for --fit shrink (nearest keeps hard pixel edges)")
+    pipe.add_argument("--fps", type=float, default=12.0, help="playback rate written to the metadata")
+    pipe.add_argument("--durations-ms", help="per-frame durations, comma separated (overrides --fps)")
+    pipe.add_argument("--include-ends", action="store_true",
+                      help="metadata and sheet also list the two endpoint frames (from, to)")
+    pipe.add_argument("--export", choices=("none", "sheet"), default="none",
+                      help="sheet: also write sheet.png + sheet.json (atlas rows, one row per boundary)")
+    pipe.add_argument("--force", action="store_true", help="redo boundaries whose cached result is still valid")
 
 
 def _run(args: argparse.Namespace) -> int:
     utf8_streams()
+    if getattr(args, "manifest", None) is not None:
+        from sprite_gen.effects import tween_pipeline
+        if args.from_ref or args.to_ref or args.from_file or args.to_file:
+            raise TweenUsage("tween: --manifest replaces --from/--to/--from-file/--to-file")
+        if args.out_dir is None:
+            raise TweenUsage("tween: --manifest needs --out-dir")
+        return tween_pipeline.run_manifest(args.manifest, args.out_dir, force=args.force,
+                                           only=args.only)
     run_mode = args.from_ref is not None or args.to_ref is not None
     file_mode = args.from_file is not None or args.to_file is not None
     if run_mode == file_mode:
-        raise SystemExit("tween: give either RUN_DIR --from --to, or --from-file --to-file --out-dir")
+        raise TweenUsage("tween: give either RUN_DIR --from --to, or --from-file --to-file --out-dir")
     if run_mode:
         if not (args.run_dir and args.from_ref and args.to_ref):
-            raise SystemExit("tween: run mode needs RUN_DIR, --from and --to")
+            raise TweenUsage("tween: run mode needs RUN_DIR, --from and --to")
         from sprite_gen.spec.runio import load_request
         request = load_request(args.run_dir)
         (fs, fi), (ts, ti) = parse_ref(args.from_ref), parse_ref(args.to_ref)
@@ -644,26 +694,10 @@ def _run(args: argparse.Namespace) -> int:
         target = record_transition_take(args.run_dir, request, label, frames, meta)
         print(f"[tween] transition take written: {target} ({fs}:{fi} -> {ts}:{ti}, n={args.n})")
         return 0
+    from sprite_gen.effects import tween_pipeline
     if not (args.from_file and args.to_file and args.out_dir):
-        raise SystemExit("tween: file mode needs --from-file, --to-file and --out-dir")
-    name, _, hexv = args.chroma.partition(":")
-    rgb = tuple(int(hexv.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4))
-    cell = _cell(args.cell)
-    a = endpoint_from_file(args.from_file, cell, rgb)
-    b = endpoint_from_file(args.to_file, cell, rgb)
-    frames, report = make_tween(a, b, args.n, workdir=args.out_dir, method=args.method, provider=args.provider,
-                                anchor=args.anchor, margin=args.margin, min_endpoint_iou=args.min_endpoint_iou,
-                                description=args.description, chroma=(name, hexv, rgb), extra_refs=args.ref)
-    ends = report.pop("_ends")
-    ends[0].save(args.out_dir / "from.png")
-    ends[1].save(args.out_dir / "to.png")
-    for k, f in enumerate(frames):
-        f.save(args.out_dir / f"tween-{k}.png")
-    report["frames"] = [f"tween-{k}.png" for k in range(len(frames))]
-    report["transition"] = {"from_state": args.from_file, "to_state": args.to_file, "n": args.n}
-    (args.out_dir / "tween.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
-    print(f"[tween] {len(frames)} frames written to {args.out_dir}")
-    return 0
+        raise TweenUsage("tween: file mode needs --from-file, --to-file and --out-dir")
+    return tween_pipeline.run_single(tween_pipeline.boundary_from_args(args), args.out_dir, force=args.force)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -672,13 +706,23 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _reporting(fn: Callable[[], int]) -> int:
+    """Print a TweenError's message to stderr; its exit code survives (0 ok, 1 error, 2 usage, 3 refused)."""
+    try:
+        return fn()
+    except TweenError as exc:
+        import sys
+        print(exc.message, file=sys.stderr)
+        raise
+
+
 def run(**kwargs: object) -> int:
-    return _run(namespace_from_kwargs(_build_parser(), kwargs))
+    return _reporting(lambda: _run(namespace_from_kwargs(_build_parser(), kwargs)))
 
 
 def main(argv: list[str] | None = None) -> int:
     utf8_streams()
-    return _run(_build_parser().parse_args(argv))
+    return _reporting(lambda: _run(_build_parser().parse_args(argv)))
 
 
 if __name__ == "__main__":

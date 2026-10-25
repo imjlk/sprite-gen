@@ -154,3 +154,57 @@ is exercised manually, not in CI.
 ## Related
 
 - [docs/README.md](README.md) — documentation index
+
+### Asset pipeline: fixed frames, metadata, batches, sheets
+
+File mode and `--manifest` mode add an engine-facing layer (`sprite_gen/effects/tween_pipeline.py`):
+
+```bash
+# one boundary, fixed 256x256 frames, feet on the bottom-centre pixel, a sheet for the packer
+sprite-gen tween --from-file a.png --to-file b.png --n 2 --out-dir out/ \
+  --frame-size 256x256 --pivot bottom-center --fps 12 --include-ends --export sheet
+# many boundaries in one run; re-running skips what is already done
+sprite-gen tween --manifest tweens.json --out-dir out/ [--only id ...] [--force]
+```
+
+| flag | meaning |
+| --- | --- |
+| `--frame-size WxH` | every frame (ends included) on one canvas size, foot anchor on `--pivot` |
+| `--pivot bottom-center\|X,Y` | pixel the foot anchor lands on (default: `W/2, H`, i.e. baseline = bottom row) |
+| `--fit error\|shrink` | a set that does not fit: refuse (default, exit 3) or shrink the whole set uniformly about the anchor; never clipped |
+| `--resample lanczos\|nearest` | filter for `--fit shrink` (`nearest` for hard-edged pixel art) |
+| `--fps`, `--durations-ms a,b,…` | per-frame durations written to the metadata |
+| `--include-ends` | metadata and sheet also list the `from` / `to` frames |
+| `--export sheet` | also write `sheet.png` + `sheet.json`, one row per boundary |
+| `--force` | redo a boundary even when its cached result is valid |
+
+`tween.json` (`schema: sprite-gen-tween/2`) adds `id`, `input_hash`, `frame_size`, `pivot`
+(`x, y` px and normalised `nx, ny`), `fit_scale`, `fps`, `loop` and
+`frames: [{index, file, role (from|tween|to), w, h, pivot, duration_ms}]` to the existing
+checks. `sheet.json` uses the same `cell`, `animation.rows.<id>.{row, frames, durations_ms,
+loop}` and `frame_layout.rows.<id>: [{x, y, w, h}]` shape as `compose`'s `manifest.json`, so a
+loader for compose output reads it unchanged.
+
+Manifest (`--manifest`), paths relative to the manifest file:
+
+```json
+{
+  "defaults": {"n": 2, "frame_size": "256x256", "fps": 12, "export": "sheet"},
+  "boundaries": [
+    {"id": "attack_to_idle", "from_file": "attack.png:-1", "to_file": "idle.png:0", "cell": "256x256"},
+    {"id": "idle_to_attack", "from_file": "idle.png:0", "to_file": "attack.png:0", "cell": "256x256", "n": 1}
+  ]
+}
+```
+
+Every boundary option of file mode is accepted per entry (`n, method, provider, anchor, margin,
+min_endpoint_iou, description, chroma, refs, cell, frame_size, pivot, fit, resample, fps,
+durations_ms, include_ends, loop`); unknown keys are a usage error. Each boundary lands in
+`<out>/<id>/`, one failure does not stop the rest, and `<out>/batch.json` lists every id with
+`status` (`ok`, `cached`, `refused`, `error`, `usage`). A boundary is skipped when its
+`tween.json` says `ok` for the same `input_hash` (endpoint and ref bytes plus every option
+that changes the output) and its frame files exist; `tween.json` is written last and
+atomically, so an interrupted run simply redoes that boundary.
+
+Exit codes: `0` all ok or cached, `1` provider/runtime error, `2` usage error, `3` refused
+(endpoint drift, a set that does not fit). A batch returns the most severe code (1 > 3 > 2).
