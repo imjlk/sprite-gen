@@ -65,6 +65,7 @@ MODULE_DOMAIN = {
     'anatomy': 'effects',
     'recolor': 'effects',
     'interpolate': 'effects',
+    'tween': 'effects',
     'reroll': 'effects',
     'inspect': 'qa',
     'score': 'qa',
