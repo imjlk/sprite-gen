@@ -138,12 +138,32 @@ class Source:
 class Projection:
     frames: list[Image.Image]
     record: dict[str, Any]
-    cropped: list[Image.Image]  # what each cell was resampled from: the cleaned, ramped source frame cut to the crop
+    cropped: list[Image.Image]  # what each cell was resampled from: the held, cleaned, ramped source frame cut to the crop
+
+
+def _cut_moves(hold: dict[str, Any], n: int) -> tuple[list[dict[str, Any]], tuple[int, int, int, int]]:
+    """The move each frame of a held fixed cut was held by (`size_hold.cut_frames`, `gait_fallback.frame_hold`) and the
+    room every frame was widened by (`padding_ltrb`): one move per frame of the cut, in order."""
+    moves, pad = hold.get("cut_frames"), hold.get("padding_ltrb")
+
+    def number(v: Any) -> bool:
+        return type(v) in (int, float) and math.isfinite(v)
+
+    if (not isinstance(moves, list) or len(moves) != n or not isinstance(pad, list) or len(pad) != 4
+            or any(type(v) is not int or v < 0 for v in pad)
+            or any(not isinstance(move, dict) or set(move) != {"scale", "foot_point_px", "lift_px"}
+                   or not number(move["scale"]) or move["scale"] <= 0
+                   or not isinstance(move["foot_point_px"], list) or len(move["foot_point_px"]) != 2
+                   or not all(number(v) for v in move["foot_point_px"])
+                   or not (move["lift_px"] is None or number(move["lift_px"])) for move in moves)):
+        raise ValueError("invalid size_hold.cut_frames")
+    return moves, tuple(pad)  # type: ignore[return-value]
 
 
 def project(baseline: Any, source: Source) -> tuple[Projection | None, str | None]:
-    """Prove one shared crop against all cells outside the recorded repair hints."""
-    from sprite_gen.video import loop
+    """Prove one shared crop against all cells outside the recorded repair hints. A fixed cut held at its size
+    (`size_hold`) is read on its source frames held again, each by the move its report records for it."""
+    from sprite_gen.video import gait_fallback, loop
     from sprite_gen.video.frames import drop_specks
 
     m, report = baseline.meta, baseline.source_report
@@ -183,16 +203,22 @@ def project(baseline: Any, source: Source) -> tuple[Projection | None, str | Non
     anchor = m.get("foot_anchor")
     if anchor not in ("none", "body") or report.get("anchor") != anchor:
         return None, "source-anchor-unsupported"
-    if any(k in m for k in ("cycle_align", "motion_anchor", "wrap_blend")) or report.get("size_hold", {}).get("applied"):
+    hold = report.get("size_hold", {})
+    # A held cut is read again only where its report records each frame's move, and the cut's frames before repair to
+    # prove every one of them on (`source_projection`, the moves of the cells the repair replaced included).
+    held = bool(hold.get("applied"))
+    if (any(k in m for k in ("cycle_align", "motion_anchor", "wrap_blend"))
+            or held and ("cut_frames" not in hold or report.get("source_projection") is None)):
         return None, "source-processing-unsupported"
+    moves, pad = _cut_moves(hold, n) if held else (None, None)
     hints = (report.get("jump_repair") or {}).get("replaced", [])
     if (not isinstance(hints, list) or any(type(k) is not int or not 0 <= k < n for k in hints)
             or len(set(hints)) != len(hints) or len(hints) > n // 2):
         return None, "repair-locations-unverified"
     keep = [k for k in range(n) if k not in hints]
     frames = []
-    for frame in source.frames[start:start + n]:
-        frame = frame.copy()
+    for j, frame in enumerate(source.frames[start:start + n]):
+        frame = gait_fallback.hold_frame(frame, moves[j], pad) if moves else frame.copy()
         loop._scrub(frame)
         frames.append(drop_specks(frame, alpha_over=16, diagonal=False, apart=0)[0])
     dx = loop.body_wrap_offset(frames) if anchor == "body" else 0
@@ -254,6 +280,8 @@ def project(baseline: Any, source: Source) -> tuple[Projection | None, str | Non
                "samples": list(range(start, start + n)), "pts_seconds": pts[start:start + n],
                "unmodified_cells": keep, "repair_hints": hints, "exact_projections": 1,
                "reference_pixels_sha256": [evidence.digest(f.tobytes()) for f in projected]}
+    if moves:
+        receipt["size_hold"] = {"padding_ltrb": list(pad), "cut_frames": moves}
     return Projection(projected, receipt, cropped), None
 
 

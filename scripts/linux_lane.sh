@@ -5,7 +5,10 @@
 # What the CI job ran, in the same order: a clean virtual environment installed the way the
 # quickstart does (`pip install -e ".[dev]"`), RIFE installed through the user's own path
 # (`sprite-gen rife install`, its check frame on the host's Vulkan driver), the quickstart smoke
-# (prepare -> extract -> compose) and the whole test suite.
+# (prepare -> extract -> compose) and the whole test suite. Then RIFE's torch backend on the CPU:
+# PyTorch (TORCH_VERSION, from PyTorch's CPU index) into the same environment, its install check
+# frame (`sprite-gen rife install --backend torch`) and every test marked torch_rife, none skipped
+# (SPRITE_GEN_RIFE_DEVICE=cpu). Its CUDA run is the T4 lane's (`scripts/t4_lane.py`, docs/release.md).
 #
 # Run it from a clean clone of the commit being measured, on x86-64 Linux with:
 #   - Python 3.14 (`python3.14` on PATH, or named by SPRITE_GEN_LANE_PYTHON),
@@ -31,9 +34,10 @@
 #                              tests/conftest.py names it as not RIFE's. The run ends by naming
 #                              what it did not measure and exits 3, not 0.
 #   --rife-only                the RIFE gates alone, on a host where Vulkan works: `rife install`
-#                              (its check frame) and every test of the suite marked `real_rife`,
-#                              none of it skipped — the tests `--rife-unmeasured` let skip for RIFE
-#                              (docs/release.md).
+#                              (its check frame), every test of the suite marked `real_rife`, and
+#                              the torch backend's gates above, none of it skipped — the tests
+#                              `--rife-unmeasured` let skip for RIFE (docs/release.md). The tests
+#                              marked both run with the torch backend's.
 # A commit has passed the lane when one run exits 0, or when a `--rife-unmeasured` run (exit 3)
 # and a `--rife-only` run (exit 0) of the same commit both did.
 set -euo pipefail
@@ -71,6 +75,9 @@ fi
 
 PINNED_PYTHON=3.14
 PYTHON=${SPRITE_GEN_LANE_PYTHON:-python$PINNED_PYTHON}
+# The PyTorch the torch backend was measured on; its CPU build, as a host without a GPU installs it.
+TORCH_VERSION=2.13.0
+TORCH_CPU_INDEX=https://download.pytorch.org/whl/cpu
 
 fail() {
   echo "linux_lane: $*" >&2
@@ -78,6 +85,21 @@ fail() {
 }
 step() {
   echo "== $*"
+}
+# RIFE's torch backend on the CPU: PyTorch into .venv, the install's check frame through it (the model
+# `sprite-gen rife install` already put in place), and every test marked torch_rife, none skipped.
+torch_gates() {
+  step "RIFE torch backend (PyTorch $TORCH_VERSION, CPU)"
+  .venv/bin/pip install --quiet --index-url "$TORCH_CPU_INDEX" "torch==$TORCH_VERSION"
+  .venv/bin/python -c 'import torch; print("torch", torch.__version__, "cuda", torch.version.cuda)'
+  SPRITE_GEN_RIFE_BACKEND=torch SPRITE_GEN_RIFE_DEVICE=cpu .venv/bin/sprite-gen rife install
+  step "RIFE torch tests (every test marked torch_rife, none skipped)"
+  torch_log=$(mktemp)
+  # No test marked: pytest exits 5 ("no tests ran"), and the lane with it. --full: a marked test that is
+  # also marked slow runs too.
+  SPRITE_GEN_RIFE_DEVICE=cpu .venv/bin/python -m pytest -q -rs --full -m torch_rife | tee "$torch_log"
+  ! grep -E '^SKIPPED' "$torch_log" >/dev/null || fail "a torch_rife test skipped; this run is meant to measure them"
+  rm -f "$torch_log"
 }
 
 cd "$(git rev-parse --show-toplevel)"
@@ -127,9 +149,10 @@ if [ "$rife_only" = 1 ]; then
   rife_log=$(mktemp)
   trap 'rm -f "$rife_log"' EXIT
   # No test marked: pytest exits 5 ("no tests ran"), and the lane with it. --full: a marked test that is
-  # also marked slow runs too.
-  .venv/bin/python -m pytest -q -rs --full -m real_rife | tee "$rife_log"
+  # also marked slow runs too. Those marked torch_rife as well run with the torch backend's.
+  .venv/bin/python -m pytest -q -rs --full -m "real_rife and not torch_rife" | tee "$rife_log"
   ! grep -E '^SKIPPED' "$rife_log" >/dev/null || fail "a RIFE test skipped; this run is meant to measure them"
+  torch_gates
   echo "linux_lane: the RIFE gates passed at $sha"
   exit 0
 fi
@@ -159,8 +182,13 @@ test -f "$smoke/run/manifest.json"
 
 step "tests"
 # Every test (--full): a plain pytest is the fast bundle, the tests marked slow deselected. Without RIFE, a
-# skip of a test not marked real_rife fails unless tests/conftest.py names it.
+# skip of a test not marked real_rife or torch_rife fails unless tests/conftest.py names it. PyTorch is not
+# installed yet: the tests marked torch_rife skip here and run in torch_gates.
 .venv/bin/python -m pytest -q --full ${rife_unmeasured:+--rife-unmeasured}
+
+if [ -z "$rife_unmeasured" ]; then
+  torch_gates
+fi
 
 if [ -n "$rife_unmeasured" ]; then
   echo "linux_lane: every gate but RIFE passed at $sha"

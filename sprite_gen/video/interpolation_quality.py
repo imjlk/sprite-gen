@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 """The shared acceptance policy for the frames repair and cycle alignment deliver.
 
-Measurements live in ``rife`` (``smear``, ``outline_shift``, ``ghost``, ``crossfade``, ``torn``); these are the existing
-alignment bounds, also applied before replacing a filmed middle frame during jump repair, the ghost screen
-every frame a loop path delivers passes, filmed or made, the clean frame a filmed ghost gives way
-to, and the cross-fade a made frame is named for, kept; and the torn part a frame of the overlapped wrap
-is refused for (docs/loop-repair.md section 4).
+Measurements live in ``rife`` (``smear``, ``outline_shift``, ``ghost``, ``crossfade``, ``torn``, ``hole``, ``doubled``);
+these are the existing alignment bounds, also applied before replacing a filmed middle frame during jump repair, the ghost
+screen every frame a loop path delivers passes, filmed or made, the clean frame a filmed ghost gives way
+to, and the cross-fade a made frame is named for, kept; the torn part a frame of the overlapped wrap
+is refused for; and the hole through a limb and the double outline a frame the alignment makes gives way for
+(docs/loop-repair.md section 4).
 """
 
 from collections.abc import Container
@@ -32,6 +33,19 @@ CROSSFADE_LOOK = 0.015
 # legs melted into one shape, a part doubled) and the frames seen as clean. Read only where a frame is read with its
 # passes — the overlapped wrap's frames (docs/loop-repair.md sections 2 and 4).
 TORN_WARN = 0.21
+# A made frame whose `rife.hole` is over this has a hole through a limb: a transparent hole inside its silhouette at
+# least rife.HOLE_THICK pixels thick that neither neighbour has there, in place, carried by the whole figure's motion, or
+# as one hole of each, alike and on its way. Any is one: a gap a step opens between two legs lies where the neighbour that
+# shows it open has it, a gap the two have moved with the body lies on its way between them, and a hole each has that a
+# part carried, turned or grown, is one hole of each; all are theirs. Read only where the measure carries it — the frames
+# the cycle alignment makes (docs/loop-repair.md section 4).
+HOLE_WARN = 0.0
+# A made frame whose `rife.doubled` is over this shows a double outline: a line one neighbour draws, left at part strength
+# in its own place, over a run longer than this share of its body height. Set by eye on drawn walks, between the frames
+# seen with a line doubled (a boot's top faded out where one neighbour tilts it, beside the top the frame drew), which read
+# over it, and the frames seen as clean or only soft, which read under it. Read only where the measure carries it — the
+# frames the cycle alignment makes (docs/loop-repair.md section 4).
+DOUBLED_WARN = 0.03
 
 
 def faults(measure: dict[str, float | None]) -> list[str]:
@@ -45,13 +59,18 @@ def faults(measure: dict[str, float | None]) -> list[str]:
     Where it is None (art painted without a line) and in the versioned measures of
     `video-loop-compare` and `video-loop-repair`, which carry `rife.smear` alone, the dark line
     judges alone. A part torn where the measure carries how far the frame's passes disagree
-    (`torn`, the overlapped wrap's frames: `rife.passes`, `rife.torn`)."""
+    (`torn`, the overlapped wrap's frames: `rife.passes`, `rife.torn`). A hole through a limb where
+    it carries the holes the frame opened that neither neighbour has (`hole`, the cycle alignment's
+    frames: `rife.hole`). A double outline where it carries how far a line one neighbour draws runs at
+    part strength in its own place (`doubled`, the cycle alignment's frames: `rife.doubled`)."""
     shift = measure.get("outline_shift")
     outline = measure["outline_loss"] if shift is None else min(measure["outline_loss"], shift)
     return ([*(["smear"] if measure["dark_excess"] > SMEAR_WARN else []),
              *(["outline"] if outline > OUTLINE_WARN else []),
              *(["ghost"] if (measure.get("ghost") or 0.0) > GHOST_WARN else []),
-             *(["torn"] if (measure.get("torn") or 0.0) > TORN_WARN else [])])
+             *(["torn"] if (measure.get("torn") or 0.0) > TORN_WARN else []),
+             *(["hole"] if (measure.get("hole") or 0.0) > HOLE_WARN else []),
+             *(["doubled"] if (measure.get("doubled") or 0.0) > DOUBLED_WARN else [])])
 
 
 def looks(measure: dict[str, float | None]) -> list[str]:

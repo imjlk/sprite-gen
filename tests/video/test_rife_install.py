@@ -13,6 +13,7 @@ import sys
 import zipfile
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from sprite_gen import cli
@@ -23,28 +24,36 @@ TOP = f"rife-ncnn-vulkan-{rife.RELEASE}-{PLATFORM}"
 BINARY = rife.installed_binary(Path("."), PLATFORM).name
 
 
-def _release_zip(tmp_path: Path, *, model: bool = True) -> Path:
-    path = tmp_path / rife_install.zip_name(PLATFORM)
+# The fixture zip's model files, which its pin names in place of rife-v4.6's (`rife.MODEL_SHA256`).
+MODEL_FILES = {"flownet.param": b"param\n", "flownet.bin": b"bin\n"}
+
+
+def _release_zip(tmp_path: Path, *, model: bool = True, platform: str = PLATFORM) -> Path:
+    path = tmp_path / rife_install.zip_name(platform)
+    top, binary = f"rife-ncnn-vulkan-{rife.RELEASE}-{platform}", rife.installed_binary(Path("."), platform).name
     with zipfile.ZipFile(path, "w") as zf:
-        zf.writestr(f"{TOP}/", "")
-        zf.writestr(f"{TOP}/{BINARY}", "#!/bin/sh\nexit 0\n")
-        zf.writestr(f"{TOP}/LICENSE", "MIT\n")
-        zf.writestr(f"{TOP}/README.md", "readme\n")
+        zf.writestr(f"{top}/", "")
+        zf.writestr(f"{top}/{binary}", "#!/bin/sh\nexit 0\n")
+        zf.writestr(f"{top}/LICENSE", "MIT\n")
+        zf.writestr(f"{top}/README.md", "readme\n")
         if model:
-            zf.writestr(f"{TOP}/{rife.MODEL}/flownet.param", "param\n")
-            zf.writestr(f"{TOP}/{rife.MODEL}/flownet.bin", "bin\n")
-        zf.writestr(f"{TOP}/rife-v4/flownet.bin", "another model\n")  # not what the engine runs
-        zf.writestr(f"{TOP}/{rife.MODEL}/../../escape.txt", "outside\n")
+            for name, data in MODEL_FILES.items():
+                zf.writestr(f"{top}/{rife.MODEL}/{name}", data)
+        zf.writestr(f"{top}/rife-v4/flownet.bin", "another model\n")  # not what the engine runs
+        zf.writestr(f"{top}/{rife.MODEL}/../../escape.txt", "outside\n")
         zf.writestr("elsewhere/rife-ncnn-vulkan", "not in the release folder\n")
     return path
 
 
 @pytest.fixture
 def pinned(monkeypatch, tmp_path):
-    """The fixture zip, with its SHA-256 as the pinned one, and the engine looking only at tmp_path."""
+    """The fixture zip, with its SHA-256 and its model's as the pinned ones, and the engine looking only at tmp_path."""
     (tmp_path / "zips").mkdir()
     path = _release_zip(tmp_path / "zips")
     monkeypatch.setitem(rife_install.ZIP_SHA256, PLATFORM, hashlib.sha256(path.read_bytes()).hexdigest())
+    monkeypatch.setattr(rife, "MODEL_SHA256", {name: hashlib.sha256(data).hexdigest() for name, data in MODEL_FILES.items()},
+                        raising=False)
+    monkeypatch.delenv("SPRITE_GEN_RIFE_BACKEND", raising=False)
     monkeypatch.setenv("SPRITE_GEN_DATA_DIR", str(tmp_path / "data"))
     monkeypatch.delenv("SPRITE_GEN_RIFE", raising=False)
     monkeypatch.delenv("SPRITE_GEN_RIFE_MODEL", raising=False)
@@ -133,3 +142,58 @@ def test_a_platform_without_a_release_build_is_refused(monkeypatch):
     monkeypatch.setattr(rife, "platform_release", lambda: "")
     with pytest.raises(SystemExit, match="ships no build"):
         rife_install.install(run_check=False)
+
+
+@pytest.mark.parametrize("backend", ["ncnn", "torch"])
+def test_a_zip_whose_model_is_not_the_pinned_one_installs_nothing(pinned, tmp_path, monkeypatch, backend):
+    """Its hash checked, the zip unpacked, the model's two files are checked too (`rife.MODEL_SHA256`), for either backend:
+    a model that is not the one pinned is named with what it is and what was expected, and nothing is installed."""
+    monkeypatch.setattr(rife, "MODEL_SHA256", {**rife.MODEL_SHA256, "flownet.bin": "0" * 64}, raising=False)
+    with pytest.raises(SystemExit, match=r"flownet.bin has sha256 [0-9a-f]{64}, expected 0{64}.*nothing was installed"):
+        rife_install.install(zip_path=pinned, platform=PLATFORM, run_check=False, backend=backend)
+    assert not (tmp_path / "data" / "rife" / TOP).exists()
+
+
+class _Halfway:
+    """A torch runner stood in: the frame between is the first disc moved half the 36 px to the second (the check's discs)."""
+
+    def __init__(self, model: Path):
+        self.model = model
+
+    def frame(self, colour, cover, t):
+        return np.roll(colour[0], 18, axis=1), np.roll(cover[0], 18, axis=1)
+
+    def identity(self):
+        return {"backend": "torch"}
+
+    def describe(self):
+        return {"kind": "rife-torch", "device": "cpu", "model": self.model.name}
+
+
+def test_the_torch_backend_installs_where_the_binary_does_not_run_and_checks_its_frame_through_torch(monkeypatch, tmp_path, capsys):
+    """`--backend torch` (or SPRITE_GEN_RIFE_BACKEND=torch, which it defaults to) reads the zip's model only: on a Linux
+    machine its x86-64 binary does not run on, it is not refused as the binary's install is; the model's files are checked;
+    the check frame is made through the torch backend from the model just installed — the binary in it never runs (it makes
+    no frame) — and the report names the model the engine will read."""
+    monkeypatch.setattr(rife, "platform_release", lambda: "ubuntu")
+    monkeypatch.setattr(rife_install.platform_mod, "machine", lambda: "aarch64")
+    monkeypatch.setenv("SPRITE_GEN_DATA_DIR", str(tmp_path / "data"))
+    for name in ("SPRITE_GEN_RIFE", "SPRITE_GEN_RIFE_MODEL", "SPRITE_GEN_RIFE_BACKEND"):
+        monkeypatch.delenv(name, raising=False)
+    (tmp_path / "zips").mkdir()
+    zipped = _release_zip(tmp_path / "zips", platform="ubuntu")
+    monkeypatch.setitem(rife_install.ZIP_SHA256, "ubuntu", hashlib.sha256(zipped.read_bytes()).hexdigest())
+    monkeypatch.setattr(rife, "MODEL_SHA256", {name: hashlib.sha256(data).hexdigest() for name, data in MODEL_FILES.items()},
+                        raising=False)
+    with pytest.raises(SystemExit, match="x86-64 only and this machine is aarch64"):
+        rife_install.install(zip_path=zipped, run_check=False)
+    asked = []
+    monkeypatch.setattr(rife, "torch_runner", lambda model=None: asked.append(model) or _Halfway(model), raising=False)
+    report = rife_install.install(zip_path=zipped, backend="torch")
+    model = (tmp_path / "data" / "rife" / f"rife-ncnn-vulkan-{rife.RELEASE}-ubuntu" / rife.MODEL).resolve()
+    assert report["backend"] == "torch" and report["installed"] == "now" and asked == [model]
+    assert report["check"] == {"passed": True, "disc_centre_x": 48.0}
+    assert report["engine_finds"] == str(model) and "note" not in report
+    monkeypatch.setenv("SPRITE_GEN_RIFE_BACKEND", "torch")
+    assert cli.main(["rife", "install", "--zip", str(zipped)]) == 0
+    assert json.loads(capsys.readouterr().out)["backend"] == "torch" and len(asked) == 2

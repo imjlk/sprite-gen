@@ -66,6 +66,65 @@ popover, click two cards to pick the pair (blue border), choose GPT/Grok, Genera
 While the follow-up full-batch re-extraction runs, `/api/run` reports busy (503)
 instead of a manifest-consistency error.
 
+## Cross-state in-betweens (`sprite-gen tween`)
+
+`interpolate` works inside one state's primary strip, one frame per call. Chained states
+(`attack -> idle` recovery, `skill -> idle`, an `idle -> attack` wind-up) need frames between
+two frames of *different* states, often several, and often across a large height change.
+`sprite-gen tween` (`sprite_gen/effects/tween.py`, `scripts/tween_frames.py`) covers that.
+
+Clips that a video source films whole keep their existing paths: `video-stop` for walk/run
+stops, one-shot cuts for recovery inside one clip, `video --image --last-frame` for pinned
+clips. `tween` is for joining frames that already exist.
+
+```bash
+# run mode: endpoints from two states of a run (negative index = from the end)
+sprite-gen tween <run> --from attack:-1 --to idle:0 --n 2 [--label attack_recover]
+# file mode: endpoints from PNGs, or from cells of a sheet
+sprite-gen tween --from-file a.png --to-file sheet.png:0 --cell 448x448 --n 3 --out-dir out/
+```
+
+| flag | meaning |
+| --- | --- |
+| `--n` | in-betweens to draw, 1..6 (default 2), all in one call |
+| `--method strip` (default) | one keyframe strip: slot 1 = A, last slot = B, grey onion-skin ghosts of both in the slots between; the provider fills every slot at once |
+| `--method video` | films a first-last clip through the existing `video --image --last-frame` path (grok login), samples N+2 frames evenly, same checks |
+| `--provider codex\|grok` | the one provider used; no retry on another (No silent fallback). Default `grok` |
+| `--anchor foot\|bottom-center` | horizontal anchor: mean x of the bottom 6 % of opaque rows, or bbox centre |
+| `--margin` | safe margin around each slot as a fraction of the figure size (default 0.12) |
+| `--min-endpoint-iou` | refusal threshold for drawn endpoints (default 0.6) |
+| `--ref` | extra identity reference for the strip method (repeatable) |
+| `--description` | character text for the prompt (run mode reads `character.description`) |
+
+What it does with the result:
+
+- **Endpoint check.** The drawn slot 1 and last slot are compared with A and B (silhouette
+  IoU at the keyframes' height, foot anchors aligned), and the scale the provider drew the
+  two ends at must agree (`scale_agree >= 0.85`). Under either threshold the command exits
+  non-zero with the numbers and keeps `keyframe-strip.png`, `raw.png` and `tween.json`.
+- **Scale and feet.** Every in-between is rescaled to the lerped keyframe height
+  (A height to B height), and its foot anchor goes on the shared ground row. How big the
+  provider drew it is measured against the lerp of the two *drawn* endpoint heights and kept
+  in `tween.json` as `frame_scale.drawn_vs_endpoints`. Outside 0.85..1.18 it is a warning for
+  `--method strip` and a refusal for `--method video` (a clip that zooms or shrinks the figure).
+- **Slicing by component, with an ownership rule.** The drawn strip is cut by connected
+  component, not by fixed columns. The largest component in each slot is that slot's figure;
+  every other piece (a blade, a cape tip) goes to the figure it is horizontally closest to, so
+  a long prop reaching over a slot border stays with its owner. One summarised warning is
+  given only for a figure spilling more than a quarter slot into its neighbour or a piece
+  about equally close to two figures; a source cell whose content touches its own cell
+  border is also warned (a sign the source sheet was mis-sliced).
+- **Pose jumps.** `step_iou` (consecutive silhouette IoU across A, tweens, B) under 0.45 is
+  warned. `drawn_step_iou` measures the same before rescaling; for `--method video` under 0.3
+  is a refusal.
+- **Status.** `tween.json` always carries `status`: `ok`, `refused` (with `error`), or
+  `error` when the provider call itself failed (timeout, auth, crash) — the folder is never
+  left without a record.
+- **Record.** Run mode writes one take strip on the destination state
+  (`raw/<to>.takes/<label>.png`) with `takes[].transition = {from_state, from_index,
+  to_state, to_index, n, method, provider, endpoint_match}`; re-running a label overwrites it.
+  File mode writes `tween-<k>.png` (RGBA, one canvas size) and `tween.json`.
+
 ## Pipeline internals
 
 1. Chroma-remove the primary strip, extract components, tighten to solid bbox.
@@ -95,3 +154,57 @@ is exercised manually, not in CI.
 ## Related
 
 - [docs/README.md](README.md) — documentation index
+
+### Asset pipeline: fixed frames, metadata, batches, sheets
+
+File mode and `--manifest` mode add an engine-facing layer (`sprite_gen/effects/tween_pipeline.py`):
+
+```bash
+# one boundary, fixed 256x256 frames, feet on the bottom-centre pixel, a sheet for the packer
+sprite-gen tween --from-file a.png --to-file b.png --n 2 --out-dir out/ \
+  --frame-size 256x256 --pivot bottom-center --fps 12 --include-ends --export sheet
+# many boundaries in one run; re-running skips what is already done
+sprite-gen tween --manifest tweens.json --out-dir out/ [--only id ...] [--force]
+```
+
+| flag | meaning |
+| --- | --- |
+| `--frame-size WxH` | every frame (ends included) on one canvas size, foot anchor on `--pivot` |
+| `--pivot bottom-center\|X,Y` | pixel the foot anchor lands on (default: `W/2, H`, i.e. baseline = bottom row) |
+| `--fit error\|shrink` | a set that does not fit: refuse (default, exit 3) or shrink the whole set uniformly about the anchor; never clipped |
+| `--resample lanczos\|nearest` | filter for `--fit shrink` (`nearest` for hard-edged pixel art) |
+| `--fps`, `--durations-ms a,b,…` | per-frame durations written to the metadata |
+| `--include-ends` | metadata and sheet also list the `from` / `to` frames |
+| `--export sheet` | also write `sheet.png` + `sheet.json`, one row per boundary |
+| `--force` | redo a boundary even when its cached result is valid |
+
+`tween.json` (`schema: sprite-gen-tween/2`) adds `id`, `input_hash`, `frame_size`, `pivot`
+(`x, y` px and normalised `nx, ny`), `fit_scale`, `fps`, `loop` and
+`frames: [{index, file, role (from|tween|to), w, h, pivot, duration_ms}]` to the existing
+checks. `sheet.json` uses the same `cell`, `animation.rows.<id>.{row, frames, durations_ms,
+loop}` and `frame_layout.rows.<id>: [{x, y, w, h}]` shape as `compose`'s `manifest.json`, so a
+loader for compose output reads it unchanged.
+
+Manifest (`--manifest`), paths relative to the manifest file:
+
+```json
+{
+  "defaults": {"n": 2, "frame_size": "256x256", "fps": 12, "export": "sheet"},
+  "boundaries": [
+    {"id": "attack_to_idle", "from_file": "attack.png:-1", "to_file": "idle.png:0", "cell": "256x256"},
+    {"id": "idle_to_attack", "from_file": "idle.png:0", "to_file": "attack.png:0", "cell": "256x256", "n": 1}
+  ]
+}
+```
+
+Every boundary option of file mode is accepted per entry (`n, method, provider, anchor, margin,
+min_endpoint_iou, description, chroma, refs, cell, frame_size, pivot, fit, resample, fps,
+durations_ms, include_ends, loop`); unknown keys are a usage error. Each boundary lands in
+`<out>/<id>/`, one failure does not stop the rest, and `<out>/batch.json` lists every id with
+`status` (`ok`, `cached`, `refused`, `error`, `usage`). A boundary is skipped when its
+`tween.json` says `ok` for the same `input_hash` (endpoint and ref bytes plus every option
+that changes the output) and its frame files exist; `tween.json` is written last and
+atomically, so an interrupted run simply redoes that boundary.
+
+Exit codes: `0` all ok or cached, `1` provider/runtime error, `2` usage error, `3` refused
+(endpoint drift, a set that does not fit). A batch returns the most severe code (1 > 3 > 2).

@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 """`scripts/linux_lane.sh --rife-unmeasured` runs the suite where no RIFE is reachable, and the tests
-that need one skip; `--rife-only` runs the tests marked `real_rife` (`pytest -m real_rife`), none
-skipped. A test that skips without RIFE and is not marked is measured by neither run.
+that need one skip; `--rife-only` runs the tests marked `real_rife` or `torch_rife` (`pytest -m real_rife`,
+`-m torch_rife`), none skipped. A test that skips without RIFE and is not marked is measured by neither run.
 
 Its collection: the suite is collected twice, with nothing else changed, once with a stand-in RIFE
-everywhere `rife.locate()` looks (SPRITE_GEN_RIFE, PATH, the install root) and once with none. Every
-test the two collections skip, or collect, differently is decided by RIFE, and must carry the mark.
+everywhere `rife.locate()` and `rife.locate_model()` look (SPRITE_GEN_RIFE, PATH, the install root) and
+once with none. Every test the two collections skip, or collect, differently is decided by RIFE, and must
+carry one of the marks.
 
 Its run: a fixture or the test body can skip it, which no collection reads, so the RIFE-less run itself
 (`pytest --rife-unmeasured`, tests/conftest.py) fails each skip of a test that is not marked, unless it
@@ -28,7 +29,8 @@ from sprite_gen.video import rife
 ROOT = Path(__file__).resolve().parents[2]
 
 # Loaded into each collection (-p): per collected test, whether its skip and skipif marks skip it —
-# pytest's own reading, the mark tests/conftest.py adds included — and whether it is marked real_rife.
+# pytest's own reading, the mark tests/conftest.py adds included — and whether it is marked real_rife or
+# torch_rife.
 PROBE = '''
 import json, os
 from _pytest.skipping import evaluate_skip_marks
@@ -36,7 +38,8 @@ from _pytest.skipping import evaluate_skip_marks
 
 def pytest_collection_finish(session):
     with open(os.environ["RIFE_PROBE_OUT"], "w") as out:
-        json.dump({item.nodeid: [evaluate_skip_marks(item) is not None, item.get_closest_marker("real_rife") is not None]
+        json.dump({item.nodeid: [evaluate_skip_marks(item) is not None,
+                                 any(item.get_closest_marker(m) is not None for m in ("real_rife", "torch_rife"))]
                    for item in session.items}, out)
 '''
 
@@ -107,7 +110,7 @@ def test_every_test_rife_decides_is_marked_real_rife(tmp_path):
     decided = (present.keys() ^ absent.keys()) | {n for n in present.keys() & absent.keys() if present[n][0] != absent[n][0]}
     unmarked = sorted(n for n in decided if not (present.get(n) or absent[n])[1])
     assert not unmarked, (
-        "skipped or collected by whether RIFE is reachable, but not marked real_rife — "
+        "skipped or collected by whether RIFE is reachable, but not marked real_rife or torch_rife — "
         "`scripts/linux_lane.sh --rife-only` would not run them:\n" + "\n".join(unmarked))
     assert decided, "no test is decided by RIFE: the stand-in or the conftest skip no longer reaches the marked tests"
 

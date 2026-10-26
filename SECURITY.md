@@ -67,5 +67,6 @@ safedeps gates run --root . --strict
 ```
 
 GitHub-hosted CI is not used for this repository: the test gates and the release
-build run on the maintainer's own Linux runner through `scripts/linux_lane.sh`
-(see [docs/release.md](docs/release.md)).
+build run on the maintainer's own Linux runner through `scripts/linux_lane.sh`, and
+the RIFE torch backend's CUDA gates on a T4 rented from Modal through
+`scripts/t4_lane.py` (see [docs/release.md](docs/release.md)).

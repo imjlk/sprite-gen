@@ -9,9 +9,15 @@ directory — which `rife.locate()` searches after SPRITE_GEN_RIFE and PATH. `--
 somewhere else and prints the SPRITE_GEN_RIFE line that points the engine at it.
 
 Unpacked into a staging directory and renamed into place, so an interrupted install never leaves
-a half-written RIFE where the engine looks. Running it again over a finished install of the same
+a half-written RIFE where the engine looks; the model's two files are checked against their pinned
+SHA-256 (`rife.MODEL_SHA256`) before it is. Running it again over a finished install of the same
 zip does nothing but the check. The check makes one frame between two discs through the
 installed binary, so a machine that has the files but no working Vulkan finds out here.
+
+`--backend torch` (the default where SPRITE_GEN_RIFE_BACKEND names torch) installs the same zip for the
+torch backend, which reads the model only (`rife.locate_model()`): a Linux machine the binary does not run
+on (aarch64) is not refused, and the check frame is made through PyTorch on SPRITE_GEN_RIFE_DEVICE
+(`pip install "sprite-gen[torch]"` first; an image built without a GPU checks with SPRITE_GEN_RIFE_DEVICE=cpu).
 """
 
 from __future__ import annotations
@@ -54,14 +60,14 @@ def zip_name(platform: str) -> str:
     return f"{rife.BINARY}-{rife.RELEASE}-{platform}.zip"
 
 
-def _platform(platform: str | None) -> str:
+def _platform(platform: str | None, backend: str = "ncnn") -> str:
     name = platform or rife.platform_release()
     if name not in ZIP_SHA256:
         raise SystemExit(f"rife install: rife-ncnn-vulkan {rife.RELEASE} ships no build for {sys.platform}; build it from "
                          f"github.com/nihui/rife-ncnn-vulkan and set SPRITE_GEN_RIFE to the binary (docs/loop-repair.md)")
     machines = ZIP_MACHINES[name]
     machine = platform_mod.machine().lower()
-    if platform is None and machines is not None and machine not in machines:
+    if backend == "ncnn" and platform is None and machines is not None and machine not in machines:
         raise SystemExit(f"rife install: the {name} build of rife-ncnn-vulkan {rife.RELEASE} is x86-64 only and this machine "
                          f"is {machine}; build it from github.com/nihui/rife-ncnn-vulkan and set SPRITE_GEN_RIFE to the binary")
     return name
@@ -141,12 +147,15 @@ def _disc(cx: int) -> Image.Image:
     return Image.fromarray(a, "RGBA")
 
 
-def check(binary: Path, model: Path) -> dict[str, Any]:
-    """One frame half way between two discs through `binary`: the disc must land in the middle."""
+def check(binary: Path, model: Path, *, backend: str = "ncnn") -> dict[str, Any]:
+    """One frame half way between two discs through `binary`, or through the torch backend from `model`: the disc must
+    land in the middle."""
     try:
-        mid = rife.Rife(binary, model)(_disc(30), _disc(66), 0.5)
+        made = rife.Rife(binary, model) if backend == "ncnn" else rife.Rife(runner=rife.torch_runner(model))
+        mid = made(_disc(30), _disc(66), 0.5)
     except rife.RifeUnavailable as exc:
-        linux = " — on Linux without a GPU install `libvulkan1 mesa-vulkan-drivers`" if sys.platform.startswith("linux") else ""
+        linux = (" — on Linux without a GPU install `libvulkan1 mesa-vulkan-drivers`"
+                 if backend == "ncnn" and sys.platform.startswith("linux") else "")
         raise SystemExit(f"rife install: installed, but the check frame failed: {exc}{linux}") from exc
     xs = np.nonzero(np.asarray(mid)[..., 3] > 127)[1]
     centre = float(xs.mean()) if xs.size else None
@@ -156,14 +165,20 @@ def check(binary: Path, model: Path) -> dict[str, Any]:
 
 
 def install(*, dest: Path | None = None, zip_path: Path | None = None, platform: str | None = None,
-            force: bool = False, run_check: bool = True) -> dict[str, Any]:
-    name = _platform(platform)
+            force: bool = False, run_check: bool = True, backend: str | None = None) -> dict[str, Any]:
+    try:
+        backend = backend or rife.backend()
+    except rife.RifeUnavailable as exc:
+        raise SystemExit(f"rife install: {exc}") from exc
+    if backend not in rife.BACKENDS:
+        raise SystemExit(f"rife install: backend {backend!r}: name ncnn or torch")
+    name = _platform(platform, backend)
     sha = ZIP_SHA256[name]
     root = (dest or rife.install_root()).expanduser().resolve()
     binary = rife.installed_binary(root, name)
     target = binary.parent
-    report: dict[str, Any] = {"release": rife.RELEASE, "model": rife.MODEL, "platform": name, "zip": zip_name(name),
-                              "sha256": sha, "dir": str(target), "binary": str(binary)}
+    report: dict[str, Any] = {"backend": backend, "release": rife.RELEASE, "model": rife.MODEL, "platform": name,
+                              "zip": zip_name(name), "sha256": sha, "dir": str(target), "binary": str(binary)}
     if not force and _complete(target, name, sha):
         report["installed"] = "already"
     else:
@@ -183,6 +198,10 @@ def install(*, dest: Path | None = None, zip_path: Path | None = None, platform:
                 raise SystemExit(f"rife install: {zip_path.name} has SHA-256 {got}, expected {sha}; nothing was installed")
             staging = work / target.name
             report["files"] = _unpack(zip_path, staging, name)
+            try:
+                rife.model_bytes(staging / rife.MODEL)
+            except rife.RifeUnavailable as exc:
+                raise SystemExit(f"rife install: {exc}; nothing was installed") from exc
             (staging / MARKER).write_text(json.dumps({"release": rife.RELEASE, "zip": zip_name(name), "sha256": sha}) + "\n",
                                           encoding="utf-8")
             if target.exists():
@@ -190,7 +209,18 @@ def install(*, dest: Path | None = None, zip_path: Path | None = None, platform:
             staging.rename(target)
         report["installed"] = "now"
     if run_check:
-        report["check"] = check(binary, target / rife.MODEL)
+        report["check"] = check(binary, target / rife.MODEL, backend=backend)
+    if backend == "torch":
+        # What the torch backend will read: SPRITE_GEN_RIFE_MODEL before the install root.
+        try:
+            found = str(rife.locate_model())
+        except rife.RifeUnavailable:
+            found = None
+        report["engine_finds"] = found
+        if found != str((target / rife.MODEL).resolve()):
+            report["note"] = (f"the torch backend reads SPRITE_GEN_RIFE_MODEL before {rife.install_root()}; to read this "
+                              f"install set SPRITE_GEN_RIFE_MODEL={target / rife.MODEL}" + (f" (it now reads {found})" if found else ""))
+        return report
     # What the engine will run: SPRITE_GEN_RIFE and PATH are searched before the install root.
     try:
         found = str(rife.locate()[0])
@@ -212,13 +242,16 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
                                             "its SHA-256 is checked all the same")
     p.add_argument("--force", action="store_true", help="unpack again over a finished install")
     p.add_argument("--no-check", action="store_true", help="skip the check frame made through the installed binary")
+    p.add_argument("--backend", choices=rife.BACKENDS, help="what will run RIFE: ncnn (the binary) or torch (the model only, "
+                                                            "its check frame through PyTorch on SPRITE_GEN_RIFE_DEVICE); "
+                                                            "default SPRITE_GEN_RIFE_BACKEND, else ncnn")
 
 
 def run(**kwargs: object) -> int:
     if kwargs.get("action") != "install":
         raise SystemExit(f"rife: unknown action {kwargs.get('action')!r}; expected install")
     report = install(dest=kwargs.get("dir"), zip_path=kwargs.get("zip"), force=bool(kwargs.get("force")),  # type: ignore[arg-type]
-                     run_check=not kwargs.get("no_check"))
+                     run_check=not kwargs.get("no_check"), backend=kwargs.get("backend"))  # type: ignore[arg-type]
     if report.get("note"):
         print(f"rife install: note: {report['note']}", file=sys.stderr)
     print(json.dumps({k: v for k, v in report.items() if k != "files"}, ensure_ascii=False, indent=2))

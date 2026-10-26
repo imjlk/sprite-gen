@@ -977,9 +977,9 @@ def align_gaits(results: list[dict[str, Any]], root: Path, mode: str, *, interpo
                                          views=[_align_view(r) for r in rows], state=state, feet=told)
         except rife_mod.RifeNotInstalled as exc:
             out[state] = {"ok": True, "applied": False, "reason": "rife-not-installed", "why": "RIFE not installed — each loop keeps its own length",
-                          "rife": str(exc), "install": rife_mod.INSTALL_COMMAND}
+                          "rife": str(exc), "install": rife_mod.install_command()}
             print(f"video-set: warning: {state}: cycles not aligned — RIFE is not installed, so each loop keeps its own "
-                  f"length; run `{rife_mod.INSTALL_COMMAND}`, then `sprite-gen video-cycle-align` (docs/loop-repair.md)",
+                  f"length; run `{rife_mod.install_command()}`, then `sprite-gen video-cycle-align` (docs/loop-repair.md)",
                   file=sys.stderr)
             continue
         except align_mod.CycleSuspects as exc:
@@ -1159,7 +1159,7 @@ def run_set(
     warnings = ([f"{r['item']}: jump frame not repaired — {r['loop']['jump_repair']['why']}" for r in results if r.get("ok") and "jump_repair" in r["loop"]]
                 + [f"cycle-align:{st}: not aligned — {a['why']}" for st, a in aligned.items() if a.get("reason") == "rife-not-installed"])
     if warnings:
-        warnings.append(f"install RIFE with `{rife_mod.INSTALL_COMMAND}` (docs/loop-repair.md)")
+        warnings.append(f"install RIFE with `{rife_mod.install_command()}` (docs/loop-repair.md)")
     # What the set left for someone to count — never a failure, never silent.
     warnings += [f"cycle-align:{st}: not aligned — {a['why']}; count them, then `sprite-gen video-cycle-align --cycles <loop>=<k>` "
                  f"(the loops under `suspects` in {a['report']}, docs/loop-repair.md section 4)"

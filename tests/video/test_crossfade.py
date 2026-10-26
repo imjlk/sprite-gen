@@ -4,7 +4,9 @@ the near and far boots of two drawings both at part strength where the flow foun
 the coverage whole — so no part-covered band for the ghost screen, and an outline the outline rule
 reads only where the art outlines in near-black. `rife.crossfade` reads it relative to the source
 frames' own edges; it is a reading to look at, named in a warning, never a fault: on these legs a
-clean drawing between two far-apart drawings outlined in grey reads over the line too.
+clean drawing between two far-apart drawings outlined in grey reads over the line too. The lines such
+a frame leaves at part strength inside the silhouette are read apart, and where they run long they
+are a double outline, a fault of its own (`rife.doubled`, tests/video/test_inbetween_doubled.py).
 
 The fixtures are synthetic: outlined legs with boots (tests/video/test_rife.py `_walker`, three times
 the size, a palette per case — the outline's and the boots' lightness varied), and RIFE stand-ins
@@ -23,7 +25,7 @@ import pytest
 from PIL import Image, ImageDraw
 
 from sprite_gen.video import align, repair, rife
-from sprite_gen.video.interpolation_quality import CROSSFADE_LOOK, faults, looks
+from sprite_gen.video.interpolation_quality import CROSSFADE_LOOK, DOUBLED_WARN, faults, looks
 from tests.video.test_ghost_screen import _band, _block_walker, _cut
 from tests.video.test_loop_repair import forced_flow_group
 
@@ -127,6 +129,8 @@ def test_a_clean_drawing_between_far_drawings_outlined_in_grey_reads_over_the_li
 
 @pytest.mark.slow
 def test_auto_keeps_a_crossfaded_frame_and_names_it_to_look_at():
+    """Legs 10 to 5 degrees: the lines the cross-fade leaves inside every silhouette run under the
+    double outline's line (the rest of its doubled edge lies on the silhouette), so it is kept, named."""
     sa, sb = (10, -10), (5, -5)
     a, b, _, there = _inside(sa, sb, 0.5)
     _, _, _, back = _inside(sb, sa, 0.5)
@@ -135,7 +139,7 @@ def test_auto_keeps_a_crossfaded_frame_and_names_it_to_look_at():
         out, facts = align.resample([a, b], 4, lambda x, y, t: made[(id(x), id(y))], between=between)  # times 0, .5, 1, 1.5
         assert [m["at"] for m in facts["smear"]] == [1, 3]
         assert all(m["method"] == "rife" and m["faults"] == [] and m["look"] == ["crossfade"] for m in facts["smear"])
-        assert all(m["crossfade"] > CROSSFADE_LOOK for m in facts["smear"])
+        assert all(m["crossfade"] > CROSSFADE_LOOK and m["doubled"] < DOUBLED_WARN for m in facts["smear"])
         assert out[1] is there and out[3] is back and facts["made_by_rife"] == 2
     a, b, _, there = _inside(sa, sb, 0.5, outline=BLACK, boot=None)
     _, _, _, back = _inside(sb, sa, 0.5, outline=BLACK, boot=None)
@@ -156,18 +160,27 @@ def _keyed(tmp_path: Path, name: str, length: int) -> Path:
 
 
 @pytest.mark.slow
-def test_alignment_warns_on_a_crossfaded_frame_it_keeps(tmp_path, capsys):
+def test_alignment_gives_a_crossfaded_frame_way_as_a_double_outline_and_names_it_to_look_at(tmp_path, capsys):
     """Resampled 8 to 12 through a RIFE whose colour run blends and whose coverage run is the union:
-    the frames it makes across the legs' long steps are kept, each named in a warning line."""
+    every frame it makes across the legs' long steps leaves both drawings' lines at half inside the
+    silhouette, a double outline (`rife.doubled`, tests/video/test_inbetween_doubled.py), so auto gives
+    it way, each named in a warning line, and names it to look at all the same. Before the double
+    outline was read they were kept: the cross-fade reading names and never judges, as a clean drawing
+    between far-apart drawings reads over it too, and it still does. Under rife they are kept, each
+    named in a warning line to look at."""
     _cut(_keyed(tmp_path, "E", 8), tmp_path / "E", 8)
     report = align.align_set([tmp_path / "E"], length=12, interpolate=lambda a, b, t: _made(a, b, t, _union), multi_cycle="warn")
-    row = report["loops"][0]
-    looked = [m for m in row["smear"] if m["look"]]
+    looked = [m for m in report["loops"][0]["smear"] if m["look"]]
     assert looked and all(m["look"] == ["crossfade"] and m["crossfade"] > CROSSFADE_LOOK for m in looked)
-    assert all(m["method"] == "rife" for m in looked if not m["faults"])  # the reading gives nothing way
-    kept = [m for m in looked if m["method"] == "rife"]
+    assert all(m["method"] == "nearest" and "doubled" in m["faults"] for m in looked)
+    assert all(any(f"frame {m['at']}: RIFE's frame" in w and "a double outline" in w for w in report["warnings"]) for m in looked)
+    _cut(_keyed(tmp_path, "R", 8), tmp_path / "R", 8)
+    report = align.align_set([tmp_path / "R"], length=12, interpolate=lambda a, b, t: _made(a, b, t, _union), multi_cycle="warn",
+                             between="rife")
+    kept = [m for m in report["loops"][0]["smear"] if m["look"]]
     named = [w for w in report["warnings"] if "may cross-fade two drawings inside its outline" in w]
-    assert kept and len(named) == len(kept) and all(any(f"frame {m['at']} (made by RIFE)" in w for w in named) for m in kept)
+    assert kept and all(m["method"] == "rife" for m in kept)
+    assert len(named) == len(kept) and all(any(f"frame {m['at']} (made by RIFE)" in w for w in named) for m in kept)
 
 
 def test_jump_repair_takes_a_crossfaded_proposal_and_names_it(monkeypatch):

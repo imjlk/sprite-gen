@@ -312,7 +312,10 @@ def test_the_summary_names_the_frames_made_and_the_rife_that_made_them(tmp_path,
             return between(a, b, t)
 
         def describe(self):
-            return {"binary": "rife-ncnn-vulkan", "model": "rife-v4.6", "tta": ""}
+            return {"kind": "rife-ncnn-vulkan", "binary": "rife-ncnn-vulkan", "model": "rife-v4.6", "tta": ""}
+
+        def counts(self):
+            return {"binary_calls": Found.calls}
 
     monkeypatch.setattr(loop_mod.rife_mod, "Rife", Found)
     keyed = _keyed(tmp_path, phases)

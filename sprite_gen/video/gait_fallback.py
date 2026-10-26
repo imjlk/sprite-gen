@@ -377,20 +377,29 @@ def undo_scale(frames: list[Image.Image], measured: dict, pad: tuple[int, int, i
     a part scaled up past the frame's edge is kept. A crown carried above the frame was cut off
     in every frame it reached. With no room needed the frames keep their size and bytes.
     """
-    height, foot_x, foot_y = measured["height"], measured["foot_x"], measured["foot_y"]
-    left, top, right, bottom = undo_padding(frames, measured, lift) if pad is None else pad
-    out = []
-    for k, frame in enumerate(frames):
-        s = float(height[0] / height[k])
-        ax, ay = float(foot_x[k]), float(foot_y[k])
-        # Output (x, y) reads input anchor + (x - room - anchor) / s; held, y - room - anchor - lift.
-        ry = ay * (1 - 1 / s) - top / s
-        if lift is not None:
-            ry -= float(lift[k]) / s
-        inverse = (1 / s, 0.0, ax * (1 - 1 / s) - left / s, 0.0, 1 / s, ry)
-        size = (frame.width + left + right, frame.height + top + bottom)
-        out.append(transform_cell(frame, size, inverse))
-    return out
+    pad = undo_padding(frames, measured, lift) if pad is None else pad
+    return [hold_frame(frame, frame_hold(k, measured, lift), pad) for k, frame in enumerate(frames)]
+
+
+def frame_hold(k: int, measured: dict, lift: np.ndarray | None = None) -> dict:
+    """How `undo_scale` moves frame `k`: `scale`d about its fitted foot point (`foot_point_px`, x and y), then
+    `lift_px` down (up, negative), None where the feet stay where they were filmed. Python floats, which JSON
+    carries exactly, so the move recorded is the move made again (`hold_frame`)."""
+    return {"scale": float(measured["height"][0] / measured["height"][k]),
+            "foot_point_px": [float(measured["foot_x"][k]), float(measured["foot_y"][k])],
+            "lift_px": None if lift is None else float(lift[k])}
+
+
+def hold_frame(frame: Image.Image, move: dict, pad: tuple[int, int, int, int]) -> Image.Image:
+    """One frame moved as `frame_hold` says, widened by `pad` (left, top, right, bottom): `undo_scale`'s frame."""
+    s, (ax, ay), lift = move["scale"], move["foot_point_px"], move["lift_px"]
+    left, top, right, bottom = pad
+    # Output (x, y) reads input anchor + (x - room - anchor) / s; held, y - room - anchor - lift.
+    ry = ay * (1 - 1 / s) - top / s
+    if lift is not None:
+        ry -= lift / s
+    inverse = (1 / s, 0.0, ax * (1 - 1 / s) - left / s, 0.0, 1 / s, ry)
+    return transform_cell(frame, (frame.width + left + right, frame.height + top + bottom), inverse)
 
 
 def held_box(box: tuple[int, int, int, int], k: int, measured: dict, pad: tuple[int, int, int, int],

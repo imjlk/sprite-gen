@@ -34,7 +34,7 @@ from sprite_gen.video import restoration as video_restoration
 from sprite_gen.video import source as video_source
 from sprite_gen.video import rife_install
 from sprite_gen.video import face_bake, face_pack
-from sprite_gen.effects import breathe, recolor, shadow
+from sprite_gen.effects import breathe, recolor, shadow, tween
 from sprite_gen.scene import render, inspect_scene
 from sprite_gen.serve import serve_compose, serve_curation
 from sprite_gen.spec import migrate_breathe, migrate_request
@@ -453,6 +453,11 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         "Lay the Breathe layer over a folder of loop frames: pixel (default) or smooth (large illustrations, video frames); smooth can choose its beat to miss the hands (--avoid-region).",
         breathe.add_arguments,
         breathe.run,
+    ),
+    "tween": (
+        "Draw N in-betweens between frames of two states (or two files) in one onion-skin keyframe strip; refuses drifted endpoints.",
+        tween.add_arguments,
+        tween.run,
     ),
     "inspect": ("Inspect sprite rows for frame-count, identity, and motion defects.", _add_inspect, inspect.run),
     "score": ("Score a sprite inspect report and emit correction hints.", _add_score, score.run),

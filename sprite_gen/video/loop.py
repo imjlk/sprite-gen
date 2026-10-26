@@ -1040,11 +1040,10 @@ def _repair_jumps(frames: list[Image.Image], interpolate: rife_mod.Interpolate |
             if required:
                 raise
             frames, overlap = asked(frames, read=None)
-            overlap.update(why="RIFE not installed — the wrap cut as filmed", rife=str(exc), install=rife_mod.INSTALL_COMMAND)
+            overlap.update(why="RIFE not installed — the wrap cut as filmed", rife=str(exc), install=rife_mod.install_command())
         overlapped = overlap["frames"]
         if overlap["calls"]:
-            overlap["interpolator"] = ({"kind": "rife-ncnn-vulkan", **made_by[0], "binary_calls": interpolate.calls}
-                                       if made_by else {"kind": "injected"})
+            overlap["interpolator"] = {**made_by[0], **interpolate.counts()} if made_by else {"kind": "injected"}
     wrap_calls = calls
     try:
         repaired, record = repair_mod.repair_jumps(frames, lazy, facing=facing, screen=screen, overlapped=overlapped,
@@ -1060,17 +1059,17 @@ def _repair_jumps(frames: list[Image.Image], interpolate: rife_mod.Interpolate |
         if "unmade" in record:
             record.update(why="RIFE not installed — cut as filmed" if not record["replaced"] else
                           "RIFE not installed — the jump cut as filmed, each filmed ghost given way to the clean frame beside it",
-                          rife=str(exc), install=rife_mod.INSTALL_COMMAND)
+                          rife=str(exc), install=rife_mod.install_command())
         elif record.get("ease_skipped") == "no interpolator":
             # no jump, but a part that rushes: the frames either side of it were to be made again at eased times
             record.update(why="RIFE not installed — the rush cut as filmed" if not record["replaced"] else
                           "RIFE not installed — the rush cut as filmed, each filmed ghost given way to the clean frame beside it",
-                          rife=str(exc), install=rife_mod.INSTALL_COMMAND)
+                          rife=str(exc), install=rife_mod.install_command())
         return repaired, record, overlap
     frames = repaired
     record["applied"] = bool(record["replaced"])
     if calls > wrap_calls:
-        record["interpolator"] = {"kind": "rife-ncnn-vulkan", **made_by[0]} if made_by else {"kind": "injected"}
+        record["interpolator"] = dict(made_by[0]) if made_by else {"kind": "injected"}
     return frames, record, overlap
 
 
@@ -1094,7 +1093,7 @@ def _ghost_lines(jump_repair: dict[str, Any]) -> list[str]:
         if r["proposal"] is not None:
             why = f"RIFE's frame between its neighbours has a fault ({', '.join(r['faults'])})"
         elif r["no_proposal"] == "no interpolator":
-            why = f"RIFE is not installed, so no frame between its neighbours was made (`{rife_mod.INSTALL_COMMAND}`)"
+            why = f"RIFE is not installed, so no frame between its neighbours was made (`{rife_mod.install_command()}`)"
         else:
             why = r["no_proposal"]
         lines.append(line + f"given way to frame {r['taken']['source']} beside it, shown twice in a row (cycle/frame-{j:03d}.png): "
@@ -1113,7 +1112,7 @@ def _overlap_lines(overlap: dict[str, Any]) -> list[str]:
                 f"two drawings inside its outline (crossfade {r['proposal']['crossfade']:.4f}); kept, a reading to look at "
                 "(docs/loop-repair.md section 2)" for r in taken["made"] if r["look"]]
     if "rife" in overlap:
-        return [f"{said}, and RIFE is not installed, so the overlapped wrap was not made — run `{rife_mod.INSTALL_COMMAND}` "
+        return [f"{said}, and RIFE is not installed, so the overlapped wrap was not made — run `{rife_mod.install_command()}` "
                 "and cut it again (docs/loop-repair.md section 2)"]
     if "skipped" in overlap:
         return [f"{said}; the overlapped wrap was not made: {overlap['skipped']} (docs/loop-repair.md section 2)"]
@@ -1213,11 +1212,10 @@ def _bridge_seam(frames: list[Image.Image], interpolate: rife_mod.Interpolate | 
         if required:
             raise
         frames, record = asked(frames, None)
-        record.update(why="RIFE not installed — the wrap cut as filmed", rife=str(exc), install=rife_mod.INSTALL_COMMAND)
+        record.update(why="RIFE not installed — the wrap cut as filmed", rife=str(exc), install=rife_mod.install_command())
     record["applied"] = bool(record["replaced"])
     if record["calls"]:
-        record["interpolator"] = ({"kind": "rife-ncnn-vulkan", **made_by[0], "binary_calls": interpolate.calls}
-                                  if made_by else {"kind": "injected"})
+        record["interpolator"] = {**made_by[0], **interpolate.counts()} if made_by else {"kind": "injected"}
     return frames, record
 
 
@@ -1238,7 +1236,7 @@ def _bridge_lines(bridge: dict[str, Any]) -> list[str]:
                   f"cross-fade two drawings inside its outline (crossfade {m['proposal']['crossfade']:.4f}); kept, a reading "
                   "to look at (docs/loop-repair.md section 4)" for m in taken["made"] if m["look"])]
     if "unmade" in bridge:
-        return [f"{said}, and RIFE is not installed, so no frame was made round it — run `{rife_mod.INSTALL_COMMAND}` "
+        return [f"{said}, and RIFE is not installed, so no frame was made round it — run `{rife_mod.install_command()}` "
                 "and cut it again (docs/loop-repair.md section 2)"]
     reasons = {"line": "the straight line between its anchors does not close it", "fault": "a frame made has a fault",
                "seam": "the frames made do not close it"}
@@ -1720,7 +1718,8 @@ def _size_hold(frames: list[Image.Image], *, lo: int, hi: int,
     settles into the walk is not taken for a body that shrinks, nor for feet that climb (gait_fallback.cycle_drift,
     foot_drift). A cut the caller names (`cut`: start, length) is held only where it shows the change itself, a cycle
     of its length apart (`gait_fallback.at_cut`), and its feet are moved only where it shows them move: a clip whose
-    frames that are not the walk read a change the cut does not make is cut as filmed (`size_hold.at_cut`, `why`)."""
+    frames that are not the walk read a change the cut does not make is cut as filmed (`size_hold.at_cut`, `why`).
+    Held, its record carries the move each frame of the cut was held by (`size_hold.cut_frames`)."""
     measured = gait_fallback.cycle_drift(frames, min_lag=lo, max_lag=hi)
     hold: dict[str, Any] = {"applied": False, "min": gait_fallback.SIZE_HOLD_MIN,
                             **{k: measured[k] for k in ("height_first_px", "height_last_px", "drift", "method",
@@ -1741,6 +1740,10 @@ def _size_hold(frames: list[Image.Image], *, lo: int, hi: int,
     pad = gait_fallback.undo_padding(frames, measured, lift)
     held = gait_fallback.undo_scale(frames, measured, pad=pad, lift=lift)
     hold.update(applied=True, padding_ltrb=list(pad), feet=feet)
+    if cut is not None:
+        # The move each frame of the cut was held by, exact (`gait_fallback.frame_hold`): `video-loop-repair` holds the
+        # cut's source frames by it again before it reads them (sprite_gen/video/source.py).
+        hold["cut_frames"] = [gait_fallback.frame_hold(k, measured, lift) for k in range(cut[0], cut[0] + cut[1])]
     return held, hold, partial(gait_fallback.held_box, measured=measured, pad=pad, lift=lift)
 
 
@@ -2168,7 +2171,7 @@ def _cut_loop(
             frames, report_base["jump_repair"], overlap = _repair_jumps(frames, interpolate, facing=facing, required=repair == "on",
                                                                         screen=report_base["ghost_screen"], wrap=wrap)
         except (ValueError, rife_mod.RifeUnavailable) as exc:
-            fix = (f"install RIFE (`{rife_mod.INSTALL_COMMAND}`), or pass --repair auto to cut it as filmed with a warning"
+            fix = (f"install RIFE (`{rife_mod.install_command()}`), or pass --repair auto to cut it as filmed with a warning"
                    if isinstance(exc, rife_mod.RifeNotInstalled) else "fix RIFE, or pass --repair off to cut it as filmed")
             error = (f"video-loop: {exc}; the loop has a frame to make (after a jump, for a part that rushes, at a wrap a part "
                      f"on its own beat does not close, or for a filmed ghost between two clean frames) — {fix} (docs/loop-repair.md)")
@@ -2209,12 +2212,12 @@ def _cut_loop(
             unmade = report_base["jump_repair"]["unmade"]
             print(f"video-loop: warning: a jump frame was not repaired (frames {unmade['frames']}, {unmade['off']:.2f}x its "
                   "region's usual step off the line between its neighbours) — RIFE is not installed, so the loop is cut as filmed; "
-                  f"run `{rife_mod.INSTALL_COMMAND}` and cut it again (docs/loop-repair.md)", file=sys.stderr)
+                  f"run `{rife_mod.install_command()}` and cut it again (docs/loop-repair.md)", file=sys.stderr)
         elif "rife" in report_base["jump_repair"]:
             rush = report_base["jump_repair"]["surge"]
             print(f"video-loop: warning: a part of the loop rushes (frames {rush['frames']}, {rush['ratio']:.1f}x its steps "
                   "either side) and was not eased — RIFE is not installed, so the loop is cut as filmed; "
-                  f"run `{rife_mod.INSTALL_COMMAND}` and cut it again (docs/loop-repair.md section 2)", file=sys.stderr)
+                  f"run `{rife_mod.install_command()}` and cut it again (docs/loop-repair.md section 2)", file=sys.stderr)
     elif repair != "off" and cycle["kind"] not in nonloop.KINDS:
         # A loop that is not a walk: its flow is not read (an idle's blink would leave it), its wrap alone is, and the
         # frames round a wrap that jumps are made again (the seam bridge, docs/loop-repair.md section 2). A pinned clip
@@ -2226,7 +2229,7 @@ def _cut_loop(
                 hold=report_base["cycle_drawings"]["hold"],
                 skip="the pin does not close: the clip is refused on it" if pin_refused else None)
         except (ValueError, rife_mod.RifeUnavailable) as exc:
-            fix = (f"install RIFE (`{rife_mod.INSTALL_COMMAND}`), or pass --repair auto to cut it as filmed with a warning"
+            fix = (f"install RIFE (`{rife_mod.install_command()}`), or pass --repair auto to cut it as filmed with a warning"
                    if isinstance(exc, rife_mod.RifeNotInstalled) else "fix RIFE, or pass --repair off to cut it as filmed")
             error = f"video-loop: {exc}; the loop's wrap jumps and the frames round it are to be made — {fix} (docs/loop-repair.md section 2)"
             refuse(target, out_dir, name, {**report_base, "status": "failed", "error": error, "cycle": cycle})
@@ -2269,7 +2272,7 @@ def _cut_loop(
             error = (f"video-loop: loop jolts — {'; '.join(over)} ({cycle.get('kind', 'periodic')} length {L} frames from {i}"
                      f"{', after repairing frames ' + str(report_base['jump_repair']['replaced']) if report_base['jump_repair'].get('replaced') else ''}); "
                      "the motion does not play smoothly — regenerate the clip"
-                     f"{' (the jump repair did not run: RIFE is not installed — ' + rife_mod.INSTALL_COMMAND + ')' if 'rife' in report_base['jump_repair'] else ''}")
+                     f"{' (the jump repair did not run: RIFE is not installed — ' + rife_mod.install_command() + ')' if 'rife' in report_base['jump_repair'] else ''}")
             refuse(target, out_dir, name, {**report_base, "status": "failed", "error": error, "cycle": cycle})
             raise SystemExit(error)
         left = _unfixed_lines(report_base["jump_repair"])
@@ -2605,7 +2608,7 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
                              f"cut is gated by its pin. --seam-max does not lift it. off: no gate — over {repair_mod.SEAM_POP_REFERENCE:g} "
                              "is a warning line (docs/loop-repair.md section 3, \"The seam pop\")")
     parser.add_argument("--facing", choices=FACINGS, default="right", help="which way the body faces in the frames (default right): the jolt index's hair, and the size reading video-loop-compare's jump guard reads, are behind it; the jump repair reads the flow either way")
-    parser.add_argument("--size-hold", choices=SIZE_HOLD_MODES, default="auto", help="walk/run, --anchor motion-auto or --cycle fixed: auto (default) scales a clip whose height, read one cycle on, changes by 1 %% or more over the clip back to its first frame's size about its feet, and moves its feet to the first frame's row where they climb or sink by 1 %% of the height or more, applied before the cycle search or over the whole clip before a fixed cut is read (a fixed cut is held only where the cut itself shows the change a cycle of its length apart; recorded as size_hold; a held cut is not restored from source frames); off: the frames as filmed, except motion-auto's gait fallback, which after a first search that finds nothing still scales back a change of 3 %% or more by the same reading, its feet where they were filmed (recorded as gait_fallback)")
+    parser.add_argument("--size-hold", choices=SIZE_HOLD_MODES, default="auto", help="walk/run, --anchor motion-auto or --cycle fixed: auto (default) scales a clip whose height, read one cycle on, changes by 1 %% or more over the clip back to its first frame's size about its feet, and moves its feet to the first frame's row where they climb or sink by 1 %% of the height or more, applied before the cycle search or over the whole clip before a fixed cut is read (a fixed cut is held only where the cut itself shows the change a cycle of its length apart; recorded as size_hold, with each frame's move on a held fixed cut (size_hold.cut_frames), which video-loop-repair holds the source frames by again); off: the frames as filmed, except motion-auto's gait fallback, which after a first search that finds nothing still scales back a change of 3 %% or more by the same reading, its feet where they were filmed (recorded as gait_fallback)")
     parser.add_argument("--steps", type=int, choices=STEPS, default=None,
                         help="--anchor motion-auto: how many steps the cut it takes without this holds, as counted by whoever looked "
                              "at the loop (how often each foot lands) — the report's `cycle.step_screen` names a cut that may be one "
