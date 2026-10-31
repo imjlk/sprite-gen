@@ -1,0 +1,81 @@
+{
+  "answer": {
+    "limits": [
+      "The small rear cuff junction in walk.24 remains visually ambiguous.",
+      "Only the front shoe can be assessed fully in walk.26; the rear shoe is not approved.",
+      "These three still frames cannot establish motion timing or gait quality. This observational audit grants no curator approval or release."
+    ],
+    "poses": {
+      "walk.24": {
+        "hair": "pass",
+        "issues": [
+          "A small grey-looking notch at the raised rear calf/cuff junction makes the ankle bridge uncertain. The corresponding bare ankle is continuous skin; a transparency gap versus collar shading cannot be resolved confidently.",
+          "Both shoes retain substantial navy/cream volume, but the rear calf entry remains uncertain."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      },
+      "walk.25": {
+        "hair": "pass",
+        "issues": [
+          "A pointed white flap appears beside the raised rear shoe, against the overlapping front calf. The bare pair has no corresponding anatomical projection; this looks like stray sock fabric.",
+          "The visible shoes retain their sole thickness and toe direction from walk.24."
+        ],
+        "shoes": "pass",
+        "socks": "rework"
+      },
+      "walk.26": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged actual rear ankle shows a grey notch interrupting the calf beside the rear shoe. The bare pair contains skin there, indicating a missing body/ankle bridge rather than opaque sock coverage.",
+          "The rear shoe is largely hidden behind the front calf. Its narrow visible strip cannot establish full shoe volume, collar integrity or attachment."
+        ],
+        "shoes": "unknown",
+        "socks": "rework"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "f3a40a3bf3082702afe781cde53a6a40f68d96242a28507ff4df10651e87ca13",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "5884ce550ababa6138a987307de9082f8113870b273b55921e2b1d62b99c77df",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "e9ef085efed5be71ef615eea70d0d0ec1176dfb345df6c6a8e705dded82bc426",
+  "motion": {
+    "digest": "b2b3be93a5fab17fcb945e3d9f5ebe4b6d78b47c58e4d9d8c8e2b10b4f79206f",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "adca6068560f03425e933ef0d3572bbec43917819c47f60a7d24ac0341182674",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "b18cca24ec20610364bc552e1ded5d1d338f4273138d9824fb1c494f9c562470",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "dd850478cad19ee2eeabad7cc54038f37ac73a2b014df92deb7c004f8424f631",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "a4d3322540ffcf3eaade2b2bb03842e7f90a8d90629b7d925e63b46b005415cb",
+  "release_ready": false,
+  "required_poses": [
+    "walk.24",
+    "walk.25",
+    "walk.26"
+  ],
+  "response_sha256": "d718a47347c2736beb6ec21d30270ca845bb0c99c4acd8d71e1cf775c917b479",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

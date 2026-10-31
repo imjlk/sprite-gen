@@ -1,0 +1,52 @@
+{
+  "poses": {
+    "run.06": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "Front ankle: the cream collar surrounds a small grey-looking opening where the bare reference shows calf. A missing ankle bridge is suspected; opaque cuff shading cannot be ruled out.",
+        "Front shoe volume and toe direction look consistent, but attachment through this collar opening is uncertain."
+      ]
+    },
+    "run.07": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.08": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.09": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.10": {
+      "hair": "pass",
+      "socks": "rework",
+      "shoes": "rework",
+      "issues": [
+        "Front sock: its right edge ends in an abrupt rectangular step above the shoe, leaving a grey notch where the bare reference's calf continues.",
+        "This apparent missing calf/ankle bridge interrupts the front shoe's calf entry. The navy upper and cream sole retain plausible product volume."
+      ]
+    },
+    "run.11": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    }
+  },
+  "limits": [
+    "The small front collar opening in run.06 cannot be conclusively distinguished from opaque shading in this board.",
+    "Pass ratings cover visible features in these six frames only; concealed foot interiors and other motion frames are unobservable.",
+    "Stills do not establish speed, gait quality or animation continuity beyond the displayed neighboring poses.",
+    "This observational audit grants no curator approval or release authorization."
+  ]
+}

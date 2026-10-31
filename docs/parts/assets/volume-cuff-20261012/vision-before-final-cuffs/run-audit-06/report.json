@@ -1,0 +1,100 @@
+{
+  "answer": {
+    "limits": [
+      "The small front collar opening in run.06 cannot be conclusively distinguished from opaque shading in this board.",
+      "Pass ratings cover visible features in these six frames only; concealed foot interiors and other motion frames are unobservable.",
+      "Stills do not establish speed, gait quality or animation continuity beyond the displayed neighboring poses.",
+      "This observational audit grants no curator approval or release authorization."
+    ],
+    "poses": {
+      "run.06": {
+        "hair": "pass",
+        "issues": [
+          "Front ankle: the cream collar surrounds a small grey-looking opening where the bare reference shows calf. A missing ankle bridge is suspected; opaque cuff shading cannot be ruled out.",
+          "Front shoe volume and toe direction look consistent, but attachment through this collar opening is uncertain."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      },
+      "run.07": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.08": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.09": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.10": {
+        "hair": "pass",
+        "issues": [
+          "Front sock: its right edge ends in an abrupt rectangular step above the shoe, leaving a grey notch where the bare reference's calf continues.",
+          "This apparent missing calf/ankle bridge interrupts the front shoe's calf entry. The navy upper and cream sole retain plausible product volume."
+        ],
+        "shoes": "rework",
+        "socks": "rework"
+      },
+      "run.11": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "f3a40a3bf3082702afe781cde53a6a40f68d96242a28507ff4df10651e87ca13",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "5884ce550ababa6138a987307de9082f8113870b273b55921e2b1d62b99c77df",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "f4d973c0d8d1245b56cab9ac0ab995dc66fb70392e433d56a442e4a6068c32f4",
+  "motion": {
+    "digest": "b2b3be93a5fab17fcb945e3d9f5ebe4b6d78b47c58e4d9d8c8e2b10b4f79206f",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "adca6068560f03425e933ef0d3572bbec43917819c47f60a7d24ac0341182674",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "b18cca24ec20610364bc552e1ded5d1d338f4273138d9824fb1c494f9c562470",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "dd850478cad19ee2eeabad7cc54038f37ac73a2b014df92deb7c004f8424f631",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "d655184b17cd73d5cb27e33b2bb268b0866bb50e095ffe04e0951155c32d73d5",
+  "release_ready": false,
+  "required_poses": [
+    "run.06",
+    "run.07",
+    "run.08",
+    "run.09",
+    "run.10",
+    "run.11"
+  ],
+  "response_sha256": "380c91b2266a4a313db43b9d27281f1f4184df217824972311a7aee0897ddd16",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "source_sha256": "d3c711722d3c974c7141fd25df47c8dfef2c11480efe66e12d1a3e56b5dcaf08",
+  "source_size": [
+    1902,
+    827
+  ],
+  "sole_heel": [
+    200,
+    725
+  ],
+  "sole_toe": [
+    1700,
+    725
+  ],
+  "canonical_heel": [
+    120,
+    795
+  ],
+  "canonical_toe": [
+    1430,
+    795
+  ],
+  "sole_profile": "rounded bevel",
+  "observation": "Exact native viewed: horizontal attachment baseline at y725, rounded shoe extends below this line. Not a straight-edged lateral sole.",
+  "art_approved": false,
+  "perspective": "native compact domed toe and shallow top plane; shared side-view yaw, no 3D recovery"
+}

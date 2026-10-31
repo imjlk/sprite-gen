@@ -1,0 +1,25 @@
+Critically inspect these consecutive actual layered sprite frames.
+Columns: the unchanged bare body reference; actual hair+socks+shoes composition;
+enlarged BARE back ankle; enlarged ACTUAL back ankle; enlarged BARE front ankle;
+enlarged ACTUAL front ankle. Each labeled row is ONE
+real frame. Check ALL specified frame IDs. This is a high-resolution SD illustrated
+character, not pixel art. Reject obvious defects rather than accepting improvement.
+Hair: ear opening matches body ear, no bald crown, skin halo or displaced hair.
+Use the enlarged bare anatomy to distinguish source ankle contours from part
+spill; do not claim fabric extends outside the calf without that comparison.
+Socks: fitted calf cuff, no detached white triangle, hard clip, fabric on the other
+limb or missing ankle bridge. Shoes: consistent navy/cream product volume, rigid
+sole, correct toe direction, no needle-thin or crushed shoe, naked toes, floating
+footwear, wrong calf entry, cutoff collar or random size/shape changes. Compare
+neighboring frames for attachment and design continuity. The neutral grey board background is transparency,
+not cream fabric: a missing calf exposing background is a body-ownership defect.
+Distinguish such a hole from an opaque sock by the actual bare/composed pair.
+Report visible uncertain defects; never declare an unobservable rear shoe approved.
+Do not invent speed or gait approval from stills; a biomechanically questionable source pose is a BODY
+issue, not something to hide by approving parts. This page contains only the
+labeled subset of the active motion's actual frame sequence.
+Return strict JSON, no Markdown: {"poses": {FRAME: {"hair":"pass|rework|unknown",
+"socks":"pass|rework|unknown","shoes":"pass|rework|unknown","issues":[specific
+visible observations]}},"limits":[specific uncertainties]}. No tools or code.
+This is an observational audit only. It NEVER grants curator approval or release.
+Required frame IDs: ["run.00", "run.01", "run.02", "run.03", "run.04", "run.05"]

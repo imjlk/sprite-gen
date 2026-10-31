@@ -1,0 +1,97 @@
+{
+  "answer": {
+    "limits": [
+      "Only run.00 through run.05 are shown; continuity with omitted frames cannot be assessed.",
+      "The bare/composed comparisons do not establish an obvious background-colored calf hole or cuff spill beyond the source calf contours.",
+      "The ambiguous lifted front ankle in run.02 needs a clearer view; hidden attachment surfaces remain unverified.",
+      "Stills cannot establish speed or gait quality. These observational labels do not grant curator approval or release."
+    ],
+    "poses": {
+      "run.00": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.01": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.02": {
+        "hair": "pass",
+        "issues": [
+          "A small pale projection rises above the lifted front shoe's collar. Its connection to the sock is unclear; it could be a tongue or disconnected fabric.",
+          "The crossed limbs obscure part of that ankle junction, preventing confident verification of a continuous sock bridge and correct calf entry."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      },
+      "run.03": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.04": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.05": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "f3a40a3bf3082702afe781cde53a6a40f68d96242a28507ff4df10651e87ca13",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "5884ce550ababa6138a987307de9082f8113870b273b55921e2b1d62b99c77df",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "c92218afae6310447852f230b9b242c2f25f4fcdec92eaf58c3061c7b482afa1",
+  "motion": {
+    "digest": "b2b3be93a5fab17fcb945e3d9f5ebe4b6d78b47c58e4d9d8c8e2b10b4f79206f",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "adca6068560f03425e933ef0d3572bbec43917819c47f60a7d24ac0341182674",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "b18cca24ec20610364bc552e1ded5d1d338f4273138d9824fb1c494f9c562470",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "dd850478cad19ee2eeabad7cc54038f37ac73a2b014df92deb7c004f8424f631",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "da40c6695bc2ecdcc6d8eeeff615e0673346eccb17b0b413e74c7359dac8e050",
+  "release_ready": false,
+  "required_poses": [
+    "run.00",
+    "run.01",
+    "run.02",
+    "run.03",
+    "run.04",
+    "run.05"
+  ],
+  "response_sha256": "4422152d98c25c7e772520f77adbfcb9746110f21e71274f2ac480b6e3d5a3e4",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

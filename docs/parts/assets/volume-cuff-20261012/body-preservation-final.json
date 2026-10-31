@@ -1,0 +1,15 @@
+{
+  "body_rgba_sources_identical": true,
+  "ownership_changed": [
+    "foot_back/walk.26.png",
+    "foot_back/walk.25.png",
+    "leg_back/walk.26.png",
+    "leg_back/walk.25.png",
+    "leg_front/walk.26.png",
+    "leg_front/walk.25.png"
+  ],
+  "skin_palette_preserved": true,
+  "motion_changed": false,
+  "body_drawing_regenerated": false,
+  "appearance_clips_baked": 0
+}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import OrderedDict
 from pathlib import Path
 
 from sprite_gen._deps import np
@@ -37,10 +38,15 @@ def recolor(image, regions, palette):
 
 
 class AssetLoader:
-    """Verified, bounded, one-read image cache, rooted at each immutable document."""
+    """Verified source snapshot and bounded LRU decoded-image cache.
+
+    A long motion can contain many unique full-canvas masks. Bound resident
+    decoded pixels, not the lifetime sum of every frame ever requested. The
+    SourceReader still bounds and verifies the immutable encoded input set.
+    """
     def __init__(self, root, index):
         self.root, self.index = Path(root), index
-        self.reader, self.images = assets.SourceReader(root), {}
+        self.reader, self.images = assets.SourceReader(root), OrderedDict()
         self.total_pixels = 0
 
     def relative_asset(self, document, reference):
@@ -52,10 +58,16 @@ class AssetLoader:
         key = (reference["file"], reference["sha256"])
         if key not in self.images:
             value = assets.load_image(self.reader, reference)
-            self.total_pixels += value.width * value.height
-            if self.total_pixels > assets.MAX_TOTAL_PIXELS:
+            pixels=value.width * value.height
+            if pixels > assets.MAX_TOTAL_PIXELS:
                 raise contract.PartsContractError("decoded render inputs exceed pixel budget")
+            while self.total_pixels + pixels > assets.MAX_TOTAL_PIXELS:
+                _,old=self.images.popitem(last=False)
+                self.total_pixels-=old.width * old.height
             self.images[key] = value
+            self.total_pixels+=pixels
+        else:
+            self.images.move_to_end(key)
         return self.images[key].copy()
 
 

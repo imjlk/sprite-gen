@@ -1,0 +1,94 @@
+{
+  "answer": {
+    "limits": [
+      "Assessment covers only the six labeled frames and their visible anatomy and parts. Occluded collar edges and cropped secondary shoe fragments remain unverified.",
+      "Comparison with the bare ankles shows no clear background hole, detached sock fragment or missing ankle bridge. Fine edge artifacts below the displayed resolution remain uncertain.",
+      "These stills cannot establish motion timing, speed, gait quality or continuity through frames outside this subset.",
+      "This observational audit grants no curator approval or release authorization."
+    ],
+    "poses": {
+      "walk.00": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.01": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.02": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.03": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.04": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.05": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "f3a40a3bf3082702afe781cde53a6a40f68d96242a28507ff4df10651e87ca13",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "5884ce550ababa6138a987307de9082f8113870b273b55921e2b1d62b99c77df",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "eb9a9fb8a16372943b15972fbeeb187e2ce257b476b21d681cef8e8fef3014ce",
+  "motion": {
+    "digest": "b2b3be93a5fab17fcb945e3d9f5ebe4b6d78b47c58e4d9d8c8e2b10b4f79206f",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "adca6068560f03425e933ef0d3572bbec43917819c47f60a7d24ac0341182674",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "b18cca24ec20610364bc552e1ded5d1d338f4273138d9824fb1c494f9c562470",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "dd850478cad19ee2eeabad7cc54038f37ac73a2b014df92deb7c004f8424f631",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "76c8588aec6e751f22ff8ad88cc6a873efbf8d10dbbae4edd25187bd982025ca",
+  "release_ready": false,
+  "required_poses": [
+    "walk.00",
+    "walk.01",
+    "walk.02",
+    "walk.03",
+    "walk.04",
+    "walk.05"
+  ],
+  "response_sha256": "e005e4fc7b7013f78126c0d98b5b8d811b21df4b34bcdbcd85d5f557b13e72b1",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

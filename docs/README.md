@@ -159,7 +159,8 @@ flat-body overlay adapter are implemented. The current SD art remains unapproved
 | [parts/07-m1-verification.md](parts/07-m1-verification.md) | M1 test evidence, reproducible five-rig synthetic builds, exact art limitations and remaining acceptance work |
 | [parts/08-layer-export.md](parts/08-layer-export.md) | Authored fitting import, bounded repair proposals, portable independent layers and browser clock limits |
 | [parts/25-natural-walk-and-footwear.md](parts/25-natural-walk-and-footwear.md) | Shared walk retake, source landmark corrections and ankle/calf ownership repairs |
-| [parts/26-shoe-perspective-and-skin-colour.md](parts/26-shoe-perspective-and-skin-colour.md) | Current lateral sneaker and skin palette revision; actual walk/run playback, source preservation and curation evidence |
+| [parts/26-shoe-perspective-and-skin-colour.md](parts/26-shoe-perspective-and-skin-colour.md) | Lateral sneaker and skin palette revision; source preservation and curation evidence |
+| [parts/27-shoe-volume-and-curved-sock-hems.md](parts/27-shoe-volume-and-curved-sock-hems.md) | Current compact sneaker volume and source-aligned curved sock hems; actual walk/run validation |
 | [parts/sd-explorer-contribution-demo-20261005.md](parts/sd-explorer-contribution-demo-20261005.md) | SD sneakers and clothing repair baseline, public QA integration and portable demo |
 | [parts/sd-explorer-polish-20261005.md](parts/sd-explorer-polish-20261005.md) | Current SD run-body, hair and boots improvements; pinned source stability checks, shared layer preview and reproducible inputs |
 | [parts/sd-explorer-session-handoff-20261005.md](parts/sd-explorer-session-handoff-20261005.md) | Session handoff: goal state, current checkpoint, implementation paths, verification and remaining art work |

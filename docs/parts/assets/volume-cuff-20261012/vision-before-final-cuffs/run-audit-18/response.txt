@@ -1,0 +1,48 @@
+{
+  "poses": {
+    "run.18": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.19": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "run.20": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "A small grey-looking recess appears at the rear ankle between the raised heel edge and the cuff entering the calf. The bare ankle is continuous through this region; a missing ankle bridge cannot be ruled out.",
+        "Rear shoe volume and toe direction remain consistent, but attachment at that collar transition is uncertain."
+      ]
+    },
+    "run.21": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "The rear heel/cuff junction again has a grey-looking notch. Its boundary is difficult to distinguish from the board, leaving calf ownership and collar attachment uncertain.",
+        "The raised outer heel contour also exists in the bare reference; that projection alone does not establish fabric spill."
+      ]
+    },
+    "run.22": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "The pointed upper rear heel/cuff junction retains a pale grey transition whose connection to the calf is uncertain. Possible ankle-bridge loss remains unresolved.",
+        "The rear shoe is visibly substantial with a continuous cream sole, but its calf entry cannot confidently pass."
+      ]
+    }
+  },
+  "limits": [
+    "The small rear ankle transitions in run.20–run.22 cannot be confidently separated into opaque sock shading versus exposed grey background from this board.",
+    "Only run.18–run.22 are shown. These stills do not establish full-sequence continuity, speed, or gait quality.",
+    "This observational audit grants no curator approval or release."
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "answer": {
+    "limits": [
+      "The suspected cuff interruptions in walk.12 and walk.13 cannot be conclusively separated into missing body, detached fabric, or overlap artifacts from this board.",
+      "Several enlarged crops truncate the other shoe. The complete compositions show both shoes, but provide less detail for those cropped portions.",
+      "Hair judgments cover the visible crown and ear opening; concealed surfaces are unobservable.",
+      "Only walk.12 through walk.17 were inspected. Stills do not establish speed, gait quality, or continuity outside this subset.",
+      "This observational audit grants no curator approval or release authorization."
+    ],
+    "poses": {
+      "walk.12": {
+        "hair": "pass",
+        "issues": [
+          "The raised front sock has a pointed white projection above the sneaker collar. Its base appears interrupted at the overlapping ankle; a continuous fitted cuff and ankle bridge are not clearly visible.",
+          "Overlapping shoes obscure the rear collar and calf entry, preventing confident attachment approval."
+        ],
+        "shoes": "unknown",
+        "socks": "rework"
+      },
+      "walk.13": {
+        "hair": "pass",
+        "issues": [
+          "The raised front cuff forms a tall rounded pale lobe. Its junction with the bent calf is ambiguous beside the gray notch; the bare/composed comparison does not clearly establish a continuous ankle bridge."
+        ],
+        "shoes": "pass",
+        "socks": "unknown"
+      },
+      "walk.14": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.15": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.16": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.17": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "f3a40a3bf3082702afe781cde53a6a40f68d96242a28507ff4df10651e87ca13",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "5884ce550ababa6138a987307de9082f8113870b273b55921e2b1d62b99c77df",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "19577b88b5cf94ba9fe0eccf3fccaf6c508bd9e48cf0187bcd93440e48dc0de4",
+  "motion": {
+    "digest": "b2b3be93a5fab17fcb945e3d9f5ebe4b6d78b47c58e4d9d8c8e2b10b4f79206f",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "adca6068560f03425e933ef0d3572bbec43917819c47f60a7d24ac0341182674",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "b18cca24ec20610364bc552e1ded5d1d338f4273138d9824fb1c494f9c562470",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "dd850478cad19ee2eeabad7cc54038f37ac73a2b014df92deb7c004f8424f631",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "981fff47680ae72a31cf3378308c017b8c993b7640c4b50bd4f4981ee569b95e",
+  "release_ready": false,
+  "required_poses": [
+    "walk.12",
+    "walk.13",
+    "walk.14",
+    "walk.15",
+    "walk.16",
+    "walk.17"
+  ],
+  "response_sha256": "339a37a159c27b865a368b2ca001d04e488651324f0ecab8787efcd99943edf6",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

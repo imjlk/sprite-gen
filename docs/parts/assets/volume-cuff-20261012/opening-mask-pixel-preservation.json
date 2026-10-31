@@ -1,0 +1,20 @@
+{
+  "approval_copied": false,
+  "art_approved": false,
+  "parts": [
+    {
+      "art_approved": false,
+      "batch": "iac6dbd915995",
+      "current_body": [
+        {
+          "digest": "5884ce550ababa6138a987307de9082f8113870b273b55921e2b1d62b99c77df",
+          "id": "full-motion.body"
+        }
+      ],
+      "generation_calls": 0,
+      "layers_pixel_identical": 100,
+      "part": "full-motion.sneakers",
+      "poses": 50
+    }
+  ]
+}

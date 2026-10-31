@@ -1,0 +1,102 @@
+{
+  "answer": {
+    "limits": [
+      "The small rear ankle interruption in walk.21 remains visually uncertain in this flattened composition.",
+      "The precise layer or mask responsible for the rear ankle gaps cannot be determined from this board.",
+      "Only walk.18 through walk.23 are shown; other frames and motion timing are unassessed.",
+      "This observational audit grants no curator approval or release authorization."
+    ],
+    "poses": {
+      "walk.18": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.19": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.20": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "walk.21": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged back ankle shows a small gray notch between the projecting heel contour and the sock/collar transition. The bare reference has continuous skin through this region; the composed ankle bridge and rear shoe attachment remain uncertain."
+        ],
+        "shoes": "unknown",
+        "socks": "unknown"
+      },
+      "walk.22": {
+        "hair": "pass",
+        "issues": [
+          "A gray interruption above the rear collar separates the small remaining heel-side skin sliver from the main calf connection. The corresponding bare ankle is filled with skin, indicating a missing body/ankle bridge.",
+          "The rear shoe retains substantial navy/cream volume, but its collar does not establish a continuous calf entry."
+        ],
+        "shoes": "rework",
+        "socks": "rework"
+      },
+      "walk.23": {
+        "hair": "pass",
+        "issues": [
+          "The enlarged back ankle has a gray gap above the nearly vertical shoe collar, with a thin isolated skin-colored strip at the heel side. Comparison with the continuous bare heel/calf contour indicates missing ankle ownership.",
+          "The rear collar appears abruptly cut across the ankle connection. Shoe volume and toe direction remain plausible, but attachment requires rework."
+        ],
+        "shoes": "rework",
+        "socks": "rework"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "f3a40a3bf3082702afe781cde53a6a40f68d96242a28507ff4df10651e87ca13",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "5884ce550ababa6138a987307de9082f8113870b273b55921e2b1d62b99c77df",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "b504bd4803e25418c562ac4fe2a22701e04aada4c87c9b650f69e4e139d1d3b1",
+  "motion": {
+    "digest": "b2b3be93a5fab17fcb945e3d9f5ebe4b6d78b47c58e4d9d8c8e2b10b4f79206f",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "adca6068560f03425e933ef0d3572bbec43917819c47f60a7d24ac0341182674",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "b18cca24ec20610364bc552e1ded5d1d338f4273138d9824fb1c494f9c562470",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "dd850478cad19ee2eeabad7cc54038f37ac73a2b014df92deb7c004f8424f631",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "2cfbab040c5ecf9206443597a57e5cf0f0613f9472ffc872bb6e1a975da829a4",
+  "release_ready": false,
+  "required_poses": [
+    "walk.18",
+    "walk.19",
+    "walk.20",
+    "walk.21",
+    "walk.22",
+    "walk.23"
+  ],
+  "response_sha256": "44cbfe835e4bfc90095e7baef863ebc68543ef60321123e5e5e6ac7c2f857f6b",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

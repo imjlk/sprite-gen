@@ -1,0 +1,95 @@
+{
+  "answer": {
+    "limits": [
+      "Occluded cuff interiors and shoe surfaces cannot be assessed. Visible rear shoes are assessable, but hidden attachment surfaces are not approved.",
+      "Only run.12–run.17 are shown; continuity across omitted frames and motion or gait quality cannot be established.",
+      "These are observational statuses only and grant no curator approval or release."
+    ],
+    "poses": {
+      "run.12": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.13": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.14": {
+        "hair": "pass",
+        "issues": [
+          "The crossing ankle's cuff-to-calf bridge is partly obscured by the adjacent limb and shoe. Continuous opaque sock coverage cannot be confidently established; the bare reference also has overlapping anatomy here."
+        ],
+        "shoes": "pass",
+        "socks": "unknown"
+      },
+      "run.15": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.16": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      },
+      "run.17": {
+        "hair": "pass",
+        "issues": [],
+        "shoes": "pass",
+        "socks": "pass"
+      }
+    }
+  },
+  "appearance": {
+    "digest": "f3a40a3bf3082702afe781cde53a6a40f68d96242a28507ff4df10651e87ca13",
+    "id": "full-motion.example"
+  },
+  "art_approved": false,
+  "body": [
+    {
+      "digest": "5884ce550ababa6138a987307de9082f8113870b273b55921e2b1d62b99c77df",
+      "id": "full-motion.body"
+    }
+  ],
+  "input_sha256": "da3fe953dc80db7075554669df67b6f94cabd2f7378e19033efc4294c02709ae",
+  "motion": {
+    "digest": "b2b3be93a5fab17fcb945e3d9f5ebe4b6d78b47c58e4d9d8c8e2b10b4f79206f",
+    "id": "full-motion.walk-run"
+  },
+  "parts": {
+    "full-motion.hair": {
+      "digest": "adca6068560f03425e933ef0d3572bbec43917819c47f60a7d24ac0341182674",
+      "id": "full-motion.hair"
+    },
+    "full-motion.sneakers": {
+      "digest": "b18cca24ec20610364bc552e1ded5d1d338f4273138d9824fb1c494f9c562470",
+      "id": "full-motion.sneakers"
+    },
+    "full-motion.socks": {
+      "digest": "dd850478cad19ee2eeabad7cc54038f37ac73a2b014df92deb7c004f8424f631",
+      "id": "full-motion.socks"
+    }
+  },
+  "prompt_sha256": "aca83e2f4506e2c1f75751c7cfb93809247d69105f087a04422b020654b44e38",
+  "release_ready": false,
+  "required_poses": [
+    "run.12",
+    "run.13",
+    "run.14",
+    "run.15",
+    "run.16",
+    "run.17"
+  ],
+  "response_sha256": "aa29f8ad31e99093c0533c36d8d7b91118c409c4d58d70aa0ee5207d18b7785f",
+  "status": "completed",
+  "transport": {
+    "auth_source": "codex-login",
+    "transport": "codex-exec"
+  }
+}

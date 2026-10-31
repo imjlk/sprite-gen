@@ -1,0 +1,1475 @@
+{
+  "art_approved": false,
+  "image_generation_calls": 0,
+  "poses": [
+    {
+      "actual_entry": [
+        278.26543027707254,
+        573.4555253982057
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "9b9c6bbb7fad87aeb659451b662ca654daedbbb3c6af5c683cc69fca98a671e4",
+      "pose": "run.00",
+      "side": "back",
+      "source_ankle": [
+        274,
+        576
+      ]
+    },
+    {
+      "actual_entry": [
+        357.7311047069027,
+        670.1343560728546
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "2d6a6482184fae8e10a9f7cbaeec240bb241328e6c876bdcb770409639629cbc",
+      "pose": "run.00",
+      "side": "front",
+      "source_ankle": [
+        356,
+        668
+      ]
+    },
+    {
+      "actual_entry": [
+        309.50425132650275,
+        581.43037494535
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "a238c8b2542389939d7dfeab3d36067ba01c5f92ac49359d5c55c51d3e01fddd",
+      "pose": "run.01",
+      "side": "back",
+      "source_ankle": [
+        298,
+        586
+      ]
+    },
+    {
+      "actual_entry": [
+        333.6104868587379,
+        667.8178745456993
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "ee497a9529ac9041510c7df9c1b9ea11aa5f870975fae034e628456604af9d3b",
+      "pose": "run.01",
+      "side": "front",
+      "source_ankle": [
+        336,
+        668
+      ]
+    },
+    {
+      "actual_entry": [
+        284.6806959493333,
+        669.874347254419
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "bbcbdc1257e96b846647ba1c795da29a028c9b1bd8887398436166b71c6dd3e3",
+      "pose": "run.02",
+      "side": "back",
+      "source_ankle": [
+        294,
+        675
+      ]
+    },
+    {
+      "actual_entry": [
+        342.0408360933016,
+        609.8551174761478
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "4e9981885cf62d1934633fca6bda68a4e69d698cc9becfbe0646191fc0e06f8f",
+      "pose": "run.02",
+      "side": "front",
+      "source_ankle": [
+        337,
+        614
+      ]
+    },
+    {
+      "actual_entry": [
+        263.736623004625,
+        658.8451720928352
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "0b36b040d1c4a095cf3cb1210632e2d2071492e2440c2634432e3c901c233e49",
+      "pose": "run.03",
+      "side": "back",
+      "source_ankle": [
+        252,
+        657
+      ]
+    },
+    {
+      "actual_entry": [
+        366.714849202028,
+        594.7175357764779
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "08854d15a7ce9e208aa842b9ec1d3cea219f25bc21e10e01e43a73e57129804f",
+      "pose": "run.03",
+      "side": "front",
+      "source_ankle": [
+        370,
+        599
+      ]
+    },
+    {
+      "actual_entry": [
+        233.69060514211205,
+        639.5755433662725
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "914f6ea6e5b9b7c5f599bb16d6046c32abdb0f65bb863e3a63b430668350e57f",
+      "pose": "run.04",
+      "side": "back",
+      "source_ankle": [
+        227,
+        651
+      ]
+    },
+    {
+      "actual_entry": [
+        397.4529533590111,
+        604.1169231762556
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "873c0cc5f99af394d4a5329d768c23ea4e7744567c2c97c8a5c5c4ee08df023b",
+      "pose": "run.04",
+      "side": "front",
+      "source_ankle": [
+        414,
+        621
+      ]
+    },
+    {
+      "actual_entry": [
+        215.4444489602734,
+        637.4016593859051
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "5caea6911d5cb070f28e2ab38db10f141016eefdf569a8e3ff03e8e7f362a814",
+      "pose": "run.05",
+      "side": "back",
+      "source_ankle": [
+        210,
+        641
+      ]
+    },
+    {
+      "actual_entry": [
+        422.96775050761653,
+        618.8774554496307
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "d07f9245713dd745bfbb838f5d4fe4887ad4411b7efa806bb1ee6a5b52ff466f",
+      "pose": "run.05",
+      "side": "front",
+      "source_ankle": [
+        417,
+        627
+      ]
+    },
+    {
+      "actual_entry": [
+        179.76240199272215,
+        624.5012876982498
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "d7366a72d939416c085673dfabdd86642c75bb3f3dd1bb9718bf0755586a0d6e",
+      "pose": "run.06",
+      "side": "back",
+      "source_ankle": [
+        168,
+        629
+      ]
+    },
+    {
+      "actual_entry": [
+        464.96783525011114,
+        638.1148936593381
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "581154078fbd9d3435d4a824fb2550f7c8744066d0542514e5cadc67c1ee3fd4",
+      "pose": "run.06",
+      "side": "front",
+      "source_ankle": [
+        452,
+        659
+      ]
+    },
+    {
+      "actual_entry": [
+        159.90862049869855,
+        608.9160654324037
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "14edc27d4085e83ea4848d4937bcb051e92ece4dd847af76a01536f49db787f5",
+      "pose": "run.07",
+      "side": "back",
+      "source_ankle": [
+        144,
+        604
+      ]
+    },
+    {
+      "actual_entry": [
+        481.0635704550891,
+        643.097998575739
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "9c10594c57eeef715bf5124db21008fec920715d4710bbde2e7233ac9bc7ac11",
+      "pose": "run.07",
+      "side": "front",
+      "source_ankle": [
+        471,
+        655
+      ]
+    },
+    {
+      "actual_entry": [
+        153.7271656658191,
+        574.00809304629
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "4936d6ca1bc0ca3f84c4c8ca5a5e3556249f6ae05ec2a593183c9d65e5bf6e60",
+      "pose": "run.08",
+      "side": "back",
+      "source_ankle": [
+        147,
+        571
+      ]
+    },
+    {
+      "actual_entry": [
+        480.72767070256054,
+        657.9100919223306
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "be0227c53a7ec68696a49382beba35b0467af1bffec373c653cd7a1a6eb1db19",
+      "pose": "run.08",
+      "side": "front",
+      "source_ankle": [
+        477,
+        663
+      ]
+    },
+    {
+      "actual_entry": [
+        164.85786798425931,
+        560.502807565761
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "7515a4849ffb095e6e1016a227202369478d7c3f3dbeae1910e8a35af946332e",
+      "pose": "run.09",
+      "side": "back",
+      "source_ankle": [
+        160,
+        548
+      ]
+    },
+    {
+      "actual_entry": [
+        451.25249366247044,
+        664.0154533711108
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "9f320d953f1fdbc7f56bf20ff44c009bb1a2e3803df431750a62ee7c99760256",
+      "pose": "run.09",
+      "side": "front",
+      "source_ankle": [
+        443,
+        658
+      ]
+    },
+    {
+      "actual_entry": [
+        197.50114021288275,
+        553.1430969694256
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "6a490563952c0be632eee9d2a263678949f472f9ae4855eeca9ab854d42be534",
+      "pose": "run.10",
+      "side": "back",
+      "source_ankle": [
+        201,
+        551
+      ]
+    },
+    {
+      "actual_entry": [
+        415.36,
+        674.4933333333333
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "62212a5de1cc7d2a8fb93f3bd54bfe8391b52a1c5760cf30994c8584933ab505",
+      "pose": "run.10",
+      "side": "front",
+      "source_ankle": [
+        411,
+        665
+      ]
+    },
+    {
+      "actual_entry": [
+        245.77391318393478,
+        546.5619830548874
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "089342b92386b950dbe9e001bd3de5337be14d264dbbbca0d996c7edd9c0b8cf",
+      "pose": "run.11",
+      "side": "back",
+      "source_ankle": [
+        249,
+        545
+      ]
+    },
+    {
+      "actual_entry": [
+        390.08926897362477,
+        674.9685567576837
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "a794c806f113a3c566447b356e6389323dc0ecd11b66fa0a9bf233f19f69efcd",
+      "pose": "run.11",
+      "side": "front",
+      "source_ankle": [
+        390,
+        664
+      ]
+    },
+    {
+      "actual_entry": [
+        276.70539427655586,
+        573.1057179566234
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "f01711e4c7314bec3adc5fdbf43290c34c36f7c8ad837509ace0bbddef2297d0",
+      "pose": "run.12",
+      "side": "back",
+      "source_ankle": [
+        270,
+        571
+      ]
+    },
+    {
+      "actual_entry": [
+        352.037768918165,
+        667.1660726022299
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "fd432f19ad7a209c473119de99e501da8190982921492139ef11813e40d613d3",
+      "pose": "run.12",
+      "side": "front",
+      "source_ankle": [
+        349,
+        665
+      ]
+    },
+    {
+      "actual_entry": [
+        308.9088262421409,
+        581.1118514714524
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "80bd5f1fe8ea970b4d6ba50e0eee6f42873d95ea56faead40a34ad79996e71b4",
+      "pose": "run.13",
+      "side": "back",
+      "source_ankle": [
+        298,
+        581
+      ]
+    },
+    {
+      "actual_entry": [
+        323.23071315660064,
+        668.5173438096084
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "d3c44f57b3f2b15791c093446cb1fb981852bd4027d3940756e6eb3b9febfa01",
+      "pose": "run.13",
+      "side": "front",
+      "source_ankle": [
+        342,
+        667
+      ]
+    },
+    {
+      "actual_entry": [
+        274.2180212925074,
+        668.186686967352
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "47e3ca086ee33168b1e905e934c9d414775c26a46b20e39c9ce117752120b692",
+      "pose": "run.14",
+      "side": "back",
+      "source_ankle": [
+        277,
+        676
+      ]
+    },
+    {
+      "actual_entry": [
+        345.959560677292,
+        602.3403541232445
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "5b663d703d3220bb0f5cf4696c2afb52cd9892b76af84035623259e2ed5b57b1",
+      "pose": "run.14",
+      "side": "front",
+      "source_ankle": [
+        340,
+        605
+      ]
+    },
+    {
+      "actual_entry": [
+        250.15245560995723,
+        647.6972455466191
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "58ea737d6d17018cd32315a59cb51a917db29ba1becf70f31f87268f0ebf54c0",
+      "pose": "run.15",
+      "side": "back",
+      "source_ankle": [
+        237,
+        644
+      ]
+    },
+    {
+      "actual_entry": [
+        371.6247970297971,
+        589.4781460725321
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "4ec1af6bc3d6386a309830329c0c73c59103dcdc9594369d1fceb1158523fe34",
+      "pose": "run.15",
+      "side": "front",
+      "source_ankle": [
+        371,
+        593
+      ]
+    },
+    {
+      "actual_entry": [
+        220.09069504528173,
+        631.0899743924457
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "40da1258d0ab6c0c80bfaf2ef4b782e45ea58449a73a47884b0c697f2ed90485",
+      "pose": "run.16",
+      "side": "back",
+      "source_ankle": [
+        213,
+        633
+      ]
+    },
+    {
+      "actual_entry": [
+        408.3862711697544,
+        595.98139360524
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "e873d41d436e09b0cc5c274cc7315a8e8dc24d0fcec0372486f9566e03b5823a",
+      "pose": "run.16",
+      "side": "front",
+      "source_ankle": [
+        415,
+        617
+      ]
+    },
+    {
+      "actual_entry": [
+        218.15190944380603,
+        617.8219068313597
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "79bac8faa6724d620a6cf72c5e6499599ed83be4784bd0c51c53c061a9e20a63",
+      "pose": "run.17",
+      "side": "back",
+      "source_ankle": [
+        212,
+        620
+      ]
+    },
+    {
+      "actual_entry": [
+        427.03552023241696,
+        610.0302908471194
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "c9eceed7d4be17f5063e6d2253de9b9c4535e87aed60e2580f0b1fbfc16041ff",
+      "pose": "run.17",
+      "side": "front",
+      "source_ankle": [
+        415,
+        612
+      ]
+    },
+    {
+      "actual_entry": [
+        172.23434697430358,
+        606.6848127691139
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "d6ff162e2bffcbf09418e1984719f8c36f5fb15962038a962b16b711f4caa28a",
+      "pose": "run.18",
+      "side": "back",
+      "source_ankle": [
+        163,
+        611
+      ]
+    },
+    {
+      "actual_entry": [
+        459.22220538922,
+        631.375015304741
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "f471a3e9d671dcac9ec4241da9a7a95cc9419f8dddb3d2560d634bb6bcb84f47",
+      "pose": "run.18",
+      "side": "front",
+      "source_ankle": [
+        450,
+        637
+      ]
+    },
+    {
+      "actual_entry": [
+        156.71931125722406,
+        588.5482079390721
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "55068034aff90eee9bae2592d6a0ff833e57ee01323dd7ede1f1cbf6057235a3",
+      "pose": "run.19",
+      "side": "back",
+      "source_ankle": [
+        143,
+        595
+      ]
+    },
+    {
+      "actual_entry": [
+        468.8415822048777,
+        643.8785652208617
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "88e584b07fc1e5b86237061c419f51aca7e9405f87032189ad82ebdca8a847c8",
+      "pose": "run.19",
+      "side": "front",
+      "source_ankle": [
+        462,
+        644
+      ]
+    },
+    {
+      "actual_entry": [
+        164.79322497310946,
+        551.8590506370693
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "eaea3e23973115b1c48f549e5f13db24ea1295aad93cea363ea4b809a3889e88",
+      "pose": "run.20",
+      "side": "back",
+      "source_ankle": [
+        148,
+        542
+      ]
+    },
+    {
+      "actual_entry": [
+        475.98612607954715,
+        670.9946826829324
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "b8f82a3cc98b5675532b209116f9591493b05a9495abf84bb97e1c7b0ffb454e",
+      "pose": "run.20",
+      "side": "front",
+      "source_ankle": [
+        471,
+        665
+      ]
+    },
+    {
+      "actual_entry": [
+        185.62793696455827,
+        541.9591065044772
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "42858f12c1e0b9c6f34f2ad9e9223b44f9495d6b451c0def74fbfd35bd4ec501",
+      "pose": "run.21",
+      "side": "back",
+      "source_ankle": [
+        179,
+        541
+      ]
+    },
+    {
+      "actual_entry": [
+        436.2342777512703,
+        661.3485084012108
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "56b7e6d9521017feaf8420539dc5a50e5148981a9a4a8fc66596bfe80ba7daaf",
+      "pose": "run.21",
+      "side": "front",
+      "source_ankle": [
+        432,
+        665
+      ]
+    },
+    {
+      "actual_entry": [
+        244.2645929489203,
+        548.1748449157548
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "6ed557677139ae7979365a7333a61f55b7f5ad64d4e1b4792c7c37e7477d498d",
+      "pose": "run.22",
+      "side": "back",
+      "source_ankle": [
+        244,
+        540
+      ]
+    },
+    {
+      "actual_entry": [
+        401.90151450373304,
+        660.0538563564412
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "479f9f5ed40d792b96734416d772e2ea522144db5f3a4b8e3604d846de29b71f",
+      "pose": "run.22",
+      "side": "front",
+      "source_ankle": [
+        396,
+        655
+      ]
+    },
+    {
+      "actual_entry": [
+        410.68341823135955,
+        632.0288747275711
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "3ce4e48e851e2c7faef5ee9f44d29e1e7ffc03f53c9bb882bb005443026f0c34",
+      "pose": "walk.00",
+      "side": "back",
+      "source_ankle": [
+        388,
+        630
+      ]
+    },
+    {
+      "actual_entry": [
+        338.04522468726947,
+        671.5224276820568
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "4e361d3722f85d134b60005f50bb069a7d5fc0dd28beb8b7d78747e3a45ac203",
+      "pose": "walk.00",
+      "side": "front",
+      "source_ankle": [
+        341,
+        678
+      ]
+    },
+    {
+      "actual_entry": [
+        410.18512884186515,
+        613.8377614595557
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "5cbae29c8ffa1ac2f7cdadd183a7111150c3a372cc4c1edebf5b4a49d84540de",
+      "pose": "walk.01",
+      "side": "back",
+      "source_ankle": [
+        411,
+        622
+      ]
+    },
+    {
+      "actual_entry": [
+        321.04768639395365,
+        669.7510387896868
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "b9a569d61f442d6315fb4ffd929f32a94fdf825f87e5694e782c8908afaa3198",
+      "pose": "walk.01",
+      "side": "front",
+      "source_ankle": [
+        327,
+        677
+      ]
+    },
+    {
+      "actual_entry": [
+        423.15343056993606,
+        625.3558836435474
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "6fbd4784cd1d7f82f134f02db7b6a3fe6a9faead8844be841189eb614e7d0ed6",
+      "pose": "walk.02",
+      "side": "back",
+      "source_ankle": [
+        428,
+        626
+      ]
+    },
+    {
+      "actual_entry": [
+        305.4551328298285,
+        664.7156766125681
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "3721cf11eacd16c9215d3a3176e7ce381d089c5b7b05c4f6a7a2912b29ea0bbe",
+      "pose": "walk.02",
+      "side": "front",
+      "source_ankle": [
+        309,
+        667
+      ]
+    },
+    {
+      "actual_entry": [
+        442.7621919719756,
+        641.5777474806569
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "d09af899dcd8c35aa7278e7ec435e31eb495b7e26b19298f67caed78de93a4ce",
+      "pose": "walk.03",
+      "side": "back",
+      "source_ankle": [
+        441,
+        638
+      ]
+    },
+    {
+      "actual_entry": [
+        290.46786318815606,
+        664.6557189290033
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "a6d0ce69e5982b563cee7a37e93072e8920e85abe30dbfe5002bc043ae7f013c",
+      "pose": "walk.03",
+      "side": "front",
+      "source_ankle": [
+        302,
+        669
+      ]
+    },
+    {
+      "actual_entry": [
+        460.47928173967364,
+        660.3730188994489
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "e6358ca7f6d1e59800bcfcad2643ca4bad4ee455150ec8a77419ff46a435430d",
+      "pose": "walk.04",
+      "side": "back",
+      "source_ankle": [
+        463,
+        660
+      ]
+    },
+    {
+      "actual_entry": [
+        276.3132246064063,
+        660.7514792941193
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "2b5dc2fbae23fd00afa4bd511065dd00ff404885ab94c2deeb15ba595e0ffcae",
+      "pose": "walk.04",
+      "side": "front",
+      "source_ankle": [
+        275,
+        667
+      ]
+    },
+    {
+      "actual_entry": [
+        468.8750907587029,
+        671.8895633019293
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "716354fa2f6cdd354c9e6f1923daeb8785386e24a2dcc8d3aeeca27f824cd8b3",
+      "pose": "walk.05",
+      "side": "back",
+      "source_ankle": [
+        464,
+        672
+      ]
+    },
+    {
+      "actual_entry": [
+        263.7803101155773,
+        663.3375144112604
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "40c2c30c1e35a944699c63c9681c49fe593d8770d2e58f9ff856ada1ebadf871",
+      "pose": "walk.05",
+      "side": "front",
+      "source_ankle": [
+        262,
+        669
+      ]
+    },
+    {
+      "actual_entry": [
+        456.0178341816672,
+        673.2655394848392
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "2a120ca808475a7a446fc35704a5a3e89e8cc6b194e04ca8e92e8f24f2eef4a7",
+      "pose": "walk.06",
+      "side": "back",
+      "source_ankle": [
+        458,
+        684
+      ]
+    },
+    {
+      "actual_entry": [
+        255.74783559176814,
+        649.0158490437562
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "456f21394e7bb26dd3e81900c12af539f1da29d57c29bad6ab3f3720199aa993",
+      "pose": "walk.06",
+      "side": "front",
+      "source_ankle": [
+        255,
+        666
+      ]
+    },
+    {
+      "actual_entry": [
+        443.2606615070469,
+        676.5036302180936
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "9d6eaf3be16c80d4d14cc8ef4d0bd0b5079bc3dce80d52c3bbf29d509e3255fd",
+      "pose": "walk.07",
+      "side": "back",
+      "source_ankle": [
+        442,
+        681
+      ]
+    },
+    {
+      "actual_entry": [
+        262.91797589732715,
+        645.3369675924699
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "6daf960428a3e85ca3c33dc97a370e74a9660c185bbe8c5b5363867d413cdf11",
+      "pose": "walk.07",
+      "side": "front",
+      "source_ankle": [
+        249,
+        663
+      ]
+    },
+    {
+      "actual_entry": [
+        425.99625875245397,
+        672.7127938742618
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "a0d07fba6b5822e96364d67c6f7551db0725cf632f4c34b6158b02346a701554",
+      "pose": "walk.08",
+      "side": "back",
+      "source_ankle": [
+        425,
+        677
+      ]
+    },
+    {
+      "actual_entry": [
+        280.9726432733814,
+        636.2335723063167
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "58bcac22339a3f83478667066cfdebff5bc62df938caeedf0405511e47f25719",
+      "pose": "walk.08",
+      "side": "front",
+      "source_ankle": [
+        271,
+        642
+      ]
+    },
+    {
+      "actual_entry": [
+        411.69462021484264,
+        673.4913766350701
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "da70455bef4716a07dcdaf486726dd9daa67a5c880c61c8722db8b52af87f1b3",
+      "pose": "walk.09",
+      "side": "back",
+      "source_ankle": [
+        420,
+        678
+      ]
+    },
+    {
+      "actual_entry": [
+        303.67654226120186,
+        626.2085689822277
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "d58c1788897c640d3016e4f51023d80568ad7207ca64131fd4b6bb7ebab8c433",
+      "pose": "walk.09",
+      "side": "front",
+      "source_ankle": [
+        291,
+        637
+      ]
+    },
+    {
+      "actual_entry": [
+        395.99625875245397,
+        672.7127938742618
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "d00499b52576e41fdc409b2336080ba3d764a0f759f16aac38b5e53a18625030",
+      "pose": "walk.10",
+      "side": "back",
+      "source_ankle": [
+        396,
+        678
+      ]
+    },
+    {
+      "actual_entry": [
+        329.785061506365,
+        621.5685193721853
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "e1d2b0866df9968a33f3317983a7269bd9b359c445d96c26939e88a273e2df6d",
+      "pose": "walk.10",
+      "side": "front",
+      "source_ankle": [
+        315,
+        635
+      ]
+    },
+    {
+      "actual_entry": [
+        381.39684638061203,
+        673.0145774202981
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "41825198c8da9adc0dcfcc855cc6509769deefa9b013c77d5df3c5794ebb5799",
+      "pose": "walk.11",
+      "side": "back",
+      "source_ankle": [
+        382,
+        678
+      ]
+    },
+    {
+      "actual_entry": [
+        354.2276759507593,
+        614.1405670953477
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "8cb83ab00aab348f69720492efc402cfccfc82f8906f69a066b4152ac574662b",
+      "pose": "walk.11",
+      "side": "front",
+      "source_ankle": [
+        343,
+        626
+      ]
+    },
+    {
+      "actual_entry": [
+        363.67270125381947,
+        674.4754783586064
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "a404c885fc2bc84d260d015ec61a2859bf4fcd2ccb89c70b562d8f4c8404a791",
+      "pose": "walk.12",
+      "side": "back",
+      "source_ankle": [
+        360,
+        681
+      ]
+    },
+    {
+      "actual_entry": [
+        381.63715251874663,
+        639.8202536198631
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "6b2b8e8fd4e8b9f8995aac6226577dcf3e5d7b9e01109aa5ced0e98f17c594eb",
+      "pose": "walk.12",
+      "side": "front",
+      "source_ankle": [
+        367,
+        652
+      ]
+    },
+    {
+      "actual_entry": [
+        347.39684638061203,
+        673.0145774202981
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "fdcdb959b97cdd4962edab95a2632ee161efd9ef58babc08fe91a176e5cc19af",
+      "pose": "walk.13",
+      "side": "back",
+      "source_ankle": [
+        345,
+        682
+      ]
+    },
+    {
+      "actual_entry": [
+        411.6552564693938,
+        636.8956372732983
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "ec1b64aa69cb21a1ea05b26213e4499e760fa1fac19c8ebb763015f36d1d096f",
+      "pose": "walk.13",
+      "side": "front",
+      "source_ankle": [
+        391,
+        649
+      ]
+    },
+    {
+      "actual_entry": [
+        332.1287699271625,
+        668.4280427206353
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "172022d0f0036040d82eb4408620085e618d0f420c6b1102aab3c5b11af3897f",
+      "pose": "walk.14",
+      "side": "back",
+      "source_ankle": [
+        332,
+        665
+      ]
+    },
+    {
+      "actual_entry": [
+        404.61137286193457,
+        610.5657588777826
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "7169fd5a84ae0c79522fb8f547300dcfaaeedfb98e52203642a29aa2c08e723c",
+      "pose": "walk.14",
+      "side": "front",
+      "source_ankle": [
+        405,
+        620
+      ]
+    },
+    {
+      "actual_entry": [
+        317.56423687130547,
+        667.8134451927519
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "d6016e4c9edbe14761cf19ecf7dcc5f0a562581e7cc6e829d1d7be19d78d8d3b",
+      "pose": "walk.15",
+      "side": "back",
+      "source_ankle": [
+        324,
+        664
+      ]
+    },
+    {
+      "actual_entry": [
+        416.59929379098253,
+        612.9026737083922
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "956773a00ee04ca318077a2d66e47e8d67bce4a1d37446487f04aa314116f29e",
+      "pose": "walk.15",
+      "side": "front",
+      "source_ankle": [
+        421,
+        625
+      ]
+    },
+    {
+      "actual_entry": [
+        304.0645248370391,
+        664.3008553525792
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "410066e6a99b2e05c29a66362b10f24c54470448b6fbef38d9c4a2b1d5f3c740",
+      "pose": "walk.16",
+      "side": "back",
+      "source_ankle": [
+        308,
+        666
+      ]
+    },
+    {
+      "actual_entry": [
+        431.0743437390402,
+        630.7709201714124
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "b4cb12092c513358931e27596a2f5b16211bf1b321cfd1b2f7dc6a9619e46634",
+      "pose": "walk.16",
+      "side": "front",
+      "source_ankle": [
+        435,
+        637
+      ]
+    },
+    {
+      "actual_entry": [
+        291.0194408114313,
+        664.3956037409189
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "87c1371ca90b1cd567836225c7aa4e5c7023e56d6f254116e95f65719c36dc4e",
+      "pose": "walk.17",
+      "side": "back",
+      "source_ankle": [
+        295,
+        666
+      ]
+    },
+    {
+      "actual_entry": [
+        443.38790752150993,
+        644.3105504290551
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "53c419512d120b9ec9face12f6c205a81a9049b6b3ab51e7541ecc711a4c6b7b",
+      "pose": "walk.17",
+      "side": "front",
+      "source_ankle": [
+        450,
+        646
+      ]
+    },
+    {
+      "actual_entry": [
+        281.08319376165247,
+        664.7316399281589
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "b5ed95a7cfd40086eafc5a943189508a269b4e306236ff00e8d07897df3ced05",
+      "pose": "walk.18",
+      "side": "back",
+      "source_ankle": [
+        282,
+        678
+      ]
+    },
+    {
+      "actual_entry": [
+        457.64811186775137,
+        662.8500501739336
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "69a527dbfbd2963530b0cc0736a47aa746cfcfd5c5c723ffd7394b24d93a107b",
+      "pose": "walk.18",
+      "side": "front",
+      "source_ankle": [
+        459,
+        669
+      ]
+    },
+    {
+      "actual_entry": [
+        271.74568112699944,
+        664.6359451841028
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "e5052933463f7f377c3a9f34a6391e59819db5c3fbf60180fcd48b0d67f0e087",
+      "pose": "walk.19",
+      "side": "back",
+      "source_ankle": [
+        273,
+        683
+      ]
+    },
+    {
+      "actual_entry": [
+        459.2867529241998,
+        675.5338986274679
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "129ff6a6d8b1ccad05ff7db4d47f4ca317d64e57153ffc68230c65b3e177cce7",
+      "pose": "walk.19",
+      "side": "front",
+      "source_ankle": [
+        461,
+        684
+      ]
+    },
+    {
+      "actual_entry": [
+        257.4891982151863,
+        659.2063522970561
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "a32df9c5682c084ebcf136b29b6a0738a4d38da4829618cd560195c3c945fda7",
+      "pose": "walk.20",
+      "side": "back",
+      "source_ankle": [
+        252,
+        677
+      ]
+    },
+    {
+      "actual_entry": [
+        457.77750987374804,
+        680.5027129075569
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "34578ef9bffd761cc5a973e6115f96ad74eb4d6446a324e64dced60c59ff4539",
+      "pose": "walk.20",
+      "side": "front",
+      "source_ankle": [
+        443,
+        691
+      ]
+    },
+    {
+      "actual_entry": [
+        266.55271153400855,
+        658.1356691769997
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "df283d6a1fe69c75a2e423b9a43540bf564489ec30183c1ece16ed4d797f465a",
+      "pose": "walk.21",
+      "side": "back",
+      "source_ankle": [
+        266,
+        680
+      ]
+    },
+    {
+      "actual_entry": [
+        443.62137696577213,
+        683.4959677119539
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "d60faf5f69c57646919fa668a9945351748b92eb2b15caeb346b1526a9778b50",
+      "pose": "walk.21",
+      "side": "front",
+      "source_ankle": [
+        434,
+        689
+      ]
+    },
+    {
+      "actual_entry": [
+        272.9117612627158,
+        640.7093351478882
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "6da4754e156689481a385884b51506c277ade7bf5b21be6dfe4a38eaeac21d19",
+      "pose": "walk.22",
+      "side": "back",
+      "source_ankle": [
+        271,
+        650
+      ]
+    },
+    {
+      "actual_entry": [
+        424.08700142967194,
+        682.7697288916714
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "5ba660737dab4334a06fd6d199856f97ef022a3dadb1f88e8718e853ccf00068",
+      "pose": "walk.22",
+      "side": "front",
+      "source_ankle": [
+        420,
+        689
+      ]
+    },
+    {
+      "actual_entry": [
+        298.2665829505001,
+        631.590658773232
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "ec7dcf33a223a84fdbfbf372872a9f4bdf374a2442f794734e812e6a8b2798b1",
+      "pose": "walk.23",
+      "side": "back",
+      "source_ankle": [
+        285,
+        643
+      ]
+    },
+    {
+      "actual_entry": [
+        412.46681535474755,
+        681.0002392900601
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "60f367496de06099ca4b6e48cd9b862fcaf34774ac38398a90b8b8aabf4c2cc8",
+      "pose": "walk.23",
+      "side": "front",
+      "source_ankle": [
+        408,
+        687
+      ]
+    },
+    {
+      "actual_entry": [
+        319.66253925062693,
+        618.3847177718029
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "4097e0d38eecfd8041fe55809d450ca1c20be5ea415c64ac7072d67ff1886c7c",
+      "pose": "walk.24",
+      "side": "back",
+      "source_ankle": [
+        306,
+        635
+      ]
+    },
+    {
+      "actual_entry": [
+        388.8023643551031,
+        681.6012379303342
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "e67526d642fd81c5c462bb899152ea1c21092e2c117cc8f9fc006156b0382455",
+      "pose": "walk.24",
+      "side": "front",
+      "source_ankle": [
+        392,
+        674
+      ]
+    },
+    {
+      "actual_entry": [
+        346.5524301949439,
+        614.8657468365451
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "b511cacf1c2f90a1abcc5bd0dd0a044d14f717c6a7a82e2cb81af5d9af9181e2",
+      "pose": "walk.25",
+      "side": "back",
+      "source_ankle": [
+        334,
+        630
+      ]
+    },
+    {
+      "actual_entry": [
+        375.50737976873813,
+        682.0252471887472
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "48804ed4dccb1dfb030fd989fafb303ee31364628d742dfcaebb8007de237ffd",
+      "pose": "walk.25",
+      "side": "front",
+      "source_ankle": [
+        376,
+        675
+      ]
+    },
+    {
+      "actual_entry": [
+        358.2496864952399,
+        595.1952460768667
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "550eb6e0f92392fdd4d4ae4dd33592a450ddcce4c8f143dc6632e900ff0967ac",
+      "pose": "walk.26",
+      "side": "back",
+      "source_ankle": [
+        352,
+        594
+      ]
+    },
+    {
+      "actual_entry": [
+        362.9911098245035,
+        679.9937172325609
+      ],
+      "mask_basis": "observed native opening intersected with own source anatomy",
+      "mask_sha256": "0585ba66e2d831bf0b4ddd26d4af1115512a8e6b7eca752ce33512538272e25e",
+      "pose": "walk.26",
+      "side": "front",
+      "source_ankle": [
+        363,
+        678
+      ]
+    }
+  ],
+  "source": {
+    "art_approved": false,
+    "native_entry": [
+      530,
+      205
+    ],
+    "native_sha256": "d3c711722d3c974c7141fd25df47c8dfef2c11480efe66e12d1a3e56b5dcaf08",
+    "native_size": [
+      1902,
+      827
+    ],
+    "native_source": "inputs/volume-shoe-r1/native-source.png",
+    "native_to_canonical": [
+      [
+        0.8733333333333333,
+        0.0,
+        -54.66666666666666
+      ],
+      [
+        0.0,
+        0.8733333333333333,
+        161.83333333333337
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "observation": "Read on exact generated navy collar dark interior; exclude front rim and navy side wall. Shoe artwork unchanged; clear only where own calf/foot enters this interior.",
+    "opening_polygon": [
+      [
+        386,
+        159
+      ],
+      [
+        466,
+        178
+      ],
+      [
+        556,
+        189
+      ],
+      [
+        644,
+        185
+      ],
+      [
+        683,
+        174
+      ],
+      [
+        646,
+        221
+      ],
+      [
+        572,
+        236
+      ],
+      [
+        493,
+        227
+      ],
+      [
+        442,
+        213
+      ]
+    ]
+  }
+}

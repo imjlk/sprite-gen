@@ -18,7 +18,13 @@ from sprite_gen.frames import parts_production as p
 from sprite_gen.spec import parts_assets as a,parts_contract as c,parts_workspace as w
 
 
-def bridge(assembly,revision,defer_build=False,include_lower_leg=False):
+def cuff_cap(along,across,top,half_width,rounding,center=0):
+    """An antialiased curved hem in the calf's own coordinate system."""
+    profile=top-rounding*np.minimum(((across-center)/max(half_width,1))**2,1)
+    return profile,np.clip(profile+.5-along,0,1)
+
+
+def bridge(assembly,revision,defer_build=False,include_lower_leg=False,rounded_cuffs=False):
     root,index,reg,_=parts_motion._active(assembly);folder=root/'inputs'/revision
     if folder.exists():raise ValueError('preserve prior bridges')
     folder.mkdir();state=p._load(root,'full-motion.socks');config=deepcopy(state['config'])
@@ -38,34 +44,61 @@ def bridge(assembly,revision,defer_build=False,include_lower_leg=False):
             leg=np.array(Image.open(root/f'inputs/body-segments/leg_{side}/{pose}.png').getchannel('A'))
             along=(coords-ankle)@axis
             across=(coords-ankle)@np.array([-axis[1],axis[0]])
-            lower=np.where((along<=0)&(np.abs(across)<=points.get('cuff_half_width',30)),leg,0).astype('uint8') if include_lower_leg else np.zeros_like(leg)
-            top=points.get('cuff_top_height')
-            rounding=points.get('cuff_top_rounding',0)
+            distal=(along<=0) if rounded_cuffs else (along<=0)&(np.abs(across)<=points.get('cuff_half_width',30))
+            lower=np.where(distal,leg,0).astype('uint8') if include_lower_leg else np.zeros_like(leg)
+            top=points.get('cuff_top_height',30 if rounded_cuffs else None)
+            rounding=6 if rounded_cuffs else points.get('cuff_top_rounding',0)
             if not 0<=rounding<=8:raise ValueError('cuff top rounding must stay within 8 source pixels')
             if rounding and top is None:raise ValueError('cuff rounding needs an authored top height')
-            top_profile=top-rounding*np.minimum((across/25)**2,1) if top is not None else None
+            # Read the actual calf width at its hem, rather than using a fixed
+            # circle that changes apparent curvature as the leg bends.
+            hem=(leg>=128)&(np.abs(along-top)<5)&(np.abs(across)<=40) if top is not None else np.zeros_like(leg,dtype=bool)
+            if rounded_cuffs and hem.any():
+                left,right=np.percentile(across[hem],[2,98]);center=float((left+right)/2)
+                half_width=max(8,float((right-left)/2))
+            else:center,half_width=0,25
+            top_profile,cap=cuff_cap(along,across,top,half_width,rounding,center) if top is not None else (None,None)
             upper=np.where((along>=0)&(along<=top_profile)&(np.abs(across)<=points.get('cuff_half_width',30)),leg,0).astype('uint8') if top is not None else np.zeros_like(leg)
             if top is not None:
                 required &= along<=top_profile+.5
-            added=np.where(required,np.maximum(np.maximum(foot,lower),upper),0).astype('uint8');identity='sock_'+side+'_cuff';old=np.array(pieces[identity])
+            added=np.where(required,np.maximum(np.maximum(foot,lower),upper),0).astype('uint8')
+            if rounded_cuffs and not (points.get('cuff_fully_occluded') or points.get('foot_fully_occluded')):
+                # The shoe UV limits only the foot/ankle bridge. A calf hem
+                # must not be sheared by a rotated shoe's top/forefoot plane.
+                # Some source calf pixels belong to the replaceable foot node.
+                # Cover that source anatomy too, so replacing the foot cannot
+                # erase a rectangular piece of the distal calf (e.g. run.10).
+                calf_band=(along>=-8)&(along<=top_profile+.5)&(np.abs(across-center)<=half_width+2)&(uv[...,1]<785)
+                upper=np.where(calf_band,np.maximum(leg,foot),0).astype('uint8')
+                added=np.maximum(added,upper)
+            identity='sock_'+side+'_cuff';old=np.array(pieces[identity])
             # Shoe placement can change while the body stays the same. Retain
             # the authored calf, but rebuild its foot-sourced bridge against
             # the CURRENT sole instead of accumulating former bridge pixels.
             retained=np.minimum(old[...,3],leg);alpha=np.maximum(retained,added)
             if rounding:
-                cap=np.clip(top_profile+.5-along,0,1)
                 alpha=np.rint(alpha.astype(float)*cap).astype('uint8')
                 added=np.rint(added.astype(float)*cap).astype('uint8')
             edge=(alpha.astype(float)-np.array(Image.fromarray(alpha).filter(ImageFilter.MinFilter(3))))/255
             rgb=np.array([245.,239.,221.])*(1-edge[...,None])+np.array([151,138,113])*edge[...,None]
             new=np.dstack([np.rint(rgb).astype('uint8'),alpha]);kept=retained>0
             if rounding:kept &= cap>=1
-            new[kept,:3]=old[kept,:3];new[alpha==0]=0
+            new[kept,:3]=old[kept,:3]
+            if rounded_cuffs:
+                # Re-author the fabric instead of retaining the former sharp
+                # polygon's brown edge inside the new rounded silhouette.
+                radial=np.minimum(np.abs(across-center)/half_width,1)
+                shade=1-.10*radial**2
+                fabric=np.array([245.,239.,221.])*shade[...,None]
+                hem_line=np.clip(1-np.abs(along-(top_profile-1.2))/1.1,0,1)*.22
+                fabric=fabric*(1-hem_line[...,None])+np.array([170,155,130])*hem_line[...,None]
+                new[...,:3]=np.rint(fabric*(1-edge[...,None]*.35)+np.array([151,138,113])*edge[...,None]*.35).astype('uint8')
+            new[alpha==0]=0
             changed |= not np.array_equal(new,old)
             pieces[identity]=Image.fromarray(new)
             guide=folder/f'{pose}.{side}.ankle-required.png';Image.fromarray(added).save(guide)
             proof.append({'pose':pose,'side':side,'added_pixels':int((alpha>old[...,3]).sum()),'required':guide.relative_to(root).as_posix(),
-                          'include_lower_leg':include_lower_leg,'source_leg_sha256':a.sha256((root/f'inputs/body-segments/leg_{side}/{pose}.png').read_bytes()),
+                          'include_lower_leg':include_lower_leg,'rounded_cuff':rounded_cuffs,'hem_height':top,'hem_center':center,'hem_half_width':half_width,'hem_rounding':rounding,'source_leg_sha256':a.sha256((root/f'inputs/body-segments/leg_{side}/{pose}.png').read_bytes()),
                           'source_foot_sha256':a.sha256((root/f'inputs/body-segments/foot_{side}/{pose}.png').read_bytes()),'hidden':bool(not required.any())})
         if not changed:
             continue
@@ -80,7 +113,7 @@ def bridge(assembly,revision,defer_build=False,include_lower_leg=False):
             required=np.maximum(required,np.where(aa>=240,255,0).astype('uint8'));allowed=np.maximum(allowed,np.array(im.getchannel('A').filter(ImageFilter.MaxFilter(5))))
         for k,mask in [('required',required),('allowed',allowed)]:
             file=folder/f'{pose}.{k}.png';Image.fromarray(mask).save(file);config['pose_checks'][pose][k]=file.relative_to(root).as_posix()
-    (folder/'authoring.json').write_bytes(w.json_bytes({'poses':proof,'method':'retain existing cuffs; add own source-foot and optional distal-calf interface strictly above rigid shoe sole','art_approved':False}))
+    (folder/'authoring.json').write_bytes(w.json_bytes({'poses':proof,'method':'source-bound calf cuff with centered curved hem and fabric shading; shoe UV limits only ankle/foot bridge' if rounded_cuffs else 'retain existing cuffs; add own source-foot and optional distal-calf interface strictly above rigid shoe sole','art_approved':False}))
     if not changed_poses:
         (root/'inputs/ankle-continuity-active.json').write_bytes(w.json_bytes({
             'authoring':(folder/'authoring.json').relative_to(root).as_posix(),
@@ -108,4 +141,5 @@ def bridge(assembly,revision,defer_build=False,include_lower_leg=False):
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--assembly',type=Path,required=True);parser.add_argument('--revision',required=True);parser.add_argument('--defer-build',action='store_true')
     parser.add_argument('--include-lower-leg',action='store_true')
+    parser.add_argument('--rounded-cuffs',action='store_true')
     print(json.dumps(bridge(**vars(parser.parse_args()))))

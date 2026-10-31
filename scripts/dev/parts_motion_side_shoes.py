@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Register a real generated lateral shoe master on existing motion landmarks.
+"""Register a generated shoe illustration on existing motion landmarks.
 
 Native artwork owns perspective; uniform registration owns scale and rotation.
 The canonical UV sole/entry are explicit authoring references, never a 3D fit.
@@ -34,7 +34,7 @@ def author(assembly, master, revision, registration=None):
     # Uniform registration into the existing authored UV convention keeps the
     # ankle bridge and outsole checks meaningful without squashing the product.
     heel=np.array(observed['sole_heel']);toe=np.array(observed['sole_toe'])
-    assert toe[0]>heel[0] and toe[1]==heel[1],'native must be a right-facing lateral view with horizontal sole'
+    assert toe[0]>heel[0] and toe[1]==heel[1],'native needs a right-facing horizontal attachment baseline'
     assert observed['canonical_heel']==[120,795] and observed['canonical_toe']==[1430,795],'unsupported ankle/sole UV convention'
     scale=1310/float(toe[0]-heel[0])
     matrix=np.eye(3);matrix[:2,:2]*=scale;matrix[:2,2]=np.array([120,795])-heel*scale
@@ -43,7 +43,7 @@ def author(assembly, master, revision, registration=None):
     canonical.save(folder/'shoe-side-canonical.png')
     geometry=w.read_json(root,'inputs/geometry.json');state=p._load(root,'full-motion.sneakers');config=deepcopy(state['config'])
     config['prompt']['refs']=[(folder/'shoe-side-canonical.png').relative_to(root).as_posix()]
-    config['prompt']['text']='Independent navy/cream low-top sneaker in exact lateral orthographic view; compact tongue and three small side lace bumps. Same sole thickness through every pose.'
+    config['prompt']['text']='Independent navy/cream low-top sneaker; native illustrated depth, uniformly attached to the source foot. No nonuniform shape warp.'
     lengths={}
     for name in index['states']:
         widths=[head_box(Image.open(root/f'inputs/body/{name}/{int(pose.split(".")[1]):03}.png').convert('RGBA')) for pose in geometry['poses'] if pose.startswith(name+'.')]
@@ -62,7 +62,12 @@ def author(assembly, master, revision, registration=None):
                 layer.setdefault('visible',{})[pose]=False;layer['straight_edges'].pop(pose,None)
             else:
                 layer.setdefault('visible',{})[pose]=True
-                layer['straight_edges'][pose]=[{'id':'rigid-outsole','start':np.rint(transform[:2,:2]@np.array([180,795])+transform[:2,2]).astype(int).tolist(),'end':np.rint(transform[:2,:2]@np.array([1260,795])+transform[:2,2]).astype(int).tolist(),'side':'positive','span':['3/20','4/5'],'max_deviation':'2'}]
+                # A rounded bevel has a curved silhouette. Do not mislabel it
+                # as a failed straight outsole or flatten it to satisfy QC.
+                if observed.get('sole_profile')=='rounded bevel':
+                    layer['straight_edges'].pop(pose,None)
+                else:
+                    layer['straight_edges'][pose]=[{'id':'rigid-outsole','start':np.rint(transform[:2,:2]@np.array([180,795])+transform[:2,2]).astype(int).tolist(),'end':np.rint(transform[:2,:2]@np.array([1260,795])+transform[:2,2]).astype(int).tolist(),'side':'positive','span':['3/20','4/5'],'max_deviation':'2'}]
             inv=np.linalg.inv(transform);uv=coords@inv[:2,:2].T+inv[:2,2]
             leg=np.array(Image.open(root/f'inputs/body-segments/leg_{side}/{pose}.png').getchannel('A'))
             lip=(uv[...,0]<410)&(uv[...,1]>345)&(uv[...,1]<465)
@@ -80,7 +85,7 @@ def author(assembly, master, revision, registration=None):
     file=folder/'config.json';file.write_bytes(w.json_bytes(config));p.configure(assembly,'full-motion.sneakers',file)
     batch=p.sheet(assembly,'full-motion.sneakers',poses=list(geometry['poses']))
     p.slice_batch(assembly,'full-motion.sneakers',batch=batch['batch'],pages=[(Path(str(n)),files[j['pose'],j['layer']]) for n,j in enumerate(batch['pages'])],registered_canvas=True)
-    record={'provider':'built-in-imagegen','native_sha256':a.sha256(master.read_bytes()),'canonical_sha256':a.sha256((folder/'shoe-side-canonical.png').read_bytes()),'native_to_canonical':matrix.tolist(),'native_sole_landmarks':{'heel':heel.tolist(),'toe':toe.tolist()},'registration_sha256':a.sha256(registration.read_bytes()),'cleanup':'largest alpha>=16 component plus 2px fringe','fixed_lengths':lengths,'poses':proof,'perspective':'generated orthographic lateral illustration; no nonuniform warp','art_approved':False,'appearance_clips_baked':0}
+    record={'provider':'built-in-imagegen','native_sha256':a.sha256(master.read_bytes()),'canonical_sha256':a.sha256((folder/'shoe-side-canonical.png').read_bytes()),'native_to_canonical':matrix.tolist(),'native_sole_landmarks':{'heel':heel.tolist(),'toe':toe.tolist()},'registration_sha256':a.sha256(registration.read_bytes()),'cleanup':'largest alpha>=16 component plus 2px fringe','fixed_lengths':lengths,'poses':proof,'perspective':observed.get('perspective','generated orthographic lateral illustration; no nonuniform warp'),'sole_profile':observed.get('sole_profile','straight lateral'),'art_approved':False,'appearance_clips_baked':0}
     (folder/'authoring.json').write_bytes(w.json_bytes(record))
     return {'frames':len(geometry['poses']),'shoe_layers':len(proof),'build':'pending','art_approved':False}
 

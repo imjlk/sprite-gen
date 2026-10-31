@@ -37,6 +37,8 @@ def transfer(source, destination, boundary, cut_y=None, right=None, y_range=None
 def publish(assembly, annotation, revision):
     root = assembly.parent
     q = json.loads(annotation.read_text())
+    if 'transfers' in q:
+        return publish_batch(assembly,annotation,revision,q)
     folder = root/'inputs'/revision
     if folder.exists():
         raise ValueError('preserve the earlier ownership correction')
@@ -73,6 +75,43 @@ def publish(assembly, annotation, revision):
               'protected_opaque_calf_pixels': int((guard >= 128).sum()),
               'art_approved': False, 'independent_candidates_need_rebinding': True}
     (folder/'result.json').write_bytes(w.json_bytes(result))
+    return result
+
+
+def publish_batch(assembly,annotation,revision,q):
+    """Validate a set against one source snapshot, then import one new body."""
+    root=assembly.parent;folder=root/'inputs'/revision
+    if folder.exists():raise ValueError('preserve prior ownership revisions')
+    folder.mkdir();images={};guards={};proof=[]
+    def path(node,pose):return root/f'inputs/body-segments/{node}/{pose}.png'
+    for item in q['transfers']:
+        for key,node in [('source_sha256',item['from']),('destination_sha256',item['to'])]:
+            file=path(node,item['pose'])
+            assert a.sha256(file.read_bytes())==item[key],'annotation belongs to another source'
+            identity=(node,item['pose'])
+            if identity not in images:
+                images[identity]=np.array(Image.open(file).convert('RGBA'))
+                shutil.copy2(file,folder/f'{item["pose"]}.{node}.before.png')
+    for item in q['transfers']:
+        src,dst=(item['from'],item['pose']),(item['to'],item['pose'])
+        images[src],images[dst],moved=transfer(images[src],images[dst],item['boundary_points'],right=item.get('right_boundary_points'),y_range=item.get('y_range'))
+        guards[item['pose']]=guards.get(item['pose'],np.zeros(moved.shape,dtype=bool))|moved
+        proof.append({**item,'moved_pixels':int(moved.sum())})
+    for (node,pose),pixels in images.items():Image.fromarray(pixels).save(path(node,pose))
+    specfile=root/'inputs/body-segments/import.json';spec=w.read_json(root,specfile.relative_to(root).as_posix())
+    for pose,moved in guards.items():
+        state,frame=pose.split('.');body=np.array(Image.open(root/f'inputs/body/{state}/{int(frame):03}.png').convert('RGBA'))
+        merged=Image.new('RGBA',(body.shape[1],body.shape[0]))
+        for piece in spec['pieces']:
+            ref=piece['pose_map'][pose]['image'];file=specfile.parent/ref['file'];ref['sha256']=a.sha256(file.read_bytes())
+            merged.alpha_composite(Image.open(file).convert('RGBA'))
+        assert np.array_equal(np.array(merged),body),'ownership changed body artwork'
+        file=root/f'inputs/body-segments/{pose}.protected-calf.png'
+        prior=np.array(Image.open(file).convert('L')) if file.exists() else np.zeros(body.shape[:2],dtype='uint8')
+        Image.fromarray(np.maximum(prior,np.where(moved&(body[...,3]>=128),255,0).astype('uint8'))).save(file)
+    specfile.write_bytes(w.json_bytes(spec));parts_import.import_pack(assembly,specfile,specfile.parent)
+    result={'transfers':proof,'body_rgba_identical':True,'art_approved':False,'independent_candidates_need_rebinding':True}
+    (folder/'annotation.json').write_bytes(annotation.read_bytes());(folder/'result.json').write_bytes(w.json_bytes(result))
     return result
 
 

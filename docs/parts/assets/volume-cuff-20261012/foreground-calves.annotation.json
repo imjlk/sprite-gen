@@ -1,0 +1,257 @@
+{
+  "transfers": [
+    {
+      "pose": "walk.25",
+      "from": "foot_back",
+      "to": "leg_front",
+      "source_sha256": "7d52e284d2e81d33030ab959556ea937614b29510b1cae14885c4f3a56a50f4e",
+      "destination_sha256": "109db18237d4f2ac688a7d074c2796995364dd3390b10458e2b1ff324f2732b5",
+      "boundary_points": [
+        [
+          363,
+          580
+        ],
+        [
+          355,
+          600
+        ],
+        [
+          351,
+          620
+        ],
+        [
+          353,
+          640
+        ],
+        [
+          354,
+          660
+        ],
+        [
+          351,
+          674
+        ]
+      ],
+      "right_boundary_points": [
+        [
+          408,
+          580
+        ],
+        [
+          401,
+          600
+        ],
+        [
+          397,
+          620
+        ],
+        [
+          393,
+          640
+        ],
+        [
+          389,
+          660
+        ],
+        [
+          388,
+          674
+        ]
+      ],
+      "y_range": [
+        580,
+        674
+      ]
+    },
+    {
+      "pose": "walk.25",
+      "from": "leg_back",
+      "to": "leg_front",
+      "source_sha256": "3e74604190e1742a8b9992d48d7e6a8b9e9cb909d375ebb8b9aa316e4c47d180",
+      "destination_sha256": "109db18237d4f2ac688a7d074c2796995364dd3390b10458e2b1ff324f2732b5",
+      "boundary_points": [
+        [
+          363,
+          580
+        ],
+        [
+          355,
+          600
+        ],
+        [
+          351,
+          620
+        ],
+        [
+          353,
+          640
+        ],
+        [
+          354,
+          660
+        ],
+        [
+          351,
+          674
+        ]
+      ],
+      "right_boundary_points": [
+        [
+          408,
+          580
+        ],
+        [
+          401,
+          600
+        ],
+        [
+          397,
+          620
+        ],
+        [
+          393,
+          640
+        ],
+        [
+          389,
+          660
+        ],
+        [
+          388,
+          674
+        ]
+      ],
+      "y_range": [
+        580,
+        674
+      ]
+    },
+    {
+      "pose": "walk.26",
+      "from": "foot_back",
+      "to": "leg_front",
+      "source_sha256": "9d2eeba2aca473ff6b3e35f948cee94e573df699b3f3e31db364ddf498041656",
+      "destination_sha256": "c028a2417724005422e53285ff3bc043c4fcdcfd224f474b4664216837768203",
+      "boundary_points": [
+        [
+          341,
+          580
+        ],
+        [
+          334,
+          600
+        ],
+        [
+          331,
+          620
+        ],
+        [
+          333,
+          640
+        ],
+        [
+          334,
+          660
+        ],
+        [
+          331,
+          674
+        ]
+      ],
+      "right_boundary_points": [
+        [
+          401,
+          580
+        ],
+        [
+          395,
+          600
+        ],
+        [
+          392,
+          620
+        ],
+        [
+          389,
+          640
+        ],
+        [
+          385,
+          660
+        ],
+        [
+          384,
+          674
+        ]
+      ],
+      "y_range": [
+        580,
+        674
+      ]
+    },
+    {
+      "pose": "walk.26",
+      "from": "leg_back",
+      "to": "leg_front",
+      "source_sha256": "40b34cead66e38b187644e1b8c91b17f1feb19553452e50ffbf6dab445b48931",
+      "destination_sha256": "c028a2417724005422e53285ff3bc043c4fcdcfd224f474b4664216837768203",
+      "boundary_points": [
+        [
+          341,
+          580
+        ],
+        [
+          334,
+          600
+        ],
+        [
+          331,
+          620
+        ],
+        [
+          333,
+          640
+        ],
+        [
+          334,
+          660
+        ],
+        [
+          331,
+          674
+        ]
+      ],
+      "right_boundary_points": [
+        [
+          401,
+          580
+        ],
+        [
+          395,
+          600
+        ],
+        [
+          392,
+          620
+        ],
+        [
+          389,
+          640
+        ],
+        [
+          385,
+          660
+        ],
+        [
+          384,
+          674
+        ]
+      ],
+      "y_range": [
+        580,
+        674
+      ]
+    }
+  ],
+  "observation": "Observed on exact body and ownership-grid crops. Foreground planted calf contains rear leg/foot triangles in walk.25/26. Only those existing source pixels inside the explicit foreground contour move; total body RGBA must be exact."
+}

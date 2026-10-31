@@ -1,0 +1,69 @@
+{
+  "native_source": "inputs/volume-shoe-r1/native-source.png",
+  "native_sha256": "d3c711722d3c974c7141fd25df47c8dfef2c11480efe66e12d1a3e56b5dcaf08",
+  "native_size": [
+    1902,
+    827
+  ],
+  "native_to_canonical": [
+    [
+      0.8733333333333333,
+      0.0,
+      -54.66666666666666
+    ],
+    [
+      0.0,
+      0.8733333333333333,
+      161.83333333333337
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "native_entry": [
+    530,
+    205
+  ],
+  "opening_polygon": [
+    [
+      386,
+      159
+    ],
+    [
+      466,
+      178
+    ],
+    [
+      556,
+      189
+    ],
+    [
+      644,
+      185
+    ],
+    [
+      683,
+      174
+    ],
+    [
+      646,
+      221
+    ],
+    [
+      572,
+      236
+    ],
+    [
+      493,
+      227
+    ],
+    [
+      442,
+      213
+    ]
+  ],
+  "observation": "Read on exact generated navy collar dark interior; exclude front rim and navy side wall. Shoe artwork unchanged; clear only where own calf/foot enters this interior.",
+  "art_approved": false
+}

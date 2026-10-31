@@ -1,0 +1,10 @@
+{
+  "mode": "built-in imagegen",
+  "selected": "shoe-volume-native.png",
+  "prompt": "shoe-prompt.txt",
+  "native_sha256": "d3c711722d3c974c7141fd25df47c8dfef2c11480efe66e12d1a3e56b5dcaf08",
+  "first_candidate": "shoe-edit-candidate.png",
+  "first_candidate_adopted": false,
+  "reason": "first edit retains elongated profile; fresh compact sneaker has domed toe and bevelled sole",
+  "art_approved": false
+}

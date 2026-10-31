@@ -6,6 +6,7 @@ import pytest
 from scripts.dev.parts_motion_skin_palette import palette_pixels
 from scripts.dev.parts_full_motion import foot_matrix
 from scripts.dev.parts_motion_preview import preview
+from scripts.dev.parts_full_motion_ankle_bridge import cuff_cap
 
 
 def test_skin_correction_keeps_alpha_head_and_garment_neighbourhood():
@@ -43,3 +44,14 @@ def test_preview_refuses_a_directory_still_being_rendered(tmp_path):
     with pytest.raises(ValueError,match='complete rendered evidence'):
         preview(folder,folder,tmp_path/'preview')
     assert not (tmp_path/'preview').exists()
+
+
+def test_cuff_hem_rounds_both_sides_and_has_fractional_edge_alpha():
+    across=np.array([-20.,-10.,0.,10.,20.])
+    profile,alpha=cuff_cap(np.full(5,27.8),across,30,20,4)
+    assert np.allclose(profile,[26,29,30,29,26])
+    assert np.allclose(alpha,[0,1,1,1,0])
+    _,edge=cuff_cap(np.array([29.8]),np.array([0.]),30,20,4)
+    assert np.allclose(edge,[.7])
+    shifted,_=cuff_cap(np.zeros(5),across-12,30,20,4,center=-12)
+    assert np.allclose(shifted,profile)  # An ankle marker need not be the calf center.

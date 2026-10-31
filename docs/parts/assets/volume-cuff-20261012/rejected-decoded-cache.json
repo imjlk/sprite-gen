@@ -1,0 +1,5 @@
+{
+  "adopted": false,
+  "complete": false,
+  "reason": "existing decoded-image cache counted all unique full-canvas masks across a motion against a lifetime pixel sum; portable export failed and viewer fell back to server rendering. Superseded by bounded resident-image cache and fresh evidence-r3."
+}

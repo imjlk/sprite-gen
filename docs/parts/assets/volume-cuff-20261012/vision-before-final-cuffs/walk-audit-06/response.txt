@@ -1,0 +1,49 @@
+{
+  "poses": {
+    "walk.06": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.07": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.08": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.09": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.10": {
+      "hair": "pass",
+      "socks": "pass",
+      "shoes": "pass",
+      "issues": []
+    },
+    "walk.11": {
+      "hair": "pass",
+      "socks": "unknown",
+      "shoes": "unknown",
+      "issues": [
+        "The lifted front shoe overlaps the back ankle and shoe collar. The back sock bridge, calf entry and heel attachment are partly hidden, preventing a complete check.",
+        "The exposed back forefoot retains navy/cream volume, but its obscured heel and collar cannot be approved from this frame."
+      ]
+    }
+  },
+  "limits": [
+    "Only walk.06 through walk.11 are shown; continuity outside this subset is unobserved.",
+    "The visible bare/composed comparisons do not establish an obvious fabric spill, detached cuff triangle or exposed-background calf hole. Occlusion in walk.11 leaves the back ankle uncertain.",
+    "These stills cannot establish speed or gait quality.",
+    "Pass indicates no obvious visible defect in the inspectable regions; this audit grants no curator approval or release."
+  ]
+}
