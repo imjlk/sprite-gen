@@ -30,62 +30,51 @@ interpolation for appearance changes (its module docstring, the 3-way comparison
 `video-chain` stays the verb for joining clips whose poses meet, and its pose distance (`joins[].steps`) says how far
 apart a join's frames are.
 
-### Pip: four joins, five ways (six on the landing)
+### Pip: one join, four ways
 
-`scripts/dev/transition_chain_demo.py` runs both verbs through the CLI on the repository's Pip clips
-(`tests/fixtures/rife-cuts/pip-jump`, `pip-run`, put on one 560 x 784 canvas), two frames between. Two joins have one
-end off the floor (`t1`, `t2`), one has both ends on it (`t3`, the control), and `t4` is a landing inside the jump
-clip, whose own frames 8 and 10 sit a third and two thirds of the way. The provider draws anew on every call, so
-each transition row ran three times on grok (`delivered` counts the tries); the chain rows run once (RIFE gives the same
-frames every run). "Up" is each frame's height off the lower end's floor: A, the two frames between, B. On `t4` a
-sixth row places the strip's in-betweens where the clip's own frames are (`--places`, section 5), as a caller who
-has the motion does.
+`scripts/dev/transition_chain_demo.py` runs both verbs through the CLI on one join between the repository's Pip clips:
+`jump:13` (Pip standing, the landed hold of `tests/fixtures/rife-cuts/pip-jump`) into `run:7` (a full stride of
+`pip-run`). Both ends are on the floor and the poses differ, so it is a cross-state join with nothing else in the way.
+Two frames between. The provider draws anew on every call, so each transition row ran three times on grok
+(`delivered` counts the tries); the chain rows run once (RIFE gives the same frames every run).
 
-| Join (`video-chain` pose distance) | `transition` strip `--ground shared` | `transition` strip (`--ground auto`, default) | `transition` video (`auto`) | `video-chain --refuse held` | `video-chain` (default) |
-|---|---|---|---|---|---|
-| `t1` jump:28, a take-off 130 px up, into run:0 (2.19 steps) | 3/3 delivered; ends IoU 0.73 to 0.98; up 0, 0, 0, 0: the take-off stands on the floor | **3/3**; ends 0.976 to 0.981 / 0.974 to 0.975; **up 117, 78, 39, 0** | 1/3 (0.967 / 0.868); refused: the judge (`outline`), in-betweens drawn 1.9x the ends | passed, 17.4 s; up 117, 52, 14, 0; kept `outline`, `ghost` | failed, 132.3 s: `ghost`, `outline`; up 118, 118, 1, 0 (frames shown again) |
-| `t2` run:25 into jump:0, rising 164 px up (4.56 steps) | 2/3 (one refused, ends 0.53 / 0.71); up 0, 0, 0, 0 | **3/3**; ends 0.971 to 0.974 / 0.799 to 0.981; **up 0, 51, 102, 153** | 1/3 (0.962 / 0.934); refused twice: consecutive frames jump (IoU 0.28, 0.17) | passed, 17.3 s; up 0, 4, 104, 153; kept `outline`, `ghost` | failed, 167.4 s: `doubled`, `ghost`, `outline` |
-| `t3` jump:13 into run:7, both on the floor (3.15 steps) | 3/3; ends 0.973 to 0.976 / 0.959 to 0.970 | 3/3, `auto` is `shared` here (heights 8 and 33 px, 25 < 35); 0.966 to 0.973 / 0.962 to 0.970 | 0/3: the last frame is not B (0.38), an in-between drawn 1.21x and 1.22x | passed, 20.2 s; kept `outline`, `ghost`, `doubled` / `hole` | failed, 178.7 s |
-| `t4` jump:6, falling 182 px up, into jump:12, landed (2.86 steps); the clip's frames: up 174, 98, 2, 0 | 2/3 (one refused, 0.66 / 0.50); up 0, 0, 0, 0 (98 px under the clip's) | **3/3**; ends 0.972 to 0.983 / 0.960 to 0.976; **up 174, 116, 58, 0** (+18, +56 px on the clip's: the straight line); IoU with the clip's frames 0.67 to 0.72 / 0.62 to 0.75. **With `--places`** read off the clip's frames 8 and 10: 3/3, **up 174, 98, 2, 0 (0, 0 px)**, anchors within 0.4 px of the clip's, IoU 0.68 to 0.69 / 0.64 to 0.67 | 0/3: the judge, `smear` on in-between 1 every try | passed, 16.1 s; up 174, 112, 2, 0 (+14, 0); IoU 0.69 / 0.76; kept `outline`, `ghost` | failed, 110.1 s: up 174, 174, 0, 0 (frames shown again) |
+**The two clips are drawn at different scales.** Pip's run is drawn about 1.37 times as large as the jump (the square
+root of the ratio of the clips' median opaque areas; their median figure heights are 689 and 542 px). Taken as they
+are, the join's ends are 498 px (standing) and 696 px (striding) tall, and every frame between grows from one to the
+other: `transition`'s strip delivered heights 498, 564, 630, 696, and RIFE's 498, 637, 688, 696, which reads as a
+zoom that belongs to neither state. The demo scales the clip drawn larger down to the other's scale before
+anything runs (`scale_by`, measured, not set: 0.726 on the run), so both verbs take the same normalized frames, on
+one 412 x 784 canvas; the ends are then 498 and 511 px, the rest being the pose. Scaling also took `video-chain`'s
+pose distance for the join from 3.15 steps to 1.78.
 
-Over the four joins: strip `auto` 12 of 12 tries delivered, strip `shared` 10 of 12, video 2 of 12; `video-chain
---refuse held` 4 of 4 (every frame between kept `outline` and `ghost`), the default 0 of 4. Before this rework,
-`--ground source` stood the ends at their heights in the strip itself; on `t1` the provider then redrew B, and one
-of three tries passed.
-
-<p align="center">
-  <img src="assets/transition-vs-chain-t4.gif" width="760" alt="t4, a fall into the landing: transition strip --ground shared, transition strip (auto), transition strip --places, transition video, video-chain --refuse held and the clip's own frames, playing A, the two frames between, B" /><br />
-  <sub>t4, jump:6 (falling) into jump:12 (landed): the strip on the straight line, the strip placed where the clip's frames 8
-  and 10 are (<code>--places</code>), and the clip's own frames. A grey line on the lower end's floor.</sub>
-</p>
+| Row | Delivered | Figure heights (A, between, between, B) | What the report says |
+|---|---|---|---|
+| `transition --method strip` (`--ground auto`: `shared` here, 8 and 24 px off the floor) | **3/3** | 498, 501, 503, 506 | ends IoU 0.962 to 0.972 / 0.972 to 0.975; lowest step IoU 0.415 to 0.476; judged for the record: `smear` once, `hole` once (with a pose-jump warning), nothing on try 3 |
+| `transition --method video` | 0/3 | none delivered | refused: consecutive clip frames jump (IoU 0.248) once; the clip's last frame is not B (IoU 0.42, 0.46) twice |
+| `video-chain --refuse held` | passed, 11.2 s | 498, 500, 504, 511 | the frames between kept `outline`, `ghost` (and `doubled` on the first) |
+| `video-chain` (default) | failed, 100.8 s | | every frame between refused: `doubled`, `ghost`, `outline` |
 
 <p align="center">
-  <img src="assets/transition-vs-chain-t1.png" width="760" alt="t1: the four frames of each of the five rows on one sheet" /><br />
-  <sub>t1, a take-off into a stride, every row's frames; a refused row on red, as it was left in <code>refused/</code> or
-  <code>keyed.refused/</code>. The same for <a href="assets/transition-vs-chain-t2.png">t2</a>
-  (<a href="assets/transition-vs-chain-t2.gif">GIF</a>), <a href="assets/transition-vs-chain-t3.png">t3</a>
-  (<a href="assets/transition-vs-chain-t3.gif">GIF</a>), <a href="assets/transition-vs-chain-t4.png">t4</a> and the
-  <a href="assets/transition-vs-chain-t1.gif">t1 GIF</a>.</sub>
+  <img src="assets/transition-vs-chain.gif" width="620" alt="jump:13 into run:7: transition strip, transition video (refused) and video-chain --refuse held, playing A, the two frames between, B" /><br />
+  <sub>jump:13 (standing) into run:7 (a stride), the clips normalized to one scale: the strip's try 3 (the evenest
+  delivered try with no fault kept), the clip (every try refused) and RIFE with <code>--refuse held</code>. The
+  <a href="assets/transition-vs-chain.png">sheet</a> has every row's four frames; a refused row on red, as it was
+  left in <code>keyed.refused/</code>.</sub>
 </p>
 
 What the run shows:
 
-- **Across a pose change RIFE makes no frame the judge passes.** On all four joins, `video-chain`'s default refused
-  every frame between and failed on a frame shown again. With `--refuse held` it passes in under 21 s, and what it
-  hands over is the two drawings at part strength (`outline`, `ghost`), at the height the pixels move through. The
-  chain is the verb for joins whose poses meet, and it keeps a clip's height where it has frames to move.
-- **The strip with the height put back delivered every try** (12 of 12, about 35 s and one image call each), its ends
-  at IoU 0.80 to 0.98 against A and B, and the height a straight line from A's to B's: 117 px of take-off on `t1`,
-  153 px of rise on `t2`, 174 px of fall on `t4`. `--ground shared` delivers the same poses standing (and was refused
-  twice in 12, on the ends). The judge read `doubled` or `smear` on six of those 24 in-betweens, for the record
-  (section 4).
-- **Where the frames go is the caller's.** On `t4` the clip has landed by two thirds of the way (2 px up). With
-  nothing said, the strip's in-betweens are on the straight line between the ends (56 px up there); RIFE, moving the
-  clip's own pixels, is at 0. Given the clip's places (`--places`), the strip's frames are where the clip's are (0 px
-  off, every try) and its poses are still drawn, not blended. transition draws the poses; the caller who knows the motion
-  says where they are (section 5).
-- **The clip is the least sure** (2 of 12): a first-last clip passes through poses in neither keyframe, zooms, or
-  smears, and the judge and the checks refuse it.
+- **Across a pose change RIFE makes no frame the judge passes.** `video-chain`'s default refused both frames between.
+  With `--refuse held` it passes in about 11 s, and what it hands over is the two drawings at part strength
+  (`outline`, `ghost`): a standing Pip fading into a running one. The chain is the verb for joins whose poses meet.
+- **The strip delivered every try** (3 of 3, about 30 s and one image call each), its ends at IoU 0.96 to 0.98
+  against A and B and its in-betweens drawn poses: legs opening into the stride, not two figures at half strength.
+  The judge's readings on a redrawn frame are kept on the record, not refused (section 4).
+- **The clip is the least sure** (0 of 3 here): a first-last clip passes through poses in neither keyframe or ends
+  off B, and the checks refuse it.
+
+Where the frames stand and where the in-betweens go are the caller's, with `--ground` and `--places` (section 5),
+which the examples there show in text and JSON.
 
 ## 2. Use
 
@@ -95,7 +84,9 @@ sprite-gen transition <run> --from attack:-1 --to idle:0 --n 2 [--label attack_r
 # file mode: endpoints from PNGs, or from cells of a sheet
 sprite-gen transition --from-file a.png --to-file sheet.png:0 --cell 448x448 --n 3 --out-dir out/
 # a take-off into a run: the take-off's height off the floor is kept (--ground auto, the default)
-sprite-gen transition --from-file jump/keyed/frame-0029.png --to-file run/keyed/frame-0001.png --out-dir t1/
+sprite-gen transition --from-file jump/keyed/frame-0029.png --to-file run/keyed/frame-0001.png --out-dir takeoff/
+# a fall into the landing, the in-betweens where the caller's motion puts them (section 5)
+sprite-gen transition --from-file jump/keyed/frame-0007.png --to-file jump/keyed/frame-0013.png --places places.json --out-dir landing/
 ```
 
 | flag | meaning |
@@ -169,6 +160,10 @@ frames stand, once they are drawn:
 | `source` | each end as high off the floor as on its source canvas, each in-between at the lerp of the two heights (or where `--places` says) | file mode, one canvas height (a usage error otherwise) |
 | `shared` | every foot on one ground row: an end off the floor (a take-off, a fall) is delivered standing | anywhere |
 
+For example, a take-off 130 px off the floor into a stride on it, two frames between: the two heights differ by more
+than 5 %, so `auto` uses `source`, and the delivered frames stand 130, 87, 43 and 0 px up (the in-betweens on the
+straight line, unless `--places` says otherwise). `--ground shared` delivers the same four poses at 0, 0, 0, 0.
+
 A frame's height is the rows under its lowest opaque row on its source canvas (`Endpoint.lift`), whose bottom row is
 the floor, as `video-set` films a set's states. Two ends within 5 % of each other (a stride and a stand, both on the
 floor with a few rows of padding) are `shared` under `auto`, as before. The output canvas grows to hold the height;
@@ -203,7 +198,7 @@ lowest opaque row):
   the height off the floor, and `{"dx": 0, "dy": -106}` stands an in-between 106 px up, as a frame 106 px off its
   source canvas's floor is.
 
-Read off a clip's own frames (what `scripts/dev/transition_chain_demo.py` does on `t4`): `dy` is minus each frame's rows
+Read off a clip's own frames (a landing whose clip has the frames between): `dy` is minus each frame's rows
 under its lowest opaque row; `dx` is its anchor's x minus the straight line between the two ends' anchors at that
 frame's time, since transition stands both ends on one anchor column.
 
