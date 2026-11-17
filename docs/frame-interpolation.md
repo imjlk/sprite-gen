@@ -66,11 +66,11 @@ popover, click two cards to pick the pair (blue border), choose GPT/Grok, Genera
 While the follow-up full-batch re-extraction runs, `/api/run` reports busy (503)
 instead of a manifest-consistency error.
 
-## Cross-state in-betweens: `sprite-gen tween`
+## Cross-state in-betweens: `sprite-gen transition`
 
 `interpolate` works inside one state's strip, one frame per call. Frames between two frames of *different*
 states (`attack -> idle`, a jump landing into a run), several at once and across a large change of pose and height,
-are [`sprite-gen tween`](tween.md)'s: drawn in one onion-skin keyframe strip or filmed as a first-last clip, judged
+are [`sprite-gen transition`](transition.md)'s: drawn in one onion-skin keyframe strip or filmed as a first-last clip, judged
 as frames made between two are, and delivered as frames, a take, or a sheet.
 
 ## Pipeline internals

@@ -1174,7 +1174,7 @@ sprite-gen video-chain --piece over=clips/over:0:45 --piece run=clips/run:12:70 
 
 Where the two frames of a join are two poses apart (a take-off into a stride, a stride into a fall), what RIFE makes
 between them is the two drawings at part strength, and the judge refuses it. Frames between two different poses are
-redrawn by [`sprite-gen tween`](tween.md) (its section 1 runs both verbs on three Pip joins).
+redrawn by [`sprite-gen transition`](transition.md) (its section 1 runs both verbs on four Pip joins).
 
 ### What it takes from sprite-gen
 

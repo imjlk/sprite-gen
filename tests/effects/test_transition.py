@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Cross-state in-betweens (sprite_gen.effects.tween) plumbing.
+"""Cross-state in-betweens (sprite_gen.effects.transition) plumbing.
 
 No provider runs here: a stub generator "draws" the strip by filling each ghost slot, so the
 tests check the strip layout, per-slot heights, foot anchor, endpoint refusal, border
@@ -12,7 +12,7 @@ import pytest
 from PIL import Image
 
 from sprite_gen import cli
-from sprite_gen.effects import tween
+from sprite_gen.effects import transition
 
 MAGENTA = (255, 0, 255)
 BODY = (90, 60, 30, 255)
@@ -49,27 +49,27 @@ def fill_ghosts(strip_path: Path, prompt: str, out: Path, aspect: str, *, keep_e
     Image.fromarray(arr).save(out)
 
 
-def endpoint(img: Image.Image, name: str) -> tween.Endpoint:
-    return tween.Endpoint(img, name, [])
+def endpoint(img: Image.Image, name: str) -> transition.Endpoint:
+    return transition.Endpoint(img, name, [])
 
 
 def test_parse_ref_allows_negative_and_slashed_states():
-    assert tween.parse_ref("attack:-1") == ("attack", -1)
-    assert tween.parse_ref("down/idle:0") == ("down/idle", 0)
+    assert transition.parse_ref("attack:-1") == ("attack", -1)
+    assert transition.parse_ref("down/idle:0") == ("down/idle", 0)
     with pytest.raises(SystemExit):
-        tween.parse_ref("attack")
+        transition.parse_ref("attack")
 
 
 def test_strip_heights_interpolate_and_feet_stay_on_anchor(tmp_path):
     crouch, stand = figure(30, 40), figure(24, 80)
-    frames, report = tween.make_tween(endpoint(crouch, "a"), endpoint(stand, "b"), 3, workdir=tmp_path,
+    frames, report = transition.make_transition(endpoint(crouch, "a"), endpoint(stand, "b"), 3, workdir=tmp_path,
                                       generator=fill_ghosts)
     assert len(frames) == 3 and len({f.size for f in frames}) == 1
-    heights = [tween._tight(f).height for f in frames]
+    heights = [transition._tight(f).height for f in frames]
     assert all(40 <= h <= 80 for h in heights) and heights == sorted(heights)
     assert all(e <= 2 for e in report["foot_error_px"])
     assert report["endpoint_match"]["iou_from"] > 0.9
-    saved = json.loads((tmp_path / "tween.json").read_text())
+    saved = json.loads((tmp_path / "transition.json").read_text())
     assert saved["n"] == 3 and (tmp_path / "keyframe-strip.png").is_file()
     w, h = Image.open(tmp_path / "keyframe-strip.png").size
     num, den = (int(v) for v in report["aspect"].split(":"))
@@ -80,11 +80,11 @@ def test_drifted_endpoint_is_refused_and_raw_kept(tmp_path):
     def drift(strip, prompt, out, aspect):
         fill_ghosts(strip, prompt, out, aspect, keep_ends=False)
     with pytest.raises(SystemExit, match="refused"):
-        tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
+        transition.make_transition(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
                          workdir=tmp_path, generator=drift)
     assert (tmp_path / "raw.png").is_file()
-    match = json.loads((tmp_path / "tween.json").read_text())["endpoint_match"]
-    assert match["scale_agree"] < tween.MIN_SCALE_AGREE  # ends redrawn at different sizes
+    match = json.loads((tmp_path / "transition.json").read_text())["endpoint_match"]
+    assert match["scale_agree"] < transition.MIN_SCALE_AGREE  # ends redrawn at different sizes
 
 
 def test_content_crossing_slot_border_warns(tmp_path):
@@ -96,7 +96,7 @@ def test_content_crossing_slot_border_warns(tmp_path):
             for y in range(im.height // 2, im.height // 2 + 12):
                 im.putpixel((x, y), (200, 200, 210))
         im.save(out)
-    frames, report = tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
+    frames, report = transition.make_transition(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
                                       workdir=tmp_path, generator=spill)
     assert not any("slot slicing" in w for w in report["warnings"])  # a short reach is not worth a warning
     blade = lambda f: (np.asarray(f)[..., :3] == (200, 200, 210)).all(axis=2).sum()
@@ -108,10 +108,10 @@ def test_sheet_cell_touching_its_border_warns(tmp_path):
     sheet.alpha_composite(figure(20, 40, sword=44), (10, 12))  # blade runs into cell 1
     sheet.alpha_composite(figure(20, 40), (84, 12))
     sheet.save(tmp_path / "sheet.png")
-    a = tween.endpoint_from_file(f"{tmp_path / 'sheet.png'}:0", (64, 64), MAGENTA)
-    b = tween.endpoint_from_file(f"{tmp_path / 'sheet.png'}:-1", (64, 64), MAGENTA)
+    a = transition.endpoint_from_file(f"{tmp_path / 'sheet.png'}:0", (64, 64), MAGENTA)
+    b = transition.endpoint_from_file(f"{tmp_path / 'sheet.png'}:-1", (64, 64), MAGENTA)
     assert a.touches_border == ["right"] and b.touches_border == ["left"]  # the blade shows in both cells
-    _, report = tween.make_tween(a, b, 1, workdir=tmp_path / "w", generator=fill_ghosts,
+    _, report = transition.make_transition(a, b, 1, workdir=tmp_path / "w", generator=fill_ghosts,
                                  min_endpoint_iou=0.3)
     assert any("touches its cell border" in w for w in report["warnings"])
 
@@ -138,10 +138,10 @@ def _run(tmp_path: Path) -> Path:
 
 def test_run_mode_records_transition_take_idempotently(tmp_path, monkeypatch):
     run = _run(tmp_path)
-    monkeypatch.setattr(tween, "gen_generator", lambda provider, refs=None: fill_ghosts)
+    monkeypatch.setattr(transition, "gen_generator", lambda provider, refs=None: fill_ghosts)
     args = dict(run_dir=run, from_ref="attack:-1", to_ref="idle:0", n=2, label="attack_recover")
-    assert cli.COMMANDS["tween"][2](**args) == 0
-    assert tween.run(**args) == 0
+    assert cli.COMMANDS["transition"][2](**args) == 0
+    assert transition.run(**args) == 0
     req = json.loads((run / "sprite-request.json").read_text())
     takes = req["states"]["idle"]["takes"]
     assert len(takes) == 1 and takes[0]["frames"] == 2
@@ -170,17 +170,17 @@ def test_video_method_samples_clip_and_verifies(tmp_path, monkeypatch):
             out.append(im.convert("RGB"))
         return out
 
-    monkeypatch.setattr(tween, "video_frames", fake_frames)
-    frames, report = tween.make_tween(endpoint(a, "a"), endpoint(b, "b"), 2, workdir=tmp_path,
+    monkeypatch.setattr(transition, "video_frames", fake_frames)
+    frames, report = transition.make_transition(endpoint(a, "a"), endpoint(b, "b"), 2, workdir=tmp_path,
                                       method="video", video_runner=fake_runner, min_endpoint_iou=0.5)
     assert len(frames) == 2 and report["method"] == "video" and len(calls) == 1
 
 
 def test_mode_arguments_fail_loudly(tmp_path):
     with pytest.raises(SystemExit, match="either"):
-        tween.run()
+        transition.run()
     with pytest.raises(SystemExit, match="--n"):
-        tween.make_tween(endpoint(figure(4, 4), "a"), endpoint(figure(4, 4), "b"), 0, workdir=tmp_path)
+        transition.make_transition(endpoint(figure(4, 4), "a"), endpoint(figure(4, 4), "b"), 0, workdir=tmp_path)
 
 
 @pytest.mark.parametrize("method", ["strip", "video"])
@@ -201,16 +201,16 @@ def test_no_frame_touches_its_canvas_and_ends_share_it(tmp_path, monkeypatch, me
     calls = []
     def runner(first, last, prompt, out):
         calls.append((first, last)); out.write_bytes(b"mp4")
-    monkeypatch.setattr(tween, "video_frames", lambda clip, wd: [
+    monkeypatch.setattr(transition, "video_frames", lambda clip, wd: [
         Image.blend(Image.open(calls[0][0]).convert("RGB"), Image.open(calls[0][1]).convert("RGB"), t / 6)
         for t in range(7)])
     # the stub clip cross-fades A into B, which the judge refuses by default (smear, outline): this test is the canvas's
-    frames, report = tween.make_tween(endpoint(a, "a"), endpoint(b, "b"), 2, workdir=tmp_path, method=method,
+    frames, report = transition.make_transition(endpoint(a, "a"), endpoint(b, "b"), 2, workdir=tmp_path, method=method,
                                       generator=wide, video_runner=runner, min_endpoint_iou=0.3,
                                       refuse="held" if method == "video" else None)
     for f in [*frames, *report["_ends"]]:
         assert f.size == tuple(report["canvas"])
-        assert tween.border_touches(f, band=tween.OUT_PAD - 1) == []
+        assert transition.border_touches(f, band=transition.OUT_PAD - 1) == []
 
 
 def _scale_slots(out: Path, slots: int, factor: float, which: list[int]) -> None:
@@ -219,9 +219,9 @@ def _scale_slots(out: Path, slots: int, factor: float, which: list[int]) -> None
     w = im.width // slots
     for k in which:
         cell = im.crop((k * w, 0, (k + 1) * w, im.height))
-        fig = tween._tight(tween._keyed(cell, MAGENTA))
-        box = tween._tight_box(tween._keyed(cell, MAGENTA))
-        big = tween._scaled(fig, fig.height * factor)
+        fig = transition._tight(transition._keyed(cell, MAGENTA))
+        box = transition._tight_box(transition._keyed(cell, MAGENTA))
+        big = transition._scaled(fig, fig.height * factor)
         blank = Image.new("RGBA", cell.size, MAGENTA + (255,))
         blank.alpha_composite(big, (max(0, (w - big.width) // 2), box[3] - big.height))
         im.paste(blank, (k * w, 0))
@@ -235,10 +235,10 @@ def test_inbetweens_drawn_too_big_are_rescaled_to_the_lerped_height(tmp_path):
     def big(strip, prompt, out, aspect):
         fill_ghosts(strip, prompt, out, aspect)
         _scale_slots(out, 4, 1.12, [1, 2])
-    frames, report = tween.make_tween(endpoint(a, "a"), endpoint(b, "b"), 2, workdir=tmp_path, generator=big)
+    frames, report = transition.make_transition(endpoint(a, "a"), endpoint(b, "b"), 2, workdir=tmp_path, generator=big)
     for k, f in enumerate(frames):
         target = 60 + 30 * (k + 1) / 3
-        assert abs(tween._tight(f).height - target) <= 1.5
+        assert abs(transition._tight(f).height - target) <= 1.5
     assert all(r > 1.05 for r in report["frame_scale"]["drawn_vs_endpoints"])
 
 
@@ -260,7 +260,7 @@ def test_detached_blade_goes_to_the_nearest_figure_not_the_slot_of_its_centre(tm
             for yy in range(y - 6, y + 9):
                 im.putpixel((x, yy), (200, 200, 210))
         im.save(out)
-    frames, report = tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
+    frames, report = transition.make_transition(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
                                       workdir=tmp_path, generator=blade, margin=0.5)
     grey = lambda f: (np.asarray(f)[..., :3] == (200, 200, 210)).all(axis=2).sum()
     assert grey(frames[0]) > 0 and grey(frames[1]) == 0
@@ -274,8 +274,8 @@ def _video(tmp_path, monkeypatch, mutate):
         f0, f1 = Image.open(calls[0][0]).convert("RGB"), Image.open(calls[0][1]).convert("RGB")
         seq = [f0] * 3 + [f1] * 4   # picks 0, 3, 6 for n=1
         return mutate(seq)
-    monkeypatch.setattr(tween, "video_frames", frames)
-    return tween.make_tween(endpoint(figure(30, 70), "a"), endpoint(figure(30, 70), "b"), 1,
+    monkeypatch.setattr(transition, "video_frames", frames)
+    return transition.make_transition(endpoint(figure(30, 70), "a"), endpoint(figure(30, 70), "b"), 1,
                             workdir=tmp_path, method="video", video_runner=runner)
 
 
@@ -290,7 +290,7 @@ def test_video_frame_drawn_at_wrong_scale_is_refused(tmp_path, monkeypatch):
         return seq
     with pytest.raises(SystemExit, match="size of the drawn endpoints"):
         _video(tmp_path, monkeypatch, shrink)
-    saved = json.loads((tmp_path / "tween.json").read_text())
+    saved = json.loads((tmp_path / "transition.json").read_text())
     assert saved["status"] == "refused" and "error" in saved
     assert "--method strip" in saved["error"] and "--method video" not in saved["error"]
 
@@ -306,17 +306,17 @@ def test_video_pose_jump_is_refused(tmp_path, monkeypatch):
         return seq
     with pytest.raises(SystemExit, match="refused"):
         _video(tmp_path, monkeypatch, lie_down)
-    assert json.loads((tmp_path / "tween.json").read_text())["status"] == "refused"
+    assert json.loads((tmp_path / "transition.json").read_text())["status"] == "refused"
 
 
-def test_provider_timeout_leaves_a_tween_json_with_the_error(tmp_path):
+def test_provider_timeout_leaves_a_transition_json_with_the_error(tmp_path):
     def timeout(strip, prompt, out, aspect):
         raise TimeoutError("provider took too long")
-    with pytest.raises(tween.TweenError, match="grok made nothing for the strip: provider took too long") as exc:
-        tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
+    with pytest.raises(transition.TransitionError, match="grok made nothing for the strip: provider took too long") as exc:
+        transition.make_transition(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
                          workdir=tmp_path, generator=timeout)
-    assert exc.value.code == tween.EXIT_ERROR and isinstance(exc.value.__cause__, TimeoutError)
-    saved = json.loads((tmp_path / "tween.json").read_text())
+    assert exc.value.code == transition.EXIT_ERROR and isinstance(exc.value.__cause__, TimeoutError)
+    saved = json.loads((tmp_path / "transition.json").read_text())
     assert saved["status"] == "error" and "TimeoutError" in saved["error"]
 
 
@@ -338,7 +338,7 @@ def test_slice_slots_gives_a_detached_piece_to_the_nearest_figure_not_its_centre
     for x in range(115, 140):                  # ... whose heavy tip pulls its centre into slot 2
         for y in range(30, 52):
             px[x, y] = (200, 200, 210)
-    cells, _ = tween.slice_slots(strip, slots, MAGENTA)
+    cells, _ = transition.slice_slots(strip, slots, MAGENTA)
     grey = lambda im: (np.asarray(im)[..., 3] > 0) & (np.asarray(im)[..., :3] == (200, 200, 210)).all(axis=2)
     assert grey(cells[0]).sum() > 0, "blade must stay with the figure it is attached to"
     assert grey(cells[1]).sum() == 0
@@ -347,7 +347,7 @@ def test_slice_slots_gives_a_detached_piece_to_the_nearest_figure_not_its_centre
 
 # ---------------------------------------------------------------- asset pipeline
 
-from sprite_gen.effects import tween_pipeline as P  # noqa: E402
+from sprite_gen.effects import transition_pipeline as P  # noqa: E402
 
 
 def _pair(tmp_path, a=(30, 40), b=(24, 80), name="p"):
@@ -368,10 +368,10 @@ def test_fixed_frame_size_puts_every_foot_on_the_pivot(tmp_path):
     cfg = _cfg(tmp_path, n=3, frame_size="96x128", include_ends=True, fps=10)
     res = P.run_boundary(cfg, tmp_path / "out", generator=fill_ghosts)
     assert res["status"] == "ok" and res["exit"] == 0
-    rep = json.loads((tmp_path / "out" / "tween.json").read_text())
-    assert rep["schema"] == "sprite-gen-tween/2" and rep["frame_size"] == [96, 128]
+    rep = json.loads((tmp_path / "out" / "transition.json").read_text())
+    assert rep["schema"] == "sprite-gen-transition/2" and rep["frame_size"] == [96, 128]
     assert rep["pivot"] == {"x": 48, "y": 128, "nx": 0.5, "ny": 1.0}
-    assert [f["role"] for f in rep["frames"]] == ["from", "tween", "tween", "tween", "to"]
+    assert [f["role"] for f in rep["frames"]] == ["from", "between", "between", "between", "to"]
     assert all(f["duration_ms"] == 100 for f in rep["frames"])
     for f in rep["frames"]:
         im = Image.open(tmp_path / "out" / f["file"])
@@ -384,8 +384,8 @@ def test_fixed_frame_size_puts_every_foot_on_the_pivot(tmp_path):
 def test_set_that_does_not_fit_is_refused_or_shrunk(tmp_path):
     cfg = _cfg(tmp_path, frame_size="40x40")
     res = P.run_boundary(cfg, tmp_path / "a", generator=fill_ghosts)
-    assert res["status"] == "refused" and res["exit"] == tween.EXIT_REFUSED
-    assert json.loads((tmp_path / "a" / "tween.json").read_text())["status"] == "refused"
+    assert res["status"] == "refused" and res["exit"] == transition.EXIT_REFUSED
+    assert json.loads((tmp_path / "a" / "transition.json").read_text())["status"] == "refused"
     cfg = _cfg(tmp_path, frame_size="40x40", fit="shrink", resample="nearest")
     res = P.run_boundary(cfg, tmp_path / "b", generator=fill_ghosts)
     assert res["status"] == "ok" and res["report"]["fit_scale"] < 1
@@ -410,7 +410,7 @@ def test_second_run_is_cached_until_inputs_change(tmp_path):
 def test_manifest_batch_continues_past_a_refusal_and_exports_one_sheet(tmp_path):
     _pair(tmp_path, name="good")
     _pair(tmp_path, a=(30, 60), b=(26, 72), name="bad")
-    manifest = tmp_path / "tweens.json"
+    manifest = tmp_path / "transitions.json"
     manifest.write_text(json.dumps({
         "defaults": {"n": 2, "frame_size": "96x128", "export": "sheet", "fps": 8},
         "boundaries": [
@@ -422,7 +422,7 @@ def test_manifest_batch_continues_past_a_refusal_and_exports_one_sheet(tmp_path)
         fill_ghosts(strip, prompt, out, aspect, keep_ends="bad" not in str(strip))
     out = tmp_path / "out"
     code = P.run_manifest(manifest, out, generator=gen)
-    assert code == tween.EXIT_REFUSED
+    assert code == transition.EXIT_REFUSED
     batch = json.loads((out / "batch.json").read_text())
     assert [b["status"] for b in batch["boundaries"]] == ["ok", "refused", "ok"]
     meta = json.loads((out / "sheet.json").read_text())
@@ -441,35 +441,35 @@ def test_manifest_batch_continues_past_a_refusal_and_exports_one_sheet(tmp_path)
 
 def test_cli_exit_codes(tmp_path, monkeypatch, capsys):
     fa, fb = _pair(tmp_path)
-    monkeypatch.setattr(tween, "gen_generator", lambda provider, refs=None: fill_ghosts)
+    monkeypatch.setattr(transition, "gen_generator", lambda provider, refs=None: fill_ghosts)
     base = ["--from-file", str(fa), "--to-file", str(fb), "--out-dir", str(tmp_path / "o")]
-    assert tween.main(base + ["--frame-size", "96x128", "--export", "sheet"]) == 0
+    assert transition.main(base + ["--frame-size", "96x128", "--export", "sheet"]) == 0
     assert (tmp_path / "o" / "sheet.json").is_file()
-    assert tween.main(base + ["--frame-size", "20x20", "--force"]) == tween.EXIT_REFUSED
+    assert transition.main(base + ["--frame-size", "20x20", "--force"]) == transition.EXIT_REFUSED
     with pytest.raises(SystemExit) as exc:
-        tween.main(base + ["--frame-size", "nope"])
-    assert exc.value.code == tween.EXIT_USAGE and "WxH" in capsys.readouterr().err
+        transition.main(base + ["--frame-size", "nope"])
+    assert exc.value.code == transition.EXIT_USAGE and "WxH" in capsys.readouterr().err
 
 
 # ---------------------------------------------------------------- the run contract (docs/run-contract.md)
 
 def test_exit_codes_are_those_of_the_frame_verbs():
-    assert (tween.EXIT_OK, tween.EXIT_REFUSED, tween.EXIT_ERROR, tween.EXIT_USAGE) == (0, 1, 2, 2)
+    assert (transition.EXIT_OK, transition.EXIT_REFUSED, transition.EXIT_ERROR, transition.EXIT_USAGE) == (0, 1, 2, 2)
     assert P.exit_code([{"exit": 1}, {"exit": 2}, {"exit": 0}]) == 2
     assert P.exit_code([{"exit": 1}, {"exit": 0}]) == 1
 
 
 def test_provider_names_come_from_gen_base():
     from sprite_gen.gen import base
-    assert tween.PROVIDERS == (base.PROVIDER_CODEX, base.PROVIDER_GROK)
-    assert tween.DEFAULT_PROVIDER == base.PROVIDER_GROK == P.FIELDS["provider"]
+    assert transition.PROVIDERS == (base.PROVIDER_CODEX, base.PROVIDER_GROK)
+    assert transition.DEFAULT_PROVIDER == base.PROVIDER_GROK == P.FIELDS["provider"]
 
 
 def test_video_method_takes_no_other_provider(tmp_path):
     with pytest.raises(SystemExit, match="films on grok") as exc:
-        tween.make_tween(endpoint(figure(30, 40), "a"), endpoint(figure(24, 80), "b"), 2, workdir=tmp_path,
+        transition.make_transition(endpoint(figure(30, 40), "a"), endpoint(figure(24, 80), "b"), 2, workdir=tmp_path,
                          method="video", provider="codex", video_runner=lambda *a: None)
-    assert exc.value.code == tween.EXIT_USAGE
+    assert exc.value.code == transition.EXIT_USAGE
 
 
 def test_an_input_inside_the_outputs_is_refused_before_anything_is_made(tmp_path):
@@ -482,20 +482,20 @@ def test_an_input_inside_the_outputs_is_refused_before_anything_is_made(tmp_path
     cfg = P.normalise({"id": "x", "from_file": str(inside), "to_file": str(fb)}, tmp_path)
     with pytest.raises(SystemExit, match="same file") as exc:
         P.run_boundary(cfg, out, generator=lambda *a: calls.append(a))
-    assert exc.value.code == tween.EXIT_USAGE and not calls and inside.read_bytes() == fa.read_bytes()
+    assert exc.value.code == transition.EXIT_USAGE and not calls and inside.read_bytes() == fa.read_bytes()
 
 
 def test_a_refused_run_hands_over_no_old_frames_and_keeps_its_own_in_refused(tmp_path):
     cfg = _cfg(tmp_path, frame_size="96x128")
     out = tmp_path / "o"
     assert P.run_single(cfg, out, generator=fill_ghosts) == 0
-    assert (out / "tween-0.png").is_file()
+    assert (out / "between-0.png").is_file()
     small = P.normalise({**cfg, "frame_size": "40x40", "cell": None}, tmp_path)
-    assert P.run_single(small, out, generator=fill_ghosts) == tween.EXIT_REFUSED
-    rep = json.loads((out / "tween.json").read_text())
+    assert P.run_single(small, out, generator=fill_ghosts) == transition.EXIT_REFUSED
+    rep = json.loads((out / "transition.json").read_text())
     assert rep["status"] == "refused" and Path(rep["refused_dir"]) == out / "refused"
-    assert not list(out.glob("tween-*.png")) and not (out / "from.png").exists()
-    assert sorted(p.name for p in (out / "refused").iterdir()) == ["from.png", "to.png", "tween-0.png", "tween-1.png"]
+    assert not list(out.glob("between-*.png")) and not (out / "from.png").exists()
+    assert sorted(p.name for p in (out / "refused").iterdir()) == ["between-0.png", "between-1.png", "from.png", "to.png"]
     assert P.run_single(cfg, out, generator=fill_ghosts) == 0
     assert not (out / "refused").exists()
 
@@ -503,7 +503,7 @@ def test_a_refused_run_hands_over_no_old_frames_and_keeps_its_own_in_refused(tmp
 def test_the_record_carries_the_engine_and_the_source_identity(tmp_path):
     cfg = _cfg(tmp_path)
     rep = P.run_boundary(cfg, tmp_path / "o", generator=fill_ghosts)["report"]
-    assert set(rep["producer"]) == {"implementation_sha256", "tween_sha256"}
+    assert set(rep["producer"]) == {"implementation_sha256", "transition_sha256"}
     assert rep["source"]["kind"] == "keyed-frame-sequence" and rep["source"]["frames"] == 2
 
 
@@ -511,12 +511,12 @@ def test_a_refusal_names_the_other_method_never_the_one_refused(tmp_path, monkey
     def drift(strip, prompt, out, aspect):
         fill_ghosts(strip, prompt, out, aspect, keep_ends=False)
     with pytest.raises(SystemExit) as exc:
-        tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
+        transition.make_transition(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
                          workdir=tmp_path / "s", generator=drift)
     said = str(exc.value)
     assert "--method video" in said and "--provider codex" in said and "strip drifted" in said
-    assert tween.retry_hint("strip", "codex").count("--provider grok") == 1
-    hint = tween.retry_hint("video", "grok")
+    assert transition.retry_hint("strip", "codex").count("--provider grok") == 1
+    hint = transition.retry_hint("video", "grok")
     assert "--method strip" in hint and "--method video" not in hint
 
 
@@ -526,7 +526,7 @@ def _crossfade(monkeypatch):
     calls = []
     def runner(first, last, prompt, out):
         calls.append((first, last)); out.write_bytes(b"mp4")
-    monkeypatch.setattr(tween, "video_frames", lambda clip, wd: [
+    monkeypatch.setattr(transition, "video_frames", lambda clip, wd: [
         Image.blend(Image.open(calls[0][0]).convert("RGB"), Image.open(calls[0][1]).convert("RGB"), t / 6)
         for t in range(7)])
     return runner
@@ -536,19 +536,19 @@ def test_video_frames_are_judged_and_every_fault_refuses_by_default(tmp_path, mo
     """A clip that cross-fades A into B, as RIFE does across a pose change, is what video-chain's judge refuses."""
     a, b = endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b")
     with pytest.raises(SystemExit, match=r"held_fill\.judge") as exc:
-        tween.make_tween(a, b, 2, workdir=tmp_path, method="video", video_runner=_crossfade(monkeypatch),
+        transition.make_transition(a, b, 2, workdir=tmp_path, method="video", video_runner=_crossfade(monkeypatch),
                          min_endpoint_iou=0.3)
-    assert exc.value.code == tween.EXIT_REFUSED and "--method video" not in str(exc.value).split("Re-run")[1]
-    rep = json.loads((tmp_path / "tween.json").read_text())
+    assert exc.value.code == transition.EXIT_REFUSED and "--method video" not in str(exc.value).split("Re-run")[1]
+    rep = json.loads((tmp_path / "transition.json").read_text())
     from sprite_gen.video.held_fill import FAULTS
     assert rep["status"] == "refused" and rep["refuse"] == list(FAULTS)
     assert all(row["faults"] for row in rep["judge"])
-    assert sorted(p.name for p in (tmp_path / "refused").iterdir()) == ["from.png", "to.png", "tween-0.png", "tween-1.png"]
+    assert sorted(p.name for p in (tmp_path / "refused").iterdir()) == ["between-0.png", "between-1.png", "from.png", "to.png"]
 
 
 def test_refuse_leaves_a_fault_on_the_record_as_video_chain_does(tmp_path, monkeypatch):
     a, b = endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b")
-    frames, report = tween.make_tween(a, b, 2, workdir=tmp_path, method="video", video_runner=_crossfade(monkeypatch),
+    frames, report = transition.make_transition(a, b, 2, workdir=tmp_path, method="video", video_runner=_crossfade(monkeypatch),
                                       min_endpoint_iou=0.3, refuse="held")
     assert report["refuse"] == ["held"] and len(frames) == 2
     kept = [row.get("kept_faults") for row in report["judge"]]
@@ -560,18 +560,18 @@ def test_refuse_leaves_a_fault_on_the_record_as_video_chain_does(tmp_path, monke
 def test_refuse_names_only_faults_and_only_for_video(tmp_path, monkeypatch):
     a, b = endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b")
     with pytest.raises(SystemExit, match="no fault") as exc:
-        tween.make_tween(a, b, 2, workdir=tmp_path, method="video", refuse="smear,blur",
+        transition.make_transition(a, b, 2, workdir=tmp_path, method="video", refuse="smear,blur",
                          video_runner=lambda *x: None)
-    assert exc.value.code == tween.EXIT_USAGE
+    assert exc.value.code == transition.EXIT_USAGE
     with pytest.raises(SystemExit, match="--method video frame") as exc:
-        tween.make_tween(a, b, 2, workdir=tmp_path, refuse="smear", generator=fill_ghosts)
-    assert exc.value.code == tween.EXIT_USAGE
-    assert tween.read_refuse("smear") == {"smear", "held"} and tween.read_refuse(None) is None
+        transition.make_transition(a, b, 2, workdir=tmp_path, refuse="smear", generator=fill_ghosts)
+    assert exc.value.code == transition.EXIT_USAGE
+    assert transition.read_refuse("smear") == {"smear", "held"} and transition.read_refuse(None) is None
 
 
 def test_the_strip_is_judged_for_the_record_and_a_held_in_between_refuses(tmp_path):
     a, b = endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b")
-    _, report = tween.make_tween(a, b, 2, workdir=tmp_path / "ok", generator=fill_ghosts)
+    _, report = transition.make_transition(a, b, 2, workdir=tmp_path / "ok", generator=fill_ghosts)
     assert report["refuse"] == ["held"] and [r["frame"] for r in report["judge"]] == [1, 2]
     assert report["read"]["unlisted"] == 0 and report["read"]["inspected"] == 1
 
@@ -584,10 +584,10 @@ def test_the_strip_is_judged_for_the_record_and_a_held_in_between_refuses(tmp_pa
         im.save(out)
     a, b = endpoint(figure(30, 60), "a"), endpoint(figure(24, 60), "b")  # one height: nothing rescales A's copy
     with pytest.raises(SystemExit, match="held") as exc:
-        tween.make_tween(a, b, 2, workdir=tmp_path / "held", generator=copy_a)
-    assert exc.value.code == tween.EXIT_REFUSED
-    rep = json.loads((tmp_path / "held" / "tween.json").read_text())
-    assert rep["judge"][0]["shows"] == ["a"] and (tmp_path / "held" / "refused" / "tween-0.png").is_file()
+        transition.make_transition(a, b, 2, workdir=tmp_path / "held", generator=copy_a)
+    assert exc.value.code == transition.EXIT_REFUSED
+    rep = json.loads((tmp_path / "held" / "transition.json").read_text())
+    assert rep["judge"][0]["shows"] == ["a"] and (tmp_path / "held" / "refused" / "between-0.png").is_file()
 
 
 def test_the_final_reading_refuses_a_picture_shown_again(tmp_path, monkeypatch):
@@ -600,10 +600,10 @@ def test_the_final_reading_refuses_a_picture_shown_again(tmp_path, monkeypatch):
         w = im.width // 3
         im.paste(im.crop((0, 0, w, im.height)), (w, 0))
         im.save(out)
-    with pytest.raises(SystemExit, match=r"final reading \(qa\.holds\.inspect\): tween-0 shows the picture"):
-        tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(24, 60), "b"), 1, workdir=tmp_path,
+    with pytest.raises(SystemExit, match=r"final reading \(qa\.holds\.inspect\): between-0 shows the picture"):
+        transition.make_transition(endpoint(figure(30, 60), "a"), endpoint(figure(24, 60), "b"), 1, workdir=tmp_path,
                          generator=copy_a)
-    assert json.loads((tmp_path / "tween.json").read_text())["read"]["unlisted"] == 1
+    assert json.loads((tmp_path / "transition.json").read_text())["read"]["unlisted"] == 1
 
 
 # ---------------------------------------------------------------- where the frames stand (--ground)
@@ -624,7 +624,7 @@ def _bottoms(out: Path, names: list[str]) -> list[int]:
     return [Image.open(out / n).getchannel("A").getbbox()[3] for n in names]
 
 
-FOUR = ["from.png", "tween-0.png", "tween-1.png", "to.png"]
+FOUR = ["from.png", "between-0.png", "between-1.png", "to.png"]
 
 
 def _ink_bottoms(strip: Image.Image, slots: int) -> list[int]:
@@ -665,8 +665,8 @@ def test_ground_source_draws_on_one_floor_and_lifts_only_the_delivered_frames(tm
 
 def test_ground_source_films_the_clip_grounded_and_lifts_the_samples(tmp_path, monkeypatch):
     fa, fb = _airborne_pair(tmp_path, up=42)
-    a, b = tween.endpoint_from_file(str(fa), None, MAGENTA), tween.endpoint_from_file(str(fb), None, MAGENTA)
-    frames, rep = tween.make_tween(a, b, 2, workdir=tmp_path / "v", method="video", video_runner=_crossfade(monkeypatch),
+    a, b = transition.endpoint_from_file(str(fa), None, MAGENTA), transition.endpoint_from_file(str(fb), None, MAGENTA)
+    frames, rep = transition.make_transition(a, b, 2, workdir=tmp_path / "v", method="video", video_runner=_crossfade(monkeypatch),
                                    min_endpoint_iou=0.3, refuse="held", ground="source")
     shown = [Image.open(tmp_path / "v" / f).convert("RGB") for f in ("first.png", "last.png")]
     assert len({_ink_bottoms(im, 1)[0] for im in shown}) == 1  # the clip's first and last frames on one floor
@@ -679,7 +679,7 @@ def test_ground_auto_is_source_where_one_end_is_off_the_floor(tmp_path):
     fa, fb = _airborne_pair(tmp_path, up=42)
     rep = P.run_boundary(P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb)}, tmp_path), tmp_path / "o",
                          generator=fill_ghosts)["report"]
-    assert P.FIELDS["ground"] == tween.DEFAULT_GROUND == "auto"
+    assert P.FIELDS["ground"] == transition.DEFAULT_GROUND == "auto"
     assert rep["ground"]["asked"] == "auto" and rep["ground"]["used"] == "source" and rep["lift_px"][0] == 42.0
     assert "differ by 42 >= 4" in rep["ground"]["why"]  # 5% of the taller end (80 px)
 
@@ -689,7 +689,7 @@ def test_ground_auto_is_shared_for_two_grounded_ends_run_mode_and_two_canvas_hei
     rep = P.run_boundary(P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb)}, tmp_path), tmp_path / "o",
                          generator=fill_ghosts)["report"]
     assert rep["ground"]["used"] == "shared" and rep["lift_px"] == [0.0] * 4
-    _, rep = tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b"), 2,
+    _, rep = transition.make_transition(endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b"), 2,
                               workdir=tmp_path / "r", generator=fill_ghosts)
     assert rep["ground"] == {"asked": "auto", "used": "shared", "why": "no source canvas (run mode)"}
     fa, fb = _airborne_pair(tmp_path, up=42, other=(80, 150))
@@ -703,9 +703,9 @@ def test_ground_source_needs_one_canvas_height_and_files(tmp_path):
     cfg = P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb), "ground": "source"}, tmp_path)
     with pytest.raises(SystemExit, match="one canvas height") as exc:
         P.run_boundary(cfg, tmp_path / "o", generator=fill_ghosts)
-    assert exc.value.code == tween.EXIT_USAGE
+    assert exc.value.code == transition.EXIT_USAGE
     with pytest.raises(SystemExit, match="file mode only"):
-        tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b"), 2, workdir=tmp_path / "r",
+        transition.make_transition(endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b"), 2, workdir=tmp_path / "r",
                          generator=fill_ghosts, ground="source")
     with pytest.raises(SystemExit, match="ground must be one of"):
         P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb), "ground": "air"}, tmp_path)
@@ -718,14 +718,14 @@ def test_a_provider_that_made_nothing_is_an_error_not_a_refusal(tmp_path):
     def expired(*_a, **_k):
         raise SystemExit("xai: the grok login token expired; nothing was uploaded.")
     with pytest.raises(SystemExit) as exc:
-        tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b"), 2, workdir=tmp_path / "r",
+        transition.make_transition(endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b"), 2, workdir=tmp_path / "r",
                          generator=expired)
-    assert exc.value.code == tween.EXIT_ERROR and "token expired" in str(exc.value)
-    assert json.loads((tmp_path / "r" / "tween.json").read_text())["status"] == "error"
+    assert exc.value.code == transition.EXIT_ERROR and "token expired" in str(exc.value)
+    assert json.loads((tmp_path / "r" / "transition.json").read_text())["status"] == "error"
     fa, fb = _airborne_pair(tmp_path)
     res = P.run_boundary(P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb)}, tmp_path),
                          tmp_path / "o", generator=expired)
-    assert res["status"] == "error" and res["exit"] == tween.EXIT_ERROR and "token expired" in res["report"]["error"]
+    assert res["status"] == "error" and res["exit"] == transition.EXIT_ERROR and "token expired" in res["report"]["error"]
 
 
 # ---------------------------------------------------------------- where the in-betweens are placed (--places)
@@ -737,19 +737,19 @@ def _never(*_a, **_k):
 def _anchor_x(path: Path) -> float:
     im = Image.open(path).convert("RGBA")
     box = im.getchannel("A").getbbox()
-    return box[0] + tween.foot_x(im.crop(box))
+    return box[0] + transition.foot_x(im.crop(box))
 
 
 def test_read_places_takes_a_list_an_object_or_a_file_and_reads_its_own_output(tmp_path):
     want = [{"dx": 0.0, "dy": -98.0}, {"dx": 4.0, "dy": -2.0}]
-    got = tween.read_places([{"dx": 0, "dy": -98}, {"dx": 4, "dy": -2}])
+    got = transition.read_places([{"dx": 0, "dy": -98}, {"dx": 4, "dy": -2}])
     assert got == {"from": "inline", "file": None, "places": want}
     obj = {"places": [{"dx": 0, "dy": -98}, {"dx": 4, "dy": -2}], "from": "jump clip frames 8 and 10"}
-    assert tween.read_places(obj)["from"] == "jump clip frames 8 and 10"
+    assert transition.read_places(obj)["from"] == "jump clip frames 8 and 10"
     (tmp_path / "p.json").write_text(json.dumps(obj))
-    read = tween.read_places("p.json", tmp_path)
+    read = transition.read_places("p.json", tmp_path)
     assert read["file"] == str(tmp_path / "p.json") and read["places"] == want and read["from"] == obj["from"]
-    assert tween.read_places(read) == read and tween.read_places(None) is None
+    assert transition.read_places(read) == read and transition.read_places(None) is None
 
 
 @pytest.mark.parametrize("bad, said", [
@@ -760,17 +760,17 @@ def test_read_places_takes_a_list_an_object_or_a_file_and_reads_its_own_output(t
 ])
 def test_read_places_refuses_what_is_not_a_list_of_places(bad, said):
     with pytest.raises(SystemExit, match=said) as exc:
-        tween.read_places(bad)
-    assert exc.value.code == tween.EXIT_USAGE
+        transition.read_places(bad)
+    assert exc.value.code == transition.EXIT_USAGE
 
 
 def test_read_places_refuses_a_missing_file_and_bad_json(tmp_path):
     with pytest.raises(SystemExit, match="file missing") as exc:
-        tween.read_places(tmp_path / "nope.json")
-    assert exc.value.code == tween.EXIT_USAGE
+        transition.read_places(tmp_path / "nope.json")
+    assert exc.value.code == transition.EXIT_USAGE
     (tmp_path / "bad.json").write_text("{dx: 1")
     with pytest.raises(SystemExit, match="is not JSON"):
-        tween.read_places(tmp_path / "bad.json")
+        transition.read_places(tmp_path / "bad.json")
 
 
 @pytest.mark.parametrize("places, said", [
@@ -781,12 +781,12 @@ def test_read_places_refuses_a_missing_file_and_bad_json(tmp_path):
 ])
 def test_places_off_count_or_off_canvas_are_usage_errors_before_any_provider_call(tmp_path, places, said):
     fa, fb = _airborne_pair(tmp_path)
-    a, b = tween.endpoint_from_file(str(fa), None, MAGENTA), tween.endpoint_from_file(str(fb), None, MAGENTA)
+    a, b = transition.endpoint_from_file(str(fa), None, MAGENTA), transition.endpoint_from_file(str(fb), None, MAGENTA)
     for method in ("strip", "video"):
         with pytest.raises(SystemExit, match=said) as exc:
-            tween.make_tween(a, b, 2, workdir=tmp_path / method, method=method, generator=_never, video_runner=_never,
+            transition.make_transition(a, b, 2, workdir=tmp_path / method, method=method, generator=_never, video_runner=_never,
                              places=places)
-        assert exc.value.code == tween.EXIT_USAGE
+        assert exc.value.code == transition.EXIT_USAGE
         assert not (tmp_path / method / "keyframe-strip.png").exists() and not (tmp_path / method / "first.png").exists()
 
 
@@ -810,7 +810,7 @@ def test_places_put_the_in_betweens_where_the_caller_says_and_the_ends_where_gro
         im = Image.open(out / f)
         x0, y0, x1, y1 = im.getchannel("A").getbbox()
         assert x0 >= 1 and y0 >= 1 and x1 < im.width and y1 < im.height  # no frame clipped
-    saved = json.loads((out / "tween.json").read_text())
+    saved = json.loads((out / "transition.json").read_text())
     assert saved["placement"]["kind"] == "places"
 
 
@@ -834,8 +834,8 @@ def test_without_places_the_record_says_linear_with_the_line_s_values(tmp_path):
 
 def test_places_place_the_clip_s_samples_too(tmp_path, monkeypatch):
     fa, fb = _airborne_pair(tmp_path, up=0)
-    a, b = tween.endpoint_from_file(str(fa), None, MAGENTA), tween.endpoint_from_file(str(fb), None, MAGENTA)
-    frames, rep = tween.make_tween(a, b, 2, workdir=tmp_path / "v", method="video", video_runner=_crossfade(monkeypatch),
+    a, b = transition.endpoint_from_file(str(fa), None, MAGENTA), transition.endpoint_from_file(str(fb), None, MAGENTA)
+    frames, rep = transition.make_transition(a, b, 2, workdir=tmp_path / "v", method="video", video_runner=_crossfade(monkeypatch),
                                    min_endpoint_iou=0.3, refuse="held", places=[{"dx": 0, "dy": -30},
                                                                                 {"dx": 0, "dy": -10}])
     bottoms = [f.getchannel("A").getbbox()[3] for f in [*rep["_ends"][:1], *frames, *rep["_ends"][1:]]]
@@ -845,21 +845,21 @@ def test_places_place_the_clip_s_samples_too(tmp_path, monkeypatch):
 
 def test_places_in_run_mode_and_the_cli(tmp_path, monkeypatch):
     run = _run(tmp_path)
-    monkeypatch.setattr(tween, "gen_generator", lambda provider, refs=None: fill_ghosts)
+    monkeypatch.setattr(transition, "gen_generator", lambda provider, refs=None: fill_ghosts)
     (tmp_path / "p.json").write_text(json.dumps([{"dx": 0, "dy": -30}, {"dx": 0, "dy": -10}]))
-    assert tween.run(run_dir=run, from_ref="attack:-1", to_ref="idle:0", n=2, label="up",
+    assert transition.run(run_dir=run, from_ref="attack:-1", to_ref="idle:0", n=2, label="up",
                      places=str(tmp_path / "p.json")) == 0
     meta = json.loads((run / "sprite-request.json").read_text())["states"]["idle"]["takes"][0]["transition"]
     assert meta["placement"]["kind"] == "places" and meta["placement"]["places"][0]["dy"] == -30.0
     with pytest.raises(SystemExit, match=r"off the top of the 128x128 canvas") as exc:  # the raw strip's cell
-        tween.run(run_dir=run, from_ref="attack:-1", to_ref="idle:0", n=2, label="up2",
+        transition.run(run_dir=run, from_ref="attack:-1", to_ref="idle:0", n=2, label="up2",
                   places=[{"dx": 0, "dy": -120}, {"dx": 0, "dy": 0}])
-    assert exc.value.code == tween.EXIT_USAGE
+    assert exc.value.code == transition.EXIT_USAGE
     fa, fb = _pair(tmp_path)
     with pytest.raises(SystemExit) as exc:
-        tween.main(["--from-file", str(fa), "--to-file", str(fb), "--out-dir", str(tmp_path / "o"), "--n", "3",
+        transition.main(["--from-file", str(fa), "--to-file", str(fb), "--out-dir", str(tmp_path / "o"), "--n", "3",
                     "--places", str(tmp_path / "p.json")])
-    assert exc.value.code == tween.EXIT_USAGE
+    assert exc.value.code == transition.EXIT_USAGE
 
 
 def test_places_in_a_manifest_read_relative_to_it_and_hashed(tmp_path):

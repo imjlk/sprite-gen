@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""`tween` beside `video-chain` on four joins between frames of two Pip clips (docs/tween.md "tween and video-chain").
+"""`transition` beside `video-chain` on four joins between frames of two Pip clips (docs/transition.md "transition and video-chain").
 
 The frames are the repository's own: `tests/fixtures/rife-cuts/pip-jump` (29 keyed frames: rising 0-4 to an apex 208 px
 off the floor, falling 5-9, landed 10-25, taking off 26-28) and `pip-run` (26), put on one canvas (bottom-aligned,
@@ -16,27 +16,27 @@ For each, two frames between, five ways, every one through the CLI in a subproce
 
 | row | command |
 |---|---|
-| `strip-shared` | `tween --method strip --ground shared` (every foot on one ground row) |
-| `strip` | `tween --method strip` (`--ground auto`, the default: the height put back where one end is off the floor) |
+| `strip-shared` | `transition --method strip --ground shared` (every foot on one ground row) |
+| `strip` | `transition --method strip` (`--ground auto`, the default: the height put back where one end is off the floor) |
 | `strip-places` | `t4` only: the same with `--places runs/t4/places.json`, the places of the clip's own frames 8 and 10 (each one's height off the floor, and its anchor's distance from the line between the ends'): what a caller who has the motion gives |
-| `video` | `tween --method video` (`--ground auto`; every fault of the judge refuses, the default) |
+| `video` | `transition --method video` (`--ground auto`; every fault of the judge refuses, the default) |
 | `chain-held` | `video-chain --piece A=..:F-3:F --piece B=..:T:T+3 --bridge 2 --refuse held` |
 | `chain` | the same with every fault refusing (the default) |
 
-The tween rows call the provider (`--provider`, grok by default: one image or one clip a try, billed per call where the
+The transition rows call the provider (`--provider`, grok by default: one image or one clip a try, billed per call where the
 login does not cover it) `--tries` times each (default 3), since the provider draws anew on every call: the summary
 counts the tries delivered and the pages show the first delivered (or the first refused). The chain rows run once
 (RIFE gives the same frames every run). `--no-provider` runs the chain rows only, and `--render-only` draws the pages
 again from an earlier `--out-dir`. RIFE must be installed for the chain rows (`sprite-gen rife install`).
 
-    .venv/bin/python scripts/dev/tween_chain_demo.py --out-dir <a new directory> [--tries 3] [--jobs 5]
+    .venv/bin/python scripts/dev/transition_chain_demo.py --out-dir <a new directory> [--tries 3] [--jobs 5]
 
 Writes `<out-dir>/runs/<join>/<row>/[try-<k>/]` (each verb's own folder and report), `<out-dir>/summary.json` (each
 try's exit code, seconds and the numbers its report gives, each row's frames' height off the floor, `rise_px`, and on
 `t4` each frame's silhouette IoU with the clip's own frame, its height error and its anchor's error off the line between
 the ends'), and `<out-dir>/showcase/`:
-`tween-vs-chain-<join>.gif` (four rows playing A, the two frames between, B, `t4` with the clip's own frames beside
-them; a grey line on the lower end's floor) and `tween-vs-chain-<join>.png` (every row on one sheet), each under 1 MB.
+`transition-vs-chain-<join>.gif` (four rows playing A, the two frames between, B, `t4` with the clip's own frames beside
+them; a grey line on the lower end's floor) and `transition-vs-chain-<join>.png` (every row on one sheet), each under 1 MB.
 """
 from __future__ import annotations
 
@@ -61,12 +61,12 @@ JOINS = {  # name: (from clip, from frame, to clip, to frame, what it is)
 }
 TRUTH = {"t4": ("pip-jump", (6, 8, 10, 12))}  # the clip's own frames at A, 1/3, 2/3, B
 ROWS = ("strip-shared", "strip", "video", "chain-held", "chain")
-TWEEN_ROWS = ("strip-shared", "strip", "strip-places", "video")
+TRANSITION_ROWS = ("strip-shared", "strip", "strip-places", "video")
 PLACES_FILE = "places.json"  # runs/<join>/places.json: the clip's own frames' places, for the strip-places row
-TITLES = {"strip-shared": "tween strip --ground shared", "strip": "tween strip (--ground auto)",
-          "video": "tween video (--ground auto)", "chain-held": "video-chain --refuse held",
+TITLES = {"strip-shared": "transition strip (shared)", "strip": "transition strip (auto)",  # 27 characters at most:
+          "video": "transition video (auto)", "chain-held": "video-chain --refuse held",  # a GIF column's width
           "chain": "video-chain (default)", "truth": "the clip's own frames",
-          "strip-places": "tween strip --places"}
+          "strip-places": "transition strip --places"}
 DESCRIPTION = ("chibi wizard kid Pip: big indigo pointed hood with a yellow bell tip, orange scarf, cream tunic, "
                "brown satchel and boots, side view facing right")
 MARGIN = (12, 13)  # px added to the larger clip's width and height: the canvas of the comparison
@@ -80,7 +80,7 @@ def rows_of(join: str) -> tuple[str, ...]:
 
 def anchor_place(frame: Image.Image) -> tuple[float, float]:
     """A frame's foot anchor on its canvas: (x, its lowest opaque row's height off the canvas floor)."""
-    from sprite_gen.effects.tween import foot_x
+    from sprite_gen.effects.transition import foot_x
     box = frame.getchannel("A").getbbox()
     return box[0] + foot_x(frame.crop(box)), float(frame.height - box[3])
 
@@ -123,7 +123,7 @@ def command(row: str, join: str, states: dict[str, Path], run: Path, provider: s
         args = ["video-chain", "--piece", f"A={states[a]}:{fa - 3}:{fa}", "--piece", f"B={states[b]}:{fb}:{fb + 3}",
                 "--bridge", str(n), "--key", "green", "--fps", str(FPS), "--out-dir", str(run)]
         return args + (["--refuse", "held"] if row == "chain-held" else [])
-    args = ["tween", "--from-file", str(states[a] / f"frame-{fa + 1:04d}.png"),
+    args = ["transition", "--from-file", str(states[a] / f"frame-{fa + 1:04d}.png"),
             "--to-file", str(states[b] / f"frame-{fb + 1:04d}.png"), "--n", str(n), "--provider", provider,
             "--description", DESCRIPTION, "--out-dir", str(run), "--fps", str(FPS), "--include-ends", "--force",
             "--method", "video" if row == "video" else "strip"]
@@ -133,14 +133,14 @@ def command(row: str, join: str, states: dict[str, Path], run: Path, provider: s
 
 
 def run_dirs(row: str, join: str, runs: Path, tries: int) -> list[Path]:
-    """Where a row's runs go: one folder for a chain row, `try-<k>` for each try of a tween row."""
+    """Where a row's runs go: one folder for a chain row, `try-<k>` for each try of a transition row."""
     base = runs / join / row
     return [base] if row.startswith("chain") else [base / f"try-{k}" for k in range(1, tries + 1)]
 
 
 def stands(row: str, run: Path) -> bool:
     """An earlier run that made something: a report whose status is not error."""
-    report = run / ("chain.report.json" if row.startswith("chain") else "tween.json")
+    report = run / ("chain.report.json" if row.startswith("chain") else "transition.json")
     try:
         return json.loads(report.read_text(encoding="utf-8")).get("status") != "error"
     except (OSError, ValueError):
@@ -166,7 +166,7 @@ def read_run(row: str, run: Path) -> dict:
                 "bridge_faults": [sorted({f for t in b["refused"] for f in t["faults"]}) for b in bridges],
                 "bridge_made": [b["judged"] is not None for b in bridges],
                 "kept_faults": [b.get("kept_faults", []) for b in bridges], "error": rep.get("error")}
-    rep = json.loads((run / "tween.json").read_text(encoding="utf-8"))
+    rep = json.loads((run / "transition.json").read_text(encoding="utf-8"))
     em = rep.get("endpoint_match", {})
     return {"status": rep["status"], "endpoint_iou": [em.get("iou_from"), em.get("iou_to")],
             "scale_agree": em.get("scale_agree"), "frame_scale": rep.get("frame_scale", {}).get("drawn_vs_endpoints"),
@@ -189,8 +189,8 @@ def frames_of(row: str, run: Path) -> tuple[list[Image.Image] | None, bool]:
         folder, refused = (keyed, False) if keyed.is_dir() else (run / "keyed.refused", True)
         files = [folder / f"frame-{k:04d}.png" for k in (4, 5, 6, 7)]
     else:
-        folder, refused = (run, False) if (run / "tween-0.png").is_file() else (run / "refused", True)
-        files = [folder / n for n in ("from.png", "tween-0.png", "tween-1.png", "to.png")]
+        folder, refused = (run, False) if (run / "between-0.png").is_file() else (run / "refused", True)
+        files = [folder / n for n in ("from.png", "between-0.png", "between-1.png", "to.png")]
     if not all(f.is_file() for f in files):
         return None, True
     return [Image.open(f).convert("RGBA") for f in files], refused
@@ -213,7 +213,7 @@ def rise_px(frames: list[Image.Image]) -> list[int]:
 def against_truth(frames: list[Image.Image], truth: list[Image.Image]) -> dict:
     """The frames between beside the clip's own: silhouette IoU at the clip frame's height, foot on foot, and the
     height error. A frame drawn at another scale than the clip's is compared at the clip's scale."""
-    from sprite_gen.effects.tween import _scaled, _tight, silhouette_iou
+    from sprite_gen.effects.transition import _scaled, _tight, silhouette_iou
     iou = []
     for got, want in zip(frames[1:-1], truth[1:-1]):
         g, w = _tight(got), _tight(want)
@@ -321,7 +321,7 @@ def render(join: str, runs: Path, summary: dict, states: dict[str, Path], tries:
             d.text((8, y + 22 + j * 14), line, font=_font(10), fill=(150, 0, 0) if refused else (50, 50, 50))
         for k, im in enumerate(frames or []):
             sheet.alpha_composite(_panel(im, zoom, (pw, ph), refused, floor(frames)), (lab + k * (pw + 4), y))
-    out_png = show / f"tween-vs-chain-{join}.png"
+    out_png = show / f"transition-vs-chain-{join}.png"
     sheet.convert("RGB").quantize(colors=128).save(out_png, optimize=True)
     shown = [r for r in order if r != "chain"]
     pages = []
@@ -340,7 +340,7 @@ def render(join: str, runs: Path, summary: dict, states: dict[str, Path], tries:
             for j, line in enumerate(_wrap(note(row, entry), 30)[:4]):
                 d.text((x, 38 + ph + 2 + j * 12), line, font=_font(9), fill=(60, 60, 60))
         pages.append(page.convert("RGB").quantize(colors=96))
-    out_gif = show / f"tween-vs-chain-{join}.gif"
+    out_gif = show / f"transition-vs-chain-{join}.gif"
     pages[0].save(out_gif, save_all=True, append_images=pages[1:], duration=[700, 350, 350, 700], loop=0,
                   optimize=True)
     return [out_gif, out_png]
@@ -360,9 +360,9 @@ def _wrap(text: str, width: int) -> list[str]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--out-dir", type=Path, required=True)
-    parser.add_argument("--provider", default="grok", help="the tween rows' provider (default grok)")
+    parser.add_argument("--provider", default="grok", help="the transition rows' provider (default grok)")
     parser.add_argument("--n", type=int, default=2, help="frames between (default 2)")
-    parser.add_argument("--tries", type=int, default=3, help="tries of each tween row (default 3)")
+    parser.add_argument("--tries", type=int, default=3, help="tries of each transition row (default 3)")
     parser.add_argument("--only", default=",".join(JOINS), help=f"joins to run, comma separated (default {','.join(JOINS)})")
     parser.add_argument("--jobs", type=int, default=5, help="runs at once (default 5)")
     parser.add_argument("--no-provider", action="store_true", help="run the chain rows only")
@@ -385,7 +385,7 @@ def main(argv: list[str] | None = None) -> int:
             if j in TRUTH:
                 (runs / j).mkdir(parents=True, exist_ok=True)
                 (runs / j / PLACES_FILE).write_text(json.dumps(places_from_truth(j, states), indent=2) + "\n")
-        todo = [(row, j, d) for j in joins for row in rows_of(j) if not (args.no_provider and row in TWEEN_ROWS)
+        todo = [(row, j, d) for j in joins for row in rows_of(j) if not (args.no_provider and row in TRANSITION_ROWS)
                 for d in run_dirs(row, j, runs, args.tries) if not (args.resume and stands(row, d))]
         with ThreadPoolExecutor(max(1, args.jobs)) as pool:
             for (row, j, d), result in zip(todo, pool.map(

@@ -26,13 +26,13 @@ height (a crouch into a stand). This module:
    (`qa.holds.inspect`), as `video-chain` does;
 8. records the frames as a transition take on the destination state
    (`takes[].transition = {from_state, from_index, to_state, to_index, n}`) or, in file
-   mode, as frames plus `tween.json` in `--out-dir`; a refused tween leaves its frames in
-   `refused/` and exits 1 (docs/tween.md).
+   mode, as frames plus `transition.json` in `--out-dir`; a refused transition leaves its frames in
+   `refused/` and exits 1 (docs/transition.md).
 
 The provider always draws on one ground row. `--ground source` puts the height back when the frames
 are placed: each end as high off the floor as on its source canvas, the in-betweens at the lerp of
 the two heights; `shared` puts every foot on one row; `auto` (default) is source where one end is
-off the floor and the other is not (file mode), else shared. tween decides no motion: the
+off the floor and the other is not (file mode), else shared. transition decides no motion: the
 in-betweens are on the straight line between the ends' places (the default when nothing says
 otherwise) or where the caller's `--places` puts them.
 
@@ -60,8 +60,8 @@ from sprite_gen.util.console import utf8_streams
 
 # The image providers that take a keyframe strip as a reference (`gen.base` names them once), as `interpolate` offers.
 PROVIDERS = (PROVIDER_CODEX, PROVIDER_GROK)
-# tween's own default, as `interpolate` keeps its own: the provider the Pip comparison was measured on
-# (docs/tween.md "tween and video-chain"). `--method video` films on grok whatever the strip provider is.
+# transition's own default, as `interpolate` keeps its own: the provider the Pip comparison was measured on
+# (docs/transition.md "transition and video-chain"). `--method video` films on grok whatever the strip provider is.
 DEFAULT_PROVIDER = PROVIDER_GROK
 VIDEO_PROVIDER = PROVIDER_GROK
 METHODS = ("strip", "video")
@@ -76,7 +76,7 @@ DEFAULT_GROUND = "auto"
 AIRBORNE_FRACTION = 0.05
 # Where each in-between is placed. linear (no --places): on the straight line from A's place to B's, the default when
 # nothing says otherwise, not a motion. places: where the caller says (`--places FILE`), each in-between's foot anchor
-# `dx` px right of the anchor column and `dy` px down from the floor (negative: above it). tween decides no motion.
+# `dx` px right of the anchor column and `dy` px down from the floor (negative: above it). transition decides no motion.
 PLACEMENTS = ("linear", "places")
 PLACE_KEYS = ("dx", "dy")
 DEFAULT_MIN_ENDPOINT_IOU = 0.6
@@ -97,11 +97,11 @@ STRIP_ASPECTS = ((21, 9), (20, 9), (5, 2), (2, 1), (16, 9), (3, 2), (4, 3), (1, 
 # frames were made and refused (kept in `refused/`, none handed over), 2 an error, a usage error among them.
 EXIT_OK, EXIT_REFUSED, EXIT_ERROR = 0, 1, 2
 EXIT_USAGE = EXIT_ERROR
-REFUSED = "refused"  # the folder beside the frames a refused tween leaves its frames in, as `keyed.refused/`
+REFUSED = "refused"  # the folder beside the frames a refused transition leaves its frames in, as `keyed.refused/`
 
 
-class TweenError(SystemExit):
-    """A tween failure with a stable process exit code; str() is the message."""
+class TransitionError(SystemExit):
+    """A transition failure with a stable process exit code; str() is the message."""
     exit_code = EXIT_ERROR
 
     def __init__(self, message: str):
@@ -113,11 +113,11 @@ class TweenError(SystemExit):
         return self.message
 
 
-class TweenUsage(TweenError):
+class TransitionUsage(TransitionError):
     exit_code = EXIT_USAGE
 
 
-class TweenRefused(TweenError):
+class TransitionRefused(TransitionError):
     """The frames were made and fail a check: exit EXIT_REFUSED; `frames` (name, image) are left in `refused/`."""
     exit_code = EXIT_REFUSED
 
@@ -146,17 +146,17 @@ class Endpoint:
 def parse_ref(spec: str) -> tuple[str, int]:
     """`state:idx` -> (state, idx); idx may be negative. The state may itself contain `/`."""
     if ":" not in spec:
-        raise TweenUsage(f"tween: expected <state>:<index>, got {spec!r}")
+        raise TransitionUsage(f"transition: expected <state>:<index>, got {spec!r}")
     state, _, idx = spec.rpartition(":")
     try:
         return state, int(idx)
     except ValueError:
-        raise TweenUsage(f"tween: frame index must be an integer in {spec!r}") from None
+        raise TransitionUsage(f"transition: frame index must be an integer in {spec!r}") from None
 
 
 def _pick(items: list, index: int, what: str):
     if not -len(items) <= index < len(items):
-        raise TweenUsage(f"tween: {what} index {index} out of range ({len(items)} frames)")
+        raise TransitionUsage(f"transition: {what} index {index} out of range ({len(items)} frames)")
     return items[index]
 
 
@@ -182,7 +182,7 @@ def border_touches(rgba: Image.Image, band: int = 1) -> list[str]:
 def _tight(rgba: Image.Image) -> Image.Image:
     box = Image.fromarray(((_alpha(rgba) >= ALPHA_MIN) * 255).astype("uint8")).getbbox()
     if box is None:
-        raise TweenUsage("tween: endpoint frame is empty (no opaque content)")
+        raise TransitionUsage("transition: endpoint frame is empty (no opaque content)")
     return rgba.crop(box)
 
 
@@ -195,12 +195,12 @@ def endpoint_from_file(spec: str, cell: tuple[int, int] | None,
         path_s, idx = head, int(tail)
     path = Path(path_s)
     if not path.is_file():
-        raise TweenUsage(f"tween: endpoint file missing: {path}")
+        raise TransitionUsage(f"transition: endpoint file missing: {path}")
     image = Image.open(path)
     image.load()
     if idx is not None:
         if cell is None:
-            raise TweenUsage(f"tween: {spec!r} names a cell index; pass --cell WxH")
+            raise TransitionUsage(f"transition: {spec!r} names a cell index; pass --cell WxH")
         cw, ch = cell
         cols, rows = image.width // cw, image.height // ch
         boxes = [(c * cw, r * ch, (c + 1) * cw, (r + 1) * ch) for r in range(rows) for c in range(cols)]
@@ -216,16 +216,16 @@ def endpoint_from_run(run_dir: Path, request: dict[str, Any], state: str, index:
                                            tighten_components)
     from sprite_gen.spec.layout import raw_rel
     if state not in request.get("states", {}):
-        raise TweenUsage(f"tween: unknown state: {state}")
+        raise TransitionUsage(f"transition: unknown state: {state}")
     strip_path = run_dir / raw_rel(request, state)
     if not strip_path.is_file():
-        raise TweenUsage(f"tween: raw strip missing: {strip_path}")
+        raise TransitionUsage(f"transition: raw strip missing: {strip_path}")
     chroma_rgb = tuple(request["chroma_key"]["rgb"])
     frames = int(request["states"][state]["frames"])
     cleaned = remove_chroma_background_ycbcr(Image.open(strip_path).convert("RGBA"), chroma_rgb)
     components = extract_component_images(cleaned, frames)
     if not components:
-        raise TweenUsage(f"tween: could not extract {frames} components from {strip_path}")
+        raise TransitionUsage(f"transition: could not extract {frames} components from {strip_path}")
     image = _pick(tighten_components(components), index, state)
     # the cell of the raw strip is the canvas a --places bound reads; no floor is read off it (lift None: shared)
     return Endpoint(_tight(image), f"{state}:{index}", [], None, (cleaned.width // frames, cleaned.height))
@@ -310,7 +310,7 @@ def keyframe_strip(a: Image.Image, b: Image.Image, lay: Layout, n: int, anchor: 
     return strip
 
 
-def tween_prompt(n: int, description: str | None, chroma: tuple[str, str]) -> str:
+def transition_prompt(n: int, description: str | None, chroma: tuple[str, str]) -> str:
     slots = n + 2
     middle = f"slots 2-{slots - 1}" if n > 1 else "slot 2"
     who = description or "the same character as the keyframes"
@@ -375,7 +375,7 @@ def slice_slots(image: Image.Image, slots: int, chroma_rgb: tuple[int, int, int]
         if mains[k] is None or c["area"] > mains[k]["area"]:
             mains[k] = c
     if any(m is None for m in mains):
-        raise TweenRefused("tween: a slot came back empty in the drawn strip")
+        raise TransitionRefused("transition: a slot came back empty in the drawn strip")
     masks = [np.zeros(keyed.width * keyed.height, bool) for _ in range(slots)]
     ambiguous, spills = [], []
     for k, m in enumerate(mains):
@@ -433,7 +433,7 @@ def _largest_figure(rgba: Image.Image) -> Image.Image:
 
 def gen_generator(provider: str, extra_refs: list[Path] | None = None) -> Generator:
     if provider not in PROVIDERS:
-        raise TweenUsage(f"tween: unknown provider {provider!r} (choose from {PROVIDERS})")
+        raise TransitionUsage(f"transition: unknown provider {provider!r} (choose from {PROVIDERS})")
     from sprite_gen.gen import generate_image
 
     def run(strip: Path, prompt: str, out: Path, aspect: str) -> None:
@@ -450,7 +450,7 @@ def video_runner_default(first: Path, last: Path, prompt: str, out: Path) -> Non
 
 def video_frames(clip: Path, workdir: Path) -> list[Image.Image]:
     if shutil.which("ffmpeg") is None:
-        raise TweenError("tween --method video needs ffmpeg on PATH")
+        raise TransitionError("transition --method video needs ffmpeg on PATH")
     frames = workdir / "clip-frames"
     frames.mkdir(exist_ok=True)
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(clip), str(frames / "%04d.png")], check=True)
@@ -459,7 +459,7 @@ def video_frames(clip: Path, workdir: Path) -> list[Image.Image]:
         with Image.open(p) as im:
             out.append(im.convert("RGB").copy())
     if len(out) < 3:
-        raise TweenError(f"tween: clip {clip} has {len(out)} frames; need at least 3")
+        raise TransitionError(f"transition: clip {clip} has {len(out)} frames; need at least 3")
     return out
 
 
@@ -467,21 +467,21 @@ def video_frames(clip: Path, workdir: Path) -> list[Image.Image]:
 
 def _call_provider(workdir: Path, method: str, provider: str, n: int, a: Endpoint, b: Endpoint,
                    call: Callable[[], None]) -> None:
-    """Run the provider call; on any failure (timeout, auth, crash) leave a tween.json saying so and raise a TweenError
+    """Run the provider call; on any failure (timeout, auth, crash) leave a transition.json saying so and raise a TransitionError
     (exit EXIT_ERROR: a provider that made nothing is an error, not a refusal). A provider's own SystemExit (an expired
     login says so with one) keeps its message."""
     try:
         call()
     except BaseException as exc:  # noqa: BLE001 - recorded, then raised as the run contract's error
-        said = str(exc.code) if isinstance(exc, SystemExit) and not isinstance(exc, TweenError) else str(exc)
-        report = {"kind": "sprite-gen-tween", "method": method, "provider": provider, "n": n,
+        said = str(exc.code) if isinstance(exc, SystemExit) and not isinstance(exc, TransitionError) else str(exc)
+        report = {"kind": "sprite-gen-transition", "method": method, "provider": provider, "n": n,
                   "from": a.source, "to": b.source, "status": "error",
                   "error": f"{type(exc).__name__}: {said}"}
-        (workdir / "tween.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
-        if isinstance(exc, (KeyboardInterrupt, TweenError)):
+        (workdir / "transition.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+        if isinstance(exc, (KeyboardInterrupt, TransitionError)):
             raise
         what = "the clip" if method == "video" else "the strip"
-        raise TweenError(f"tween: {provider} made nothing for {what}: {said}") from exc
+        raise TransitionError(f"transition: {provider} made nothing for {what}: {said}") from exc
 
 # ---------------------------------------------------------------- the judge and the final reading
 
@@ -494,7 +494,7 @@ def read_refuse(text: str | Collection[str] | None) -> frozenset[str] | None:
     named = [n.strip() for n in (text.split(",") if isinstance(text, str) else text)]
     unknown = [n for n in named if n not in FAULTS]
     if unknown:
-        raise TweenUsage(f"tween: --refuse: {', '.join(repr(n) for n in unknown)} "
+        raise TransitionUsage(f"transition: --refuse: {', '.join(repr(n) for n in unknown)} "
                          f"{'is' if len(unknown) == 1 else 'are'} no fault: one of {', '.join(FAULTS)}")
     return frozenset(named) | {"held"}
 
@@ -526,7 +526,7 @@ def judge_frames(a: Image.Image, made: list[Image.Image], b: Image.Image, *, met
 
 def final_reading(frames: list[Image.Image]) -> dict[str, Any]:
     """The frames as delivered, ends in, read as `inspect-holds` reads a delivery (`qa.holds.inspect` on
-    `alpha_figures`): a frame showing the picture of the frame before it is on no list, and refuses the tween."""
+    `alpha_figures`): a frame showing the picture of the frame before it is on no list, and refuses the transition."""
     from sprite_gen.qa import holds
     try:
         return holds.inspect(holds.alpha_figures(frames))
@@ -568,11 +568,11 @@ def read_places(spec: Any, base: Path | None = None) -> dict[str, Any] | None:
         if base is not None and not path.is_absolute():
             path = base / path
         if not path.is_file():
-            raise TweenUsage(f"tween: --places file missing: {path}")
+            raise TransitionUsage(f"transition: --places file missing: {path}")
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError) as exc:
-            raise TweenUsage(f"tween: --places {path} is not JSON: {exc}") from None
+            raise TransitionUsage(f"transition: --places {path} is not JSON: {exc}") from None
         file = str(path)
     else:
         data = spec
@@ -580,25 +580,25 @@ def read_places(spec: Any, base: Path | None = None) -> dict[str, Any] | None:
     if isinstance(data, dict):
         unknown = set(data) - {"places", "from", "file"}
         if unknown or "places" not in data:
-            raise TweenUsage(f"tween: --places is a list of places or an object with `places` (and `from`); "
+            raise TransitionUsage(f"transition: --places is a list of places or an object with `places` (and `from`); "
                              f"got keys {sorted(data)}")
         if data.get("from") is not None and not isinstance(data["from"], str):
-            raise TweenUsage("tween: --places `from` is text: what the places were read off")
+            raise TransitionUsage("transition: --places `from` is text: what the places were read off")
         file = data.get("file") or file
         label = data.get("from") or file or label
         items = data["places"]
     else:
         items = data
     if not isinstance(items, list) or not items:
-        raise TweenUsage("tween: --places holds one place per in-between: a non-empty list of {\"dx\": px, \"dy\": px}")
+        raise TransitionUsage("transition: --places holds one place per in-between: a non-empty list of {\"dx\": px, \"dy\": px}")
     places = []
     for k, item in enumerate(items):
         if not isinstance(item, dict) or set(item) != set(PLACE_KEYS):
-            raise TweenUsage(f"tween: --places[{k}] must be {{\"dx\": px, \"dy\": px}}, got {item!r}")
+            raise TransitionUsage(f"transition: --places[{k}] must be {{\"dx\": px, \"dy\": px}}, got {item!r}")
         for key in PLACE_KEYS:
             v = item[key]
             if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
-                raise TweenUsage(f"tween: --places[{k}].{key} must be a finite number of px, got {v!r}")
+                raise TransitionUsage(f"transition: --places[{k}].{key} must be a finite number of px, got {v!r}")
         places.append({key: float(item[key]) for key in PLACE_KEYS})
     return {"from": label, "file": file, "places": places}
 
@@ -608,18 +608,18 @@ def check_places(places: dict[str, Any], n: int, a: Endpoint, b: Endpoint, bound
     never under the floor (dy <= 0), its top (at its lerped height) inside the canvas, |dx| under its width."""
     got = places["places"]
     if len(got) != n:
-        raise TweenUsage(f"tween: --places gives {len(got)} place(s) for --n {n} in-betweens; give one per in-between")
+        raise TransitionUsage(f"transition: --places gives {len(got)} place(s) for --n {n} in-betweens; give one per in-between")
     w, h = bound
     for k, p in enumerate(got, start=1):
         tall = a.image.height + (b.image.height - a.image.height) * k / (n + 1)
         if p["dy"] > 0:
-            raise TweenUsage(f"tween: --places[{k - 1}] dy {p['dy']:g} puts in-between {k} under the floor "
+            raise TransitionUsage(f"transition: --places[{k - 1}] dy {p['dy']:g} puts in-between {k} under the floor "
                              "(dy is px down from it; above it is negative)")
         if tall - p["dy"] > h:
-            raise TweenUsage(f"tween: --places[{k - 1}] dy {p['dy']:g} puts in-between {k} ({tall:.0f} px tall) "
+            raise TransitionUsage(f"transition: --places[{k - 1}] dy {p['dy']:g} puts in-between {k} ({tall:.0f} px tall) "
                              f"off the top of the {w}x{h} canvas")
         if abs(p["dx"]) >= w:
-            raise TweenUsage(f"tween: --places[{k - 1}] dx {p['dx']:g} puts in-between {k} off the {w}x{h} canvas")
+            raise TransitionUsage(f"transition: --places[{k - 1}] dx {p['dx']:g} puts in-between {k} off the {w}x{h} canvas")
 
 
 def resolve_ground(a: Endpoint, b: Endpoint, ground: str) -> tuple[str, tuple[float, float], str]:
@@ -627,17 +627,17 @@ def resolve_ground(a: Endpoint, b: Endpoint, ground: str) -> tuple[str, tuple[fl
 
     `source` refuses (usage) without a source canvas or with two canvas heights; `auto` falls back to `shared` there."""
     if ground not in GROUNDS:
-        raise TweenUsage(f"tween: unknown --ground {ground!r} (choose from {GROUNDS})")
+        raise TransitionUsage(f"transition: unknown --ground {ground!r} (choose from {GROUNDS})")
     if ground == "shared":
         return "shared", (0.0, 0.0), "asked"
     if a.lift is None or b.lift is None or a.canvas is None or b.canvas is None:
         if ground == "source":
-            raise TweenUsage("tween: --ground source reads each end's height off its source canvas: file mode only "
+            raise TransitionUsage("transition: --ground source reads each end's height off its source canvas: file mode only "
                              "(--from-file, --to-file)")
         return "shared", (0.0, 0.0), "no source canvas (run mode)"
     if a.canvas[1] != b.canvas[1]:
         if ground == "source":
-            raise TweenUsage(f"tween: --ground source needs the two ends on one canvas height (their floor is its "
+            raise TransitionUsage(f"transition: --ground source needs the two ends on one canvas height (their floor is its "
                              f"bottom row); {a.source} is {a.canvas[1]} px tall and {b.source} {b.canvas[1]} px")
         return "shared", (0.0, 0.0), f"two canvas heights ({a.canvas[1]}, {b.canvas[1]} px): no one floor"
     if ground == "source":
@@ -648,7 +648,7 @@ def resolve_ground(a: Endpoint, b: Endpoint, ground: str) -> tuple[str, tuple[fl
     return "shared", (0.0, 0.0), f"heights off the floor {a.lift:.0f} and {b.lift:.0f} px differ by {gap:.0f} < {bar:.0f}"
 
 
-def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str = "strip",
+def make_transition(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str = "strip",
                provider: str = DEFAULT_PROVIDER, anchor: str = "foot", margin: float = DEFAULT_MARGIN,
                min_endpoint_iou: float = DEFAULT_MIN_ENDPOINT_IOU, description: str | None = None,
                chroma: tuple[str, str, tuple[int, int, int]] = ("magenta", "#FF00FF", (255, 0, 255)),
@@ -665,19 +665,19 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
     `places` (`read_places`) places the in-betweens where the caller says; without it they are on the straight line
     between the ends' places, the default when nothing says otherwise."""
     if not 1 <= n <= 6:
-        raise TweenUsage(f"tween: --n must be 1..6, got {n}")
+        raise TransitionUsage(f"transition: --n must be 1..6, got {n}")
     if method not in METHODS:
-        raise TweenUsage(f"tween: unknown method {method!r}")
+        raise TransitionUsage(f"transition: unknown method {method!r}")
     if anchor not in ANCHORS:
-        raise TweenUsage(f"tween: unknown anchor {anchor!r}")
+        raise TransitionUsage(f"transition: unknown anchor {anchor!r}")
     ground_used, lift, ground_why = resolve_ground(a, b, ground)
     placed = read_places(places)
     refused_for = read_refuse(refuse)
     if refused_for is not None and method != "video":
-        raise TweenUsage("tween: --refuse names the faults that refuse a --method video frame; the strip's in-betweens "
+        raise TransitionUsage("transition: --refuse names the faults that refuse a --method video frame; the strip's in-betweens "
                          "are judged for the record, and only held refuses them")
     if method == "video" and provider != VIDEO_PROVIDER:
-        raise TweenUsage(f"tween: --method video films on {VIDEO_PROVIDER} (`sprite-gen video --image --last-frame`); "
+        raise TransitionUsage(f"transition: --method video films on {VIDEO_PROVIDER} (`sprite-gen video --image --last-frame`); "
                          f"--provider {provider} draws --method strip only")
     name, hexv, chroma_rgb = chroma
     workdir.mkdir(parents=True, exist_ok=True)
@@ -691,7 +691,7 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
         canvases = [ep.canvas for ep in (a, b) if ep.canvas]
         bound = ((max(c[0] for c in canvases), max(c[1] for c in canvases)) if canvases else (lay.slot_w, lay.slot_h))
         check_places(placed, n, a, b, bound)
-    prompt = tween_prompt(n, description, (name, hexv))
+    prompt = transition_prompt(n, description, (name, hexv))
     (workdir / "prompt.txt").write_text(prompt, encoding="utf-8")
     if method == "strip":
         strip = keyframe_strip(a.image, b.image, lay, n, anchor, chroma_rgb)
@@ -747,7 +747,7 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
     drawn_chain = [_scaled(f, f.height * (k_a + (k_b - k_a) * j / (slots - 1))) for j, f in enumerate(figures)]
     drawn_steps = [round(silhouette_iou(x, y, anchor), 3) for x, y in zip(drawn_chain, drawn_chain[1:])]
     report: dict[str, Any] = {
-        "kind": "sprite-gen-tween", "method": method, "provider": provider, "n": n, "anchor": anchor,
+        "kind": "sprite-gen-transition", "method": method, "provider": provider, "n": n, "anchor": anchor,
         "from": a.source, "to": b.source, "slot": [lay.slot_w, lay.slot_h], "aspect": lay.aspect,
         "endpoint_match": {"iou_from": round(iou_a, 3), "iou_to": round(iou_b, 3), "min": min_endpoint_iou,
                            "scale_from": round(k_a, 3), "scale_to": round(k_b, 3),
@@ -767,24 +767,24 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
             for fname, im in frames:
                 im.save(keep / fname)
             report["refused_dir"] = str(keep)
-        (workdir / "tween.json").write_text(json.dumps({k: v for k, v in report.items() if k != "_ends"}, indent=2),
+        (workdir / "transition.json").write_text(json.dumps({k: v for k, v in report.items() if k != "_ends"}, indent=2),
                                             encoding="utf-8")
-        raise TweenRefused(msg, frames)
+        raise TransitionRefused(msg, frames)
     if min(iou_a, iou_b) < min_endpoint_iou or scale_agree < MIN_SCALE_AGREE:
         drifted = ("the strip drifted" if method == "strip" else
                    "the clip's first or last frame is not the keyframe it was given")
         refuse(
-            f"tween: refused — drawn endpoints do not match the keyframes (IoU from {iou_a:.2f}, "
+            f"transition: refused — drawn endpoints do not match the keyframes (IoU from {iou_a:.2f}, "
             f"to {iou_b:.2f}, need >= {min_endpoint_iou}; end scales agree {scale_agree:.2f}, need >= "
             f"{MIN_SCALE_AGREE}); {drifted}. Raw kept in {workdir}. " + retry_hint(method, provider))
     if bad_scale:
-        msg = (f"tween: refused — in-between(s) {bad_scale} drawn at {[round(rel[k - 1], 2) for k in bad_scale]}x the "
+        msg = (f"transition: refused — in-between(s) {bad_scale} drawn at {[round(rel[k - 1], 2) for k in bad_scale]}x the "
                f"size of the drawn endpoints (allowed {FRAME_SCALE_MIN}..{FRAME_SCALE_MAX})")
         if method == "video":
             refuse(msg + f"; the clip zoomed or shrank the figure. Raw kept in {workdir}. " + retry_hint(method, provider))
         warnings.append(msg.replace("refused — ", "") + "; rescaled to the keyframe height")
     if method == "video" and min(drawn_steps) < STEP_IOU_REFUSE:
-        refuse(f"tween: refused — consecutive clip frames jump (silhouette IoU {drawn_steps}, need >= "
+        refuse(f"transition: refused — consecutive clip frames jump (silhouette IoU {drawn_steps}, need >= "
                f"{STEP_IOU_REFUSE}); the clip passes through a pose in neither keyframe. Raw kept in "
                f"{workdir}. " + retry_hint(method, provider))
     figs = [_scaled(figures[k], h) for k, h in zip(range(1, slots - 1), heights)]
@@ -833,7 +833,7 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
     rows, refusing = judge_frames(ends[0], outs, ends[1], method=method, refuse=refused_for)
     read = final_reading([ends[0], *outs, ends[1]])
     report.update(refuse=refusing, judge=rows, read=read)
-    made = [("from.png", ends[0]), *((f"tween-{k}.png", o) for k, o in enumerate(outs)), ("to.png", ends[1])]
+    made = [("from.png", ends[0]), *((f"between-{k}.png", o) for k, o in enumerate(outs)), ("to.png", ends[1])]
     for row in rows:
         if row.get("kept_faults"):
             warnings.append(f"in-between {row['frame']}: {', '.join(row['kept_faults'])} found by the judge and not "
@@ -844,19 +844,19 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
                          + (f" (shows the picture of {', '.join(r['shows'])})" if r.get("shows") else "") for r in bad)
         leave = ("; a fault that is the material's own is left out with --refuse (held always refuses)"
                  if method == "video" else "")
-        refuse(f"tween: refused — the judge (held_fill.judge) refused {said}{leave}. Frames kept in {workdir / REFUSED}. "
+        refuse(f"transition: refused — the judge (held_fill.judge) refused {said}{leave}. Frames kept in {workdir / REFUSED}. "
                + retry_hint(method, provider), made)
     if read.get("nothing") or read["unlisted"]:
-        names = ["from", *(f"tween-{k}" for k in range(len(outs))), "to"]
+        names = ["from", *(f"between-{k}" for k in range(len(outs))), "to"]
         shown = [names[n] for row in read["table"].values() for run in row.get("unlistedRuns", [])
                  for n in range(run["from"], run["to"] + 1)]
-        refuse(f"tween: refused — the final reading (qa.holds.inspect): "
+        refuse(f"transition: refused — the final reading (qa.holds.inspect): "
                + (read["nothing"] if read.get("nothing") else
                   f"{', '.join(shown)} show{'s' if len(shown) == 1 else ''} the picture of the frame before")
                + f". Frames kept in {workdir / REFUSED}. " + retry_hint(method, provider), made)
-    (workdir / "tween.json").write_text(json.dumps({k: v for k, v in report.items() if k != "_ends"}, indent=2), encoding="utf-8")
+    (workdir / "transition.json").write_text(json.dumps({k: v for k, v in report.items() if k != "_ends"}, indent=2), encoding="utf-8")
     for w in warnings:
-        print(f"[tween] warning: {w}")
+        print(f"[transition] warning: {w}")
     return outs, report
 
 
@@ -894,7 +894,7 @@ def record_transition_take(run_dir: Path, request: dict[str, Any], label: str, f
 
 def _safe_label(label: str) -> str:
     if not label or "/" in label or label.startswith("."):
-        raise TweenUsage(f"tween: label must be filesystem-safe: {label!r}")
+        raise TransitionUsage(f"transition: label must be filesystem-safe: {label!r}")
     return label
 
 
@@ -905,7 +905,7 @@ def _cell(value: str | None) -> tuple[int, int] | None:
         w, h = (int(v) for v in value.lower().split("x"))
         return w, h
     except ValueError:
-        raise TweenUsage(f"tween: --cell must be WxH, got {value!r}") from None
+        raise TransitionUsage(f"transition: --cell must be WxH, got {value!r}") from None
 
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
@@ -915,7 +915,7 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--from-file", help="frame PNG, or SHEET.png:<index> with --cell")
     parser.add_argument("--to-file", help="frame PNG, or SHEET.png:<index> with --cell")
     parser.add_argument("--cell", help="cell size WxH when slicing a sheet")
-    parser.add_argument("--out-dir", type=Path, help="file mode: where frames and tween.json go")
+    parser.add_argument("--out-dir", type=Path, help="file mode: where frames and transition.json go")
     parser.add_argument("--n", type=int, default=2, help="in-betweens to draw (1..6, default 2)")
     parser.add_argument("--method", choices=METHODS, default="strip")
     parser.add_argument("--provider", choices=PROVIDERS, default=DEFAULT_PROVIDER,
@@ -941,11 +941,11 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--refuse", metavar="FAULT,FAULT",
                         help="--method video: the faults of held_fill.judge that refuse a frame (default: all, as "
                              "video-chain's); held and the final reading refuse whatever this says. The strip's "
-                             "in-betweens are judged for the record only (docs/tween.md)")
+                             "in-betweens are judged for the record only (docs/transition.md)")
     parser.add_argument("--label", help="take label (default <from>_to_<to>)")
     pipe = parser.add_argument_group("asset pipeline (file and manifest mode)")
     pipe.add_argument("--manifest", type=Path,
-                      help="batch: JSON file listing many boundaries (see docs/tween.md section 6)")
+                      help="batch: JSON file listing many boundaries (see docs/transition.md section 6)")
     pipe.add_argument("--only", action="append", default=[], help="manifest mode: run only these ids")
     pipe.add_argument("--frame-size", help="fixed output frame WxH (every frame, every boundary)")
     pipe.add_argument("--pivot", default="bottom-center",
@@ -966,20 +966,20 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
 def _run(args: argparse.Namespace) -> int:
     utf8_streams()
     if getattr(args, "manifest", None) is not None:
-        from sprite_gen.effects import tween_pipeline
+        from sprite_gen.effects import transition_pipeline
         if args.from_ref or args.to_ref or args.from_file or args.to_file:
-            raise TweenUsage("tween: --manifest replaces --from/--to/--from-file/--to-file")
+            raise TransitionUsage("transition: --manifest replaces --from/--to/--from-file/--to-file")
         if args.out_dir is None:
-            raise TweenUsage("tween: --manifest needs --out-dir")
-        return tween_pipeline.run_manifest(args.manifest, args.out_dir, force=args.force,
+            raise TransitionUsage("transition: --manifest needs --out-dir")
+        return transition_pipeline.run_manifest(args.manifest, args.out_dir, force=args.force,
                                            only=args.only)
     run_mode = args.from_ref is not None or args.to_ref is not None
     file_mode = args.from_file is not None or args.to_file is not None
     if run_mode == file_mode:
-        raise TweenUsage("tween: give either RUN_DIR --from --to, or --from-file --to-file --out-dir")
+        raise TransitionUsage("transition: give either RUN_DIR --from --to, or --from-file --to-file --out-dir")
     if run_mode:
         if not (args.run_dir and args.from_ref and args.to_ref):
-            raise TweenUsage("tween: run mode needs RUN_DIR, --from and --to")
+            raise TransitionUsage("transition: run mode needs RUN_DIR, --from and --to")
         from sprite_gen.spec.runio import load_request
         request = load_request(args.run_dir)
         (fs, fi), (ts, ti) = parse_ref(args.from_ref), parse_ref(args.to_ref)
@@ -989,8 +989,8 @@ def _run(args: argparse.Namespace) -> int:
         chroma = (ck["name"], ck["hex"], tuple(ck["rgb"]))
         desc = args.description or request.get("character", {}).get("description")
         label = _safe_label(args.label or f"{fs.replace('/', '-')}_to_{ts.replace('/', '-')}")
-        work = args.run_dir / "tween" / label
-        frames, report = make_tween(a, b, args.n, workdir=work, method=args.method, provider=args.provider,
+        work = args.run_dir / "transition" / label
+        frames, report = make_transition(a, b, args.n, workdir=work, method=args.method, provider=args.provider,
                                     anchor=args.anchor, margin=args.margin,
                                     min_endpoint_iou=args.min_endpoint_iou, description=desc, chroma=chroma,
                                     extra_refs=args.ref, refuse=args.refuse, ground=args.ground,
@@ -1000,25 +1000,25 @@ def _run(args: argparse.Namespace) -> int:
                 "method": args.method, "provider": args.provider, "endpoint_match": report["endpoint_match"],
                 "placement": report["placement"]}
         target = record_transition_take(args.run_dir, request, label, frames, meta)
-        print(f"[tween] transition take written: {target} ({fs}:{fi} -> {ts}:{ti}, n={args.n})")
+        print(f"[transition] transition take written: {target} ({fs}:{fi} -> {ts}:{ti}, n={args.n})")
         return 0
-    from sprite_gen.effects import tween_pipeline
+    from sprite_gen.effects import transition_pipeline
     if not (args.from_file and args.to_file and args.out_dir):
-        raise TweenUsage("tween: file mode needs --from-file, --to-file and --out-dir")
-    return tween_pipeline.run_single(tween_pipeline.boundary_from_args(args), args.out_dir, force=args.force)
+        raise TransitionUsage("transition: file mode needs --from-file, --to-file and --out-dir")
+    return transition_pipeline.run_single(transition_pipeline.boundary_from_args(args), args.out_dir, force=args.force)
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="sprite-gen tween", description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(prog="sprite-gen transition", description=__doc__.splitlines()[0])
     add_arguments(parser)
     return parser
 
 
 def _reporting(fn: Callable[[], int]) -> int:
-    """Print a TweenError's message to stderr; its exit code survives (0 ok, 1 refused, 2 error or usage)."""
+    """Print a TransitionError's message to stderr; its exit code survives (0 ok, 1 refused, 2 error or usage)."""
     try:
         return fn()
-    except TweenError as exc:
+    except TransitionError as exc:
         import sys
         print(exc.message, file=sys.stderr)
         raise

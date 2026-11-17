@@ -1,17 +1,20 @@
-# Cross-state in-betweens: `sprite-gen tween`
+# Cross-state in-betweens: `sprite-gen transition`
 
-> Owns: `sprite-gen tween`: frames between a frame of one state and a frame of another, drawn by a provider in one onion-skin keyframe strip or filmed as a first-last clip, judged as frames made between two are, where they stand (`--ground`), fixed frames, metadata, batches and sheets, the record and exit codes · Index: [docs/README.md](README.md)
+> Owns: `sprite-gen transition`: frames between a frame of one state and a frame of another, drawn by a provider in one onion-skin keyframe strip or filmed as a first-last clip, judged as frames made between two are, where they stand (`--ground`), fixed frames, metadata, batches and sheets, the record and exit codes · Index: [docs/README.md](README.md)
 
 `interpolate` ([frame interpolation](frame-interpolation.md)) makes one in-between inside one state's strip. Chained
 states (`attack -> idle` recovery, `skill -> idle`, an `idle -> attack` wind-up, a jump landing into a run) need
 frames between two frames of *different* states: often several, often across a large change of pose and height.
-`sprite-gen tween` (`sprite_gen/effects/tween.py`, `tween_pipeline.py`; `scripts/tween_frames.py`) draws them.
+`sprite-gen transition` (`sprite_gen/effects/transition.py`, `transition_pipeline.py`; `scripts/transition_frames.py`) makes
+those in-betweens between two states. It is not the curator's **Tween** button, which is `interpolate`'s one
+in-between inside a row. (On the fork this verb was first written as `tween`; it was renamed so as not to be
+confused with that button.)
 
-## 1. `tween` and `video-chain`
+## 1. `transition` and `video-chain`
 
 Both put frames between the last frame of one piece and the first of the next. They answer different questions:
 
-| | `tween` | `video-chain` ([video-pipeline](video-pipeline.md#9-pieces-of-clips-played-as-one-move-video-chain) section 9) |
+| | `transition` | `video-chain` ([video-pipeline](video-pipeline.md#9-pieces-of-clips-played-as-one-move-video-chain) section 9) |
 |---|---|---|
 | What it joins | two finished frames: two states of a run, two PNGs, two cells of a sheet | pieces of keyed clips on one canvas, key and rate |
 | How a frame between is made | **redrawn** by a provider: one onion-skin keyframe strip (`--method strip`), or a first-last clip filmed on Grok and sampled (`--method video`) | **made from the two frames' pixels** by RIFE (`held_fill.at_times`) |
@@ -23,22 +26,22 @@ Both put frames between the last frame of one piece and the first of the next. T
 
 Across a pose change RIFE cross-fades: what it makes between a take-off and a stride is the two drawings at part
 strength each, and the judge refuses it (`outline`, `ghost`). This is why `interpolate` retired flow-based
-interpolation for appearance changes (its module docstring, the 3-way comparison of 2026-07-17) and why `tween` redraws.
+interpolation for appearance changes (its module docstring, the 3-way comparison of 2026-07-17) and why `transition` redraws.
 `video-chain` stays the verb for joining clips whose poses meet, and its pose distance (`joins[].steps`) says how far
 apart a join's frames are.
 
 ### Pip: four joins, five ways (six on the landing)
 
-`scripts/dev/tween_chain_demo.py` runs both verbs through the CLI on the repository's Pip clips
+`scripts/dev/transition_chain_demo.py` runs both verbs through the CLI on the repository's Pip clips
 (`tests/fixtures/rife-cuts/pip-jump`, `pip-run`, put on one 560 x 784 canvas), two frames between. Two joins have one
 end off the floor (`t1`, `t2`), one has both ends on it (`t3`, the control), and `t4` is a landing inside the jump
 clip, whose own frames 8 and 10 sit a third and two thirds of the way. The provider draws anew on every call, so
-each tween row ran three times on grok (`delivered` counts the tries); the chain rows run once (RIFE gives the same
+each transition row ran three times on grok (`delivered` counts the tries); the chain rows run once (RIFE gives the same
 frames every run). "Up" is each frame's height off the lower end's floor: A, the two frames between, B. On `t4` a
 sixth row places the strip's in-betweens where the clip's own frames are (`--places`, section 5), as a caller who
 has the motion does.
 
-| Join (`video-chain` pose distance) | `tween` strip `--ground shared` | `tween` strip (`--ground auto`, default) | `tween` video (`auto`) | `video-chain --refuse held` | `video-chain` (default) |
+| Join (`video-chain` pose distance) | `transition` strip `--ground shared` | `transition` strip (`--ground auto`, default) | `transition` video (`auto`) | `video-chain --refuse held` | `video-chain` (default) |
 |---|---|---|---|---|---|
 | `t1` jump:28, a take-off 130 px up, into run:0 (2.19 steps) | 3/3 delivered; ends IoU 0.73 to 0.98; up 0, 0, 0, 0: the take-off stands on the floor | **3/3**; ends 0.976 to 0.981 / 0.974 to 0.975; **up 117, 78, 39, 0** | 1/3 (0.967 / 0.868); refused: the judge (`outline`), in-betweens drawn 1.9x the ends | passed, 17.4 s; up 117, 52, 14, 0; kept `outline`, `ghost` | failed, 132.3 s: `ghost`, `outline`; up 118, 118, 1, 0 (frames shown again) |
 | `t2` run:25 into jump:0, rising 164 px up (4.56 steps) | 2/3 (one refused, ends 0.53 / 0.71); up 0, 0, 0, 0 | **3/3**; ends 0.971 to 0.974 / 0.799 to 0.981; **up 0, 51, 102, 153** | 1/3 (0.962 / 0.934); refused twice: consecutive frames jump (IoU 0.28, 0.17) | passed, 17.3 s; up 0, 4, 104, 153; kept `outline`, `ghost` | failed, 167.4 s: `doubled`, `ghost`, `outline` |
@@ -51,18 +54,18 @@ Over the four joins: strip `auto` 12 of 12 tries delivered, strip `shared` 10 of
 of three tries passed.
 
 <p align="center">
-  <img src="assets/tween-vs-chain-t4.gif" width="760" alt="t4, a fall into the landing: tween strip --ground shared, tween strip (auto), tween strip --places, tween video, video-chain --refuse held and the clip's own frames, playing A, the two frames between, B" /><br />
+  <img src="assets/transition-vs-chain-t4.gif" width="760" alt="t4, a fall into the landing: transition strip --ground shared, transition strip (auto), transition strip --places, transition video, video-chain --refuse held and the clip's own frames, playing A, the two frames between, B" /><br />
   <sub>t4, jump:6 (falling) into jump:12 (landed): the strip on the straight line, the strip placed where the clip's frames 8
   and 10 are (<code>--places</code>), and the clip's own frames. A grey line on the lower end's floor.</sub>
 </p>
 
 <p align="center">
-  <img src="assets/tween-vs-chain-t1.png" width="760" alt="t1: the four frames of each of the five rows on one sheet" /><br />
+  <img src="assets/transition-vs-chain-t1.png" width="760" alt="t1: the four frames of each of the five rows on one sheet" /><br />
   <sub>t1, a take-off into a stride, every row's frames; a refused row on red, as it was left in <code>refused/</code> or
-  <code>keyed.refused/</code>. The same for <a href="assets/tween-vs-chain-t2.png">t2</a>
-  (<a href="assets/tween-vs-chain-t2.gif">GIF</a>), <a href="assets/tween-vs-chain-t3.png">t3</a>
-  (<a href="assets/tween-vs-chain-t3.gif">GIF</a>), <a href="assets/tween-vs-chain-t4.png">t4</a> and the
-  <a href="assets/tween-vs-chain-t1.gif">t1 GIF</a>.</sub>
+  <code>keyed.refused/</code>. The same for <a href="assets/transition-vs-chain-t2.png">t2</a>
+  (<a href="assets/transition-vs-chain-t2.gif">GIF</a>), <a href="assets/transition-vs-chain-t3.png">t3</a>
+  (<a href="assets/transition-vs-chain-t3.gif">GIF</a>), <a href="assets/transition-vs-chain-t4.png">t4</a> and the
+  <a href="assets/transition-vs-chain-t1.gif">t1 GIF</a>.</sub>
 </p>
 
 What the run shows:
@@ -79,7 +82,7 @@ What the run shows:
 - **Where the frames go is the caller's.** On `t4` the clip has landed by two thirds of the way (2 px up). With
   nothing said, the strip's in-betweens are on the straight line between the ends (56 px up there); RIFE, moving the
   clip's own pixels, is at 0. Given the clip's places (`--places`), the strip's frames are where the clip's are (0 px
-  off, every try) and its poses are still drawn, not blended. tween draws the poses; the caller who knows the motion
+  off, every try) and its poses are still drawn, not blended. transition draws the poses; the caller who knows the motion
   says where they are (section 5).
 - **The clip is the least sure** (2 of 12): a first-last clip passes through poses in neither keyframe, zooms, or
   smears, and the judge and the checks refuse it.
@@ -88,11 +91,11 @@ What the run shows:
 
 ```bash
 # run mode: endpoints from two states of a run (negative index = from the end)
-sprite-gen tween <run> --from attack:-1 --to idle:0 --n 2 [--label attack_recover]
+sprite-gen transition <run> --from attack:-1 --to idle:0 --n 2 [--label attack_recover]
 # file mode: endpoints from PNGs, or from cells of a sheet
-sprite-gen tween --from-file a.png --to-file sheet.png:0 --cell 448x448 --n 3 --out-dir out/
+sprite-gen transition --from-file a.png --to-file sheet.png:0 --cell 448x448 --n 3 --out-dir out/
 # a take-off into a run: the take-off's height off the floor is kept (--ground auto, the default)
-sprite-gen tween --from-file jump/keyed/frame-0029.png --to-file run/keyed/frame-0001.png --out-dir t1/
+sprite-gen transition --from-file jump/keyed/frame-0029.png --to-file run/keyed/frame-0001.png --out-dir t1/
 ```
 
 | flag | meaning |
@@ -100,7 +103,7 @@ sprite-gen tween --from-file jump/keyed/frame-0029.png --to-file run/keyed/frame
 | `--n` | in-betweens, 1..6 (default 2), all in one call |
 | `--method strip` (default) | one keyframe strip: slot 1 = A, last slot = B, grey onion-skin ghosts of both in the slots between; the provider fills every slot at once |
 | `--method video` | films a first-last clip through `video --image --last-frame` (grok), samples N+2 frames evenly |
-| `--provider codex\|grok` | the one provider that draws the strip (default `grok`, `tween.DEFAULT_PROVIDER`; the names are `gen.base`'s); no retry on another (No silent fallback). `--method video` films on grok and refuses another |
+| `--provider codex\|grok` | the one provider that draws the strip (default `grok`, `transition.DEFAULT_PROVIDER`; the names are `gen.base`'s); no retry on another (No silent fallback). `--method video` films on grok and refuses another |
 | `--refuse FAULT,FAULT` | `--method video`: the faults of the judge that refuse a frame (default: all); section 4 |
 | `--places FILE` | where each in-between is placed, given by the caller (default: the straight line between the ends); section 5 |
 | `--ground auto\|source\|shared` | where the delivered frames stand (default `auto`: an end's height off the floor kept where the two ends' differ); the provider draws on one floor either way; section 5 |
@@ -114,8 +117,8 @@ sprite-gen tween --from-file jump/keyed/frame-0029.png --to-file run/keyed/frame
 
 - **The ends.** The drawn slot 1 and last slot (the clip's first and last frames) are compared with A and B:
   silhouette IoU at the keyframes' height, foot anchors aligned, and the scale the provider drew the two ends at must
-  agree (`scale_agree >= 0.85`). Under either bar the tween is refused with the numbers; `keyframe-strip.png`,
-  `raw.png` (or `clip.mp4`, `clip-frames/`) and `tween.json` stay.
+  agree (`scale_agree >= 0.85`). Under either bar the transition is refused with the numbers; `keyframe-strip.png`,
+  `raw.png` (or `clip.mp4`, `clip-frames/`) and `transition.json` stay.
 - **Scale and feet.** Every in-between is rescaled to the lerped keyframe height (A's to B's) and its foot anchor
   goes on the anchor column. How big the provider drew it, against the lerp of the two drawn endpoint heights, is
   `frame_scale.drawn_vs_endpoints`; outside 0.85..1.18 it is a warning for the strip and a refusal for video (a clip
@@ -148,9 +151,9 @@ before (`held_fill.judge`, unchanged; its faults are [loop repair](loop-repair.m
   frame between, however it was made. `--refuse` with the strip is a usage error, not an option that does nothing.
 - **The final reading.** The frames as delivered, ends in, are read as `inspect-holds` reads a delivery
   (`qa.holds.inspect` on `alpha_figures`): a frame showing the picture of the frame before it, on no list, refuses the
-  tween, whatever `--refuse` says. A tween has no hold meant.
+  transition, whatever `--refuse` says. A transition has no hold meant.
 
-`tween.json` records `refuse` (the faults that refused for this run), `judge` (each in-between's `frame`, `t`,
+`transition.json` records `refuse` (the faults that refused for this run), `judge` (each in-between's `frame`, `t`,
 `faults`, `kept_faults`, `shows` and its `judged` values) and `read` (the final reading), as `chain.report.json` does.
 
 ## 5. Where the frames stand: `--ground`
@@ -162,19 +165,19 @@ frames stand, once they are drawn:
 
 | `--ground` | the delivered frames | when |
 |---|---|---|
-| `auto` (default) | `source` where the two ends' heights off the floor differ by 5 % of the taller end or more (`tween.AIRBORNE_FRACTION`), else `shared` | file mode on one canvas height; run mode and two canvas heights are `shared` |
+| `auto` (default) | `source` where the two ends' heights off the floor differ by 5 % of the taller end or more (`transition.AIRBORNE_FRACTION`), else `shared` | file mode on one canvas height; run mode and two canvas heights are `shared` |
 | `source` | each end as high off the floor as on its source canvas, each in-between at the lerp of the two heights (or where `--places` says) | file mode, one canvas height (a usage error otherwise) |
 | `shared` | every foot on one ground row: an end off the floor (a take-off, a fall) is delivered standing | anywhere |
 
 A frame's height is the rows under its lowest opaque row on its source canvas (`Endpoint.lift`), whose bottom row is
 the floor, as `video-set` films a set's states. Two ends within 5 % of each other (a stride and a stand, both on the
 floor with a few rows of padding) are `shared` under `auto`, as before. The output canvas grows to hold the height;
-a fixed `--frame-size` keeps the floor on the pivot row. `tween.json` records `ground` (`asked`, `used` and `why`) and
+a fixed `--frame-size` keeps the floor on the pivot row. `transition.json` records `ground` (`asked`, `used` and `why`) and
 `lift_px` (A, the in-betweens, B).
 
 ### Where the in-betweens are placed: `--places`
 
-tween decides no motion and no place: no fall curve, no easing, no velocity, no physics. As with `video-chain`, the
+transition decides no motion and no place: no fall curve, no easing, no velocity, no physics. As with `video-chain`, the
 caller who knows the scene says where and when, and the engine makes the frames.
 
 - **Without `--places`** (`placement: linear`) each in-between is on the **straight line** from A's place to B's, at
@@ -200,9 +203,9 @@ lowest opaque row):
   the height off the floor, and `{"dx": 0, "dy": -106}` stands an in-between 106 px up, as a frame 106 px off its
   source canvas's floor is.
 
-Read off a clip's own frames (what `scripts/dev/tween_chain_demo.py` does on `t4`): `dy` is minus each frame's rows
+Read off a clip's own frames (what `scripts/dev/transition_chain_demo.py` does on `t4`): `dy` is minus each frame's rows
 under its lowest opaque row; `dx` is its anchor's x minus the straight line between the two ends' anchors at that
-frame's time, since tween stands both ends on one anchor column.
+frame's time, since transition stands both ends on one anchor column.
 
 Refused as a usage error (exit 2) before anything is drawn or filmed: a file that is missing or not JSON; anything but
 a non-empty list of `{"dx": number, "dy": number}` (no other keys, no booleans, no NaN); a count other than `--n`; a
@@ -211,7 +214,7 @@ reference canvas; `|dx|` of the canvas's width or more. The reference canvas is 
 (the larger of the two) and the raw strip's cell in run mode. The output canvas grows to hold every placed frame, as
 it does for the heights, and no frame is clipped. `--places` works with both methods, in file mode, run mode (the take's
 `transition.placement`) and a manifest (`"places"`: a file relative to the manifest, or the list itself; its values
-are in the cache's input hash). `tween.json` records `placement`: `kind` (`linear` or `places`), `from` (the file, the
+are in the cache's input hash). `transition.json` records `placement`: `kind` (`linear` or `places`), `from` (the file, the
 object's `from`, or `inline`; null for `linear`) and the `places` used, `{dx, dy}` per in-between (for `linear`, the
 line's), beside `lift_px`.
 
@@ -220,14 +223,14 @@ motion"); a caller can read the places off it.
 
 ## 6. Fixed frames, metadata, batches, sheets
 
-File mode and `--manifest` mode add an engine-facing layer (`sprite_gen/effects/tween_pipeline.py`):
+File mode and `--manifest` mode add an engine-facing layer (`sprite_gen/effects/transition_pipeline.py`):
 
 ```bash
 # one boundary, fixed 256x256 frames, feet on the bottom-centre pixel, a sheet for the packer
-sprite-gen tween --from-file a.png --to-file b.png --n 2 --out-dir out/ \
+sprite-gen transition --from-file a.png --to-file b.png --n 2 --out-dir out/ \
   --frame-size 256x256 --pivot bottom-center --fps 12 --include-ends --export sheet
 # many boundaries in one run; re-running skips what is already done
-sprite-gen tween --manifest tweens.json --out-dir out/ [--only id ...] [--force]
+sprite-gen transition --manifest transitions.json --out-dir out/ [--only id ...] [--force]
 ```
 
 | flag | meaning |
@@ -241,8 +244,8 @@ sprite-gen tween --manifest tweens.json --out-dir out/ [--only id ...] [--force]
 | `--export sheet` | also write `sheet.png` + `sheet.json`, one row per boundary |
 | `--force` | redo a boundary even when its cached result is valid |
 
-`tween.json` (`schema: sprite-gen-tween/2`) adds `id`, `input_hash`, `frame_size`, `pivot` (`x, y` px and normalised
-`nx, ny`), `fit_scale`, `fps`, `loop` and `frames: [{index, file, role (from|tween|to), w, h, pivot, duration_ms}]`.
+`transition.json` (`schema: sprite-gen-transition/2`) adds `id`, `input_hash`, `frame_size`, `pivot` (`x, y` px and normalised
+`nx, ny`), `fit_scale`, `fps`, `loop` and `frames: [{index, file, role (from|between|to), w, h, pivot, duration_ms}]`.
 `sheet.json` uses the `cell`, `animation.rows.<id>.{row, frames, durations_ms, loop}` and
 `frame_layout.rows.<id>: [{x, y, w, h}]` shape of `compose`'s `manifest.json`, so a loader for compose output reads it.
 
@@ -263,31 +266,31 @@ Every boundary option of file mode is accepted per entry (`n, method, provider, 
 description, chroma, refs, cell, frame_size, pivot, fit, resample, fps, durations_ms, include_ends, loop, refuse,
 ground, places`); an unknown key is a usage error. Each boundary lands in `<out>/<id>/`, one failure does not stop the rest,
 and `<out>/batch.json` lists every id with `status` (`ok`, `cached`, `refused`, `error`, `usage`). A boundary is
-skipped when its `tween.json` says `ok` for the same `input_hash` (endpoint and ref bytes plus every option that
-changes the output) and its frame files exist; `tween.json` is written last and atomically, so an interrupted run
+skipped when its `transition.json` says `ok` for the same `input_hash` (endpoint and ref bytes plus every option that
+changes the output) and its frame files exist; `transition.json` is written last and atomically, so an interrupted run
 redoes that boundary.
 
 ## 7. Outputs, the record and exit codes
 
 - **Run mode** writes one take strip on the destination state (`raw/<to>.takes/<label>.png`) with
   `takes[].transition = {from_state, from_index, to_state, to_index, n, method, provider, endpoint_match, placement}`;
-  re-running a label overwrites it. Its working files are in `<run>/tween/<label>/`.
-- **File mode** writes `from.png`, `tween-<k>.png`, `to.png` (RGBA, one canvas) and `tween.json` in `--out-dir`.
+  re-running a label overwrites it. Its working files are in `<run>/transition/<label>/`.
+- **File mode** writes `from.png`, `between-<k>.png`, `to.png` (RGBA, one canvas) and `transition.json` in `--out-dir`.
 - **The run contract** ([run-contract](run-contract.md)), as the frame verbs keep it: an input the run would write
   over or delete (`--from-file` as `<out>/from.png`, a `--ref` inside the outputs) is refused before anything is made
   (`runio.refuse_overlap`, a usage error). An earlier run's frames and sheet are removed before this run makes its own,
   so a refused run hands over none; a refused run leaves the frames it made in `<out>/refused/` (`refused_dir`), as a
   refused chain leaves `keyed.refused/`.
-- **Status.** `tween.json` always carries `status`: `ok`, `refused` (with `error`), or `error` when the provider
-  call itself failed (timeout, auth, crash). It carries `producer` (`evidence.engine_identity`, and `tween_sha256` of
-  the tween modules, which that does not hash) and `source` (`evidence.source_identity` of the two endpoint files).
+- **Status.** `transition.json` always carries `status`: `ok`, `refused` (with `error`), or `error` when the provider
+  call itself failed (timeout, auth, crash). It carries `producer` (`evidence.engine_identity`, and `transition_sha256` of
+  the transition modules, which that does not hash) and `source` (`evidence.source_identity` of the two endpoint files).
 - **Exit codes**, as `video-chain`'s and `inspect-holds --gate`'s: `0` delivered (or cached), `1` refused (the ends
   drifted, the judge or the final reading refused, a set that does not fit), `2` an error (the provider, a usage
   error). A batch returns the most severe (2 over 1 over 0).
 
 ## 8. What it takes from sprite-gen
 
-`tween` uses sprite-gen's existing rules where they answer a question the verb asks. A part that is its own says why.
+`transition` uses sprite-gen's existing rules where they answer a question the verb asks. A part that is its own says why.
 
 | Part | Taken from | Owner of the rule |
 |---|---|---|
@@ -305,7 +308,7 @@ redoes that boundary.
 
 | Part | Why it is new |
 |---|---|
-| The onion-skin keyframe strip (`plan_layout`, `keyframe_strip`, `tween_prompt`) and its aspect ratios (`STRIP_ASPECTS`) | `interpolate` sends two frames for one in-between; n in-betweens in one call need one image that holds all of them, padded to a ratio the providers accept. |
+| The onion-skin keyframe strip (`plan_layout`, `keyframe_strip`, `transition_prompt`) and its aspect ratios (`STRIP_ASPECTS`) | `interpolate` sends two frames for one in-between; n in-betweens in one call need one image that holds all of them, padded to a ratio the providers accept. |
 | Slicing by component with the ownership rule (`slice_slots`) | `extract_component_images` cuts a strip into a known count; a drawn strip's props reach over slot borders and belong to the nearest figure. |
 | The endpoint check (`silhouette_iou`, `scale_agree`) | Nothing else compares a redrawn frame with the frame it was given. |
 | The lerped height and the per-frame scale (`frame_scale`) | The ends of a cross-state join differ in height (a crouch into a stand); a frame made between two frames' pixels never changes size. |
@@ -313,7 +316,7 @@ redoes that boundary.
 | Where a frame stands (`--ground`, `Endpoint.lift`) | No verb puts frames of two canvases' states on one floor. |
 | Where an in-between is placed (`--places`, `read_places`) | `video-chain --places` places frames in time on a chain; nothing places a drawn frame in space. Same reading: the caller says, the verb refuses what is off before it makes anything. |
 | The strip judged for the record only | `held_fill.judge`'s bars were measured on frames made from the ends' pixels; a redrawn frame differs from both by design. `held` and the final reading need no such bar. |
-| Fixed frames, the metadata, batches and the cache (`tween_pipeline`) | Transition frames are delivered as engine assets (one canvas, one pivot) and many boundaries are made at once; nothing else delivers frames that way. |
+| Fixed frames, the metadata, batches and the cache (`transition_pipeline`) | Transition frames are delivered as engine assets (one canvas, one pivot) and many boundaries are made at once; nothing else delivers frames that way. |
 
 ## Related
 

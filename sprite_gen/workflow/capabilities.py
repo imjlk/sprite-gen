@@ -24,7 +24,7 @@ KIND = "sprite-gen-capabilities"
 # The providers each verb may call over HTTP (`address.PROVIDERS`); a verb not named calls none. `gen`, `gen-set`
 # and `logo` reach OpenAI by `--provider openai` and xAI by `--provider grok` (codex runs on its own login,
 # `base.logins_on`); `curation` reaches xAI by its reroll and in-between buttons (codex or grok); `video-set` makes
-# each clip with `video` and checks a side view's facing on Grok; `tween` draws its strip on grok (codex on its own
+# each clip with `video` and checks a side view's facing on Grok; `transition` draws its strip on grok (codex on its own
 # login) and films `--method video` with `video`.
 PROVIDER_CALLS: dict[str, tuple[str, ...]] = {
     "gen": (address.OPENAI, address.XAI),
@@ -37,7 +37,7 @@ PROVIDER_CALLS: dict[str, tuple[str, ...]] = {
     "video-edit": (address.XAI,),
     "video-resume": (address.XAI,),
     "video-set": (address.XAI,),
-    "tween": (address.XAI,),
+    "transition": (address.XAI,),
 }
 # Verbs that call a provider and buy nothing: `video-resume` polls and downloads a clip an earlier run bought.
 NO_PURCHASE = frozenset({"video-resume"})

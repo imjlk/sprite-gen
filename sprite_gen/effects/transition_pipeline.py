@@ -1,28 +1,28 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Asset-pipeline layer over `sprite-gen tween`: fixed frames, engine metadata, batches, sheets.
+"""Asset-pipeline layer over `sprite-gen transition`: fixed frames, engine metadata, batches, sheets.
 
-`make_tween` returns in-betweens on a canvas sized to that one transition. A game pipeline
+`make_transition` returns in-betweens on a canvas sized to that one transition. A game pipeline
 needs more than that, and this module adds it without touching the drawing itself:
 
 * **fixed frames** (`frame_size`, `pivot`, `fit`): every frame of every boundary on one
   canvas size with the foot anchor on one pixel, so frames from different transitions and
   from the base sheet are interchangeable at runtime. A set that does not fit is refused
   (`fit=error`) or shrunk uniformly about the anchor (`fit=shrink`); never clipped.
-* **metadata** (`tween.json`, schema `sprite-gen-tween/2`): per-frame file, role, size,
+* **metadata** (`transition.json`, schema `sprite-gen-transition/2`): per-frame file, role, size,
   pivot and duration, plus status, so an engine or atlas packer reads one file.
 * **sheets** (`export=sheet`): `sheet.png` + `sheet.json` with one row per boundary, in the
   same `animation.rows` / `frame_layout.rows` shape `compose` writes to `manifest.json`.
 * **batches** (`--manifest`): many boundaries in one run; each lands in `<out>/<id>/`,
   `batch.json` summarises them, and one failure does not stop the rest.
-* **resumable**: a boundary whose `tween.json` says `ok` for the same input hash (endpoint
+* **resumable**: a boundary whose `transition.json` says `ok` for the same input hash (endpoint
   bytes + every option that changes the output) is skipped; `--force` redoes it.
 
 The run contract (docs/run-contract.md) as the frame verbs keep it: an input that the run would overwrite or delete
 (`--from-file` as `<out>/from.png`) is refused before anything is made (`runio.refuse_overlap`); an earlier run's
 frames are removed before this run makes its own, so a refused run hands over none; a refused run leaves the frames
-it made in `<out>/refused/` (`TweenRefused.frames`). Exit codes as `video-chain`'s: 0 all ok (or cached), 1 refused,
+it made in `<out>/refused/` (`TransitionRefused.frames`). Exit codes as `video-chain`'s: 0 all ok (or cached), 1 refused,
 2 an error (a usage error among them). In a batch the most severe code wins: error (2) over refused (1) over ok (0).
-`tween.json` carries the engine's fingerprint (`producer`: `evidence.engine_identity` and the tween modules' own)
+`transition.json` carries the engine's fingerprint (`producer`: `evidence.engine_identity` and the transition modules' own)
 and the endpoint files' (`source`: `evidence.source_identity`)."""
 
 from __future__ import annotations
@@ -35,15 +35,15 @@ from typing import Any
 
 from PIL import Image
 
-from sprite_gen.effects import tween as T
+from sprite_gen.effects import transition as T
 from sprite_gen.spec.runio import refuse_overlap
 from sprite_gen.video import evidence
 
-SCHEMA = "sprite-gen-tween/2"
+SCHEMA = "sprite-gen-transition/2"
 CACHE_VERSION = 3  # 2: refused frames kept, judge and final reading on the record, --refuse and --ground hashed;
 # 3: the strip is always drawn on one ground row, --ground auto (default) and the ground record; --places (its values)
 # What a run writes in its folder, past the frames (`_delivered`): it replaces each, so none of them is an input.
-WORK_FILES = ("tween.json", "prompt.txt", "keyframe-strip.png", "raw.png", "first.png", "last.png", "clip.mp4",
+WORK_FILES = ("transition.json", "prompt.txt", "keyframe-strip.png", "raw.png", "first.png", "last.png", "clip.mp4",
               "clip-frames", T.REFUSED, "sheet.png", "sheet.json")
 FIELDS = {  # boundary option -> default
     "from_file": None, "to_file": None, "cell": None, "n": 2, "method": "strip", "provider": T.DEFAULT_PROVIDER,
@@ -67,9 +67,9 @@ def _size(value: Any, what: str) -> tuple[int, int] | None:
         try:
             w, h = (int(v) for v in str(value).lower().split("x"))
         except ValueError:
-            raise T.TweenUsage(f"tween: {what} must be WxH, got {value!r}") from None
+            raise T.TransitionUsage(f"transition: {what} must be WxH, got {value!r}") from None
     if w <= 0 or h <= 0:
-        raise T.TweenUsage(f"tween: {what} must be positive, got {value!r}")
+        raise T.TransitionUsage(f"transition: {what} must be positive, got {value!r}")
     return w, h
 
 
@@ -80,31 +80,31 @@ def _durations(value: Any) -> list[int] | None:
     try:
         out = [int(v) for v in items]
     except ValueError:
-        raise T.TweenUsage(f"tween: durations_ms must be integers, got {value!r}") from None
+        raise T.TransitionUsage(f"transition: durations_ms must be integers, got {value!r}") from None
     if any(d <= 0 for d in out):
-        raise T.TweenUsage("tween: durations_ms must be positive")
+        raise T.TransitionUsage("transition: durations_ms must be positive")
     return out
 
 
 def boundary_from_args(args) -> dict[str, Any]:
     cfg = {k: getattr(args, k, v) for k, v in FIELDS.items() if k != "refs"}
     cfg["refs"] = [str(p) for p in (args.ref or [])]
-    cfg["id"] = args.label or "tween"
+    cfg["id"] = args.label or "transition"
     return normalise(cfg, Path.cwd())
 
 
 def normalise(cfg: dict[str, Any], base: Path) -> dict[str, Any]:
     unknown = set(cfg) - set(FIELDS) - {"id"}
     if unknown:
-        raise T.TweenUsage(f"tween: unknown boundary option(s) {sorted(unknown)}")
+        raise T.TransitionUsage(f"transition: unknown boundary option(s) {sorted(unknown)}")
     out = {**FIELDS, **cfg}
     bid = str(out.get("id") or "")
     if not bid or "/" in bid or "\\" in bid or bid.startswith("."):
-        raise T.TweenUsage(f"tween: boundary id must be a filesystem-safe name, got {bid!r}")
+        raise T.TransitionUsage(f"transition: boundary id must be a filesystem-safe name, got {bid!r}")
     out["id"] = bid
     for key in ("from_file", "to_file"):
         if not out[key]:
-            raise T.TweenUsage(f"tween: boundary {bid!r} needs {key}")
+            raise T.TransitionUsage(f"transition: boundary {bid!r} needs {key}")
         spec = str(out[key])
         head, sep, tail = spec.rpartition(":")
         path, suffix = (head, sep + tail) if sep and tail.lstrip("-").isdigit() else (spec, "")
@@ -114,21 +114,21 @@ def normalise(cfg: dict[str, Any], base: Path) -> dict[str, Any]:
     out["frame_size"] = _size(out["frame_size"], "frame_size")
     out["durations_ms"] = _durations(out["durations_ms"])
     if out["fit"] not in ("error", "shrink"):
-        raise T.TweenUsage(f"tween: fit must be error or shrink, got {out['fit']!r}")
+        raise T.TransitionUsage(f"transition: fit must be error or shrink, got {out['fit']!r}")
     if out["resample"] not in ("lanczos", "nearest"):
-        raise T.TweenUsage(f"tween: resample must be lanczos or nearest, got {out['resample']!r}")
+        raise T.TransitionUsage(f"transition: resample must be lanczos or nearest, got {out['resample']!r}")
     if out["export"] not in ("none", "sheet"):
-        raise T.TweenUsage(f"tween: export must be none or sheet, got {out['export']!r}")
+        raise T.TransitionUsage(f"transition: export must be none or sheet, got {out['export']!r}")
     if out["ground"] not in T.GROUNDS:
-        raise T.TweenUsage(f"tween: ground must be one of {', '.join(T.GROUNDS)}, got {out['ground']!r}")
+        raise T.TransitionUsage(f"transition: ground must be one of {', '.join(T.GROUNDS)}, got {out['ground']!r}")
     out["places"] = T.read_places(out["places"], base)  # a file (relative to the manifest), or the places themselves
     if out["places"] is not None and len(out["places"]["places"]) != int(out["n"]):
-        raise T.TweenUsage(f"tween: boundary {bid!r}: places gives {len(out['places']['places'])} place(s) for n "
+        raise T.TransitionUsage(f"transition: boundary {bid!r}: places gives {len(out['places']['places'])} place(s) for n "
                            f"{out['n']} in-betweens; give one per in-between")
     refuse = T.read_refuse(out["refuse"])
     out["refuse"] = None if refuse is None else sorted(refuse)
     if float(out["fps"]) <= 0:
-        raise T.TweenUsage("tween: fps must be positive")
+        raise T.TransitionUsage("transition: fps must be positive")
     return out
 
 
@@ -139,9 +139,9 @@ def _pivot(spec: str, size: tuple[int, int]) -> tuple[int, int]:
     try:
         x, y = (int(v) for v in str(spec).split(","))
     except ValueError:
-        raise T.TweenUsage(f"tween: pivot must be bottom-center or X,Y, got {spec!r}") from None
+        raise T.TransitionUsage(f"transition: pivot must be bottom-center or X,Y, got {spec!r}") from None
     if not (0 <= x <= w and 0 <= y <= h):
-        raise T.TweenUsage(f"tween: pivot {spec} lies outside the {w}x{h} frame")
+        raise T.TransitionUsage(f"transition: pivot {spec} lies outside the {w}x{h} frame")
     return x, y
 
 
@@ -152,16 +152,16 @@ def _path(spec: str) -> Path:
 
 
 def producer() -> dict[str, str]:
-    """`evidence.engine_identity` (the video and frames code the judge and the readings run on) and the tween modules',
+    """`evidence.engine_identity` (the video and frames code the judge and the readings run on) and the transition modules',
     which it does not hash."""
     here = Path(__file__).resolve()
-    files = [here.with_name("tween.py"), here]
+    files = [here.with_name("transition.py"), here]
     return {**evidence.engine_identity(),
-            "tween_sha256": evidence.digest(b"".join(p.name.encode() + b"\0" + p.read_bytes() for p in files))}
+            "transition_sha256": evidence.digest(b"".join(p.name.encode() + b"\0" + p.read_bytes() for p in files))}
 
 
 def _delivered(out_dir: Path) -> list[Path]:
-    return [p for p in (out_dir / "from.png", out_dir / "to.png", *sorted(out_dir.glob("tween-*.png")))]
+    return [p for p in (out_dir / "from.png", out_dir / "to.png", *sorted(out_dir.glob("between-*.png")))]
 
 
 def guard(cfg: dict[str, Any], out_dir: Path) -> None:
@@ -170,14 +170,14 @@ def guard(cfg: dict[str, Any], out_dir: Path) -> None:
               **{f"--ref {r}": Path(r) for r in cfg["refs"]},
               **({"--places": Path(cfg["places"]["file"])} if cfg.get("places") and cfg["places"]["file"] else {})}
     outputs = {f"{p.name} in --out-dir": p for p in
-               [*_delivered(out_dir), *(out_dir / f"tween-{k}.png" for k in range(int(cfg["n"]))),
+               [*_delivered(out_dir), *(out_dir / f"between-{k}.png" for k in range(int(cfg["n"]))),
                 *(out_dir / w for w in WORK_FILES)]}
     try:
-        refuse_overlap(inputs, outputs, verb="tween")
-    except T.TweenError:
+        refuse_overlap(inputs, outputs, verb="transition")
+    except T.TransitionError:
         raise
     except SystemExit as exc:
-        raise T.TweenUsage(str(exc.code)) from None
+        raise T.TransitionUsage(str(exc.code)) from None
 
 
 def withdraw(out_dir: Path) -> None:
@@ -188,7 +188,7 @@ def withdraw(out_dir: Path) -> None:
 
 
 def input_hash(cfg: dict[str, Any]) -> str:
-    h = hashlib.sha256(f"tween-cache/{CACHE_VERSION}".encode())
+    h = hashlib.sha256(f"transition-cache/{CACHE_VERSION}".encode())
     h.update(json.dumps({k: cfg[k] for k in _HASHED}, sort_keys=True, default=str).encode())
     for spec in (cfg["from_file"], cfg["to_file"], *cfg["refs"]):
         path = _path(spec)
@@ -210,15 +210,15 @@ def fit_frames(canvases: list[Image.Image], anchor: tuple[int, int], size: tuple
             union = box if union is None else (min(union[0], box[0]), min(union[1], box[1]),
                                                max(union[2], box[2]), max(union[3], box[3]))
     if union is None:
-        raise T.TweenRefused("tween: every frame is empty")
+        raise T.TransitionRefused("transition: every frame is empty")
     ax, ay = anchor
     need = (ax - union[0], union[2] - ax, ay - union[1], union[3] - ay)   # left, right, up, down
     room = (pivot[0], size[0] - pivot[0], pivot[1], size[1] - pivot[1])
     ratios = [r / n for n, r in zip(need, room) if n > 0]
     scale = min([1.0, *ratios])
     if scale < 1.0 and fit != "shrink":
-        raise T.TweenRefused(
-            f"tween: refused — the frames need {need[0] + need[1]}x{need[2] + need[3]} px around the anchor "
+        raise T.TransitionRefused(
+            f"transition: refused — the frames need {need[0] + need[1]}x{need[2] + need[3]} px around the anchor "
             f"(left {need[0]}, right {need[1]}, up {need[2]}, down {need[3]}) but --frame-size "
             f"{size[0]}x{size[1]} with pivot {pivot[0]},{pivot[1]} leaves {room}; enlarge the frame, move the "
             "pivot, or pass --fit shrink")
@@ -250,7 +250,7 @@ def sheet(rows: list[tuple[str, list[Image.Image], list[int], bool]], size: tupl
             rects.append({"x": c * w, "y": r * h, "w": w, "h": h})
         layout[rid] = rects
         animation[rid] = {"row": r, "frames": len(frames), "durations_ms": durations, "loop": loop}
-    meta = {"kind": "sprite-gen-tween-sheet", "schema": SCHEMA, "image": "sheet.png",
+    meta = {"kind": "sprite-gen-transition-sheet", "schema": SCHEMA, "image": "sheet.png",
             "size": [atlas.width, atlas.height], "cell": {"width": w, "height": h},
             "pivot": {"x": pivot[0], "y": pivot[1], "nx": round(pivot[0] / w, 4), "ny": round(pivot[1] / h, 4)},
             "animation": {"rows": animation}, "frame_layout": {"rows": layout}}
@@ -267,7 +267,7 @@ def _write_json(path: Path, data: dict[str, Any]) -> None:
 
 def _cached(out_dir: Path, digest: str) -> dict[str, Any] | None:
     try:
-        old = json.loads((out_dir / "tween.json").read_text(encoding="utf-8"))
+        old = json.loads((out_dir / "transition.json").read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
     if old.get("status") != "ok" or old.get("input_hash") != digest:
@@ -281,24 +281,24 @@ def run_boundary(cfg: dict[str, Any], out_dir: Path, *, force: bool = False,
                  generator: T.Generator | None = None, video_runner: T.VideoRunner | None = None
                  ) -> dict[str, Any]:
     """Run one boundary into `out_dir`. Never raises for refusals or provider errors: returns
-    {id, status: ok|cached|refused|error, exit, out_dir, report}. Usage errors raise TweenUsage."""
+    {id, status: ok|cached|refused|error, exit, out_dir, report}. Usage errors raise TransitionUsage."""
     guard(cfg, out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     digest = input_hash(cfg)
     if not force:
         old = _cached(out_dir, digest)
         if old is not None:
-            print(f"[tween] {cfg['id']}: up to date ({digest}), skipped")
+            print(f"[transition] {cfg['id']}: up to date ({digest}), skipped")
             return {"id": cfg["id"], "status": "cached", "exit": T.EXIT_OK, "out_dir": str(out_dir), "report": old}
     withdraw(out_dir)
     name, _, hexv = str(cfg["chroma"]).partition(":")
     try:
         rgb = tuple(int(hexv.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4))
     except ValueError:
-        raise T.TweenUsage(f"tween: chroma must be name:#RRGGBB, got {cfg['chroma']!r}") from None
+        raise T.TransitionUsage(f"transition: chroma must be name:#RRGGBB, got {cfg['chroma']!r}") from None
     a = T.endpoint_from_file(cfg["from_file"], cfg["cell"], rgb)
     b = T.endpoint_from_file(cfg["to_file"], cfg["cell"], rgb)
-    base = {"kind": "sprite-gen-tween", "schema": SCHEMA, "id": cfg["id"], "input_hash": digest,
+    base = {"kind": "sprite-gen-transition", "schema": SCHEMA, "id": cfg["id"], "input_hash": digest,
             "producer": producer(),
             "source": evidence.source_identity([_path(cfg["from_file"]), _path(cfg["to_file"])], float(cfg["fps"])),
             "from": cfg["from_file"], "to": cfg["to_file"], "n": cfg["n"], "method": cfg["method"],
@@ -306,31 +306,31 @@ def run_boundary(cfg: dict[str, Any], out_dir: Path, *, force: bool = False,
 
     def failed(status: str, code: int, exc: BaseException) -> dict[str, Any]:
         try:
-            rep = json.loads((out_dir / "tween.json").read_text(encoding="utf-8"))
+            rep = json.loads((out_dir / "transition.json").read_text(encoding="utf-8"))
         except (OSError, ValueError):
             rep = {}
         rep = {**rep, **base, "status": status, "error": rep.get("error") or f"{type(exc).__name__}: {exc}"}
-        _write_json(out_dir / "tween.json", rep)
-        print(f"[tween] {cfg['id']}: {status}: {rep['error']}")
+        _write_json(out_dir / "transition.json", rep)
+        print(f"[transition] {cfg['id']}: {status}: {rep['error']}")
         return {"id": cfg["id"], "status": status, "exit": code, "out_dir": str(out_dir), "report": rep}
 
     try:
-        tweens, report = T.make_tween(
+        betweens, report = T.make_transition(
             a, b, int(cfg["n"]), workdir=out_dir, method=cfg["method"], provider=cfg["provider"],
             anchor=cfg["anchor"], margin=float(cfg["margin"]), min_endpoint_iou=float(cfg["min_endpoint_iou"]),
             description=cfg["description"], chroma=(name, hexv, rgb), generator=generator,
             video_runner=video_runner, extra_refs=[Path(r) for r in cfg["refs"]], refuse=cfg["refuse"],
             ground=cfg["ground"], places=cfg["places"])
-    except T.TweenUsage:
+    except T.TransitionUsage:
         raise
-    except T.TweenRefused as exc:
+    except T.TransitionRefused as exc:
         return failed("refused", T.EXIT_REFUSED, exc)
-    except T.TweenError as exc:  # the provider made nothing: recorded per boundary, the batch goes on
+    except T.TransitionError as exc:  # the provider made nothing: recorded per boundary, the batch goes on
         return failed("error", T.EXIT_ERROR, exc)
     except Exception as exc:  # noqa: BLE001 - provider/runtime failure is recorded per boundary
         return failed("error", T.EXIT_ERROR, exc)
     ends = report.pop("_ends")
-    canvases = [ends[0], *tweens, ends[1]]
+    canvases = [ends[0], *betweens, ends[1]]
     anchor = tuple(report["anchor_px"])
     scale = 1.0
     size = tuple(report["canvas"])
@@ -340,22 +340,22 @@ def run_boundary(cfg: dict[str, Any], out_dir: Path, *, force: bool = False,
         pivot = _pivot(cfg["pivot"], size)
         try:
             canvases, scale = fit_frames(canvases, anchor, size, pivot, cfg["fit"], cfg["resample"])
-        except T.TweenRefused as exc:
+        except T.TransitionRefused as exc:
             keep = out_dir / T.REFUSED
             keep.mkdir(parents=True, exist_ok=True)
-            for im, fname in zip(canvases, ["from.png", *[f"tween-{k}.png" for k in range(len(tweens))], "to.png"]):
+            for im, fname in zip(canvases, ["from.png", *[f"between-{k}.png" for k in range(len(betweens))], "to.png"]):
                 im.save(keep / fname)
-            _write_json(out_dir / "tween.json", {**report, **base, "status": "refused", "error": str(exc),
+            _write_json(out_dir / "transition.json", {**report, **base, "status": "refused", "error": str(exc),
                                                  "refused_dir": str(keep)})
             return failed("refused", T.EXIT_REFUSED, exc)
-    names = ["from.png", *[f"tween-{k}.png" for k in range(len(tweens))], "to.png"]
-    roles = ["from", *["tween"] * len(tweens), "to"]
+    names = ["from.png", *[f"between-{k}.png" for k in range(len(betweens))], "to.png"]
+    roles = ["from", *["between"] * len(betweens), "to"]
     for im, fname in zip(canvases, names):
         im.save(out_dir / fname)
     listed = list(range(len(names))) if cfg["include_ends"] else list(range(1, len(names) - 1))
     durations = cfg["durations_ms"] or [max(1, round(1000.0 / float(cfg["fps"])))] * len(listed)
     if len(durations) != len(listed):
-        raise T.TweenUsage(f"tween: {cfg['id']}: durations_ms has {len(durations)} values for "
+        raise T.TransitionUsage(f"transition: {cfg['id']}: durations_ms has {len(durations)} values for "
                            f"{len(listed)} frames")
     frames = [{"index": j, "file": names[i], "role": roles[i], "w": size[0], "h": size[1],
                "pivot": [pivot[0], pivot[1]], "duration_ms": d} for j, (i, d) in enumerate(zip(listed, durations))]
@@ -369,8 +369,8 @@ def run_boundary(cfg: dict[str, Any], out_dir: Path, *, force: bool = False,
     })
     if scale < 1.0:
         report.setdefault("warnings", []).append(f"set shrunk to {scale:.3f}x to fit {size[0]}x{size[1]}")
-    _write_json(out_dir / "tween.json", report)
-    print(f"[tween] {cfg['id']}: {len(tweens)} in-betweens written to {out_dir}")
+    _write_json(out_dir / "transition.json", report)
+    print(f"[transition] {cfg['id']}: {len(betweens)} in-betweens written to {out_dir}")
     return {"id": cfg["id"], "status": "ok", "exit": T.EXIT_OK, "out_dir": str(out_dir), "report": report}
 
 
@@ -379,7 +379,7 @@ def _sheet_rows(results: list[dict[str, Any]]) -> tuple[list, tuple[int, int], t
     sizes = {tuple(r["report"]["frame_size"]) for r in ok}
     pivots = {(r["report"]["pivot"]["x"], r["report"]["pivot"]["y"]) for r in ok}
     if len(sizes) != 1 or len(pivots) != 1:
-        raise T.TweenUsage("tween: export=sheet across boundaries needs one --frame-size and --pivot for all")
+        raise T.TransitionUsage("transition: export=sheet across boundaries needs one --frame-size and --pivot for all")
     rows = []
     for r in ok:
         d = Path(r["out_dir"])
@@ -425,31 +425,31 @@ def load_manifest(path: Path) -> list[dict[str, Any]]:
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
-        raise T.TweenUsage(f"tween: cannot read manifest {path}: {exc}") from None
+        raise T.TransitionUsage(f"transition: cannot read manifest {path}: {exc}") from None
     if not isinstance(data, dict) or not isinstance(data.get("boundaries"), list) or not data["boundaries"]:
-        raise T.TweenUsage("tween: manifest needs a non-empty \"boundaries\" list")
+        raise T.TransitionUsage("transition: manifest needs a non-empty \"boundaries\" list")
     defaults = data.get("defaults", {})
     base = Path(path).resolve().parent
     out, seen = [], set()
     for entry in data["boundaries"]:
         cfg = normalise({**defaults, **entry}, base)
         if cfg["id"] in seen:
-            raise T.TweenUsage(f"tween: duplicate boundary id {cfg['id']!r} in manifest")
+            raise T.TransitionUsage(f"transition: duplicate boundary id {cfg['id']!r} in manifest")
         seen.add(cfg["id"])
         out.append(cfg)
     exports = {c["export"] for c in out}
     if "sheet" in exports and (any(c["frame_size"] is None for c in out)
                                or len({c["frame_size"] for c in out}) != 1):
-        raise T.TweenUsage("tween: export=sheet in a manifest needs one frame_size shared by every boundary")
+        raise T.TransitionUsage("transition: export=sheet in a manifest needs one frame_size shared by every boundary")
     return out
 
 
 def refuse_overlap_manifest(path: Path, out_dir: Path) -> None:
     try:
         refuse_overlap({"--manifest": Path(path)}, {f"{n} in --out-dir": out_dir / n
-                                                    for n in ("batch.json", "sheet.png", "sheet.json")}, verb="tween")
+                                                    for n in ("batch.json", "sheet.png", "sheet.json")}, verb="transition")
     except SystemExit as exc:
-        raise T.TweenUsage(str(exc.code)) from None
+        raise T.TransitionUsage(str(exc.code)) from None
 
 
 def run_manifest(path: Path, out_dir: Path, *, force: bool = False, only: list[str] | None = None,
@@ -458,7 +458,7 @@ def run_manifest(path: Path, out_dir: Path, *, force: bool = False, only: list[s
     if only:
         missing = set(only) - {b["id"] for b in boundaries}
         if missing:
-            raise T.TweenUsage(f"tween: --only names unknown id(s) {sorted(missing)}")
+            raise T.TransitionUsage(f"transition: --only names unknown id(s) {sorted(missing)}")
         boundaries = [b for b in boundaries if b["id"] in only]
     refuse_overlap_manifest(path, out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -469,15 +469,15 @@ def run_manifest(path: Path, out_dir: Path, *, force: bool = False, only: list[s
         try:
             results.append(run_boundary(cfg, out_dir / cfg["id"], force=force, generator=generator,
                                         video_runner=video_runner))
-        except T.TweenUsage as exc:
-            print(f"[tween] {cfg['id']}: usage: {exc}")
+        except T.TransitionUsage as exc:
+            print(f"[transition] {cfg['id']}: usage: {exc}")
             results.append({"id": cfg["id"], "status": "usage", "exit": T.EXIT_USAGE,
                             "out_dir": str(out_dir / cfg["id"]), "error": str(exc)})
     sheet_path = None
     if any(c["export"] == "sheet" for c in boundaries):
         sheet_path = write_sheet(results, out_dir)
     code = exit_code(results)
-    summary = {"kind": "sprite-gen-tween-batch", "schema": SCHEMA, "manifest": str(path), "exit": code,
+    summary = {"kind": "sprite-gen-transition-batch", "schema": SCHEMA, "manifest": str(path), "exit": code,
                "counts": {s: sum(r["status"] == s for r in results)
                           for s in ("ok", "cached", "refused", "error", "usage")},
                "sheet": sheet_path.name if sheet_path else None,
@@ -485,5 +485,5 @@ def run_manifest(path: Path, out_dir: Path, *, force: bool = False, only: list[s
                                "dir": Path(r["out_dir"]).name,
                                "error": r.get("error") or r.get("report", {}).get("error")} for r in results]}
     _write_json(out_dir / "batch.json", summary)
-    print(f"[tween] batch: {summary['counts']} -> {out_dir / 'batch.json'} (exit {code})")
+    print(f"[transition] batch: {summary['counts']} -> {out_dir / 'batch.json'} (exit {code})")
     return code

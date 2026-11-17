@@ -71,6 +71,6 @@ its `--help` and its doc ([docs/README.md](README.md)).
 | `curation` | `xai` (the reroll and in-between buttons on grok; codex on its own login) | yes |
 | `video`, `video-extend`, `video-edit`, `video-set` | `xai` | yes |
 | `video-resume` | `xai` | no |
-| `tween` | `xai` (`--provider grok`, the default, and `--method video`); codex runs on its own login | yes |
+| `transition` | `xai` (`--provider grok`, the default, and `--method video`); codex runs on its own login | yes |
 
 Every other verb calls no provider.
