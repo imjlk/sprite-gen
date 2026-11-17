@@ -17,24 +17,35 @@ needs more than that, and this module adds it without touching the drawing itsel
 * **resumable**: a boundary whose `tween.json` says `ok` for the same input hash (endpoint
   bytes + every option that changes the output) is skipped; `--force` redoes it.
 
-Exit codes: 0 all ok (or cached), 1 provider/runtime error, 2 usage error, 3 refused.
-In a batch the most severe code wins: error (1) over refused (3) over usage (2) over ok (0)."""
+The run contract (docs/run-contract.md) as the frame verbs keep it: an input that the run would overwrite or delete
+(`--from-file` as `<out>/from.png`) is refused before anything is made (`runio.refuse_overlap`); an earlier run's
+frames are removed before this run makes its own, so a refused run hands over none; a refused run leaves the frames
+it made in `<out>/refused/` (`TweenRefused.frames`). Exit codes as `video-chain`'s: 0 all ok (or cached), 1 refused,
+2 an error (a usage error among them). In a batch the most severe code wins: error (2) over refused (1) over ok (0).
+`tween.json` carries the engine's fingerprint (`producer`: `evidence.engine_identity` and the tween modules' own)
+and the endpoint files' (`source`: `evidence.source_identity`)."""
 
 from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
 from PIL import Image
 
 from sprite_gen.effects import tween as T
+from sprite_gen.spec.runio import refuse_overlap
+from sprite_gen.video import evidence
 
 SCHEMA = "sprite-gen-tween/2"
-CACHE_VERSION = 1
+CACHE_VERSION = 2  # 2: refused frames kept, judge and final reading on the record, --refuse and --ground hashed
+# What a run writes in its folder, past the frames (`_delivered`): it replaces each, so none of them is an input.
+WORK_FILES = ("tween.json", "prompt.txt", "keyframe-strip.png", "raw.png", "first.png", "last.png", "clip.mp4",
+              "clip-frames", T.REFUSED, "sheet.png", "sheet.json")
 FIELDS = {  # boundary option -> default
-    "from_file": None, "to_file": None, "cell": None, "n": 2, "method": "strip", "provider": "grok",
+    "from_file": None, "to_file": None, "cell": None, "n": 2, "method": "strip", "provider": T.DEFAULT_PROVIDER,
     "anchor": "foot", "margin": T.DEFAULT_MARGIN, "min_endpoint_iou": T.DEFAULT_MIN_ENDPOINT_IOU,
     "description": None, "chroma": "magenta:#FF00FF", "refs": [], "frame_size": None,
     "pivot": "bottom-center", "fit": "error", "resample": "lanczos", "fps": 12.0, "durations_ms": None,
@@ -124,12 +135,52 @@ def _pivot(spec: str, size: tuple[int, int]) -> tuple[int, int]:
     return x, y
 
 
+def _path(spec: str) -> Path:
+    """The file of an endpoint spec (`a.png` or `sheet.png:3`)."""
+    head, sep, tail = spec.rpartition(":")
+    return Path(head if sep and tail.lstrip("-").isdigit() else spec)
+
+
+def producer() -> dict[str, str]:
+    """`evidence.engine_identity` (the video and frames code the judge and the readings run on) and the tween modules',
+    which it does not hash."""
+    here = Path(__file__).resolve()
+    files = [here.with_name("tween.py"), here]
+    return {**evidence.engine_identity(),
+            "tween_sha256": evidence.digest(b"".join(p.name.encode() + b"\0" + p.read_bytes() for p in files))}
+
+
+def _delivered(out_dir: Path) -> list[Path]:
+    return [p for p in (out_dir / "from.png", out_dir / "to.png", *sorted(out_dir.glob("tween-*.png")))]
+
+
+def guard(cfg: dict[str, Any], out_dir: Path) -> None:
+    """Refuse (a usage error, nothing made) an input the run would write over or delete (`runio.refuse_overlap`)."""
+    inputs = {"--from-file": _path(cfg["from_file"]), "--to-file": _path(cfg["to_file"]),
+              **{f"--ref {r}": Path(r) for r in cfg["refs"]}}
+    outputs = {f"{p.name} in --out-dir": p for p in
+               [*_delivered(out_dir), *(out_dir / f"tween-{k}.png" for k in range(int(cfg["n"]))),
+                *(out_dir / w for w in WORK_FILES)]}
+    try:
+        refuse_overlap(inputs, outputs, verb="tween")
+    except T.TweenError:
+        raise
+    except SystemExit as exc:
+        raise T.TweenUsage(str(exc.code)) from None
+
+
+def withdraw(out_dir: Path) -> None:
+    """Take back what an earlier run handed over: its frames and its refused frames."""
+    for p in _delivered(out_dir):
+        p.unlink(missing_ok=True)
+    shutil.rmtree(out_dir / T.REFUSED, ignore_errors=True)
+
+
 def input_hash(cfg: dict[str, Any]) -> str:
     h = hashlib.sha256(f"tween-cache/{CACHE_VERSION}".encode())
     h.update(json.dumps({k: cfg[k] for k in _HASHED}, sort_keys=True, default=str).encode())
     for spec in (cfg["from_file"], cfg["to_file"], *cfg["refs"]):
-        head, sep, tail = spec.rpartition(":")
-        path = Path(head if sep and tail.lstrip("-").isdigit() else spec)
+        path = _path(spec)
         h.update(path.read_bytes() if path.is_file() else b"<missing>")
     return h.hexdigest()[:16]
 
@@ -220,6 +271,7 @@ def run_boundary(cfg: dict[str, Any], out_dir: Path, *, force: bool = False,
                  ) -> dict[str, Any]:
     """Run one boundary into `out_dir`. Never raises for refusals or provider errors: returns
     {id, status: ok|cached|refused|error, exit, out_dir, report}. Usage errors raise TweenUsage."""
+    guard(cfg, out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     digest = input_hash(cfg)
     if not force:
@@ -227,6 +279,7 @@ def run_boundary(cfg: dict[str, Any], out_dir: Path, *, force: bool = False,
         if old is not None:
             print(f"[tween] {cfg['id']}: up to date ({digest}), skipped")
             return {"id": cfg["id"], "status": "cached", "exit": T.EXIT_OK, "out_dir": str(out_dir), "report": old}
+    withdraw(out_dir)
     name, _, hexv = str(cfg["chroma"]).partition(":")
     try:
         rgb = tuple(int(hexv.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4))
@@ -235,6 +288,8 @@ def run_boundary(cfg: dict[str, Any], out_dir: Path, *, force: bool = False,
     a = T.endpoint_from_file(cfg["from_file"], cfg["cell"], rgb)
     b = T.endpoint_from_file(cfg["to_file"], cfg["cell"], rgb)
     base = {"kind": "sprite-gen-tween", "schema": SCHEMA, "id": cfg["id"], "input_hash": digest,
+            "producer": producer(),
+            "source": evidence.source_identity([_path(cfg["from_file"]), _path(cfg["to_file"])], float(cfg["fps"])),
             "from": cfg["from_file"], "to": cfg["to_file"], "n": cfg["n"], "method": cfg["method"],
             "provider": cfg["provider"]}
 
@@ -272,7 +327,12 @@ def run_boundary(cfg: dict[str, Any], out_dir: Path, *, force: bool = False,
         try:
             canvases, scale = fit_frames(canvases, anchor, size, pivot, cfg["fit"], cfg["resample"])
         except T.TweenRefused as exc:
-            _write_json(out_dir / "tween.json", {**report, **base, "status": "refused", "error": str(exc)})
+            keep = out_dir / T.REFUSED
+            keep.mkdir(parents=True, exist_ok=True)
+            for im, fname in zip(canvases, ["from.png", *[f"tween-{k}.png" for k in range(len(tweens))], "to.png"]):
+                im.save(keep / fname)
+            _write_json(out_dir / "tween.json", {**report, **base, "status": "refused", "error": str(exc),
+                                                 "refused_dir": str(keep)})
             return failed("refused", T.EXIT_REFUSED, exc)
     names = ["from.png", *[f"tween-{k}.png" for k in range(len(tweens))], "to.png"]
     roles = ["from", *["tween"] * len(tweens), "to"]
@@ -327,7 +387,7 @@ def write_sheet(results: list[dict[str, Any]], out_dir: Path) -> Path | None:
 
 def exit_code(results: list[dict[str, Any]]) -> int:
     codes = {r["exit"] for r in results}
-    for code in (T.EXIT_ERROR, T.EXIT_REFUSED, T.EXIT_USAGE):
+    for code in (T.EXIT_ERROR, T.EXIT_REFUSED):
         if code in codes:
             return code
     return T.EXIT_OK
@@ -335,6 +395,9 @@ def exit_code(results: list[dict[str, Any]]) -> int:
 
 def run_single(cfg: dict[str, Any], out_dir: Path, *, force: bool = False, **kw) -> int:
     result = run_boundary(cfg, out_dir, force=force, **kw)
+    if result["status"] not in ("ok", "cached"):
+        for stale in ("sheet.png", "sheet.json"):
+            (out_dir / stale).unlink(missing_ok=True)
     if cfg["export"] == "sheet" and result["status"] in ("ok", "cached"):
         write_sheet([result], out_dir)
     return exit_code([result])
@@ -367,6 +430,14 @@ def load_manifest(path: Path) -> list[dict[str, Any]]:
     return out
 
 
+def refuse_overlap_manifest(path: Path, out_dir: Path) -> None:
+    try:
+        refuse_overlap({"--manifest": Path(path)}, {f"{n} in --out-dir": out_dir / n
+                                                    for n in ("batch.json", "sheet.png", "sheet.json")}, verb="tween")
+    except SystemExit as exc:
+        raise T.TweenUsage(str(exc.code)) from None
+
+
 def run_manifest(path: Path, out_dir: Path, *, force: bool = False, only: list[str] | None = None,
                  generator: T.Generator | None = None, video_runner: T.VideoRunner | None = None) -> int:
     boundaries = load_manifest(path)
@@ -375,7 +446,10 @@ def run_manifest(path: Path, out_dir: Path, *, force: bool = False, only: list[s
         if missing:
             raise T.TweenUsage(f"tween: --only names unknown id(s) {sorted(missing)}")
         boundaries = [b for b in boundaries if b["id"] in only]
+    refuse_overlap_manifest(path, out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    for stale in ("sheet.png", "sheet.json"):
+        (out_dir / stale).unlink(missing_ok=True)
     results = []
     for cfg in boundaries:
         try:

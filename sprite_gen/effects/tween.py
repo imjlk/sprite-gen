@@ -40,10 +40,16 @@ from typing import Any, Callable
 from sprite_gen._deps import np
 from PIL import Image
 
+from sprite_gen.gen.base import PROVIDER_CODEX, PROVIDER_GROK
 from sprite_gen.util.cli_kwargs import namespace_from_kwargs
 from sprite_gen.util.console import utf8_streams
 
-PROVIDERS = ("codex", "grok")
+# The image providers that take a keyframe strip as a reference (`gen.base` names them once), as `interpolate` offers.
+PROVIDERS = (PROVIDER_CODEX, PROVIDER_GROK)
+# tween's own default, as `interpolate` keeps its own: the provider the Pip comparison was measured on
+# (docs/tween.md "tween and video-chain"). `--method video` films on grok whatever the strip provider is.
+DEFAULT_PROVIDER = PROVIDER_GROK
+VIDEO_PROVIDER = PROVIDER_GROK
 METHODS = ("strip", "video")
 ANCHORS = ("foot", "bottom-center")
 DEFAULT_MIN_ENDPOINT_IOU = 0.6
@@ -60,7 +66,11 @@ ALPHA_MIN = 24
 # nearest one at or below its natural ratio so slots are never squeezed.
 STRIP_ASPECTS = ((21, 9), (20, 9), (5, 2), (2, 1), (16, 9), (3, 2), (4, 3), (1, 1))
 
-EXIT_OK, EXIT_ERROR, EXIT_USAGE, EXIT_REFUSED = 0, 1, 2, 3
+# The exit codes of the other verbs that deliver frames (`video-chain`, `inspect-holds --gate`): 0 delivered, 1 the
+# frames were made and refused (kept in `refused/`, none handed over), 2 an error, a usage error among them.
+EXIT_OK, EXIT_REFUSED, EXIT_ERROR = 0, 1, 2
+EXIT_USAGE = EXIT_ERROR
+REFUSED = "refused"  # the folder beside the frames a refused tween leaves its frames in, as `keyed.refused/`
 
 
 class TweenError(SystemExit):
@@ -81,7 +91,12 @@ class TweenUsage(TweenError):
 
 
 class TweenRefused(TweenError):
+    """The frames were made and fail a check: exit EXIT_REFUSED; `frames` (name, image) are left in `refused/`."""
     exit_code = EXIT_REFUSED
+
+    def __init__(self, message: str, frames: list[tuple[str, Image.Image]] | None = None):
+        super().__init__(message)
+        self.frames = frames or []
 
 
 # generator signature: (strip_png, prompt, out_png, aspect "w:h") -> None. Tests inject a stub.
@@ -385,7 +400,7 @@ def gen_generator(provider: str, extra_refs: list[Path] | None = None) -> Genera
 
     def run(strip: Path, prompt: str, out: Path, aspect: str) -> None:
         generate_image(provider, prompt, out, refs=[strip, *(extra_refs or [])],
-                       aspect_ratio=aspect if provider == "grok" else None)
+                       aspect_ratio=aspect if provider == PROVIDER_GROK else None)
     return run
 
 
@@ -425,7 +440,7 @@ def _call_provider(workdir: Path, method: str, provider: str, n: int, a: Endpoin
         raise
 
 def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str = "strip",
-               provider: str = "grok", anchor: str = "foot", margin: float = DEFAULT_MARGIN,
+               provider: str = DEFAULT_PROVIDER, anchor: str = "foot", margin: float = DEFAULT_MARGIN,
                min_endpoint_iou: float = DEFAULT_MIN_ENDPOINT_IOU, description: str | None = None,
                chroma: tuple[str, str, tuple[int, int, int]] = ("magenta", "#FF00FF", (255, 0, 255)),
                generator: Generator | None = None, video_runner: VideoRunner | None = None,
@@ -437,8 +452,12 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
         raise TweenUsage(f"tween: unknown method {method!r}")
     if anchor not in ANCHORS:
         raise TweenUsage(f"tween: unknown anchor {anchor!r}")
+    if method == "video" and provider != VIDEO_PROVIDER:
+        raise TweenUsage(f"tween: --method video films on {VIDEO_PROVIDER} (`sprite-gen video --image --last-frame`); "
+                         f"--provider {provider} draws --method strip only")
     name, hexv, chroma_rgb = chroma
     workdir.mkdir(parents=True, exist_ok=True)
+    shutil.rmtree(workdir / REFUSED, ignore_errors=True)  # an earlier run's refused frames are not this run's
     warnings = [f"source {ep.source} touches its cell border ({', '.join(ep.touches_border)}): "
                 "content may be cut off or belong to a neighbour cell"
                 for ep in (a, b) if ep.touches_border]
@@ -511,11 +530,18 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
         "drawn_step_iou": drawn_steps, "status": "ok", "keyframe_heights": [a.image.height, b.image.height],
         "warnings": warnings,
     }
-    def refuse(msg: str) -> None:
+    def refuse(msg: str, frames: list[tuple[str, Image.Image]] | None = None) -> None:
         report["status"] = "refused"
         report["error"] = msg
-        (workdir / "tween.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
-        raise TweenRefused(msg)
+        if frames:
+            keep = workdir / REFUSED
+            keep.mkdir(parents=True, exist_ok=True)
+            for fname, im in frames:
+                im.save(keep / fname)
+            report["refused_dir"] = str(keep)
+        (workdir / "tween.json").write_text(json.dumps({k: v for k, v in report.items() if k != "_ends"}, indent=2),
+                                            encoding="utf-8")
+        raise TweenRefused(msg, frames)
     if min(iou_a, iou_b) < min_endpoint_iou or scale_agree < MIN_SCALE_AGREE:
         refuse(
             f"tween: refused — drawn endpoints do not match the keyframes (IoU from {iou_a:.2f}, "
@@ -628,7 +654,8 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--out-dir", type=Path, help="file mode: where frames and tween.json go")
     parser.add_argument("--n", type=int, default=2, help="in-betweens to draw (1..6, default 2)")
     parser.add_argument("--method", choices=METHODS, default="strip")
-    parser.add_argument("--provider", choices=PROVIDERS, default="grok")
+    parser.add_argument("--provider", choices=PROVIDERS, default=DEFAULT_PROVIDER,
+                        help=f"draws the strip (default {DEFAULT_PROVIDER}); --method video films on {VIDEO_PROVIDER} and takes no other")
     parser.add_argument("--anchor", choices=ANCHORS, default="foot")
     parser.add_argument("--margin", type=float, default=DEFAULT_MARGIN, help="safe margin per slot (fraction)")
     parser.add_argument("--min-endpoint-iou", type=float, default=DEFAULT_MIN_ENDPOINT_IOU)
@@ -707,7 +734,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _reporting(fn: Callable[[], int]) -> int:
-    """Print a TweenError's message to stderr; its exit code survives (0 ok, 1 error, 2 usage, 3 refused)."""
+    """Print a TweenError's message to stderr; its exit code survives (0 ok, 1 refused, 2 error or usage)."""
     try:
         return fn()
     except TweenError as exc:

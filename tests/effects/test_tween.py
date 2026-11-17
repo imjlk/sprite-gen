@@ -439,3 +439,59 @@ def test_cli_exit_codes(tmp_path, monkeypatch, capsys):
     with pytest.raises(SystemExit) as exc:
         tween.main(base + ["--frame-size", "nope"])
     assert exc.value.code == tween.EXIT_USAGE and "WxH" in capsys.readouterr().err
+
+
+# ---------------------------------------------------------------- the run contract (docs/run-contract.md)
+
+def test_exit_codes_are_those_of_the_frame_verbs():
+    assert (tween.EXIT_OK, tween.EXIT_REFUSED, tween.EXIT_ERROR, tween.EXIT_USAGE) == (0, 1, 2, 2)
+    assert P.exit_code([{"exit": 1}, {"exit": 2}, {"exit": 0}]) == 2
+    assert P.exit_code([{"exit": 1}, {"exit": 0}]) == 1
+
+
+def test_provider_names_come_from_gen_base():
+    from sprite_gen.gen import base
+    assert tween.PROVIDERS == (base.PROVIDER_CODEX, base.PROVIDER_GROK)
+    assert tween.DEFAULT_PROVIDER == base.PROVIDER_GROK == P.FIELDS["provider"]
+
+
+def test_video_method_takes_no_other_provider(tmp_path):
+    with pytest.raises(SystemExit, match="films on grok") as exc:
+        tween.make_tween(endpoint(figure(30, 40), "a"), endpoint(figure(24, 80), "b"), 2, workdir=tmp_path,
+                         method="video", provider="codex", video_runner=lambda *a: None)
+    assert exc.value.code == tween.EXIT_USAGE
+
+
+def test_an_input_inside_the_outputs_is_refused_before_anything_is_made(tmp_path):
+    fa, fb = _pair(tmp_path)
+    out = tmp_path / "o"
+    out.mkdir()
+    inside = out / "from.png"
+    inside.write_bytes(fa.read_bytes())
+    calls = []
+    cfg = P.normalise({"id": "x", "from_file": str(inside), "to_file": str(fb)}, tmp_path)
+    with pytest.raises(SystemExit, match="same file") as exc:
+        P.run_boundary(cfg, out, generator=lambda *a: calls.append(a))
+    assert exc.value.code == tween.EXIT_USAGE and not calls and inside.read_bytes() == fa.read_bytes()
+
+
+def test_a_refused_run_hands_over_no_old_frames_and_keeps_its_own_in_refused(tmp_path):
+    cfg = _cfg(tmp_path, frame_size="96x128")
+    out = tmp_path / "o"
+    assert P.run_single(cfg, out, generator=fill_ghosts) == 0
+    assert (out / "tween-0.png").is_file()
+    small = P.normalise({**cfg, "frame_size": "40x40", "cell": None}, tmp_path)
+    assert P.run_single(small, out, generator=fill_ghosts) == tween.EXIT_REFUSED
+    rep = json.loads((out / "tween.json").read_text())
+    assert rep["status"] == "refused" and Path(rep["refused_dir"]) == out / "refused"
+    assert not list(out.glob("tween-*.png")) and not (out / "from.png").exists()
+    assert sorted(p.name for p in (out / "refused").iterdir()) == ["from.png", "to.png", "tween-0.png", "tween-1.png"]
+    assert P.run_single(cfg, out, generator=fill_ghosts) == 0
+    assert not (out / "refused").exists()
+
+
+def test_the_record_carries_the_engine_and_the_source_identity(tmp_path):
+    cfg = _cfg(tmp_path)
+    rep = P.run_boundary(cfg, tmp_path / "o", generator=fill_ghosts)["report"]
+    assert set(rep["producer"]) == {"implementation_sha256", "tween_sha256"}
+    assert rep["source"]["kind"] == "keyed-frame-sequence" and rep["source"]["frames"] == 2
