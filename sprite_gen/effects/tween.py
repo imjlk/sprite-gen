@@ -35,6 +35,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from collections.abc import Collection
 from typing import Any, Callable
 
 from sprite_gen._deps import np
@@ -439,6 +440,68 @@ def _call_provider(workdir: Path, method: str, provider: str, n: int, a: Endpoin
         (workdir / "tween.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
         raise
 
+# ---------------------------------------------------------------- the judge and the final reading
+
+def read_refuse(text: str | Collection[str] | None) -> frozenset[str] | None:
+    """`--refuse`'s faults (`video-chain --refuse`'s reading: names of `held_fill.FAULTS`, `held` always among them);
+    None where it was not given (every fault refuses)."""
+    from sprite_gen.video.held_fill import FAULTS
+    if text is None:
+        return None
+    named = [n.strip() for n in (text.split(",") if isinstance(text, str) else text)]
+    unknown = [n for n in named if n not in FAULTS]
+    if unknown:
+        raise TweenUsage(f"tween: --refuse: {', '.join(repr(n) for n in unknown)} "
+                         f"{'is' if len(unknown) == 1 else 'are'} no fault: one of {', '.join(FAULTS)}")
+    return frozenset(named) | {"held"}
+
+
+def judge_frames(a: Image.Image, made: list[Image.Image], b: Image.Image, *, method: str,
+                 refuse: frozenset[str] | None) -> tuple[list[dict[str, Any]], list[str]]:
+    """Each in-between judged as a frame made between `a` and `b` at its own time (`held_fill.judge`, unchanged): its
+    values, the faults that refuse it and those found and kept (`kept_faults`), on one canvas with the ends. For
+    `--method video` the faults `refuse` names refuse it (None: every fault, as `video-chain`'s default); for the strip
+    the reading is the record's, and only `held` refuses: a frame showing the picture of an end or of the frame before
+    it is no frame between, whichever way it was made. Returns the rows and the faults that refuse."""
+    from sprite_gen.video import held_fill
+    from sprite_gen.video.interpolation_quality import ghost_screen
+    refusing = (list(held_fill.FAULTS) if refuse is None else [f for f in held_fill.FAULTS if f in refuse]) \
+        if method == "video" else ["held"]
+    seq = [a, *made, b]
+    reads = bool(ghost_screen(seq)["reads"])
+    rows = []
+    for k, frame in enumerate(made, start=1):
+        t = k / (len(made) + 1)
+        measure, found = held_fill.judge(frame, a, b, t, reads=reads, before=None if k == 1 else seq[k - 1])
+        wrong = [f for f in found if f in refusing]
+        kept = [f for f in found if f not in wrong]
+        rows.append({"frame": k, "t": round(t, 4), "faults": wrong, **({"kept_faults": kept} if kept else {}),
+                     **({"shows": measure["shows"]} if measure["shows"] else {}),
+                     "judged": _plain({key: v for key, v in measure.items() if key != "shows"})})
+    return rows, refusing
+
+
+def final_reading(frames: list[Image.Image]) -> dict[str, Any]:
+    """The frames as delivered, ends in, read as `inspect-holds` reads a delivery (`qa.holds.inspect` on
+    `alpha_figures`): a frame showing the picture of the frame before it is on no list, and refuses the tween."""
+    from sprite_gen.qa import holds
+    try:
+        return holds.inspect(holds.alpha_figures(frames))
+    except holds.NothingRead as exc:
+        return {**(exc.report or {"inspected": 0, "unlisted": 0, "table": {}}), "nothing": f"{holds.NOTHING}: {exc}"}
+
+
+def _plain(value: Any) -> Any:
+    """A judged value as JSON holds it (numpy scalars to Python)."""
+    if isinstance(value, dict):
+        return {k: _plain(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_plain(v) for v in value]
+    if hasattr(value, "item") and not isinstance(value, (str, bytes)):
+        return value.item()
+    return value
+
+
 def retry_hint(method: str, provider: str) -> str:
     """What to try after a refusal, for the method that was refused: never the method that was just run. Nothing is
     retried by itself (No silent fallback)."""
@@ -454,14 +517,21 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
                min_endpoint_iou: float = DEFAULT_MIN_ENDPOINT_IOU, description: str | None = None,
                chroma: tuple[str, str, tuple[int, int, int]] = ("magenta", "#FF00FF", (255, 0, 255)),
                generator: Generator | None = None, video_runner: VideoRunner | None = None,
-               extra_refs: list[Path] | None = None) -> tuple[list[Image.Image], dict[str, Any]]:
-    """Return N in-between RGBA frames (slot-sized canvases) and the report. Raises SystemExit on refusal."""
+               extra_refs: list[Path] | None = None, refuse: Collection[str] | str | None = None
+               ) -> tuple[list[Image.Image], dict[str, Any]]:
+    """Return N in-between RGBA frames (slot-sized canvases) and the report. Raises SystemExit on refusal.
+
+    `refuse` names the faults of `held_fill.FAULTS` that refuse a `--method video` frame (None: all of them)."""
     if not 1 <= n <= 6:
         raise TweenUsage(f"tween: --n must be 1..6, got {n}")
     if method not in METHODS:
         raise TweenUsage(f"tween: unknown method {method!r}")
     if anchor not in ANCHORS:
         raise TweenUsage(f"tween: unknown anchor {anchor!r}")
+    refused_for = read_refuse(refuse)
+    if refused_for is not None and method != "video":
+        raise TweenUsage("tween: --refuse names the faults that refuse a --method video frame; the strip's in-betweens "
+                         "are judged for the record, and only held refuses them")
     if method == "video" and provider != VIDEO_PROVIDER:
         raise TweenUsage(f"tween: --method video films on {VIDEO_PROVIDER} (`sprite-gen video --image --last-frame`); "
                          f"--provider {provider} draws --method strip only")
@@ -600,6 +670,30 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
         warnings.append(f"pose jump: silhouette IoU between consecutive frames {steps} "
                         f"(lowest under {STEP_IOU_WARN}); check for poses that are in neither keyframe")
     report["foot_error_px"] = [round(abs(foot_x(_tight(o), anchor) + _tight_box(o)[0] - lay.foot), 1) for o in outs]
+    rows, refusing = judge_frames(ends[0], outs, ends[1], method=method, refuse=refused_for)
+    read = final_reading([ends[0], *outs, ends[1]])
+    report.update(refuse=refusing, judge=rows, read=read)
+    made = [("from.png", ends[0]), *((f"tween-{k}.png", o) for k, o in enumerate(outs)), ("to.png", ends[1])]
+    for row in rows:
+        if row.get("kept_faults"):
+            warnings.append(f"in-between {row['frame']}: {', '.join(row['kept_faults'])} found by the judge and not "
+                            f"refused (kept_faults); look at it")
+    bad = [r for r in rows if r["faults"]]
+    if bad:
+        said = "; ".join(f"in-between {r['frame']}: {', '.join(r['faults'])}"
+                         + (f" (shows the picture of {', '.join(r['shows'])})" if r.get("shows") else "") for r in bad)
+        leave = ("; a fault that is the material's own is left out with --refuse (held always refuses)"
+                 if method == "video" else "")
+        refuse(f"tween: refused — the judge (held_fill.judge) refused {said}{leave}. Frames kept in {workdir / REFUSED}. "
+               + retry_hint(method, provider), made)
+    if read.get("nothing") or read["unlisted"]:
+        names = ["from", *(f"tween-{k}" for k in range(len(outs))), "to"]
+        shown = [names[n] for row in read["table"].values() for run in row.get("unlistedRuns", [])
+                 for n in range(run["from"], run["to"] + 1)]
+        refuse(f"tween: refused — the final reading (qa.holds.inspect): "
+               + (read["nothing"] if read.get("nothing") else
+                  f"{', '.join(shown)} show{'s' if len(shown) == 1 else ''} the picture of the frame before")
+               + f". Frames kept in {workdir / REFUSED}. " + retry_hint(method, provider), made)
     (workdir / "tween.json").write_text(json.dumps({k: v for k, v in report.items() if k != "_ends"}, indent=2), encoding="utf-8")
     for w in warnings:
         print(f"[tween] warning: {w}")
@@ -673,6 +767,10 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--chroma", default="magenta:#FF00FF", help="file mode background name:#hex")
     parser.add_argument("--ref", action="append", type=Path, default=[],
                         help="extra identity reference image for the strip method (repeatable)")
+    parser.add_argument("--refuse", metavar="FAULT,FAULT",
+                        help="--method video: the faults of held_fill.judge that refuse a frame (default: all, as "
+                             "video-chain's); held and the final reading refuse whatever this says. The strip's "
+                             "in-betweens are judged for the record only (docs/tween.md)")
     parser.add_argument("--label", help="take label (default <from>_to_<to>)")
     pipe = parser.add_argument_group("asset pipeline (file and manifest mode)")
     pipe.add_argument("--manifest", type=Path,
@@ -724,7 +822,7 @@ def _run(args: argparse.Namespace) -> int:
         frames, report = make_tween(a, b, args.n, workdir=work, method=args.method, provider=args.provider,
                                     anchor=args.anchor, margin=args.margin,
                                     min_endpoint_iou=args.min_endpoint_iou, description=desc, chroma=chroma,
-                                    extra_refs=args.ref)
+                                    extra_refs=args.ref, refuse=args.refuse)
         report.pop("_ends", None)
         meta = {"from_state": fs, "from_index": fi, "to_state": ts, "to_index": ti, "n": args.n,
                 "method": args.method, "provider": args.provider, "endpoint_match": report["endpoint_match"]}

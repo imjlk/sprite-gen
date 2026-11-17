@@ -28,6 +28,12 @@ def figure(w: int, h: int, *, sword: int = 0) -> Image.Image:
     return im
 
 
+def drawn(k: int) -> tuple[int, int, int]:
+    """The colour the stub draws slot k's in-between in: a picture of its own (held_fill.same_picture parts two
+    pictures by PIXEL_SAME 0.1 per channel), as a provider's in-between is, so the judge reads no held frame."""
+    return (BODY[0] + 30 * k, BODY[1], BODY[2])
+
+
 def fill_ghosts(strip_path: Path, prompt: str, out: Path, aspect: str, *, keep_ends: bool = True) -> None:
     assert "ONION-SKIN" in prompt and "#FF00FF" in prompt
     arr = np.asarray(Image.open(strip_path).convert("RGB")).copy()
@@ -36,7 +42,7 @@ def fill_ghosts(strip_path: Path, prompt: str, out: Path, aspect: str, *, keep_e
     for k in range(1, slots - 1):
         cell = arr[:, k * w:(k + 1) * w]
         non = np.abs(cell.astype(int) - MAGENTA).sum(axis=2) > 60
-        cell[non] = BODY[:3]
+        cell[non] = drawn(k)
     if not keep_ends:
         arr[:, :w] = MAGENTA
         arr[10:30, 5:15] = BODY[:3]
@@ -198,8 +204,10 @@ def test_no_frame_touches_its_canvas_and_ends_share_it(tmp_path, monkeypatch, me
     monkeypatch.setattr(tween, "video_frames", lambda clip, wd: [
         Image.blend(Image.open(calls[0][0]).convert("RGB"), Image.open(calls[0][1]).convert("RGB"), t / 6)
         for t in range(7)])
+    # the stub clip cross-fades A into B, which the judge refuses by default (smear, outline): this test is the canvas's
     frames, report = tween.make_tween(endpoint(a, "a"), endpoint(b, "b"), 2, workdir=tmp_path, method=method,
-                                      generator=wide, video_runner=runner, min_endpoint_iou=0.3)
+                                      generator=wide, video_runner=runner, min_endpoint_iou=0.3,
+                                      refuse="held" if method == "video" else None)
     for f in [*frames, *report["_ends"]]:
         assert f.size == tuple(report["canvas"])
         assert tween.border_touches(f, band=tween.OUT_PAD - 1) == []
@@ -400,7 +408,7 @@ def test_second_run_is_cached_until_inputs_change(tmp_path):
 
 def test_manifest_batch_continues_past_a_refusal_and_exports_one_sheet(tmp_path):
     _pair(tmp_path, name="good")
-    _pair(tmp_path, a=(30, 60), b=(30, 60), name="bad")
+    _pair(tmp_path, a=(30, 60), b=(26, 72), name="bad")
     manifest = tmp_path / "tweens.json"
     manifest.write_text(json.dumps({
         "defaults": {"n": 2, "frame_size": "96x128", "export": "sheet", "fps": 8},
@@ -509,3 +517,89 @@ def test_a_refusal_names_the_other_method_never_the_one_refused(tmp_path, monkey
     assert tween.retry_hint("strip", "codex").count("--provider grok") == 1
     hint = tween.retry_hint("video", "grok")
     assert "--method strip" in hint and "--method video" not in hint
+
+
+# ---------------------------------------------------------------- the judge and the final reading
+
+def _crossfade(monkeypatch):
+    calls = []
+    def runner(first, last, prompt, out):
+        calls.append((first, last)); out.write_bytes(b"mp4")
+    monkeypatch.setattr(tween, "video_frames", lambda clip, wd: [
+        Image.blend(Image.open(calls[0][0]).convert("RGB"), Image.open(calls[0][1]).convert("RGB"), t / 6)
+        for t in range(7)])
+    return runner
+
+
+def test_video_frames_are_judged_and_every_fault_refuses_by_default(tmp_path, monkeypatch):
+    """A clip that cross-fades A into B, as RIFE does across a pose change, is what video-chain's judge refuses."""
+    a, b = endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b")
+    with pytest.raises(SystemExit, match=r"held_fill\.judge") as exc:
+        tween.make_tween(a, b, 2, workdir=tmp_path, method="video", video_runner=_crossfade(monkeypatch),
+                         min_endpoint_iou=0.3)
+    assert exc.value.code == tween.EXIT_REFUSED and "--method video" not in str(exc.value).split("Re-run")[1]
+    rep = json.loads((tmp_path / "tween.json").read_text())
+    from sprite_gen.video.held_fill import FAULTS
+    assert rep["status"] == "refused" and rep["refuse"] == list(FAULTS)
+    assert all(row["faults"] for row in rep["judge"])
+    assert sorted(p.name for p in (tmp_path / "refused").iterdir()) == ["from.png", "to.png", "tween-0.png", "tween-1.png"]
+
+
+def test_refuse_leaves_a_fault_on_the_record_as_video_chain_does(tmp_path, monkeypatch):
+    a, b = endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b")
+    frames, report = tween.make_tween(a, b, 2, workdir=tmp_path, method="video", video_runner=_crossfade(monkeypatch),
+                                      min_endpoint_iou=0.3, refuse="held")
+    assert report["refuse"] == ["held"] and len(frames) == 2
+    kept = [row.get("kept_faults") for row in report["judge"]]
+    assert all(kept) and any("kept_faults" in w for w in report["warnings"])
+    assert all(isinstance(row["judged"], dict) and "doubled" in row["judged"] for row in report["judge"])
+    json.dumps(report["judge"])  # the record holds plain values
+
+
+def test_refuse_names_only_faults_and_only_for_video(tmp_path, monkeypatch):
+    a, b = endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b")
+    with pytest.raises(SystemExit, match="no fault") as exc:
+        tween.make_tween(a, b, 2, workdir=tmp_path, method="video", refuse="smear,blur",
+                         video_runner=lambda *x: None)
+    assert exc.value.code == tween.EXIT_USAGE
+    with pytest.raises(SystemExit, match="--method video frame") as exc:
+        tween.make_tween(a, b, 2, workdir=tmp_path, refuse="smear", generator=fill_ghosts)
+    assert exc.value.code == tween.EXIT_USAGE
+    assert tween.read_refuse("smear") == {"smear", "held"} and tween.read_refuse(None) is None
+
+
+def test_the_strip_is_judged_for_the_record_and_a_held_in_between_refuses(tmp_path):
+    a, b = endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b")
+    _, report = tween.make_tween(a, b, 2, workdir=tmp_path / "ok", generator=fill_ghosts)
+    assert report["refuse"] == ["held"] and [r["frame"] for r in report["judge"]] == [1, 2]
+    assert report["read"]["unlisted"] == 0 and report["read"]["inspected"] == 1
+
+    def copy_a(strip, prompt, out, aspect):  # every in-between drawn as keyframe A again
+        im = Image.open(strip).convert("RGB")
+        w = im.width // 4
+        first = im.crop((0, 0, w, im.height))
+        for k in (1, 2):
+            im.paste(first, (k * w, 0))
+        im.save(out)
+    a, b = endpoint(figure(30, 60), "a"), endpoint(figure(24, 60), "b")  # one height: nothing rescales A's copy
+    with pytest.raises(SystemExit, match="held") as exc:
+        tween.make_tween(a, b, 2, workdir=tmp_path / "held", generator=copy_a)
+    assert exc.value.code == tween.EXIT_REFUSED
+    rep = json.loads((tmp_path / "held" / "tween.json").read_text())
+    assert rep["judge"][0]["shows"] == ["a"] and (tmp_path / "held" / "refused" / "tween-0.png").is_file()
+
+
+def test_the_final_reading_refuses_a_picture_shown_again(tmp_path, monkeypatch):
+    """The judge reads each frame made; the final reading reads the delivery, ends in, as inspect-holds does."""
+    from sprite_gen.video import held_fill
+    monkeypatch.setattr(held_fill, "judge", lambda frame, a, b, t, reads, before=None: ({"shows": []}, []))
+
+    def copy_a(strip, prompt, out, aspect):
+        im = Image.open(strip).convert("RGB")
+        w = im.width // 3
+        im.paste(im.crop((0, 0, w, im.height)), (w, 0))
+        im.save(out)
+    with pytest.raises(SystemExit, match=r"final reading \(qa\.holds\.inspect\): tween-0 shows the picture"):
+        tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(24, 60), "b"), 1, workdir=tmp_path,
+                         generator=copy_a)
+    assert json.loads((tmp_path / "tween.json").read_text())["read"]["unlisted"] == 1

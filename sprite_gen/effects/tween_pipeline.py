@@ -49,7 +49,7 @@ FIELDS = {  # boundary option -> default
     "anchor": "foot", "margin": T.DEFAULT_MARGIN, "min_endpoint_iou": T.DEFAULT_MIN_ENDPOINT_IOU,
     "description": None, "chroma": "magenta:#FF00FF", "refs": [], "frame_size": None,
     "pivot": "bottom-center", "fit": "error", "resample": "lanczos", "fps": 12.0, "durations_ms": None,
-    "include_ends": False, "export": "none", "loop": False,
+    "include_ends": False, "export": "none", "loop": False, "refuse": None,
 }
 _HASHED = [k for k in FIELDS if k not in ("export",)]
 
@@ -117,6 +117,8 @@ def normalise(cfg: dict[str, Any], base: Path) -> dict[str, Any]:
         raise T.TweenUsage(f"tween: resample must be lanczos or nearest, got {out['resample']!r}")
     if out["export"] not in ("none", "sheet"):
         raise T.TweenUsage(f"tween: export must be none or sheet, got {out['export']!r}")
+    refuse = T.read_refuse(out["refuse"])
+    out["refuse"] = None if refuse is None else sorted(refuse)
     if float(out["fps"]) <= 0:
         raise T.TweenUsage("tween: fps must be positive")
     return out
@@ -308,7 +310,7 @@ def run_boundary(cfg: dict[str, Any], out_dir: Path, *, force: bool = False,
             a, b, int(cfg["n"]), workdir=out_dir, method=cfg["method"], provider=cfg["provider"],
             anchor=cfg["anchor"], margin=float(cfg["margin"]), min_endpoint_iou=float(cfg["min_endpoint_iou"]),
             description=cfg["description"], chroma=(name, hexv, rgb), generator=generator,
-            video_runner=video_runner, extra_refs=[Path(r) for r in cfg["refs"]])
+            video_runner=video_runner, extra_refs=[Path(r) for r in cfg["refs"]], refuse=cfg["refuse"])
     except T.TweenUsage:
         raise
     except T.TweenRefused as exc:
