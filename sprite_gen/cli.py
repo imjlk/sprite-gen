@@ -460,7 +460,7 @@ COMMANDS: dict[str, tuple[str, Callable[[argparse.ArgumentParser], None], Callab
         breathe.run,
     ),
     "tween": (
-        "Draw N in-betweens between frames of two states (or two files) in one onion-skin keyframe strip; refuses drifted endpoints.",
+        "Draw N in-betweens between frames of two states (or two files) in one onion-skin keyframe strip or a first-last clip, judged as video-chain judges; refuses drifted endpoints.",
         tween.add_arguments,
         tween.run,
     ),

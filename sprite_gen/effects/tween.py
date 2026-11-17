@@ -20,9 +20,17 @@ height (a crouch into a stand). This module:
    its foot anchor on the shared ground row;
 6. warns when content crosses a slot or source cell border (thin weapons reaching into the
    neighbour cell are the usual cause of mis-sliced sheets);
-7. records the frames as a transition take on the destination state
+7. judges each in-between as a frame made between A and B (`held_fill.judge`, unchanged: for
+   `--method video` every fault refuses unless `--refuse` names fewer; the strip's are read
+   for the record and only `held` refuses) and reads the delivery for a picture shown again
+   (`qa.holds.inspect`), as `video-chain` does;
+8. records the frames as a transition take on the destination state
    (`takes[].transition = {from_state, from_index, to_state, to_index, n}`) or, in file
-   mode, as frames plus `tween.json` in `--out-dir`.
+   mode, as frames plus `tween.json` in `--out-dir`; a refused tween leaves its frames in
+   `refused/` and exits 1 (docs/tween.md).
+
+`--ground source` keeps an airborne end off the floor (its height on its source canvas), the
+in-betweens at the lerp of the two heights; the default puts every foot on one ground row.
 
 The provider is the one named; nothing retries on another provider (No silent fallback).
 """
@@ -813,7 +821,7 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--label", help="take label (default <from>_to_<to>)")
     pipe = parser.add_argument_group("asset pipeline (file and manifest mode)")
     pipe.add_argument("--manifest", type=Path,
-                      help="batch: JSON file listing many boundaries (see docs/frame-interpolation.md)")
+                      help="batch: JSON file listing many boundaries (see docs/tween.md section 6)")
     pipe.add_argument("--only", action="append", default=[], help="manifest mode: run only these ids")
     pipe.add_argument("--frame-size", help="fixed output frame WxH (every frame, every boundary)")
     pipe.add_argument("--pivot", default="bottom-center",
