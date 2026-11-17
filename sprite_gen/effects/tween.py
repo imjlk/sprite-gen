@@ -53,6 +53,9 @@ DEFAULT_PROVIDER = PROVIDER_GROK
 VIDEO_PROVIDER = PROVIDER_GROK
 METHODS = ("strip", "video")
 ANCHORS = ("foot", "bottom-center")
+# Where each frame stands. shared: every foot on one ground row (an airborne end is drawn standing). source: each end
+# as high off the floor as on its source canvas, the in-betweens at the lerp of the two (file mode).
+GROUNDS = ("shared", "source")
 DEFAULT_MIN_ENDPOINT_IOU = 0.6
 DEFAULT_MARGIN = 0.12
 MIN_SCALE_AGREE = 0.85
@@ -111,6 +114,8 @@ class Endpoint:
     image: Image.Image          # tight RGBA crop of the figure
     source: str
     touches_border: list[str]   # sides of the source cell the content touches
+    lift: float | None = None   # px from its lowest opaque row to the bottom of its source canvas (file mode)
+    canvas: tuple[int, int] | None = None  # the size of the source canvas or cell
 
 
 # ---------------------------------------------------------------- endpoints
@@ -178,7 +183,9 @@ def endpoint_from_file(spec: str, cell: tuple[int, int] | None,
         boxes = [(c * cw, r * ch, (c + 1) * cw, (r + 1) * ch) for r in range(rows) for c in range(cols)]
         image = image.crop(_pick(boxes, idx, str(path)))
     keyed = _keyed(image, chroma_rgb)
-    return Endpoint(_tight(keyed), spec, border_touches(keyed))
+    rows = np.nonzero((_alpha(keyed) >= ALPHA_MIN).any(axis=1))[0]
+    lift = float(keyed.height - 1 - rows[-1]) if rows.size else 0.0
+    return Endpoint(_tight(keyed), spec, border_touches(keyed), lift, keyed.size)
 
 
 def endpoint_from_run(run_dir: Path, request: dict[str, Any], state: str, index: int) -> Endpoint:
@@ -226,14 +233,19 @@ class Layout:
     foot: int        # foot anchor column inside a slot
     heights: list[float]
     aspect: str
+    lifts: list[float] | None = None  # px above the ground row, per slot (None: all on it)
+
+    def lift(self, slot: int) -> float:
+        return self.lifts[slot] if self.lifts else 0.0
 
 
-def plan_layout(a: Image.Image, b: Image.Image, n: int, margin: float, anchor: str) -> Layout:
+def plan_layout(a: Image.Image, b: Image.Image, n: int, margin: float, anchor: str,
+                lift: tuple[float, float] = (0.0, 0.0)) -> Layout:
     slots = n + 2
     fa, fb = foot_x(a, anchor), foot_x(b, anchor)
     left = max(fa, fb)
     right = max(a.width - fa, b.width - fb)
-    tall = max(a.height, b.height)
+    tall = int(round(max(a.height + lift[0], b.height + lift[1])))
     pad = int(round(max(left + right, tall) * margin))
     slot_w = int(round(left + right)) + 2 * pad
     slot_h = tall + 2 * pad
@@ -242,12 +254,15 @@ def plan_layout(a: Image.Image, b: Image.Image, n: int, margin: float, anchor: s
     if num / den < natural - 1e-9:
         slot_h = int(round(slots * slot_w * den / num))   # pad height so the strip hits a provider ratio
     heights = [a.height + (b.height - a.height) * k / (slots - 1) for k in range(slots)]
-    return Layout(slot_w, slot_h, slot_h - pad, pad + int(round(left)), heights, f"{num}:{den}")
+    lifts = [lift[0] + (lift[1] - lift[0]) * k / (slots - 1) for k in range(slots)] if any(lift) else None
+    return Layout(slot_w, slot_h, slot_h - pad, pad + int(round(left)), heights, f"{num}:{den}", lifts)
 
 
-def place(canvas: Image.Image, figure: Image.Image, slot: int, lay: Layout, anchor: str) -> None:
+def place(canvas: Image.Image, figure: Image.Image, slot: int, lay: Layout, anchor: str,
+          lift: float = 0.0) -> None:
+    """Foot anchor on the slot's anchor column, lowest row `lift` px above the ground row."""
     x = slot * lay.slot_w + lay.foot - int(round(foot_x(figure, anchor)))
-    canvas.alpha_composite(figure, (x, lay.ground - figure.height))
+    canvas.alpha_composite(figure, (x, lay.ground - int(round(lift)) - figure.height))
 
 
 def ghost(figure: Image.Image, weight: float) -> Image.Image:
@@ -260,20 +275,21 @@ def ghost(figure: Image.Image, weight: float) -> Image.Image:
 
 def keyframe_strip(a: Image.Image, b: Image.Image, lay: Layout, n: int, anchor: str,
                    chroma_rgb: tuple[int, int, int]) -> Image.Image:
-    """A | ghosts x n | B on a flat chroma background, every figure foot-anchored on one ground row."""
+    """A | ghosts x n | B on a flat chroma background, every figure foot-anchored on one ground row, or as high off it
+    as `lay.lifts` says."""
     slots = n + 2
     strip = Image.new("RGBA", (slots * lay.slot_w, lay.slot_h), chroma_rgb + (255,))
-    place(strip, a, 0, lay, anchor)
-    place(strip, b, slots - 1, lay, anchor)
+    place(strip, a, 0, lay, anchor, lay.lift(0))
+    place(strip, b, slots - 1, lay, anchor, lay.lift(slots - 1))
     for k in range(1, slots - 1):
         t = k / (slots - 1)
         h = lay.heights[k]
-        place(strip, ghost(_scaled(a, h), 1 - t), k, lay, anchor)
-        place(strip, ghost(_scaled(b, h), t), k, lay, anchor)
+        place(strip, ghost(_scaled(a, h), 1 - t), k, lay, anchor, lay.lift(k))
+        place(strip, ghost(_scaled(b, h), t), k, lay, anchor, lay.lift(k))
     return strip
 
 
-def tween_prompt(n: int, description: str | None, chroma: tuple[str, str]) -> str:
+def tween_prompt(n: int, description: str | None, chroma: tuple[str, str], ground: str = "shared") -> str:
     slots = n + 2
     middle = f"slots 2-{slots - 1}" if n > 1 else "slot 2"
     who = description or "the same character as the keyframes"
@@ -285,7 +301,10 @@ def tween_prompt(n: int, description: str | None, chroma: tuple[str, str]) -> st
         "replace each ghost with a finished drawing of the character in an in-between pose, evenly "
         "spaced in time from A to B, so the slots play as one smooth motion. SHORTEST PATH: each pose "
         "stays inside the space between the two ghost silhouettes in its slot, same stance width, "
-        "same scale, same ground line; no new poses, swings, spins or flourishes that are in neither "
+        + ("same scale, same ground line; " if ground == "shared" else
+           "same scale; each pose as high above the strip's floor as its ghosts are (the character may be in the "
+           "air): never stand an airborne pose on the floor; ") +
+        "no new poses, swings, spins or flourishes that are in neither "
         "keyframe; every limb and held prop moves monotonically from its place in A to its place in B "
         "(it never passes beyond either keyframe). Rigid props keep their length and stay attached "
         "to the hand holding them, turning smoothly from their angle in A to their angle in B; never "
@@ -517,17 +536,30 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
                min_endpoint_iou: float = DEFAULT_MIN_ENDPOINT_IOU, description: str | None = None,
                chroma: tuple[str, str, tuple[int, int, int]] = ("magenta", "#FF00FF", (255, 0, 255)),
                generator: Generator | None = None, video_runner: VideoRunner | None = None,
-               extra_refs: list[Path] | None = None, refuse: Collection[str] | str | None = None
-               ) -> tuple[list[Image.Image], dict[str, Any]]:
+               extra_refs: list[Path] | None = None, refuse: Collection[str] | str | None = None,
+               ground: str = "shared") -> tuple[list[Image.Image], dict[str, Any]]:
     """Return N in-between RGBA frames (slot-sized canvases) and the report. Raises SystemExit on refusal.
 
-    `refuse` names the faults of `held_fill.FAULTS` that refuse a `--method video` frame (None: all of them)."""
+    `refuse` names the faults of `held_fill.FAULTS` that refuse a `--method video` frame (None: all of them).
+    `ground` source keeps each end as high off the floor as on its source canvas (`Endpoint.lift`) and lerps the
+    in-betweens' height between the two; shared puts every foot on one ground row."""
     if not 1 <= n <= 6:
         raise TweenUsage(f"tween: --n must be 1..6, got {n}")
     if method not in METHODS:
         raise TweenUsage(f"tween: unknown method {method!r}")
     if anchor not in ANCHORS:
         raise TweenUsage(f"tween: unknown anchor {anchor!r}")
+    if ground not in GROUNDS:
+        raise TweenUsage(f"tween: unknown --ground {ground!r} (choose from {GROUNDS})")
+    lift = (0.0, 0.0)
+    if ground == "source":
+        if a.lift is None or b.lift is None or a.canvas is None or b.canvas is None:
+            raise TweenUsage("tween: --ground source reads each end's height off its source canvas: file mode only "
+                             "(--from-file, --to-file)")
+        if a.canvas[1] != b.canvas[1]:
+            raise TweenUsage(f"tween: --ground source needs the two ends on one canvas height (their floor is its "
+                             f"bottom row); {a.source} is {a.canvas[1]} px tall and {b.source} {b.canvas[1]} px")
+        lift = (a.lift, b.lift)
     refused_for = read_refuse(refuse)
     if refused_for is not None and method != "video":
         raise TweenUsage("tween: --refuse names the faults that refuse a --method video frame; the strip's in-betweens "
@@ -541,9 +573,9 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
     warnings = [f"source {ep.source} touches its cell border ({', '.join(ep.touches_border)}): "
                 "content may be cut off or belong to a neighbour cell"
                 for ep in (a, b) if ep.touches_border]
-    lay = plan_layout(a.image, b.image, n, margin, anchor)
+    lay = plan_layout(a.image, b.image, n, margin, anchor, lift)
     slots = n + 2
-    prompt = tween_prompt(n, description, (name, hexv))
+    prompt = tween_prompt(n, description, (name, hexv), ground)
     (workdir / "prompt.txt").write_text(prompt, encoding="utf-8")
     if method == "strip":
         strip = keyframe_strip(a.image, b.image, lay, n, anchor, chroma_rgb)
@@ -557,11 +589,11 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
         warnings += crossings
         figures = [_largest_figure(c) for c in cells]
     else:
-        lay = plan_layout(a.image, b.image, n, max(margin, VIDEO_MIN_MARGIN), anchor)
+        lay = plan_layout(a.image, b.image, n, max(margin, VIDEO_MIN_MARGIN), anchor, lift)
         ends = []
-        for tag, ep in (("first", a), ("last", b)):
+        for tag, ep, up in (("first", a, lift[0]), ("last", b, lift[1])):
             canvas = Image.new("RGBA", (lay.slot_w, lay.slot_h), chroma_rgb + (255,))
-            place(canvas, ep.image, 0, lay, anchor)
+            place(canvas, ep.image, 0, lay, anchor, up)
             canvas.convert("RGB").save(workdir / f"{tag}.png")
             ends.append(workdir / f"{tag}.png")
         clip = workdir / "clip.mp4"
@@ -645,21 +677,24 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
     # The output canvas is the union of A, B and every in-between placed on one foot anchor,
     # plus OUT_PAD on every side, so no frame of the set ever touches or leaves its canvas.
     every = [a.image, *figs, b.image]
+    lifts = [lift[0] + (lift[1] - lift[0]) * k / (slots - 1) for k in range(slots)]
     left = max(round(foot_x(f, anchor)) for f in every) + OUT_PAD
     right = max(f.width - round(foot_x(f, anchor)) for f in every) + OUT_PAD
-    top = max(f.height for f in every) + OUT_PAD
-    out_lay = Layout(left + right, top + OUT_PAD, top, left, lay.heights, lay.aspect)
+    top = max(f.height + round(up) for f, up in zip(every, lifts)) + OUT_PAD
+    out_lay = Layout(left + right, top + OUT_PAD, top, left, lay.heights, lay.aspect, lifts)
     outs = []
-    for fig in figs:
+    for k, fig in enumerate(figs, start=1):
         canvas = Image.new("RGBA", (out_lay.slot_w, out_lay.slot_h), (0, 0, 0, 0))
-        place(canvas, fig, 0, out_lay, anchor)
+        place(canvas, fig, 0, out_lay, anchor, lifts[k])
         outs.append(canvas)
     lay = out_lay
     ends = []
-    for fig in (a.image, b.image):
+    for fig, up in ((a.image, lifts[0]), (b.image, lifts[-1])):
         canvas = Image.new("RGBA", (out_lay.slot_w, out_lay.slot_h), (0, 0, 0, 0))
-        place(canvas, fig, 0, out_lay, anchor)
+        place(canvas, fig, 0, out_lay, anchor, up)
         ends.append(canvas)
+    report["ground"] = ground
+    report["lift_px"] = [round(up, 1) for up in lifts]
     report["canvas"] = [out_lay.slot_w, out_lay.slot_h]
     report["anchor_px"] = [out_lay.foot, out_lay.ground]
     report["_ends"] = ends
@@ -761,6 +796,10 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--provider", choices=PROVIDERS, default=DEFAULT_PROVIDER,
                         help=f"draws the strip (default {DEFAULT_PROVIDER}); --method video films on {VIDEO_PROVIDER} and takes no other")
     parser.add_argument("--anchor", choices=ANCHORS, default="foot")
+    parser.add_argument("--ground", choices=GROUNDS, default="shared",
+                        help="shared (default): every foot on one ground row, an airborne end drawn standing; source "
+                             "(file mode): each end as high off the floor as on its source canvas (both one height), "
+                             "the in-betweens at the lerp of the two")
     parser.add_argument("--margin", type=float, default=DEFAULT_MARGIN, help="safe margin per slot (fraction)")
     parser.add_argument("--min-endpoint-iou", type=float, default=DEFAULT_MIN_ENDPOINT_IOU)
     parser.add_argument("--description", help="character description for the prompt (run mode reads the request)")
@@ -822,7 +861,7 @@ def _run(args: argparse.Namespace) -> int:
         frames, report = make_tween(a, b, args.n, workdir=work, method=args.method, provider=args.provider,
                                     anchor=args.anchor, margin=args.margin,
                                     min_endpoint_iou=args.min_endpoint_iou, description=desc, chroma=chroma,
-                                    extra_refs=args.ref, refuse=args.refuse)
+                                    extra_refs=args.ref, refuse=args.refuse, ground=args.ground)
         report.pop("_ends", None)
         meta = {"from_state": fs, "from_index": fi, "to_state": ts, "to_index": ti, "n": args.n,
                 "method": args.method, "provider": args.provider, "endpoint_match": report["endpoint_match"]}

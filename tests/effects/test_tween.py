@@ -603,3 +603,62 @@ def test_the_final_reading_refuses_a_picture_shown_again(tmp_path, monkeypatch):
         tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(24, 60), "b"), 1, workdir=tmp_path,
                          generator=copy_a)
     assert json.loads((tmp_path / "tween.json").read_text())["read"]["unlisted"] == 1
+
+
+# ---------------------------------------------------------------- where the frames stand (--ground)
+
+def _airborne_pair(tmp_path, up=40, size=(80, 140), other=None):
+    """A in the air `up` px above its canvas floor, B standing on it, both on one canvas size."""
+    fa, fb = tmp_path / "air.png", tmp_path / "floor.png"
+    a = Image.new("RGBA", size, (0, 0, 0, 0))
+    a.alpha_composite(figure(30, 60), (20, size[1] - up - 60))
+    a.save(fa)
+    b = Image.new("RGBA", other or size, (0, 0, 0, 0))
+    b.alpha_composite(figure(24, 80), (20, (other or size)[1] - 80))
+    b.save(fb)
+    return fa, fb
+
+
+def _bottoms(out: Path, names: list[str]) -> list[int]:
+    return [Image.open(out / n).getchannel("A").getbbox()[3] for n in names]
+
+
+def test_ground_shared_stands_an_airborne_end_on_the_floor(tmp_path):
+    fa, fb = _airborne_pair(tmp_path)
+    cfg = P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb)}, tmp_path)
+    rep = P.run_boundary(cfg, tmp_path / "o", generator=fill_ghosts)["report"]
+    assert rep["ground"] == "shared" and rep["lift_px"] == [0.0] * 4
+    assert len(set(_bottoms(tmp_path / "o", ["from.png", "tween-0.png", "tween-1.png", "to.png"]))) == 1
+
+
+def test_ground_source_keeps_each_end_off_the_floor_and_lerps_the_in_betweens(tmp_path):
+    fa, fb = _airborne_pair(tmp_path, up=42)
+    cfg = P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb), "ground": "source"}, tmp_path)
+    rep = P.run_boundary(cfg, tmp_path / "o", generator=fill_ghosts)["report"]
+    assert rep["lift_px"] == [42.0, 28.0, 14.0, 0.0]
+    floor = _bottoms(tmp_path / "o", ["to.png"])[0]
+    up = [floor - b for b in _bottoms(tmp_path / "o", ["from.png", "tween-0.png", "tween-1.png", "to.png"])]
+    assert all(abs(u - want) <= 1 for u, want in zip(up, [42, 28, 14, 0]))
+    assert "never stand an airborne pose" in (tmp_path / "o" / "prompt.txt").read_text()
+    strip = Image.open(tmp_path / "o" / "keyframe-strip.png").convert("RGB")
+    ink = lambda box: Image.fromarray(((np.abs(np.asarray(strip.crop(box)).astype(int) - MAGENTA).sum(axis=2) > 60)
+                                       * 255).astype("uint8")).getbbox()
+    w = strip.width // 4
+    assert ink((3 * w, 0, 4 * w, strip.height))[3] - ink((0, 0, w, strip.height))[3] == 42  # A raised in its slot
+    # on a fixed frame, the floor stays on the pivot row and A stands 42 px above it
+    fixed = P.normalise({**cfg, "cell": None, "frame_size": "96x200"}, tmp_path)
+    P.run_boundary(fixed, tmp_path / "f", generator=fill_ghosts)
+    assert _bottoms(tmp_path / "f", ["from.png", "to.png"]) == [200 - 42, 200]
+
+
+def test_ground_source_needs_one_canvas_height_and_files(tmp_path):
+    fa, fb = _airborne_pair(tmp_path, other=(80, 150))
+    cfg = P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb), "ground": "source"}, tmp_path)
+    with pytest.raises(SystemExit, match="one canvas height") as exc:
+        P.run_boundary(cfg, tmp_path / "o", generator=fill_ghosts)
+    assert exc.value.code == tween.EXIT_USAGE
+    with pytest.raises(SystemExit, match="file mode only"):
+        tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b"), 2, workdir=tmp_path / "r",
+                         generator=fill_ghosts, ground="source")
+    with pytest.raises(SystemExit, match="ground must be one of"):
+        P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb), "ground": "air"}, tmp_path)
