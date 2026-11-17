@@ -41,7 +41,7 @@ from sprite_gen.video import evidence
 
 SCHEMA = "sprite-gen-tween/2"
 CACHE_VERSION = 3  # 2: refused frames kept, judge and final reading on the record, --refuse and --ground hashed;
-# 3: the strip is always drawn on one ground row, --ground auto (default) and the ground record
+# 3: the strip is always drawn on one ground row, --ground auto (default) and the ground record; --places (its values)
 # What a run writes in its folder, past the frames (`_delivered`): it replaces each, so none of them is an input.
 WORK_FILES = ("tween.json", "prompt.txt", "keyframe-strip.png", "raw.png", "first.png", "last.png", "clip.mp4",
               "clip-frames", T.REFUSED, "sheet.png", "sheet.json")
@@ -51,7 +51,7 @@ FIELDS = {  # boundary option -> default
     "description": None, "chroma": "magenta:#FF00FF", "refs": [], "frame_size": None,
     "pivot": "bottom-center", "fit": "error", "resample": "lanczos", "fps": 12.0, "durations_ms": None,
     "include_ends": False, "export": "none", "loop": False, "refuse": None,
-    "ground": T.DEFAULT_GROUND,
+    "ground": T.DEFAULT_GROUND, "places": None,
 }
 _HASHED = [k for k in FIELDS if k not in ("export",)]
 
@@ -121,6 +121,10 @@ def normalise(cfg: dict[str, Any], base: Path) -> dict[str, Any]:
         raise T.TweenUsage(f"tween: export must be none or sheet, got {out['export']!r}")
     if out["ground"] not in T.GROUNDS:
         raise T.TweenUsage(f"tween: ground must be one of {', '.join(T.GROUNDS)}, got {out['ground']!r}")
+    out["places"] = T.read_places(out["places"], base)  # a file (relative to the manifest), or the places themselves
+    if out["places"] is not None and len(out["places"]["places"]) != int(out["n"]):
+        raise T.TweenUsage(f"tween: boundary {bid!r}: places gives {len(out['places']['places'])} place(s) for n "
+                           f"{out['n']} in-betweens; give one per in-between")
     refuse = T.read_refuse(out["refuse"])
     out["refuse"] = None if refuse is None else sorted(refuse)
     if float(out["fps"]) <= 0:
@@ -163,7 +167,8 @@ def _delivered(out_dir: Path) -> list[Path]:
 def guard(cfg: dict[str, Any], out_dir: Path) -> None:
     """Refuse (a usage error, nothing made) an input the run would write over or delete (`runio.refuse_overlap`)."""
     inputs = {"--from-file": _path(cfg["from_file"]), "--to-file": _path(cfg["to_file"]),
-              **{f"--ref {r}": Path(r) for r in cfg["refs"]}}
+              **{f"--ref {r}": Path(r) for r in cfg["refs"]},
+              **({"--places": Path(cfg["places"]["file"])} if cfg.get("places") and cfg["places"]["file"] else {})}
     outputs = {f"{p.name} in --out-dir": p for p in
                [*_delivered(out_dir), *(out_dir / f"tween-{k}.png" for k in range(int(cfg["n"]))),
                 *(out_dir / w for w in WORK_FILES)]}
@@ -315,7 +320,7 @@ def run_boundary(cfg: dict[str, Any], out_dir: Path, *, force: bool = False,
             anchor=cfg["anchor"], margin=float(cfg["margin"]), min_endpoint_iou=float(cfg["min_endpoint_iou"]),
             description=cfg["description"], chroma=(name, hexv, rgb), generator=generator,
             video_runner=video_runner, extra_refs=[Path(r) for r in cfg["refs"]], refuse=cfg["refuse"],
-            ground=cfg["ground"])
+            ground=cfg["ground"], places=cfg["places"])
     except T.TweenUsage:
         raise
     except T.TweenRefused as exc:

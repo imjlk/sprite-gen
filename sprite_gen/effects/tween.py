@@ -32,7 +32,9 @@ height (a crouch into a stand). This module:
 The provider always draws on one ground row. `--ground source` puts the height back when the frames
 are placed: each end as high off the floor as on its source canvas, the in-betweens at the lerp of
 the two heights; `shared` puts every foot on one row; `auto` (default) is source where one end is
-off the floor and the other is not (file mode), else shared.
+off the floor and the other is not (file mode), else shared. tween decides no motion: the
+in-betweens are on the straight line between the ends' places (the default when nothing says
+otherwise) or where the caller's `--places` puts them.
 
 The provider is the one named; nothing retries on another provider (No silent fallback).
 """
@@ -41,6 +43,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import shutil
 import subprocess
 from dataclasses import dataclass
@@ -71,6 +74,11 @@ ANCHORS = ("foot", "bottom-center")
 GROUNDS = ("auto", "shared", "source")
 DEFAULT_GROUND = "auto"
 AIRBORNE_FRACTION = 0.05
+# Where each in-between is placed. linear (no --places): on the straight line from A's place to B's, the default when
+# nothing says otherwise, not a motion. places: where the caller says (`--places FILE`), each in-between's foot anchor
+# `dx` px right of the anchor column and `dy` px down from the floor (negative: above it). tween decides no motion.
+PLACEMENTS = ("linear", "places")
+PLACE_KEYS = ("dx", "dy")
 DEFAULT_MIN_ENDPOINT_IOU = 0.6
 DEFAULT_MARGIN = 0.12
 MIN_SCALE_AGREE = 0.85
@@ -219,7 +227,8 @@ def endpoint_from_run(run_dir: Path, request: dict[str, Any], state: str, index:
     if not components:
         raise TweenUsage(f"tween: could not extract {frames} components from {strip_path}")
     image = _pick(tighten_components(components), index, state)
-    return Endpoint(_tight(image), f"{state}:{index}", [])
+    # the cell of the raw strip is the canvas a --places bound reads; no floor is read off it (lift None: shared)
+    return Endpoint(_tight(image), f"{state}:{index}", [], None, (cleaned.width // frames, cleaned.height))
 
 
 # ---------------------------------------------------------------- geometry
@@ -272,9 +281,9 @@ def plan_layout(a: Image.Image, b: Image.Image, n: int, margin: float, anchor: s
 
 
 def place(canvas: Image.Image, figure: Image.Image, slot: int, lay: Layout, anchor: str,
-          lift: float = 0.0) -> None:
-    """Foot anchor on the slot's anchor column, lowest row `lift` px above the ground row."""
-    x = slot * lay.slot_w + lay.foot - int(round(foot_x(figure, anchor)))
+          lift: float = 0.0, dx: float = 0.0) -> None:
+    """Foot anchor `dx` px right of the slot's anchor column, lowest row `lift` px above the ground row."""
+    x = slot * lay.slot_w + lay.foot + int(round(dx)) - int(round(foot_x(figure, anchor)))
     canvas.alpha_composite(figure, (x, lay.ground - int(round(lift)) - figure.height))
 
 
@@ -546,6 +555,73 @@ def retry_hint(method: str, provider: str) -> str:
     return "Re-run (a new clip), lower --n, or name the strip explicitly: --method strip."
 
 
+def read_places(spec: Any, base: Path | None = None) -> dict[str, Any] | None:
+    """`--places`: a JSON file (or, in a manifest, the value itself) holding a list of `{"dx": px, "dy": px}`, one per
+    in-between in order, or an object `{"places": [...], "from": "what they were read off"}`. Returns
+    `{"from", "file", "places"}` (its own output reads back unchanged), None where none was given. Anything else is a
+    usage error, before any provider call."""
+    if spec is None:
+        return None
+    file = None
+    if isinstance(spec, (str, Path)):
+        path = Path(spec)
+        if base is not None and not path.is_absolute():
+            path = base / path
+        if not path.is_file():
+            raise TweenUsage(f"tween: --places file missing: {path}")
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise TweenUsage(f"tween: --places {path} is not JSON: {exc}") from None
+        file = str(path)
+    else:
+        data = spec
+    label = file or "inline"
+    if isinstance(data, dict):
+        unknown = set(data) - {"places", "from", "file"}
+        if unknown or "places" not in data:
+            raise TweenUsage(f"tween: --places is a list of places or an object with `places` (and `from`); "
+                             f"got keys {sorted(data)}")
+        if data.get("from") is not None and not isinstance(data["from"], str):
+            raise TweenUsage("tween: --places `from` is text: what the places were read off")
+        file = data.get("file") or file
+        label = data.get("from") or file or label
+        items = data["places"]
+    else:
+        items = data
+    if not isinstance(items, list) or not items:
+        raise TweenUsage("tween: --places holds one place per in-between: a non-empty list of {\"dx\": px, \"dy\": px}")
+    places = []
+    for k, item in enumerate(items):
+        if not isinstance(item, dict) or set(item) != set(PLACE_KEYS):
+            raise TweenUsage(f"tween: --places[{k}] must be {{\"dx\": px, \"dy\": px}}, got {item!r}")
+        for key in PLACE_KEYS:
+            v = item[key]
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
+                raise TweenUsage(f"tween: --places[{k}].{key} must be a finite number of px, got {v!r}")
+        places.append({key: float(item[key]) for key in PLACE_KEYS})
+    return {"from": label, "file": file, "places": places}
+
+
+def check_places(places: dict[str, Any], n: int, a: Endpoint, b: Endpoint, bound: tuple[int, int]) -> None:
+    """One place per in-between, each on the reference canvas `bound` (the ends' source canvas, or the strip's slot):
+    never under the floor (dy <= 0), its top (at its lerped height) inside the canvas, |dx| under its width."""
+    got = places["places"]
+    if len(got) != n:
+        raise TweenUsage(f"tween: --places gives {len(got)} place(s) for --n {n} in-betweens; give one per in-between")
+    w, h = bound
+    for k, p in enumerate(got, start=1):
+        tall = a.image.height + (b.image.height - a.image.height) * k / (n + 1)
+        if p["dy"] > 0:
+            raise TweenUsage(f"tween: --places[{k - 1}] dy {p['dy']:g} puts in-between {k} under the floor "
+                             "(dy is px down from it; above it is negative)")
+        if tall - p["dy"] > h:
+            raise TweenUsage(f"tween: --places[{k - 1}] dy {p['dy']:g} puts in-between {k} ({tall:.0f} px tall) "
+                             f"off the top of the {w}x{h} canvas")
+        if abs(p["dx"]) >= w:
+            raise TweenUsage(f"tween: --places[{k - 1}] dx {p['dx']:g} puts in-between {k} off the {w}x{h} canvas")
+
+
 def resolve_ground(a: Endpoint, b: Endpoint, ground: str) -> tuple[str, tuple[float, float], str]:
     """The ground the frames are placed on (`shared` or `source`), each end's lift and why.
 
@@ -578,13 +654,16 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
                chroma: tuple[str, str, tuple[int, int, int]] = ("magenta", "#FF00FF", (255, 0, 255)),
                generator: Generator | None = None, video_runner: VideoRunner | None = None,
                extra_refs: list[Path] | None = None, refuse: Collection[str] | str | None = None,
-               ground: str = DEFAULT_GROUND) -> tuple[list[Image.Image], dict[str, Any]]:
+               ground: str = DEFAULT_GROUND,
+               places: dict[str, Any] | list | str | Path | None = None) -> tuple[list[Image.Image], dict[str, Any]]:
     """Return N in-between RGBA frames (slot-sized canvases) and the report. Raises SystemExit on refusal.
 
     `refuse` names the faults of `held_fill.FAULTS` that refuse a `--method video` frame (None: all of them).
     `ground` (`resolve_ground`): the provider draws on one ground row either way; source places each end as high off
     the floor as on its source canvas (`Endpoint.lift`) and each in-between at the lerp of the two heights, shared puts
-    every foot on one ground row, auto picks source where one end is off the floor and the other is not."""
+    every foot on one ground row, auto picks source where one end is off the floor and the other is not.
+    `places` (`read_places`) places the in-betweens where the caller says; without it they are on the straight line
+    between the ends' places, the default when nothing says otherwise."""
     if not 1 <= n <= 6:
         raise TweenUsage(f"tween: --n must be 1..6, got {n}")
     if method not in METHODS:
@@ -592,6 +671,7 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
     if anchor not in ANCHORS:
         raise TweenUsage(f"tween: unknown anchor {anchor!r}")
     ground_used, lift, ground_why = resolve_ground(a, b, ground)
+    placed = read_places(places)
     refused_for = read_refuse(refuse)
     if refused_for is not None and method != "video":
         raise TweenUsage("tween: --refuse names the faults that refuse a --method video frame; the strip's in-betweens "
@@ -607,6 +687,10 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
                 for ep in (a, b) if ep.touches_border]
     lay = plan_layout(a.image, b.image, n, margin, anchor)
     slots = n + 2
+    if placed is not None:
+        canvases = [ep.canvas for ep in (a, b) if ep.canvas]
+        bound = ((max(c[0] for c in canvases), max(c[1] for c in canvases)) if canvases else (lay.slot_w, lay.slot_h))
+        check_places(placed, n, a, b, bound)
     prompt = tween_prompt(n, description, (name, hexv))
     (workdir / "prompt.txt").write_text(prompt, encoding="utf-8")
     if method == "strip":
@@ -710,14 +794,18 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
     # plus OUT_PAD on every side, so no frame of the set ever touches or leaves its canvas.
     every = [a.image, *figs, b.image]
     lifts = [lift[0] + (lift[1] - lift[0]) * k / (slots - 1) for k in range(slots)]
-    left = max(round(foot_x(f, anchor)) for f in every) + OUT_PAD
-    right = max(f.width - round(foot_x(f, anchor)) for f in every) + OUT_PAD
+    shifts = [0.0] * slots
+    if placed is not None:  # the caller's places for the in-betweens; the ends stay where --ground put them
+        for k, p in enumerate(placed["places"], start=1):
+            lifts[k], shifts[k] = -p["dy"], p["dx"]
+    left = max(round(foot_x(f, anchor)) - round(dx) for f, dx in zip(every, shifts)) + OUT_PAD
+    right = max(f.width - round(foot_x(f, anchor)) + round(dx) for f, dx in zip(every, shifts)) + OUT_PAD
     top = max(f.height + round(up) for f, up in zip(every, lifts)) + OUT_PAD
     out_lay = Layout(left + right, top + OUT_PAD, top, left, lay.heights, lay.aspect, lifts)
     outs = []
     for k, fig in enumerate(figs, start=1):
         canvas = Image.new("RGBA", (out_lay.slot_w, out_lay.slot_h), (0, 0, 0, 0))
-        place(canvas, fig, 0, out_lay, anchor, lifts[k])
+        place(canvas, fig, 0, out_lay, anchor, lifts[k], shifts[k])
         outs.append(canvas)
     lay = out_lay
     ends = []
@@ -727,6 +815,10 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
         ends.append(canvas)
     report["ground"] = {"asked": ground, "used": ground_used, "why": ground_why}
     report["lift_px"] = [round(up, 1) for up in lifts]
+    report["placement"] = {
+        "kind": "places" if placed is not None else "linear",
+        "from": placed["from"] if placed is not None else None,
+        "places": [{"dx": round(shifts[k], 1), "dy": round(-lifts[k], 1)} for k in range(1, slots - 1)]}
     report["canvas"] = [out_lay.slot_w, out_lay.slot_h]
     report["anchor_px"] = [out_lay.foot, out_lay.ground]
     report["_ends"] = ends
@@ -736,7 +828,8 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
     if min(steps) < STEP_IOU_WARN:
         warnings.append(f"pose jump: silhouette IoU between consecutive frames {steps} "
                         f"(lowest under {STEP_IOU_WARN}); check for poses that are in neither keyframe")
-    report["foot_error_px"] = [round(abs(foot_x(_tight(o), anchor) + _tight_box(o)[0] - lay.foot), 1) for o in outs]
+    report["foot_error_px"] = [round(abs(foot_x(_tight(o), anchor) + _tight_box(o)[0] - lay.foot - round(dx)), 1)
+                               for o, dx in zip(outs, shifts[1:-1])]
     rows, refusing = judge_frames(ends[0], outs, ends[1], method=method, refuse=refused_for)
     read = final_reading([ends[0], *outs, ends[1]])
     report.update(refuse=refusing, judge=rows, read=read)
@@ -833,7 +926,12 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
                              "(file mode, one canvas height): each end as high off the floor as on its source canvas, "
                              "the in-betweens at the lerp of the two; shared: every foot on one ground row; auto "
                              f"(default): source where the ends' heights differ by {AIRBORNE_FRACTION * 100:g}%% of the taller "
-                             "end or more, else shared")
+                             "end or more, else shared. The ends only, where --places is given")
+    parser.add_argument("--places", metavar="FILE",
+                        help="JSON: where each in-between is placed, one {\"dx\": px, \"dy\": px} per in-between in order "
+                             "(a list, or an object's \"places\"): its foot anchor dx px right of the anchor column and dy "
+                             "px down from the floor (negative: above it); the ends stay where --ground puts them. Default: "
+                             "the straight line between the ends' places")
     parser.add_argument("--margin", type=float, default=DEFAULT_MARGIN, help="safe margin per slot (fraction)")
     parser.add_argument("--min-endpoint-iou", type=float, default=DEFAULT_MIN_ENDPOINT_IOU)
     parser.add_argument("--description", help="character description for the prompt (run mode reads the request)")
@@ -895,10 +993,12 @@ def _run(args: argparse.Namespace) -> int:
         frames, report = make_tween(a, b, args.n, workdir=work, method=args.method, provider=args.provider,
                                     anchor=args.anchor, margin=args.margin,
                                     min_endpoint_iou=args.min_endpoint_iou, description=desc, chroma=chroma,
-                                    extra_refs=args.ref, refuse=args.refuse, ground=args.ground)
+                                    extra_refs=args.ref, refuse=args.refuse, ground=args.ground,
+                                    places=read_places(args.places))
         report.pop("_ends", None)
         meta = {"from_state": fs, "from_index": fi, "to_state": ts, "to_index": ti, "n": args.n,
-                "method": args.method, "provider": args.provider, "endpoint_match": report["endpoint_match"]}
+                "method": args.method, "provider": args.provider, "endpoint_match": report["endpoint_match"],
+                "placement": report["placement"]}
         target = record_transition_take(args.run_dir, request, label, frames, meta)
         print(f"[tween] transition take written: {target} ({fs}:{fi} -> {ts}:{ti}, n={args.n})")
         return 0

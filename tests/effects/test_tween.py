@@ -726,3 +726,148 @@ def test_a_provider_that_made_nothing_is_an_error_not_a_refusal(tmp_path):
     res = P.run_boundary(P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb)}, tmp_path),
                          tmp_path / "o", generator=expired)
     assert res["status"] == "error" and res["exit"] == tween.EXIT_ERROR and "token expired" in res["report"]["error"]
+
+
+# ---------------------------------------------------------------- where the in-betweens are placed (--places)
+
+def _never(*_a, **_k):
+    raise AssertionError("the provider was called")
+
+
+def _anchor_x(path: Path) -> float:
+    im = Image.open(path).convert("RGBA")
+    box = im.getchannel("A").getbbox()
+    return box[0] + tween.foot_x(im.crop(box))
+
+
+def test_read_places_takes_a_list_an_object_or_a_file_and_reads_its_own_output(tmp_path):
+    want = [{"dx": 0.0, "dy": -98.0}, {"dx": 4.0, "dy": -2.0}]
+    got = tween.read_places([{"dx": 0, "dy": -98}, {"dx": 4, "dy": -2}])
+    assert got == {"from": "inline", "file": None, "places": want}
+    obj = {"places": [{"dx": 0, "dy": -98}, {"dx": 4, "dy": -2}], "from": "jump clip frames 8 and 10"}
+    assert tween.read_places(obj)["from"] == "jump clip frames 8 and 10"
+    (tmp_path / "p.json").write_text(json.dumps(obj))
+    read = tween.read_places("p.json", tmp_path)
+    assert read["file"] == str(tmp_path / "p.json") and read["places"] == want and read["from"] == obj["from"]
+    assert tween.read_places(read) == read and tween.read_places(None) is None
+
+
+@pytest.mark.parametrize("bad, said", [
+    ([], "non-empty list"), ({"place": []}, "got keys"), ({"places": [{"dx": 0, "dy": 0}], "fro": 1}, "got keys"),
+    ([{"dx": 0}], r"must be \{"), ([{"dx": 0, "dy": 0, "t": 1}], r"must be \{"), ([[0, 0]], r"must be \{"),
+    ([{"dx": "0", "dy": 0}], "finite number"), ([{"dx": True, "dy": 0}], "finite number"),
+    ([{"dx": 0, "dy": float("nan")}], "finite number"), ({"places": [{"dx": 0, "dy": 0}], "from": 3}, "is text"),
+])
+def test_read_places_refuses_what_is_not_a_list_of_places(bad, said):
+    with pytest.raises(SystemExit, match=said) as exc:
+        tween.read_places(bad)
+    assert exc.value.code == tween.EXIT_USAGE
+
+
+def test_read_places_refuses_a_missing_file_and_bad_json(tmp_path):
+    with pytest.raises(SystemExit, match="file missing") as exc:
+        tween.read_places(tmp_path / "nope.json")
+    assert exc.value.code == tween.EXIT_USAGE
+    (tmp_path / "bad.json").write_text("{dx: 1")
+    with pytest.raises(SystemExit, match="is not JSON"):
+        tween.read_places(tmp_path / "bad.json")
+
+
+@pytest.mark.parametrize("places, said", [
+    ([{"dx": 0, "dy": -10}], "gives 1 place"),
+    ([{"dx": 0, "dy": 3}, {"dx": 0, "dy": 0}], "under the floor"),
+    ([{"dx": 0, "dy": -90}, {"dx": 0, "dy": 0}], "off the top of the 80x140 canvas"),
+    ([{"dx": 0, "dy": 0}, {"dx": -80, "dy": 0}], "off the 80x140 canvas"),
+])
+def test_places_off_count_or_off_canvas_are_usage_errors_before_any_provider_call(tmp_path, places, said):
+    fa, fb = _airborne_pair(tmp_path)
+    a, b = tween.endpoint_from_file(str(fa), None, MAGENTA), tween.endpoint_from_file(str(fb), None, MAGENTA)
+    for method in ("strip", "video"):
+        with pytest.raises(SystemExit, match=said) as exc:
+            tween.make_tween(a, b, 2, workdir=tmp_path / method, method=method, generator=_never, video_runner=_never,
+                             places=places)
+        assert exc.value.code == tween.EXIT_USAGE
+        assert not (tmp_path / method / "keyframe-strip.png").exists() and not (tmp_path / method / "first.png").exists()
+
+
+def test_places_put_the_in_betweens_where_the_caller_says_and_the_ends_where_ground_does(tmp_path):
+    """On a shared floor: the ends stand on it, the in-betweens 50 and 20 px above it and 6 px right, -4 px left of
+    the anchor column; the canvas grows to hold them, nothing touches its edge; the record says what was used."""
+    fa, fb = _airborne_pair(tmp_path, up=0)
+    places = {"places": [{"dx": 6, "dy": -50}, {"dx": -4, "dy": -20}], "from": "a test"}
+    (tmp_path / "places.json").write_text(json.dumps(places))
+    cfg = P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb), "places": "places.json"}, tmp_path)
+    rep = P.run_boundary(cfg, tmp_path / "o", generator=fill_ghosts)["report"]
+    assert rep["placement"] == {"kind": "places", "from": "a test",
+                                "places": [{"dx": 6.0, "dy": -50.0}, {"dx": -4.0, "dy": -20.0}]}
+    assert rep["lift_px"] == [0.0, 50.0, 20.0, 0.0] and rep["foot_error_px"] == [0.0, 0.0]
+    out = tmp_path / "o"
+    floor = _bottoms(out, ["to.png"])[0]
+    assert [floor - b for b in _bottoms(out, FOUR)] == [0, 50, 20, 0]
+    xs = [_anchor_x(out / f) for f in FOUR]
+    assert abs(xs[1] - xs[0] - 6) <= 1 and abs(xs[2] - xs[0] + 4) <= 1 and abs(xs[3] - xs[0]) <= 1
+    for f in FOUR:
+        im = Image.open(out / f)
+        x0, y0, x1, y1 = im.getchannel("A").getbbox()
+        assert x0 >= 1 and y0 >= 1 and x1 < im.width and y1 < im.height  # no frame clipped
+    saved = json.loads((out / "tween.json").read_text())
+    assert saved["placement"]["kind"] == "places"
+
+
+def test_places_with_ground_source_keep_the_ends_at_their_heights(tmp_path):
+    fa, fb = _airborne_pair(tmp_path, up=42)
+    cfg = P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb),
+                       "places": [{"dx": 0, "dy": -40}, {"dx": 0, "dy": -1}]}, tmp_path)
+    rep = P.run_boundary(cfg, tmp_path / "o", generator=fill_ghosts)["report"]
+    assert rep["ground"]["used"] == "source" and rep["lift_px"] == [42.0, 40.0, 1.0, 0.0]
+    floor = _bottoms(tmp_path / "o", ["to.png"])[0]
+    assert [floor - b for b in _bottoms(tmp_path / "o", FOUR)] == [42, 40, 1, 0]
+
+
+def test_without_places_the_record_says_linear_with_the_line_s_values(tmp_path):
+    fa, fb = _airborne_pair(tmp_path, up=42)
+    rep = P.run_boundary(P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb)}, tmp_path), tmp_path / "o",
+                         generator=fill_ghosts)["report"]
+    assert rep["placement"] == {"kind": "linear", "from": None,
+                                "places": [{"dx": 0.0, "dy": -28.0}, {"dx": 0.0, "dy": -14.0}]}
+
+
+def test_places_place_the_clip_s_samples_too(tmp_path, monkeypatch):
+    fa, fb = _airborne_pair(tmp_path, up=0)
+    a, b = tween.endpoint_from_file(str(fa), None, MAGENTA), tween.endpoint_from_file(str(fb), None, MAGENTA)
+    frames, rep = tween.make_tween(a, b, 2, workdir=tmp_path / "v", method="video", video_runner=_crossfade(monkeypatch),
+                                   min_endpoint_iou=0.3, refuse="held", places=[{"dx": 0, "dy": -30},
+                                                                                {"dx": 0, "dy": -10}])
+    bottoms = [f.getchannel("A").getbbox()[3] for f in [*rep["_ends"][:1], *frames, *rep["_ends"][1:]]]
+    assert all(abs((bottoms[-1] - x) - want) <= 1 for x, want in zip(bottoms, [0, 30, 10, 0]))
+    assert rep["placement"]["kind"] == "places"
+
+
+def test_places_in_run_mode_and_the_cli(tmp_path, monkeypatch):
+    run = _run(tmp_path)
+    monkeypatch.setattr(tween, "gen_generator", lambda provider, refs=None: fill_ghosts)
+    (tmp_path / "p.json").write_text(json.dumps([{"dx": 0, "dy": -30}, {"dx": 0, "dy": -10}]))
+    assert tween.run(run_dir=run, from_ref="attack:-1", to_ref="idle:0", n=2, label="up",
+                     places=str(tmp_path / "p.json")) == 0
+    meta = json.loads((run / "sprite-request.json").read_text())["states"]["idle"]["takes"][0]["transition"]
+    assert meta["placement"]["kind"] == "places" and meta["placement"]["places"][0]["dy"] == -30.0
+    with pytest.raises(SystemExit, match=r"off the top of the 128x128 canvas") as exc:  # the raw strip's cell
+        tween.run(run_dir=run, from_ref="attack:-1", to_ref="idle:0", n=2, label="up2",
+                  places=[{"dx": 0, "dy": -120}, {"dx": 0, "dy": 0}])
+    assert exc.value.code == tween.EXIT_USAGE
+    fa, fb = _pair(tmp_path)
+    with pytest.raises(SystemExit) as exc:
+        tween.main(["--from-file", str(fa), "--to-file", str(fb), "--out-dir", str(tmp_path / "o"), "--n", "3",
+                    "--places", str(tmp_path / "p.json")])
+    assert exc.value.code == tween.EXIT_USAGE
+
+
+def test_places_in_a_manifest_read_relative_to_it_and_hashed(tmp_path):
+    fa, fb = _airborne_pair(tmp_path, up=0)
+    (tmp_path / "p.json").write_text(json.dumps([{"dx": 0, "dy": -30}, {"dx": 0, "dy": -10}]))
+    one = P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb), "places": "p.json"}, tmp_path)
+    other = P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb),
+                         "places": [{"dx": 0, "dy": -31}, {"dx": 0, "dy": -10}]}, tmp_path)
+    assert P.input_hash(one) != P.input_hash(other)
+    with pytest.raises(SystemExit, match="places gives 2 place"):
+        P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb), "n": 3, "places": "p.json"}, tmp_path)
