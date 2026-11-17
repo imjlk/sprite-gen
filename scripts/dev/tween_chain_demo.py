@@ -18,6 +18,7 @@ For each, two frames between, five ways, every one through the CLI in a subproce
 |---|---|
 | `strip-shared` | `tween --method strip --ground shared` (every foot on one ground row) |
 | `strip` | `tween --method strip` (`--ground auto`, the default: the height put back where one end is off the floor) |
+| `strip-places` | `t4` only: the same with `--places runs/t4/places.json`, the places of the clip's own frames 8 and 10 (each one's height off the floor, and its anchor's distance from the line between the ends'): what a caller who has the motion gives |
 | `video` | `tween --method video` (`--ground auto`; every fault of the judge refuses, the default) |
 | `chain-held` | `video-chain --piece A=..:F-3:F --piece B=..:T:T+3 --bridge 2 --refuse held` |
 | `chain` | the same with every fault refusing (the default) |
@@ -32,7 +33,8 @@ again from an earlier `--out-dir`. RIFE must be installed for the chain rows (`s
 
 Writes `<out-dir>/runs/<join>/<row>/[try-<k>/]` (each verb's own folder and report), `<out-dir>/summary.json` (each
 try's exit code, seconds and the numbers its report gives, each row's frames' height off the floor, `rise_px`, and on
-`t4` each frame's silhouette IoU with the clip's own frame and its height error), and `<out-dir>/showcase/`:
+`t4` each frame's silhouette IoU with the clip's own frame, its height error and its anchor's error off the line between
+the ends'), and `<out-dir>/showcase/`:
 `tween-vs-chain-<join>.gif` (four rows playing A, the two frames between, B, `t4` with the clip's own frames beside
 them; a grey line on the lower end's floor) and `tween-vs-chain-<join>.png` (every row on one sheet), each under 1 MB.
 """
@@ -59,14 +61,42 @@ JOINS = {  # name: (from clip, from frame, to clip, to frame, what it is)
 }
 TRUTH = {"t4": ("pip-jump", (6, 8, 10, 12))}  # the clip's own frames at A, 1/3, 2/3, B
 ROWS = ("strip-shared", "strip", "video", "chain-held", "chain")
-TWEEN_ROWS = ("strip-shared", "strip", "video")
+TWEEN_ROWS = ("strip-shared", "strip", "strip-places", "video")
+PLACES_FILE = "places.json"  # runs/<join>/places.json: the clip's own frames' places, for the strip-places row
 TITLES = {"strip-shared": "tween strip --ground shared", "strip": "tween strip (--ground auto)",
           "video": "tween video (--ground auto)", "chain-held": "video-chain --refuse held",
-          "chain": "video-chain (default)", "truth": "the clip's own frames"}
+          "chain": "video-chain (default)", "truth": "the clip's own frames",
+          "strip-places": "tween strip --places"}
 DESCRIPTION = ("chibi wizard kid Pip: big indigo pointed hood with a yellow bell tip, orange scarf, cream tunic, "
                "brown satchel and boots, side view facing right")
 MARGIN = (12, 13)  # px added to the larger clip's width and height: the canvas of the comparison
 FPS = 24
+
+
+def rows_of(join: str) -> tuple[str, ...]:
+    """The rows of a join: where the clip's own frames are known, a strip placed where they are, after the strip."""
+    return ROWS[:2] + ("strip-places",) + ROWS[2:] if join in TRUTH else ROWS
+
+
+def anchor_place(frame: Image.Image) -> tuple[float, float]:
+    """A frame's foot anchor on its canvas: (x, its lowest opaque row's height off the canvas floor)."""
+    from sprite_gen.effects.tween import foot_x
+    box = frame.getchannel("A").getbbox()
+    return box[0] + foot_x(frame.crop(box)), float(frame.height - box[3])
+
+
+def places_from_truth(join: str, states: dict[str, Path]) -> dict:
+    """`--places` read off the clip's own frames between: each one's height off the floor (dy, negative up) and its
+    anchor's distance from the straight line between the ends' anchors (dx): what a caller who has the clip gives."""
+    truth = truth_frames(join, states)
+    (xa, _), (xb, _) = anchor_place(truth[0]), anchor_place(truth[-1])
+    places = []
+    for k, frame in enumerate(truth[1:-1], start=1):
+        x, up = anchor_place(frame)
+        t = k / (len(truth) - 1)
+        places.append({"dx": round(x - (xa + (xb - xa) * t), 1), "dy": -up})
+    clip, picks = TRUTH[join]
+    return {"from": f"{clip} frames {', '.join(str(p) for p in picks[1:-1])} (the clip's own)", "places": places}
 
 
 def build_states(out: Path) -> dict[str, Path]:
@@ -97,6 +127,8 @@ def command(row: str, join: str, states: dict[str, Path], run: Path, provider: s
             "--to-file", str(states[b] / f"frame-{fb + 1:04d}.png"), "--n", str(n), "--provider", provider,
             "--description", DESCRIPTION, "--out-dir", str(run), "--fps", str(FPS), "--include-ends", "--force",
             "--method", "video" if row == "video" else "strip"]
+    if row == "strip-places":
+        args += ["--places", str(run.parents[1] / PLACES_FILE)]
     return args + (["--ground", "shared"] if row == "strip-shared" else [])
 
 
@@ -187,7 +219,12 @@ def against_truth(frames: list[Image.Image], truth: list[Image.Image]) -> dict:
         g, w = _tight(got), _tight(want)
         iou.append(round(silhouette_iou(_scaled(g, w.height), w, "foot"), 3))
     got, want = rise_px(frames), rise_px(truth)
-    return {"iou": iou, "rise_px": want, "rise_error_px": [g - w for g, w in zip(got[1:-1], want[1:-1])]}
+
+    def off_line(fs):  # each frame between's anchor x off the straight line between the ends' anchors
+        xs = [anchor_place(f)[0] for f in fs]
+        return [xs[k] - (xs[0] + (xs[-1] - xs[0]) * k / (len(xs) - 1)) for k in range(1, len(xs) - 1)]
+    return {"iou": iou, "rise_px": want, "rise_error_px": [g - w for g, w in zip(got[1:-1], want[1:-1])],
+            "anchor_error_px": [round(g - w, 1) for g, w in zip(off_line(frames), off_line(truth))]}
 
 
 def summarise(join: str, runs: Path, states: dict[str, Path], tries: int, timing: dict) -> dict:
@@ -195,7 +232,7 @@ def summarise(join: str, runs: Path, states: dict[str, Path], tries: int, timing
     truth = truth_frames(join, states)
     if truth:
         out["truth"] = {"rise_px": rise_px(truth)}
-    for row in ROWS:
+    for row in rows_of(join):
         dirs = [d for d in run_dirs(row, join, runs, tries) if (d / "log.txt").is_file()]
         if not dirs:
             continue
@@ -255,12 +292,12 @@ def render(join: str, runs: Path, summary: dict, states: dict[str, Path], tries:
            height: int) -> list[Path]:
     """The GIF (four rows playing, and the clip's own frames where there are) and the sheet (every row's four frames)."""
     rows = {}
-    for row in ROWS:
+    for row in rows_of(join):
         entry = summary[join][row]
         frames, refused = frames_of(row, run_dirs(row, join, runs, tries)[entry["shown"]])
         rows[row] = (frames, refused, entry)
     truth = truth_frames(join, states)
-    order = list(ROWS) + (["truth"] if truth else [])
+    order = list(rows_of(join)) + (["truth"] if truth else [])
     if truth:
         rows["truth"] = (truth, False, summary[join]["truth"])
     zoom = 200 / height
@@ -344,7 +381,11 @@ def main(argv: list[str] | None = None) -> int:
     timing_path = out / "timing.json"
     timing = json.loads(timing_path.read_text()) if timing_path.is_file() else {}
     if not args.render_only:
-        todo = [(row, j, d) for j in joins for row in ROWS if not (args.no_provider and row in TWEEN_ROWS)
+        for j in joins:
+            if j in TRUTH:
+                (runs / j).mkdir(parents=True, exist_ok=True)
+                (runs / j / PLACES_FILE).write_text(json.dumps(places_from_truth(j, states), indent=2) + "\n")
+        todo = [(row, j, d) for j in joins for row in rows_of(j) if not (args.no_provider and row in TWEEN_ROWS)
                 for d in run_dirs(row, j, runs, args.tries) if not (args.resume and stands(row, d))]
         with ThreadPoolExecutor(max(1, args.jobs)) as pool:
             for (row, j, d), result in zip(todo, pool.map(
@@ -356,7 +397,7 @@ def main(argv: list[str] | None = None) -> int:
     show = out / "showcase"
     show.mkdir(exist_ok=True)
     height = Image.open(next(iter(states.values())) / "frame-0001.png").height
-    written = [p for j in joins if all(r in summary[j] for r in ROWS)
+    written = [p for j in joins if all(r in summary[j] for r in rows_of(j))
                for p in render(j, runs, summary, states, args.tries, show, height)]
     (out / "summary.json").write_text(json.dumps({"provider": args.provider, "n": args.n, "tries": args.tries, "joins": {
         j: {"what": JOINS[j][4], **summary[j]} for j in joins}}, indent=2) + "\n")
