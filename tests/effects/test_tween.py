@@ -623,32 +623,78 @@ def _bottoms(out: Path, names: list[str]) -> list[int]:
     return [Image.open(out / n).getchannel("A").getbbox()[3] for n in names]
 
 
+FOUR = ["from.png", "tween-0.png", "tween-1.png", "to.png"]
+
+
+def _ink_bottoms(strip: Image.Image, slots: int) -> list[int]:
+    """Each slot's lowest row of ink on the chroma strip."""
+    arr = np.abs(np.asarray(strip.convert("RGB")).astype(int) - MAGENTA).sum(axis=2) > 60
+    w = strip.width // slots
+    return [int(np.where(arr[:, k * w:(k + 1) * w].any(axis=1))[0][-1]) for k in range(slots)]
+
+
 def test_ground_shared_stands_an_airborne_end_on_the_floor(tmp_path):
     fa, fb = _airborne_pair(tmp_path)
-    cfg = P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb)}, tmp_path)
+    cfg = P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb), "ground": "shared"}, tmp_path)
     rep = P.run_boundary(cfg, tmp_path / "o", generator=fill_ghosts)["report"]
-    assert rep["ground"] == "shared" and rep["lift_px"] == [0.0] * 4
-    assert len(set(_bottoms(tmp_path / "o", ["from.png", "tween-0.png", "tween-1.png", "to.png"]))) == 1
+    assert rep["ground"] == {"asked": "shared", "used": "shared", "why": "asked"} and rep["lift_px"] == [0.0] * 4
+    assert len(set(_bottoms(tmp_path / "o", FOUR))) == 1
 
 
-def test_ground_source_keeps_each_end_off_the_floor_and_lerps_the_in_betweens(tmp_path):
+def test_ground_source_draws_on_one_floor_and_lifts_only_the_delivered_frames(tmp_path):
+    """The provider is never shown a figure in the air: the strip stands every slot on one ground row, and the ends'
+    heights come back when the frames are placed, the in-betweens at the lerp of the two."""
     fa, fb = _airborne_pair(tmp_path, up=42)
     cfg = P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb), "ground": "source"}, tmp_path)
     rep = P.run_boundary(cfg, tmp_path / "o", generator=fill_ghosts)["report"]
-    assert rep["lift_px"] == [42.0, 28.0, 14.0, 0.0]
+    assert rep["ground"]["used"] == "source" and rep["lift_px"] == [42.0, 28.0, 14.0, 0.0]
     floor = _bottoms(tmp_path / "o", ["to.png"])[0]
-    up = [floor - b for b in _bottoms(tmp_path / "o", ["from.png", "tween-0.png", "tween-1.png", "to.png"])]
+    up = [floor - b for b in _bottoms(tmp_path / "o", FOUR)]
     assert all(abs(u - want) <= 1 for u, want in zip(up, [42, 28, 14, 0]))
-    assert "never stand an airborne pose" in (tmp_path / "o" / "prompt.txt").read_text()
-    strip = Image.open(tmp_path / "o" / "keyframe-strip.png").convert("RGB")
-    ink = lambda box: Image.fromarray(((np.abs(np.asarray(strip.crop(box)).astype(int) - MAGENTA).sum(axis=2) > 60)
-                                       * 255).astype("uint8")).getbbox()
-    w = strip.width // 4
-    assert ink((3 * w, 0, 4 * w, strip.height))[3] - ink((0, 0, w, strip.height))[3] == 42  # A raised in its slot
+    prompt = (tmp_path / "o" / "prompt.txt").read_text()
+    assert "same ground line" in prompt and "air" not in prompt
+    assert len(set(_ink_bottoms(Image.open(tmp_path / "o" / "keyframe-strip.png"), 4))) == 1  # A grounded in its slot
+    # the endpoint check compares the grounded drawing with A and B: it passes as on a shared floor
+    assert rep["endpoint_match"]["iou_from"] >= 0.99 and rep["endpoint_match"]["iou_to"] >= 0.99
     # on a fixed frame, the floor stays on the pivot row and A stands 42 px above it
     fixed = P.normalise({**cfg, "cell": None, "frame_size": "96x200"}, tmp_path)
     P.run_boundary(fixed, tmp_path / "f", generator=fill_ghosts)
     assert _bottoms(tmp_path / "f", ["from.png", "to.png"]) == [200 - 42, 200]
+
+
+def test_ground_source_films_the_clip_grounded_and_lifts_the_samples(tmp_path, monkeypatch):
+    fa, fb = _airborne_pair(tmp_path, up=42)
+    a, b = tween.endpoint_from_file(str(fa), None, MAGENTA), tween.endpoint_from_file(str(fb), None, MAGENTA)
+    frames, rep = tween.make_tween(a, b, 2, workdir=tmp_path / "v", method="video", video_runner=_crossfade(monkeypatch),
+                                   min_endpoint_iou=0.3, refuse="held", ground="source")
+    shown = [Image.open(tmp_path / "v" / f).convert("RGB") for f in ("first.png", "last.png")]
+    assert len({_ink_bottoms(im, 1)[0] for im in shown}) == 1  # the clip's first and last frames on one floor
+    assert rep["lift_px"] == [42.0, 28.0, 14.0, 0.0]
+    bottoms = [f.getchannel("A").getbbox()[3] for f in [*rep["_ends"][:1], *frames, *rep["_ends"][1:]]]
+    assert all(abs((bottoms[-1] - x) - want) <= 1 for x, want in zip(bottoms, [42, 28, 14, 0]))
+
+
+def test_ground_auto_is_source_where_one_end_is_off_the_floor(tmp_path):
+    fa, fb = _airborne_pair(tmp_path, up=42)
+    rep = P.run_boundary(P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb)}, tmp_path), tmp_path / "o",
+                         generator=fill_ghosts)["report"]
+    assert P.FIELDS["ground"] == tween.DEFAULT_GROUND == "auto"
+    assert rep["ground"]["asked"] == "auto" and rep["ground"]["used"] == "source" and rep["lift_px"][0] == 42.0
+    assert "differ by 42 >= 4" in rep["ground"]["why"]  # 5% of the taller end (80 px)
+
+
+def test_ground_auto_is_shared_for_two_grounded_ends_run_mode_and_two_canvas_heights(tmp_path):
+    fa, fb = _airborne_pair(tmp_path, up=3)  # 3 px of padding is under 5% of 80 px: both on the floor
+    rep = P.run_boundary(P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb)}, tmp_path), tmp_path / "o",
+                         generator=fill_ghosts)["report"]
+    assert rep["ground"]["used"] == "shared" and rep["lift_px"] == [0.0] * 4
+    _, rep = tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b"), 2,
+                              workdir=tmp_path / "r", generator=fill_ghosts)
+    assert rep["ground"] == {"asked": "auto", "used": "shared", "why": "no source canvas (run mode)"}
+    fa, fb = _airborne_pair(tmp_path, up=42, other=(80, 150))
+    rep = P.run_boundary(P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb)}, tmp_path),
+                         tmp_path / "h", generator=fill_ghosts)["report"]
+    assert rep["ground"]["used"] == "shared" and "two canvas heights" in rep["ground"]["why"]
 
 
 def test_ground_source_needs_one_canvas_height_and_files(tmp_path):

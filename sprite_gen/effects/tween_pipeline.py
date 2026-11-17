@@ -40,7 +40,8 @@ from sprite_gen.spec.runio import refuse_overlap
 from sprite_gen.video import evidence
 
 SCHEMA = "sprite-gen-tween/2"
-CACHE_VERSION = 2  # 2: refused frames kept, judge and final reading on the record, --refuse and --ground hashed
+CACHE_VERSION = 3  # 2: refused frames kept, judge and final reading on the record, --refuse and --ground hashed;
+# 3: the strip is always drawn on one ground row, --ground auto (default) and the ground record
 # What a run writes in its folder, past the frames (`_delivered`): it replaces each, so none of them is an input.
 WORK_FILES = ("tween.json", "prompt.txt", "keyframe-strip.png", "raw.png", "first.png", "last.png", "clip.mp4",
               "clip-frames", T.REFUSED, "sheet.png", "sheet.json")
@@ -50,7 +51,7 @@ FIELDS = {  # boundary option -> default
     "description": None, "chroma": "magenta:#FF00FF", "refs": [], "frame_size": None,
     "pivot": "bottom-center", "fit": "error", "resample": "lanczos", "fps": 12.0, "durations_ms": None,
     "include_ends": False, "export": "none", "loop": False, "refuse": None,
-    "ground": "shared",
+    "ground": T.DEFAULT_GROUND,
 }
 _HASHED = [k for k in FIELDS if k not in ("export",)]
 
