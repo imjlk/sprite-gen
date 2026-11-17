@@ -284,6 +284,7 @@ def test_video_frame_drawn_at_wrong_scale_is_refused(tmp_path, monkeypatch):
         _video(tmp_path, monkeypatch, shrink)
     saved = json.loads((tmp_path / "tween.json").read_text())
     assert saved["status"] == "refused" and "error" in saved
+    assert "--method strip" in saved["error"] and "--method video" not in saved["error"]
 
 
 def test_video_pose_jump_is_refused(tmp_path, monkeypatch):
@@ -495,3 +496,16 @@ def test_the_record_carries_the_engine_and_the_source_identity(tmp_path):
     rep = P.run_boundary(cfg, tmp_path / "o", generator=fill_ghosts)["report"]
     assert set(rep["producer"]) == {"implementation_sha256", "tween_sha256"}
     assert rep["source"]["kind"] == "keyed-frame-sequence" and rep["source"]["frames"] == 2
+
+
+def test_a_refusal_names_the_other_method_never_the_one_refused(tmp_path, monkeypatch):
+    def drift(strip, prompt, out, aspect):
+        fill_ghosts(strip, prompt, out, aspect, keep_ends=False)
+    with pytest.raises(SystemExit) as exc:
+        tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
+                         workdir=tmp_path / "s", generator=drift)
+    said = str(exc.value)
+    assert "--method video" in said and "--provider codex" in said and "strip drifted" in said
+    assert tween.retry_hint("strip", "codex").count("--provider grok") == 1
+    hint = tween.retry_hint("video", "grok")
+    assert "--method strip" in hint and "--method video" not in hint

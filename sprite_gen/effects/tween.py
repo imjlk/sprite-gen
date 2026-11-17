@@ -439,6 +439,16 @@ def _call_provider(workdir: Path, method: str, provider: str, n: int, a: Endpoin
         (workdir / "tween.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
         raise
 
+def retry_hint(method: str, provider: str) -> str:
+    """What to try after a refusal, for the method that was refused: never the method that was just run. Nothing is
+    retried by itself (No silent fallback)."""
+    if method == "strip":
+        other = next(p for p in PROVIDERS if p != provider)
+        return (f"Re-run, lower --n, or name another way explicitly: --provider {other}, or --method video "
+                f"(films on {VIDEO_PROVIDER}).")
+    return "Re-run (a new clip), lower --n, or name the strip explicitly: --method strip."
+
+
 def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str = "strip",
                provider: str = DEFAULT_PROVIDER, anchor: str = "foot", margin: float = DEFAULT_MARGIN,
                min_endpoint_iou: float = DEFAULT_MIN_ENDPOINT_IOU, description: str | None = None,
@@ -543,22 +553,22 @@ def make_tween(a: Endpoint, b: Endpoint, n: int, *, workdir: Path, method: str =
                                             encoding="utf-8")
         raise TweenRefused(msg, frames)
     if min(iou_a, iou_b) < min_endpoint_iou or scale_agree < MIN_SCALE_AGREE:
+        drifted = ("the strip drifted" if method == "strip" else
+                   "the clip's first or last frame is not the keyframe it was given")
         refuse(
             f"tween: refused — drawn endpoints do not match the keyframes (IoU from {iou_a:.2f}, "
             f"to {iou_b:.2f}, need >= {min_endpoint_iou}; end scales agree {scale_agree:.2f}, need >= "
-            f"{MIN_SCALE_AGREE}); the strip drifted. Raw kept in {workdir}. "
-            "Re-run, lower --n, or try --method video / another --provider explicitly.")
+            f"{MIN_SCALE_AGREE}); {drifted}. Raw kept in {workdir}. " + retry_hint(method, provider))
     if bad_scale:
         msg = (f"tween: refused — in-between(s) {bad_scale} drawn at {[round(rel[k - 1], 2) for k in bad_scale]}x the "
                f"size of the drawn endpoints (allowed {FRAME_SCALE_MIN}..{FRAME_SCALE_MAX})")
         if method == "video":
-            refuse(msg + f"; the clip zoomed or shrank the figure. Raw kept in {workdir}. Re-run, or try "
-                   "--method strip explicitly.")
+            refuse(msg + f"; the clip zoomed or shrank the figure. Raw kept in {workdir}. " + retry_hint(method, provider))
         warnings.append(msg.replace("refused — ", "") + "; rescaled to the keyframe height")
     if method == "video" and min(drawn_steps) < STEP_IOU_REFUSE:
         refuse(f"tween: refused — consecutive clip frames jump (silhouette IoU {drawn_steps}, need >= "
                f"{STEP_IOU_REFUSE}); the clip passes through a pose in neither keyframe. Raw kept in "
-               f"{workdir}. Re-run, or try --method strip explicitly.")
+               f"{workdir}. " + retry_hint(method, provider))
     figs = [_scaled(figures[k], h) for k, h in zip(range(1, slots - 1), heights)]
     # Grow the output canvas (same for every frame) when an in-between is drawn wider or taller
     # than the slot, so nothing is clipped; the foot anchor keeps its distance from the bottom.
