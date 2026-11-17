@@ -320,6 +320,8 @@ def run_boundary(cfg: dict[str, Any], out_dir: Path, *, force: bool = False,
         raise
     except T.TweenRefused as exc:
         return failed("refused", T.EXIT_REFUSED, exc)
+    except T.TweenError as exc:  # the provider made nothing: recorded per boundary, the batch goes on
+        return failed("error", T.EXIT_ERROR, exc)
     except Exception as exc:  # noqa: BLE001 - provider/runtime failure is recorded per boundary
         return failed("error", T.EXIT_ERROR, exc)
     ends = report.pop("_ends")

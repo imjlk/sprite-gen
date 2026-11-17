@@ -458,15 +458,21 @@ def video_frames(clip: Path, workdir: Path) -> list[Image.Image]:
 
 def _call_provider(workdir: Path, method: str, provider: str, n: int, a: Endpoint, b: Endpoint,
                    call: Callable[[], None]) -> None:
-    """Run the provider call; on any failure (timeout, auth, crash) leave a tween.json saying so."""
+    """Run the provider call; on any failure (timeout, auth, crash) leave a tween.json saying so and raise a TweenError
+    (exit EXIT_ERROR: a provider that made nothing is an error, not a refusal). A provider's own SystemExit (an expired
+    login says so with one) keeps its message."""
     try:
         call()
-    except BaseException as exc:  # noqa: BLE001 - recorded, then re-raised unchanged
+    except BaseException as exc:  # noqa: BLE001 - recorded, then raised as the run contract's error
+        said = str(exc.code) if isinstance(exc, SystemExit) and not isinstance(exc, TweenError) else str(exc)
         report = {"kind": "sprite-gen-tween", "method": method, "provider": provider, "n": n,
                   "from": a.source, "to": b.source, "status": "error",
-                  "error": f"{type(exc).__name__}: {exc}"}
+                  "error": f"{type(exc).__name__}: {said}"}
         (workdir / "tween.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
-        raise
+        if isinstance(exc, (KeyboardInterrupt, TweenError)):
+            raise
+        what = "the clip" if method == "video" else "the strip"
+        raise TweenError(f"tween: {provider} made nothing for {what}: {said}") from exc
 
 # ---------------------------------------------------------------- the judge and the final reading
 

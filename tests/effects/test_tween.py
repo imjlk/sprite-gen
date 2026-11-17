@@ -312,9 +312,10 @@ def test_video_pose_jump_is_refused(tmp_path, monkeypatch):
 def test_provider_timeout_leaves_a_tween_json_with_the_error(tmp_path):
     def timeout(strip, prompt, out, aspect):
         raise TimeoutError("provider took too long")
-    with pytest.raises(TimeoutError):
+    with pytest.raises(tween.TweenError, match="grok made nothing for the strip: provider took too long") as exc:
         tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(30, 60), "b"), 2,
                          workdir=tmp_path, generator=timeout)
+    assert exc.value.code == tween.EXIT_ERROR and isinstance(exc.value.__cause__, TimeoutError)
     saved = json.loads((tmp_path / "tween.json").read_text())
     assert saved["status"] == "error" and "TimeoutError" in saved["error"]
 
@@ -708,3 +709,20 @@ def test_ground_source_needs_one_canvas_height_and_files(tmp_path):
                          generator=fill_ghosts, ground="source")
     with pytest.raises(SystemExit, match="ground must be one of"):
         P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb), "ground": "air"}, tmp_path)
+
+
+# ---------------------------------------------------------------- a provider that made nothing
+
+def test_a_provider_that_made_nothing_is_an_error_not_a_refusal(tmp_path):
+    """An expired login (the xai client raises SystemExit with its message) exits 2, as video-chain's errors do."""
+    def expired(*_a, **_k):
+        raise SystemExit("xai: the grok login token expired; nothing was uploaded.")
+    with pytest.raises(SystemExit) as exc:
+        tween.make_tween(endpoint(figure(30, 60), "a"), endpoint(figure(24, 80), "b"), 2, workdir=tmp_path / "r",
+                         generator=expired)
+    assert exc.value.code == tween.EXIT_ERROR and "token expired" in str(exc.value)
+    assert json.loads((tmp_path / "r" / "tween.json").read_text())["status"] == "error"
+    fa, fb = _airborne_pair(tmp_path)
+    res = P.run_boundary(P.normalise({"id": "x", "from_file": str(fa), "to_file": str(fb)}, tmp_path),
+                         tmp_path / "o", generator=expired)
+    assert res["status"] == "error" and res["exit"] == tween.EXIT_ERROR and "token expired" in res["report"]["error"]
